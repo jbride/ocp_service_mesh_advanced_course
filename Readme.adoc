@@ -1,0 +1,16 @@
+= Red Hat OpenShift Service Mesh Experienced
+
+:numbered:
+
+== Agenda
+
+. *01_Connect*  (Routing)
+. *02_Control* 
+. *03_Secure* 
+. *04_Multi-tenancy*
+. *05_Multi-Cluster*
+
+== Reference
+
+. link:https://docs.google.com/document/d/1y1EYWVl6UdJiaz1p-dHjtEg-GyisokQDc7dl1wXDBDc/edit#heading=h.et0u47hb6ot1[Service Mesh Technical Competency Model]
+. link:[Smart Sheet]
