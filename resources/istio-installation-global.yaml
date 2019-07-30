@@ -1,0 +1,23 @@
+apiVersion: maistra.io/v1
+kind: ServiceMeshControlPlane
+metadata:
+  name: global-sm-controlplane
+
+  istio:
+
+    istio_cni:
+      enabled: false
+
+    kiali:
+      enabled: false
+
+    mixer:
+      enabled: false
+
+    threeScale:
+      enabled: false
+
+    tracing:
+      # The Jaeger agent runs as a DaemonSet, therefore tracing may only be enabled for a single ServiceMeshControlPlane instance. 
+      enabled: true
+
