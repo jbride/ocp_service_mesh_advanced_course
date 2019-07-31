@@ -1,10 +1,11 @@
 apiVersion: maistra.io/v1
 kind: ServiceMeshControlPlane
 metadata:
-  name: user1-servicemeshcontrolplane
+  name: user1-istio-system
 
   # Documentation: https://servicemesh--ocpdocs.netlify.com/openshift-enterprise/latest/service_mesh/service_mesh_install/installing-ossm.html#ossm-cr-parameters_installing-ossm
 
+spec:
   istio:
 
     # enables the Container Network Interface (CNI).
@@ -59,6 +60,11 @@ metadata:
     pilot:
       autoscaleEnabled: false
       traceSampling: 100.0
+      resources:
+        requests:
+          memory: 1Gi
+        limits:
+          memory: 2Gi
 
     kiali:
      dashboard:
