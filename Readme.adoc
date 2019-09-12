@@ -1,4 +1,4 @@
-= Red Hat OpenShift Service Mesh Experienced
+= Red Hat OpenShift Service Mesh Advanced
 
 :numbered:
 
