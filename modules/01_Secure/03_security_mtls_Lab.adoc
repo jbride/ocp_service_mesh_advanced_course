@@ -7,7 +7,7 @@
 
 NOTE: WIP. At the moment this is an enumeration of tasks to be performed to enable mTLS in the Emergency response Demo, including installation of Red Hat Service Mesh.
 
-== Prerequisites
+.Prerequisites
 
 * Admin access to OpenShift 3.11 cluster
 +
@@ -16,11 +16,13 @@ NOTE: TODO: test on OCP 4.x
 * `oc` OpenShift CLI tool.
 * `istioctl` Istio CLI (download from https://github.com/istio/istio/releases)
 
-== Goals
+.Goals
 
 * Install Red Hat OpenShift Service Mesh on OpenShift
 * Enable transport security (mTLS) for inter-service communication in Emergency Response Demo app
 * Set authorization policies for inter-service communication in Emergency Response Demo
+
+:numbered:
 
 == Install Red Hat OpenShift Service Mesh
 
