@@ -4,15 +4,27 @@
 
 == Agenda
 
-. *01_Secure* 
-. *02_Multi-tenancy*
-. *03_Connect*  (Routing)
-. *04_Control* 
+. *01_Whats_New*
+.. 01_1_Multi_Tenancy_Overview_Lab
+
+. *02_Secure* 
+.. 02_1_Mesh_Security_using_mTLS_Lab
+
+. *03_Connect*
+.. 03_1_Advanced_Mesh_Routing_Lab
+
+. *04_Control*
+.. 04_1_Apply_API_Policies_Lab
+.. 05_2_Onboard_API_Consumers_Lab
+
+. *05_Observe* 
+.. 05_1_Observe_API_and_Mesh_Tracing_Lab
+.. 05_2_Observe_API_and_Mesh_Analytics_Lab
+.. 05_3_Debug_MSA_Application_Lab
 
 == Reference
 
 . link:https://docs.google.com/document/d/1y1EYWVl6UdJiaz1p-dHjtEg-GyisokQDc7dl1wXDBDc/edit#heading=h.et0u47hb6ot1[Service Mesh Technical Competency Model]
-. link:[Smart Sheet]
 
 == Description
 In this course, students will build upon _Foundational_ knowledge of Red Hat OpenShift Service Mesh.
