@@ -4,6 +4,8 @@
 
 == Agenda
 
+Each course module listed below will consist of a slide presentation and one or more corresponding hands-on labs.
+
 . *01_Whats_New*
 .. 01_1_Multi_Tenancy_Overview_Lab
 
