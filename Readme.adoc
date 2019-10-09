@@ -1,6 +1,24 @@
 = Red Hat OpenShift Service Mesh Advanced
 
-:numbered:
+In this course, students learn how to manage manage complex microservice architected applications using a service mesh.
+
+    DURATION: 24 hours.
+
+    MODALITY: ILT
+
+    PROFICIENCY LEVEL: Advanced
+
+    PRODUCT: Red Hat Service Mesh
+
+== Description
+In this course, students will build upon _Foundational_ knowledge of Red Hat OpenShift Service Mesh.
+All learning objectives of this course will be achieved by applying service mesh functionality to a real-world micro-service architected application.
+This course will introduce students to the use of securing inter-service communication via the mutual TLS functionality of the product.
+In addition, students will utilize the _multi-tenancy_ capabilities of the product deployed on a single OpenShift cluster.
+Performance testing on the service mesh _tenants_ will be conducted and results will be analyzed.
+Finally, students will plugin a 3scale adapter to the _control plane_ of the Service Mesh product so as to apply API policies to both inbound traffic as well as traffic between services in the mesh.
+As part of this last exercise, students will observe analytics and tracing of traffic in and throughout the service mesh.
+
 
 == Agenda
 
@@ -28,11 +46,3 @@ Each course module listed below will consist of a slide presentation and one or 
 
 . link:https://docs.google.com/document/d/1y1EYWVl6UdJiaz1p-dHjtEg-GyisokQDc7dl1wXDBDc/edit#heading=h.et0u47hb6ot1[Service Mesh Technical Competency Model]
 
-== Description
-In this course, students will build upon _Foundational_ knowledge of Red Hat OpenShift Service Mesh.
-All learning objectives of this course will be achieved by applying service mesh functionality to a real-world micro-service architected application.
-This course will introduce students to the use of securing inter-service communication via the mutual TLS functionality of the product.
-In addition, students will utilize the _multi-tenancy_ capabilities of the product deployed on a single OpenShift cluster.
-Performance testing on the service mesh _tenants_ will be conducted and results will be analyzed.
-Finally, students will plugin a 3scale adapter to the _control plane_ of the Service Mesh product so as to apply API policies to both inbound traffic as well as traffic between services in the mesh.
-As part of this last exercise, students will observe analytics and tracing of traffic in and throughout the service mesh.
