@@ -2,13 +2,13 @@
 
 In this course, students learn how to manage manage complex microservice architected applications using a service mesh.
 
-    DURATION: 24 hours.
+* DURATION: 24 hours.
 
-    MODALITY: ILT
+* MODALITY: ILT
 
-    PROFICIENCY LEVEL: Advanced
+* PROFICIENCY LEVEL: Advanced
 
-    PRODUCT: Red Hat Service Mesh
+* PRODUCT: Red Hat Service Mesh
 
 == Description
 In this course, students will build upon _Foundational_ knowledge of Red Hat OpenShift Service Mesh.
