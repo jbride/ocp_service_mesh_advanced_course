@@ -25,22 +25,83 @@ As part of this last exercise, students will observe analytics and tracing of tr
 Each course module listed below will consist of a slide presentation and one or more corresponding hands-on labs.
 
 . *01_Whats_New*
-.. 01_1_Multi_Tenancy_Overview_Lab
+.. Slides: What's New with Service Mesh (Erik Jacobs)
+.. Labs
+... 01_1_Multi_Tenancy_Lab (jeff)
+.... Review Service Mesh operator and CRDs
+.... Review Service Mesh control plane
+... 01_2_Service_Mesh_MSA_Lab (jeff)
+.... Introduce Emergency Response demo 
+.... Add Emergency Response namespace to _ServiceMeshMemberRoll_
+.... Start Emergency Response demo 
+.... Envoy configuration via ADS
+.. Slides: Red Hat Service Mesh Engineering Design Decisions (Kevin Connor)
 
 . *02_Secure* 
-.. 02_1_Mesh_Security_using_mTLS_Lab
+.. Slides: Service Mesh Security (bernard)
+.. Labs (bernard)
+... 02_1_Vulnerable_MSA_Lab
+.... Deploy man-n-middle attack
+... 02_1_Secure_MSA_using_mTLS_Lab 
+.... mTLS communication applied
+.... Navigate to Grafana & Kiali dashboards to view encrypted connections
+.... man-in-middle attack thwarted
 
-. *03_Connect*
-.. 03_1_Advanced_Mesh_Routing_Lab
+. *03_Control*
+.. Slides: ???
+.. Labs:
+... 03_1_Security_Policies_Lab 
+... 03_2_Apply_API_Policies_Lab (jeff)
+... 03_3_Onboard_API_Consumers_Lab
 
-. *04_Control*
-.. 04_1_Apply_API_Policies_Lab
-.. 05_2_Onboard_API_Consumers_Lab
+. *04_Connect*
+.. Slides: ???
+.. Labs:
+... 04_1_Circuit_Breaker_Lab (jeff)
+... 04_2_Dark_Launch_Lab (jeff)
 
 . *05_Observe* 
-.. 05_1_Observe_API_and_Mesh_Tracing_Lab
-.. 05_2_Observe_API_and_Mesh_Analytics_Lab
-.. 05_3_Debug_MSA_Application_Lab
+.. Slides ???
+.. Labs
+... 05_1_Observe_Tracing_Lab (bernard)
+... 05_2_Prometheus_AlertManager_Lab (bernard)
+... 05_3_Kiali_Service_Graph_Lab (????  .... Bernard)
+
+. *06_Production Considerations*
+.. Slides: Production_Considerations_and_Load_Testing (Kevin Connor)
+.. Labs:
+... 06_Chaos_Engineering_Lab (bernard)
+
+. *07_Homework*
+.. 07_1_Homework_Lab  (jeff)
+
+== Lab Environment (jeff)
+. *OCP 4.2*
+.. Provisioned from labs.opentlc.com -> OCP4 Workshop Deployer
+.. Instructor uses _MachineSet API_ to scale to appropriately sized cluster 
+... Emergency Response (16GB RAM) + Istio Control Plane (6GB RAM) = 22GB RAM per student
+.. RH-SSO
+... Used as Identity Provider (via OIDC) for the following:
+.... OCP 4 
+.... 3scale
+.... Emergency Response Demo ??
+.. Service Mesh Control Plane
+... Instructor layers 1 Service Mesh Control Plane per student
+... user[1-100] has view access to service mesh control plane
+... admin[1-100] has admin access to service mesh control plane  (but is not a cluster admin)
+.. 3scale Control Plane
+... Insructor provisions 1 3scale Control Plane
+... Instructor creates 1 tenant per student
+.... user[1-100] is an API provider for their tenant
+.... admin[1-100] is a admin of their tenant
+
+.. Instructor layers 1 Emergency Response Demo per student
+... Both uer[1-100] and admin[1-100] have admin access to this _emergency-response-demo_ namespace
+. *Client tooling* (on student laptop)
+.. Browser
+.. oc 4.2 utility
+.. istioctl
+
 
 == Reference
 
