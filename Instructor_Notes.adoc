@@ -1,0 +1,42 @@
+= Red Hat OpenShift Service Mesh Advanced - Instuctor Notes
+
+== *OCP 4.2*
+. Provisioned from labs.opentlc.com -> OCP4 Workshop Deployer
+. Instructor uses _MachineSet API_ to scale to appropriately sized cluster 
+.. Emergency Response (16GB RAM) + Istio Control Plane (6GB RAM) = 22GB RAM per student
+
+== *Red Hat Service Mesh*
+. Instructor installs RHSM operator and CRDs
+. Instructor layers 1 Service Mesh Control Plane per student
+.. user[1-100] has view access to service mesh control plane
+.. admin[1-100] has admin access to service mesh control plane  (but is not a cluster admin)
+
+== Emergency Response Demo 
+. Instructor layers 1 Emergency Response Demo per student
+. Both uer[1-100] and admin[1-100] have admin access to this _emergency-response-demo_ namespace
+
+== RH-SSO
+. Used as Identity Provider (via OIDC) for the following:
+.. OCP 4 
+.. 3scale
+.. Emergency Response Demo ??
+
+== 3scale Control Plane
+... Insructor provisions 1 3scale Control Plane
+... Instructor creates 1 tenant per student
+.... user[1-100] is an API provider for their tenant
+.... admin[1-100] is a admin of their tenant
+
+
+==  *Client tooling* 
+The following is to be installed on by the student on their laptop:
+
+. Browser
+. oc 4.2 utility
+. istioctl
+
+
+== Reference
+
+. link:https://docs.google.com/document/d/1y1EYWVl6UdJiaz1p-dHjtEg-GyisokQDc7dl1wXDBDc/edit#heading=h.et0u47hb6ot1[Service Mesh Technical Competency Model]
+

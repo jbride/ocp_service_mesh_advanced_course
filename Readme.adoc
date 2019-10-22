@@ -54,11 +54,12 @@ Each course module listed below will consist of a slide presentation and one or 
 ... 03_2_Apply_API_Policies_Lab (jeff)
 ... 03_3_Onboard_API_Consumers_Lab
 
-. *04_Connect*
+. *04_Service_Resiliancy*
 .. Slides: ???
 .. Labs:
-... 04_1_Circuit_Breaker_Lab (jeff)
-... 04_2_Dark_Launch_Lab (jeff)
+... 04_1_Service_Resiliancy_Lab (jeff)
+.... Add retries to PAM invocations postgresql
+.... Add circuit-breaker to clients invoking PAM postgresql
 
 . *05_Observe* 
 .. Slides ???
@@ -75,20 +76,24 @@ Each course module listed below will consist of a slide presentation and one or 
 . *07_Homework*
 .. 07_1_Homework_Lab  (jeff)
 
+== Pre-reqs
+
+. link:https://learning.redhat.com/enrol/index.php?id=1627[Service Mesh Foundations]
+
 == Lab Environment (jeff)
 . *OCP 4.2*
 .. Provisioned from labs.opentlc.com -> OCP4 Workshop Deployer
 .. Instructor uses _MachineSet API_ to scale to appropriately sized cluster 
 ... Emergency Response (16GB RAM) + Istio Control Plane (6GB RAM) = 22GB RAM per student
+.. Service Mesh Control Plane
+... Instructor layers 1 Service Mesh Control Plane per student
+... user[1-100] has view access to service mesh control plane
+... admin[1-100] has admin access to service mesh control plane  (but is not a cluster admin)
 .. RH-SSO
 ... Used as Identity Provider (via OIDC) for the following:
 .... OCP 4 
 .... 3scale
 .... Emergency Response Demo ??
-.. Service Mesh Control Plane
-... Instructor layers 1 Service Mesh Control Plane per student
-... user[1-100] has view access to service mesh control plane
-... admin[1-100] has admin access to service mesh control plane  (but is not a cluster admin)
 .. 3scale Control Plane
 ... Insructor provisions 1 3scale Control Plane
 ... Instructor creates 1 tenant per student
