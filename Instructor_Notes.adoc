@@ -1,5 +1,10 @@
 = Red Hat OpenShift Service Mesh Advanced - Instuctor Notes
 
+== Lab Assets
+
+. link:https://github.com/gpe-mw-ansible-org/ocp_service_mesh_advanced[Lab Assets]
+. link:https://docs.google.com/spreadsheets/d/1vazinjjbOSN-uDY8u_mmg-lXtrRlZtm1l5vJQucdKz8/edit#gid=959461386[Class Assignment Spreadsheet]
+
 == *OCP 4.2*
 . Provisioned from labs.opentlc.com -> OCP4 Workshop Deployer
 . Instructor uses _MachineSet API_ to scale to appropriately sized cluster 
@@ -8,7 +13,8 @@
 == *Red Hat Service Mesh*
 . Instructor installs RHSM operator and CRDs
 . Instructor layers 1 Service Mesh Control Plane per student
-.. user[1-100] has view access to service mesh control plane
+.. user[1-100] has view access to _istio-operator_ namespace
+.. user[1-100] has view access to their own dedicated service mesh control plane
 .. admin[1-100] has admin access to service mesh control plane  (but is not a cluster admin)
 
 == Emergency Response Demo 
@@ -34,9 +40,4 @@ The following is to be installed on by the student on their laptop:
 . Browser
 . oc 4.2 utility
 . istioctl
-
-
-== Reference
-
-. link:https://docs.google.com/document/d/1y1EYWVl6UdJiaz1p-dHjtEg-GyisokQDc7dl1wXDBDc/edit#heading=h.et0u47hb6ot1[Service Mesh Technical Competency Model]
 

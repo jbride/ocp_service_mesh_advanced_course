@@ -1,0 +1,20 @@
+:noaudio:
+:scrollbar:
+:toc2:
+:linkattrs:
+:data-uri:
+
+= Service Mesh Multi Tenancy Lab
+
+.Goals
+** Understand ServiceMeshMemberRoll
+** Understand Envoy _Data Plane_
+
+:numbered:
+
+== ServiceMeshMemberRoll
+
+== Deployment Annotations
+
+== Envoy _Data Plane_
+

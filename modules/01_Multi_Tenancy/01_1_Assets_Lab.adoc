@@ -1,0 +1,95 @@
+:noaudio:
+:scrollbar:
+:toc2:
+:linkattrs:
+:data-uri:
+
+= Lab Assets Overview
+
+.Goals
+* Overview of student lab environment
+* Overview of Red Hat Service Mesh operator
+* Overview of Red Hat Service Mesh _control plane_
+* Introduction to Emergency Response demo
+
+:numbered:
+
+== OpenShift
+Your student lab is built on a shared OpenShift v4 cluster in the cloud.
+
+. Have your instructor share with you the details of your lab environment.
+. Open a terminal window on your local machine and set the following environment variables for use throughout the duration of this course: 
++
+-----
+# Modify each of the following based on settings provided by Instructor
+# Afterwards, execute each of the modified commands in your shell:
+echo "export REGION=<provided by your instructor>" >> ~/.bashrc
+echo "export LAB_ID=<provided by your instructor>" >> ~/.bashrc
+echo "export OCP_PASSWD='<provided by your instructor>'" >> ~/.bashrc
+echo "export SUBDOMAIN_BASE=<provided by your instructor>" >> ~/.bashrc
+
+
+
+#  Review, copy & paste the following in same terminal #
+echo "export LAB_MASTER_API=https://api.cluster-\$REGION.\$REGION.\$SUBDOMAIN_BASE:6443" >> ~/.bashrc
+echo "export OCP_USERNAME=user\$LAB_ID" >> ~/.bashrc
+echo "export RHSM_OPERATOR_NS=istio-operator" >> ~/bashrc
+echo "export RHSM_CONTROL_PLANE_NS=\$OCP_USERNAME-istio-system" >> ~/.bashrc
+echo "export ER_DEMO_NS=\$OCP_USERNAME-er-demo" >> ~/.bashrc
+
+
+# Source changes so as to update your current shell
+source $HOME/.bashrc
+-----
+
+. At the terminal, authenticate into OpenShift:
++
+-----
+oc login $LAB_MASTER_API -u $OCP_USERNAME -p $OCP_PASSWD
+-----
+
+. View a listing of OpenShift projects that you have access to:
+.. Execute:
++
+-----
+oc get projects
+-----
+
+.. You should see a listing similar to the following:
++
+-----
+
+istio-operator       Service Mesh Operator       Active
+kafka-operator-erd                               Active
+openshift-console                                Active
+tools-erd                                        Active
+user5-er-demo                                    Active
+user5-istio-system   user4 Service Mesh System   Active
+-----
++
+In subsequent sections of this lab, you will be oriented to each of these namespaces.
+
+. OpenShift Web Console:
+.. At the terminal, determine the URL of the OpenShift Console:
++
+-----
+echo -en "\n\nhttps://`oc get route console -n openshift-console --template "{{.spec.host}}"`\n\n"
+-----
+
+.. Open a browser tab and navigate to the URL determined in the previous step.
+.. Authenticate using the values of $OCP_USERNAME and $OCP_PASSWD
+
+== Red Hat Service Mesh Operator
+
+== Red Hat Service Mesh Control Plane
+
+== Emergency Response Demo
+
+
+
+ifdef::showscript[]
+-----
+
+
+-----
+endif::showscript[]
