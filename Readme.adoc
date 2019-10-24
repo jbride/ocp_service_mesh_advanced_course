@@ -24,7 +24,7 @@ As part of this last exercise, students will observe analytics and tracing of tr
 
 Each course module listed below will consist of a slide presentation and one or more corresponding hands-on labs.
 
-. *01_Whats_New*
+. *01_Multi_Tenancy*
 .. Slides: What's New with Service Mesh (Erik Jacobs)
 .. Labs
 ... 01_1_Multi_Tenancy_Lab (jeff)
