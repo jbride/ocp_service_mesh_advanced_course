@@ -64,7 +64,7 @@ kafka-operator-erd                               Active
 openshift-console                                Active
 tools-erd                                        Active
 user5-er-demo                                    Active
-user5-istio-system   user4 Service Mesh System   Active
+admin5-istio-system   admin4 Service Mesh System   Active
 -----
 +
 In subsequent sections of this lab, you will be oriented to each of these namespaces.
@@ -79,7 +79,32 @@ echo -en "\n\nhttps://`oc get route console -n openshift-console --template "{{.
 .. Open a browser tab and navigate to the URL determined in the previous step.
 .. Authenticate using the values of $OCP_USERNAME and $OCP_PASSWD
 
-== Red Hat Service Mesh Operator
+== Red Hat Service Mesh Operator & CRDs
+
+. View the previously installed Service Mesh operator:
++
+-----
+oc get pods -n istio-operator
+
+istio-node-8lmjb                1/1     Running   0          15h
+istio-node-q625x                1/1     Running   0          15h
+istio-node-r26x7                1/1     Running   0          15h
+istio-node-tpvbx                1/1     Running   0          15h
+istio-node-w2fhr                1/1     Running   0          15h
+istio-operator-7fdc886f-t4vw2   1/1     Running   0          15h
+-----
++
+This operator is global (to the OpenShift cluster) in scope.
++
+TO-DO:  Elaborate on each of the above
+
+. View the Service Mesh related _custom resource definitions_ that extend the OpenShift master API:
++
+-----
+oc get crd --as=system:admin | grep 'maistra\|istio'
+-----
++
+TO-DO:  Highlight some of the more important CRDs
 
 == Red Hat Service Mesh Control Plane
 
