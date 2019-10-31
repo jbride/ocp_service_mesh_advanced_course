@@ -1814,3 +1814,216 @@ Note: Unnecessary use of -X or --request, POST is already inferred.
 * Connection #0 to host incident-service.erd.apps.cluster-a3c6.a3c6.example.opentlc.com left intact
 RBAC: access denied
 ----
+
+== Origin Authentiction
+
+Istio supports end-user authentication using JWT (JSON Web Token). End-user authentication verifies the original client making the request as an end-user (or device). The end-user request requires to pass in a JWT token which will be verified by the target service proxy. End-user authentication is configured in the `origins` section of a Policy object.
+
+In this lab you will secure the Ingress Gateway service with JWT. You will use Red Hat SSO as JWT Token provider.
+
+IMPORTANT: verify the RHSSO setup in the lab environment - realm name, admin access, ...
+
+. Configure the Red Hat SSO instance to be able to obtain a JWT token.
+* Log in as administrator into the Administration console of the Red Hat SSO instance deployed as part of the Emergency Response Demo. 
+* In the SSO Administration console, navigate to the realm associated with your instance of the Emergency Response Demo.
++
+IMPORTANT: Check realm name
+* Open the _Clients_ tab and click _Create_ to create a new client.
+* Enter `curl` as the Client ID and click _Save_:
++
+image::images/sso-client-create.png[]  
+* In the _Settings_ tab, disable _Standard Flow_ and enable _Direct Access Grants_, then click _Save_:
++
+image::images/sso-client-settings.png[]
+* Check that you have at least one user defined. On the left pane, click on _Users_, and then click on _View all users_. Expect to see the user with which you registered into the Emergency Response Demo console:
++
+image::images/sso-users.png[]
+. Obtain a JWT token.
+* In a terminal, use the `curl` utility to obtain a token based on your SSO username and password.
++
+----
+$ export RHSSO_URL=<url of the RHSSO server>
+$ export REALM=<name of the emergency response demo realm>
+$ export USER=<realm username>
+$ export PASSWD=<real password>
+$ TKN=$(curl -X POST "$RHSSO_URL/auth/realms/$REALM/protocol/openid-connect/token" \
+ -H "Content-Type: application/x-www-form-urlencoded" \
+ -d "username=$USER" \
+ -d "password=$PASSWD" \
+ -d "grant_type=password" \
+ -d "client_id=curl" \
+  --insecure \
+ | sed 's/.*access_token":"//g' | sed 's/".*//g')
+$ echo $TKN
+----
++
+.Sample output
+----
+eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJrLVZtbjU2SG9keWZLSjBBLTFab01ZWUxvbDJXQlNsTjNRYVBjTzFzSTNJIn0.eyJqdGkiOiJjODgwM2M1NC1kMzRjLTRlNmYtOTM1OC0zYjhmNDQyZGE2MWMiLCJleHAiOjE1NzI1NjE1MjIsIm5iZiI6MCwiaWF0IjoxNTcyNTYxMjIyLCJpc3MiOiJodHRwczovL3Nzby11c2VyLXNzby5hcHBzLmNsdXN0ZXItYTNjNi5hM2M2LmV4YW1wbGUub3BlbnRsYy5jb20vYXV0aC9yZWFsbXMvZW1lcmdlbmN5LXJlYWxtIiwiYXVkIjoiYWNjb3VudCIsInN1YiI6ImVlNjBkNTBhLTllNGEtNDNjZi1iOWM2LWFlYzQwYjM3OWU4ZCIsInR5cCI6IkJlYXJlciIsImF6cCI6ImN1cmwiLCJhdXRoX3RpbWUiOjAsInNlc3Npb25fc3RhdGUiOiI4MDkxNTA5MC1jNzE1LTQxZDQtYTc1Mi02NjFmNmFhYjJlODQiLCJhY3IiOiIxIiwicmVhbG1fYWNjZXNzIjp7InJvbGVzIjpbIm9mZmxpbmVfYWNjZXNzIiwidW1hX2F1dGhvcml6YXRpb24iXX0sInJlc291cmNlX2FjY2VzcyI6eyJhY2NvdW50Ijp7InJvbGVzIjpbIm1hbmFnZS1hY2NvdW50IiwibWFuYWdlLWFjY291bnQtbGlua3MiLCJ2aWV3LXByb2ZpbGUiXX19LCJzY29wZSI6ImVtYWlsIHByb2ZpbGUiLCJlbWFpbF92ZXJpZmllZCI6ZmFsc2UsIm5hbWUiOiJCZXJuYXJkIFRpc29uIiwicHJlZmVycmVkX3VzZXJuYW1lIjoiYnRpc29uIiwiZ2l2ZW5fbmFtZSI6IkJlcm5hcmQiLCJmYW1pbHlfbmFtZSI6IlRpc29uIiwiZW1haWwiOiJidGlzb25AcmVkaGF0LmNvbSJ9.dUQZM_tEcmyw4MMzkv4h6pV7yFwEyPtVkkXIbNYNgSrHU5-1sfIZlTjgtj22cOkTV6Eg6-3TN_xgduvJXJ7dcgyz-rQJ0RiYtt_U8JPl2lvAP1krFepZQzUoTZ1-Yk1ybnRamvsu3IS4gOr2e5c6H1Levy-h3ifirkO0MoAWS96tYHAYLMDedZGgxp9eNqrcF1XoyK9e-YFLufrdhIE2NyAi32mFhsGNKJMyy9Lb1DLMLuaiu6y3wVsKn9JROv_yyo9cN3y8DezDdd8KZ710m7kBCNdDU0UNq735L7aSuWzwTctiAOCaO-E5I_HH4UBWh3I2Vh2lZnBlTopA_hD7tQ
+----
+* Open a web browser, navigate to https://jwt.io and paste the contents of the $TKN environment variable into the left debugger window to view the actual contents of the JSON Web Token (JWT):
++
+image::images/jwt-token.png[]
+
+. Create a _Policy_ object to configure end-user authentication for the Ingress Gateway service.
+* On the local filesystem, create a file called `ingressgateway-origin.yml` with the following contents:
++
+----
+apiVersion: authentication.istio.io/v1alpha1
+kind: Policy
+metadata:
+  name: ingressgateway-origin
+spec:
+  targets:
+    - name: istio-ingressgateway
+  origins:
+    - jwt:
+        issuer: <token issuer>
+        jwksUri: <JWT Web Key url>
+  principalBinding: USE_ORIGIN
+----
++
+** Replace <token issuer> with the value of the _iss_ field in the token. It's value should be `<url of the RHSSO server>/auth/realms/<realm name>`.
+** Replace <JWT Web Key url> with the value of `<url of the RHSSO server>/auth/realms/<realm name>/protocol/openid-connect/certs`
+* Create the Policy object in the Control Plane namespace:
++
+----
+$ oc create -f ingressgateway-origin.yml -n $RHSM_CONTROL_PLANE_NS 
+----
+
+. With the Policy in place, all requests through the Ingress Gateway will require a valid token.
+* Try to access the `/incidents` endpoint of the Incident Service:
++
+----
+$ INCIDENT_SERVICE_URL=$(oc get route incident-service-gateway -n $RHSM_CONTROL_PLANE_NS -o template --template={{.spec.host}})
+$ curl -v -k https://$INCIDENT_SERVICE_URL/incidents
+----
++
+----
+*   Trying 35.158.14.219:443...
+* TCP_NODELAY set
+* Connected to incident-service.erd.apps.cluster-a3c6.a3c6.example.opentlc.com (35.158.14.219) port 443 (#0)
+* ALPN, offering h2
+* ALPN, offering http/1.1
+* successfully set certificate verify locations:
+*   CAfile: /etc/pki/tls/certs/ca-bundle.crt
+  CApath: none
+* TLSv1.3 (OUT), TLS handshake, Client hello (1):
+* TLSv1.3 (IN), TLS handshake, Server hello (2):
+* TLSv1.3 (IN), TLS handshake, Encrypted Extensions (8):
+* TLSv1.3 (IN), TLS handshake, Certificate (11):
+* TLSv1.3 (IN), TLS handshake, CERT verify (15):
+* TLSv1.3 (IN), TLS handshake, Finished (20):
+* TLSv1.3 (OUT), TLS change cipher, Change cipher spec (1):
+* TLSv1.3 (OUT), TLS handshake, Finished (20):
+* SSL connection using TLSv1.3 / TLS_AES_256_GCM_SHA384
+* ALPN, server accepted to use h2
+* Server certificate:
+*  subject: CN=*.erd.apps.cluster-a3c6.a3c6.example.opentlc.com
+*  start date: Oct 25 15:12:23 2019 GMT
+*  expire date: Jan 23 15:12:23 2020 GMT
+*  issuer: C=US; O=Let's Encrypt; CN=Let's Encrypt Authority X3
+*  SSL certificate verify result: unable to get local issuer certificate (20), continuing anyway.
+* Using HTTP2, server supports multi-use
+* Connection state changed (HTTP/2 confirmed)
+* Copying HTTP/2 data in stream buffer to connection buffer after upgrade: len=0
+* Using Stream ID: 1 (easy handle 0x561b88ce3a40)
+> GET /incidents HTTP/2
+> Host: incident-service.erd.apps.cluster-a3c6.a3c6.example.opentlc.com
+> User-Agent: curl/7.65.3
+> Accept: */*
+> 
+* TLSv1.3 (IN), TLS handshake, Newsession Ticket (4):
+* TLSv1.3 (IN), TLS handshake, Newsession Ticket (4):
+* old SSL session ID is stale, removing
+* Connection state changed (MAX_CONCURRENT_STREAMS == 4294967295)!
+< HTTP/2 401 
+< content-length: 29
+< content-type: text/plain
+< date: Thu, 31 Oct 2019 22:58:37 GMT
+< server: istio-envoy
+< 
+* Connection #0 to host incident-service.erd.apps.cluster-a3c6.a3c6.example.opentlc.com left intact
+Origin authentication failed.
+----
++
+** The HTTP return code is 401, with message "Origin authentication failed".
+* Obtain a new token, and add the token as a `Authorization` header to the request:
++
+----
+$ TKN=$(curl -X POST "$RHSSO_URL/auth/realms/$REALM/protocol/openid-connect/token" \
+ -H "Content-Type: application/x-www-form-urlencoded" \
+ -d "username=$USER" \
+ -d "password=$PASSWD" \
+ -d "grant_type=password" \
+ -d "client_id=curl" \
+  --insecure \
+ | sed 's/.*access_token":"//g' | sed 's/".*//g')
+$ curl -v -k -H "Authorization: Bearer $TKN" https://$INCIDENT_SERVICE_URL/incidents
+----
++
+----
+*   Trying 35.156.140.248:443...
+* TCP_NODELAY set
+* Connected to incident-service.erd.apps.cluster-a3c6.a3c6.example.opentlc.com (35.156.140.248) port 443 (#0)
+* ALPN, offering h2
+* ALPN, offering http/1.1
+* successfully set certificate verify locations:
+*   CAfile: /etc/pki/tls/certs/ca-bundle.crt
+  CApath: none
+* TLSv1.3 (OUT), TLS handshake, Client hello (1):
+* TLSv1.3 (IN), TLS handshake, Server hello (2):
+* TLSv1.3 (IN), TLS handshake, Encrypted Extensions (8):
+* TLSv1.3 (IN), TLS handshake, Certificate (11):
+* TLSv1.3 (IN), TLS handshake, CERT verify (15):
+* TLSv1.3 (IN), TLS handshake, Finished (20):
+* TLSv1.3 (OUT), TLS change cipher, Change cipher spec (1):
+* TLSv1.3 (OUT), TLS handshake, Finished (20):
+* SSL connection using TLSv1.3 / TLS_AES_256_GCM_SHA384
+* ALPN, server accepted to use h2
+* Server certificate:
+*  subject: CN=*.erd.apps.cluster-a3c6.a3c6.example.opentlc.com
+*  start date: Oct 25 15:12:23 2019 GMT
+*  expire date: Jan 23 15:12:23 2020 GMT
+*  issuer: C=US; O=Let's Encrypt; CN=Let's Encrypt Authority X3
+*  SSL certificate verify result: unable to get local issuer certificate (20), continuing anyway.
+* Using HTTP2, server supports multi-use
+* Connection state changed (HTTP/2 confirmed)
+* Copying HTTP/2 data in stream buffer to connection buffer after upgrade: len=0
+* Using Stream ID: 1 (easy handle 0x558e40afda40)
+> GET /incidents HTTP/2
+> Host: incident-service.erd.apps.cluster-a3c6.a3c6.example.opentlc.com
+> User-Agent: curl/7.65.3
+> Accept: */*
+> Authorization: Bearer eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJrLVZtbjU2SG9keWZLSjBBLTFab01ZWUxvbDJXQlNsTjNRYVBjTzFzSTNJIn0.eyJqdGkiOiI2Y2IwYjlmMC1jMzFiLTQyOTQtYWJkMi1hZWVlMTEwNWQ2ZDEiLCJleHAiOjE1NzI1NjM0NTQsIm5iZiI6MCwiaWF0IjoxNTcyNTYzMTU0LCJpc3MiOiJodHRwczovL3Nzby11c2
+VyLXNzby5hcHBzLmNsdXN0ZXItYTNjNi5hM2M2LmV4YW1wbGUub3BlbnRsYy5jb20vYXV0aC9yZWFsbXMvZW1lcmdlbmN5LXJlYWxtIiwiYXVkIjoiYWNjb3VudCIsInN1YiI6ImVlNjBkNTBhLTllNGEtNDNjZi1iOWM2LWFlYzQwYjM3OWU4ZCIsInR5cCI6IkJlYXJlciIsImF6cCI6ImN1cmwiLCJhdXRoX3RpbWUiOjAsInNlc3Npb25fc3RhdGUiOiJhY2MxMzQyOC0yOGFi
+LTRiOWItYWEyNi02OWNlY2UxNmFiNWQiLCJhY3IiOiIxIiwicmVhbG1fYWNjZXNzIjp7InJvbGVzIjpbIm9mZmxpbmVfYWNjZXNzIiwidW1hX2F1dGhvcml6YXRpb24iXX0sInJlc291cmNlX2FjY2VzcyI6eyJhY2NvdW50Ijp7InJvbGVzIjpbIm1hbmFnZS1hY2NvdW50IiwibWFuYWdlLWFjY291bnQtbGlua3MiLCJ2aWV3LXByb2ZpbGUiXX19LCJzY29wZSI6ImVtYWlsIH
+Byb2ZpbGUiLCJlbWFpbF92ZXJpZmllZCI6ZmFsc2UsIm5hbWUiOiJCZXJuYXJkIFRpc29uIiwicHJlZmVycmVkX3VzZXJuYW1lIjoiYnRpc29uIiwiZ2l2ZW5fbmFtZSI6IkJlcm5hcmQiLCJmYW1pbHlfbmFtZSI6IlRpc29uIiwiZW1haWwiOiJidGlzb25AcmVkaGF0LmNvbSJ9.NvT75pNsT3PdQMbYFtbsPeNx9_bdZwDYdfBOO4BU5GPvgB6z3RTIBfKJCnGpBZmpZw46PgJ
+8eLljOZ3eDmZzPGStSMSBvgDndNv7AhdscmXVisGGR-WCLzDYtkYrZXjGVLIzhpLP_lTfapFflXlQWNZk1DkPsY_xuJ7dIX-vMQPurn0fyBhFcNtl0F6uHd7s02bCMqsX5EoOa0mV5lkI-RIqNjb94h12lBRVza9Go7aQ7q6NWP5LRr3RkKmdaLtz4E--L3pK4fVGCuhFAJfmQk7LndIQESs4DZvdtYYvQuT6RQEaLvm_0dh77xsKkIuPI7jXCugyAl_8ODeXEqsQcg
+> 
+* TLSv1.3 (IN), TLS handshake, Newsession Ticket (4):
+* TLSv1.3 (IN), TLS handshake, Newsession Ticket (4):
+* old SSL session ID is stale, removing
+* Connection state changed (MAX_CONCURRENT_STREAMS == 4294967295)!
+< HTTP/2 200 
+< content-type: application/json;charset=UTF-8
+< date: Thu, 31 Oct 2019 23:06:09 GMT
+< x-envoy-upstream-service-time: 17
+< server: istio-envoy
+< 
+* Connection #0 to host incident-service.erd.apps.cluster-a3c6.a3c6.example.opentlc.com left intact
+[]
+----
+** The request succeeds with a HTTP return code 200.
+
+NOTE: All external traffic to the Emergence Response application goes through the Ingress Gateway, and all requests require a valid JWT token. This means that the Disaster Simulator UI and the Emergency Console won't work as expected anymore. To fix this would require to have a separate Ingress Gateway for these services, which does not require origin authentication.
+
+NOTE: The Service Mesh Policy only checks for a valid token, based on the issuer, the validy of the signature on the token and the token expiry time. It is possible to configure more fine-grained authorization based on groups or roles, however, the way that Red Hat SSO encodes role information in a JWT Token is incompatible with how the Service Mesh expects this information.
+
+NOTE: The Service Mesh will only propagate the JWT token one hop. It will take the body of the JWT token and pass it along to the application in a separate header. The JWT body will be sent in the `sec-istio-auth-userinfo` header. It will be the responsibility of the application to propagate the token to downstream services or resubmit for a new token based on the end user’s identity and the service’s identity.
+
+Before continuing with the remainder of the labs, delete the end-user authentication policy:
++
+----
+oc delete policy ingressgateway-origin -n $RHSM_CONTROL_PLANE_NS 
+----
