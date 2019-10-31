@@ -1555,7 +1555,7 @@ NOTE: The communication beween the Mission Service and datagrid is not managed b
 
 NOTE: The communication beween the services and Kafka is not managed by the service mesh. Strimzi/kafka has its own security mechanisms, including transport security and authentication/authorization. 
 
-=== Authorization Policy for Services
+== Authorization Policy for Services
 
 With Service Mesh Authorization Policy, you can define service-to-service authorization policies to control which services can communicate with other services.
 
@@ -1755,8 +1755,8 @@ spec:
 $ oc create -f srb-incident-service-ingress.yml -n $ER_DEMO_NS 
 ----
 . Check that the Incident Service can now be called from outside of the cluster, but only for HTTP GET endpoints.
-* A curl request to the `/incidents` endpoint of the Incident Service still returns a HTTP 200 code.
-* A curl POST request to the `/incidents` endpoint returns with a HTTP 403 error:
+* A curl request to the `/incidents` endpoint of the Incident Service returns a HTTP 200 code.
+* A curl POST request to the `/incidents` endpoint returns a HTTP 403 error:
 +
 ----
 $ curl -k -v -X POST -H "Content-type: application/json" -d '{"lat": 34.14338, "lon": -77.86569, "numberOfPeople": 3, "medicalNeeded": true, "victimName": "victim",  "victimPhoneNumber": "111-111-111" }' https://$INCIDENT_SERVICE_URL/incidents
