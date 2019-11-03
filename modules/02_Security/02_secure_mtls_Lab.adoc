@@ -163,7 +163,7 @@ spec:
         mode: PERMISSIVE
 ----
 +
-* The global policy for mTLS is set to `PERMISSIVE`, which means that the proxy siecar will accept and pass on non mTLS encrypted traffic
+* The global policy for mTLS is set to `PERMISSIVE`, which means that the proxy sidecar will accept and pass on non mTLS encrypted traffic
 
 . _Citadel_ is the Service Mesh component responsible for the creation and rotation of the certificates that will be used for mTLS communication between services in the cluster. +
 For every service account in the namespaces which are managed by the Service Mesh, Citadel creates a secret with a certificate and key pair. +

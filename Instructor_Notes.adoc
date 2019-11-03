@@ -2,7 +2,6 @@
 
 == Lab Assets
 
-. link:https://github.com/gpe-mw-ansible-org/ocp_service_mesh_advanced[Lab Assets]
 . link:https://docs.google.com/spreadsheets/d/1vazinjjbOSN-uDY8u_mmg-lXtrRlZtm1l5vJQucdKz8/edit#gid=959461386[Class Assignment Spreadsheet]
 
 == *OCP 4.2*
@@ -16,6 +15,7 @@
 .. user[1-100] has view access to _istio-operator_ namespace
 .. user[1-100] has view access to their own dedicated service mesh control plane
 .. admin[1-100] has admin access to service mesh control plane  (but is not a cluster admin)
+. For the above provisioning, the ansible found in the course link:https://github.com/gpe-mw-ansible-org/ocp_service_mesh_advanced[Lab Assets] are recommended.
 
 == Emergency Response Demo 
 . Instructor layers 1 Emergency Response Demo per student
@@ -27,7 +27,7 @@
 .. 3scale
 .. Emergency Response Demo ??
 
-== 3scale Control Plane
+== 3scale Control Plane - (TO-DO)
 ... Insructor provisions 1 3scale Control Plane
 ... Instructor creates 1 tenant per student
 .... user[1-100] is an API provider for their tenant

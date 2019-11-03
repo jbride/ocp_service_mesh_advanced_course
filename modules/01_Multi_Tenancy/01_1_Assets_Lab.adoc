@@ -17,67 +17,91 @@
 == OpenShift
 Your student lab is built on a shared OpenShift v4 cluster in the cloud.
 
-. Have your instructor share with you the details of your lab environment.
-. Open a terminal window on your local machine and set the following environment variables for use throughout the duration of this course: 
+. Have your instructor share with you the link:https://docs.google.com/spreadsheets/d/1vazinjjbOSN-uDY8u_mmg-lXtrRlZtm1l5vJQucdKz8/edit#gid=959461386[details of your lab environment].
+. Open a terminal window on your local machine and download the script that sets needed environment variables for the labs in this course:
+
 +
 -----
-# Modify each of the following based on settings provided by Instructor
-# Afterwards, execute each of the modified commands in your shell:
-echo "export REGION=<provided by your instructor>" >> ~/.bashrc
-echo "export LAB_ID=<provided by your instructor>" >> ~/.bashrc
-echo "export OCP_PASSWD='<provided by your instructor>'" >> ~/.bashrc
-echo "export SUBDOMAIN_BASE=<provided by your instructor>" >> ~/.bashrc
-
-
-
-#  Review, copy & paste the following in same terminal #
-echo "export LAB_MASTER_API=https://api.cluster-\$REGION.\$REGION.\$SUBDOMAIN_BASE:6443" >> ~/.bashrc
-echo "export OCP_USERNAME=user\$LAB_ID" >> ~/.bashrc
-echo "export RHSM_OPERATOR_NS=istio-operator" >> ~/bashrc
-echo "export RHSM_CONTROL_PLANE_NS=\$OCP_USERNAME-istio-system" >> ~/.bashrc
-echo "export ER_DEMO_NS=\$OCP_USERNAME-er-demo" >> ~/.bashrc
-
-
-# Source changes so as to update your current shell
-source $HOME/.bashrc
+curl https://raw.githubusercontent.com/gpe-mw-ansible-org/ocp_service_mesh_advanced/master/utils/set_env_vars.sh \
+    -o /tmp/set_env_vars.sh && \
+    chmod 775 /tmp/set_env_vars.sh
 -----
 
-. At the terminal, authenticate into OpenShift:
+. Using your favorite text editor, modify the variables as discussed in that shell script you previously downloaded.
+. Execute the shell script so that the environment variables are applied to your existing shell:
 +
 -----
-oc login $LAB_MASTER_API -u $OCP_USERNAME -p $OCP_PASSWD
+./tmp/set_env_vars.sh
 -----
 
-. View a listing of OpenShift projects that you have access to:
-.. Execute:
+. You are provided with two different OpenShift users:
+
+.. *$OCP_USER*
++
+This user is an admin of your microservice architected business application.
+This user has view access to a variety of other namespaces.
+
+
+... At the terminal, authenticate into OpenShift using the user: $OCP_USER
++
+-----
+oc login $LAB_MASTER_API -u $OCP_USER -p $OCP_PASSWD
+-----
+
+... View a listing of OpenShift projects that you have access to:
 +
 -----
 oc get projects
 -----
 
-.. You should see a listing similar to the following:
+.... You should see a listing similar to the following:
 +
 -----
 
-istio-operator       Service Mesh Operator       Active
-kafka-operator-erd                               Active
-openshift-console                                Active
-tools-erd                                        Active
-user5-er-demo                                    Active
-admin5-istio-system   admin4 Service Mesh System   Active
+istio-operator       Service Mesh Operator         Active
+kafka-operator-erd                                 Active
+openshift-console                                  Active
+tools-erd                                          Active
+user5-er-demo                                      Active
+admin5-istio-system   admin5 Service Mesh System   Active
 -----
 +
-In subsequent sections of this lab, you will be oriented to each of these namespaces.
+In subsequent sections of this lab, you will be introduced to each of these namespaces.
+
+.. *$OCP_ADMIN*
++
+This user is an admin of your service mesh _control plane_.
+This user has view access to a variety of other namespaces.
+
+
+... At the terminal, authenticate into OpenShift using the user: $OCP_ADMIN
++
+-----
+oc login $LAB_MASTER_API -u $OCP_ADMIN -p $OCP_PASSWD
+-----
+
+... View a listing of OpenShift projects that you have access to:
++
+-----
+oc get projects
+-----
+
+.... You should see a listing similar to the following:
++
+-----
+
+istio-operator       Service Mesh Operator         Active
+-----
 
 . OpenShift Web Console:
 .. At the terminal, determine the URL of the OpenShift Console:
 +
 -----
-echo -en "\n\nhttps://`oc get route console -n openshift-console --template "{{.spec.host}}"`\n\n"
+oc whoami --show-console
 -----
 
 .. Open a browser tab and navigate to the URL determined in the previous step.
-.. Authenticate using the values of $OCP_USERNAME and $OCP_PASSWD
+.. Authenticate using the values of $OCP_USER and $OCP_PASSWD
 
 == Red Hat Service Mesh Operator & CRDs
 
