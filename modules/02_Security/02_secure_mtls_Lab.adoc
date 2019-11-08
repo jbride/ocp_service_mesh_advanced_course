@@ -40,7 +40,7 @@ NOTE: Review names of namespaces, crd's etc....
 Before starting the lab, let's review the Red Hat Service Mesh installation
 
 * The Service Mesh Controlplane is installed in the namespace `admin<x>-istio-system`.
-* The Controlplane is configured in the `ServiceshMeshControlPlane` CRD
+* The Controlplane is defined by the `ServiceshMeshControlPlane` custom resource.
 +
 ----
 $ oc get servicemeshcontrolplane -n $RHSM_CONTROL_PLANE_NS

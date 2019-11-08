@@ -15,7 +15,7 @@
 .. user[1-100] has view access to _istio-operator_ namespace
 .. user[1-100] has view access to their own dedicated service mesh control plane
 .. admin[1-100] has admin access to service mesh control plane  (but is not a cluster admin)
-. For the above provisioning, the ansible found in the course link:https://github.com/gpe-mw-ansible-org/ocp_service_mesh_advanced[Lab Assets] are recommended.
+. For the above provisioning, the ansible found in the course link:https://github.com/gpe-mw-training/ocp_service_mesh_advanced[Lab Assets] are recommended.
 
 == Emergency Response Demo 
 . Instructor layers 1 Emergency Response Demo per student

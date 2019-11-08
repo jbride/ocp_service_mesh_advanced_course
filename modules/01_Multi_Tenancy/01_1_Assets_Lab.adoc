@@ -36,16 +36,16 @@ curl https://raw.githubusercontent.com/gpe-mw-ansible-org/ocp_service_mesh_advan
 
 . You are provided with two different OpenShift users:
 
-.. *$OCP_USER*
+.. *$ERDEMO_USER*
 +
-This user is an admin of your microservice architected business application.
-This user has view access to a variety of other namespaces.
+This user is an admin of your microservice architected business application (the _Emergency Response Demo_).
+In addition, this user has view access to a variety of other namespaces.
 
 
-... At the terminal, authenticate into OpenShift using the user: $OCP_USER
+... At the terminal, authenticate into OpenShift using the user: $ERDEMO_USER
 +
 -----
-oc login $LAB_MASTER_API -u $OCP_USER -p $OCP_PASSWD
+oc login $LAB_MASTER_API -u $ERDEMO_USER -p $OCP_PASSWD
 -----
 
 ... View a listing of OpenShift projects that you have access to:
@@ -60,7 +60,6 @@ oc get projects
 
 istio-operator       Service Mesh Operator         Active
 kafka-operator-erd                                 Active
-openshift-console                                  Active
 tools-erd                                          Active
 user5-er-demo                                      Active
 admin5-istio-system   admin5 Service Mesh System   Active
@@ -68,16 +67,15 @@ admin5-istio-system   admin5 Service Mesh System   Active
 +
 In subsequent sections of this lab, you will be introduced to each of these namespaces.
 
-.. *$OCP_ADMIN*
+.. *$SM_CP_ADMIN*
 +
-This user is an admin of your service mesh _control plane_.
+This user is an admin of your Red Hat Service Mesh _control plane_.
 This user has view access to a variety of other namespaces.
 
-
-... At the terminal, authenticate into OpenShift using the user: $OCP_ADMIN
+... At the terminal, authenticate into OpenShift using the user: $SM_CP_ADMIN
 +
 -----
-oc login $LAB_MASTER_API -u $OCP_ADMIN -p $OCP_PASSWD
+oc login $LAB_MASTER_API -u $SM_CP_ADMIN -p $OCP_PASSWD
 -----
 
 ... View a listing of OpenShift projects that you have access to:
@@ -91,6 +89,8 @@ oc get projects
 -----
 
 istio-operator       Service Mesh Operator         Active
+admin5-istio-system   admin5 Service Mesh System   Active
+user50-er-demo                                     Active
 -----
 
 . OpenShift Web Console:
@@ -101,7 +101,7 @@ oc whoami --show-console
 -----
 
 .. Open a browser tab and navigate to the URL determined in the previous step.
-.. Authenticate using the values of $OCP_USER and $OCP_PASSWD
+.. Authenticate using the values of $ERDEMO_USER and $OCP_PASSWD
 
 == Red Hat Service Mesh Operator & CRDs
 
@@ -118,9 +118,8 @@ istio-node-w2fhr                1/1     Running   0          15h
 istio-operator-7fdc886f-t4vw2   1/1     Running   0          15h
 -----
 +
-This operator is global (to the OpenShift cluster) in scope.
-+
-TO-DO:  Elaborate on each of the above
+.. This operator is global (to the OpenShift cluster) in scope.
+.. The administrator of the _istio-operator_ namespace is cluster-admin.
 
 . View the Service Mesh related _custom resource definitions_ that extend the OpenShift master API:
 +
@@ -128,17 +127,139 @@ TO-DO:  Elaborate on each of the above
 oc get crd --as=system:admin | grep 'maistra\|istio'
 -----
 +
-TO-DO:  Highlight some of the more important CRDs
+Some of the more prominant CRD extensions of the OpenShift master include the following:
+
+.. *adapters.config.istio.io*
+.. *destinationrules.networking.istio.io*
+.. *gateways.networking.istio.io*
+.. *handlers.config.istio.io*
+.. *rules.config.istio.io*
+.. *servicemeshcontrolplanes.maistra.io*
++
+Defines the details of a service mesh _control plane_.
+
+.. *servicemeshmemberrolls.maistra.io*
+
+.. *servicemeshpolicies.authentication.maistra.io*
++
+Allows for over-riding of _ServiceMeshControlPlane_ settings with either _namespace-scoped_ or _service-scoped_ policies. 
+
+.. *virtualservices.networking.istio.io*
+
+
+TO-DO:  Elaborate on all of the above
 
 == Red Hat Service Mesh Control Plane
 
-== Emergency Response Demo
+Your lab environment includes your own Red Hat Service Mesh _control plane_.
+The lifecycle of the service mesh _control plane_ is managed by the cluster scoped Red Hat Service Mesh operator.
 
+. Notice the existence of the Service Mesh deployments:
++
+-----
+oc get deployments -n $RHSM_CONTROL_PLANE_NS
+
+NAME                     READY   UP-TO-DATE   AVAILABLE   AGE
+grafana                  1/1     1            1           24h
+istio-citadel            1/1     1            1           24h
+istio-egressgateway      1/1     1            1           24h
+istio-galley             1/1     1            1           24h
+istio-ingressgateway     1/1     1            1           24h
+istio-pilot              1/1     1            1           24h
+istio-policy             1/1     1            1           24h
+istio-sidecar-injector   1/1     1            1           24h
+istio-telemetry          1/1     1            1           24h
+jaeger                   1/1     1            1           24h
+kiali                    1/1     1            1           24h
+prometheus               1/1     1            1           24h
+-----
+
+. Notice the existence of a _ServiceMeshControlPlane_ custom resource:
++
+-----
+oc get ServiceMeshControlPlane -n $RHSM_CONTROL_PLANE_NS
+
+NAME           READY
+full-install   True
+-----
++
+During installation of your lab environment, the $RHSM_CONTROL_PLANE_NS namespace was created and this _ServiceMeshControlPlane_ link:https://github.com/gpe-mw-training/ocp_service_mesh_advanced/blob/master/ansible/roles/maistra_control_plane/tasks/main.yml#L3-L5[was applied to it].
+The Red Hat Service Mesh operator detected the presence of this new _ServiceMeshControlPlane_ custom resource and subsequently provisioned the control plane.
+
+. Notice the existance of a _ServiceMeshPolicy_:
++
+-----
+oc get ServiceMeshPolicies -n $RHSM_CONTROL_PLANE_NS
+NAME      AGE
+default   24h
+-----
+
+. Notice the existance of an empty _ServiceMeshMemberRoll_ called _default_ :
++
+-----
+oc get ServiceMeshMemberRoll default -o template --template='{{.spec}}' -n $RHSM_CONTROL_PLANE_NS
+
+map[]
+-----
++
+In the next lab, the service mesh control plane admin will add the namespace where your Emergency Response application resides to this currently empty ServiceMeshMemberRoll.
+
+== Emergency Response Demo
+For the purpose of this course, your service mesh control plane will manage your own instance of the link:https://www.erdemo.io[Emergency Response application].
+
+The services of the Emergency Response demo use a mix of both HTTP based synchroneous communication and AMQ Streams based asynchroneous communication.
+As such, the Emergency Response demo is an excellent application to highlight the existing capabilities and limitations of a service mesh.
+
+. Your $ERDEMO_USER account has admin privileges to your dedicated Emergency Response application.
+You can view its OpenShift DeploymentConfigs in the _$ERDEMO_USER-er-demo_ namespace as follows:
++
+-----
+$ oc get dc -n $ERDEMO_USER-er-demo
+
+NAME                                REVISION   DESIRED   CURRENT  
+postgresql                          1          1         1        
+user50-disaster-simulator           1          1         1        
+user50-emergency-console            1          1         1        
+user50-incident-priority-service    1          1         1        
+user50-incident-service             1          1         1        
+user50-mission-service              1          1         1        
+user50-process-service              1          1         1        
+user50-process-service-postgresql   1          1         1        
+user50-process-viewer               1          1         1        
+user50-responder-service            1          1         1        
+user50-responder-simulator          1          1         1         
+-----
+
+. The DeploymentConfigs of your Emergency Response demo are intially placed in a paused state.
++
+In the next lab of this course, you will resume all of these DeploymentConfigs after you have registered your _$ERDEMO_USER-er-demo_ namespace in the _ServiceMeshMemberRoll_ of your service mesh control plane.
+
+. Notice the Emergency Response demo also makes use of Red Hat AMQ Streams for event-driven, streams-based communication between many of its services:
++
+-----
+oc get deploy
+
+NAME                            READY   UP-TO-DATE   AVAILABLE   AGE
+kafka-cluster-entity-operator   1/1     1            1           3d5h
+-----
++
+-----
+oc get statefulset -l strimzi.io/kind=Kafka -n $ERDEMO_USER-er-demo
+
+kafka-cluster-kafka       3/3     3d5h
+kafka-cluster-zookeeper   0/3     3d5h
+-----
+
+. Also, notice the Emergency Response demo also makes use of Red Hat JBoss _Data Grid_:
++
+-----
+oc get statefulset -l application=datagrid-service
+
+datagrid-service   3/3     3d5h
+-----
 
 
 ifdef::showscript[]
------
 
 
------
 endif::showscript[]
