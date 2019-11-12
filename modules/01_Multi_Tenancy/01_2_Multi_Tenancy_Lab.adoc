@@ -7,10 +7,19 @@
 = Service Mesh Multi Tenancy Lab
 
 .Goals
+** Understand importance of Service Mesh multi-tenancy
 ** Understand ServiceMeshMemberRoll
 ** Understand Envoy _Data Plane_
 
 :numbered:
+
+== Overview
+
+Faulty or compromised control planes should not be able affect any other tenants on the cluster. 
+This means that control plane components and service accounts have to be locked down using appropriate Kubernetes Roles and network access limited by NetworkPolicies.
+
+link:https://docs.google.com/document/d/1eMnLBpcJNMahoE6cYKcECp_Jcy4Haj3qc36RBAO9J-U/edit#[Operator-Based Soft Multi-Tenancy]
+
 
 == ServiceMeshMemberRoll
 
@@ -42,6 +51,35 @@ echo -en "\n\n$(oc get project $ERDEMO_USER-er-demo -o template --template='{{.m
 
 map[kiali.io/member-of:admin50-istio-system maistra.io/member-of:admin50-istio-system]
 -----
+
+. Notice also that your $ERDEMO_USER-er-demo namespace now includes namespace scoped _RoleBindings_ associated with the Istio related service accounts from your specific service mesh control plane:
++
+-----
+oc get RoleBinding  -n user50-er-demo -l release=istio
+
+istio-citadel-admin50-istio-system                               24h
+istio-egressgateway-admin50-istio-system                         24h
+istio-galley-admin-role-binding-admin50-istio-system             24h
+istio-ingressgateway-admin50-istio-system                        24h
+istio-mixer-admin-role-binding-admin50-istio-system              24h
+istio-pilot-admin50-istio-system                                 24h
+istio-sidecar-injector-admin-role-binding-admin50-istio-system   24h
+prometheus-admin50-istio-system                                  24h
+-----
++
+The use of a project scoped _RoleBinding_ rather than a cluster-scoped _ClusterRoleBinding_ is a key enabler of _multi-tenant_ capabilities of the Red Hat Service Mesh product.+
+
+. Red Hat OpenShift Service Mesh configures each member project to ensure network access between itself, the control plane, and other member projects.
++
+Notice that your $ERDEMO_USER-er-demo namespace now also includes a _NetworkPolicy_ called: _istio-mesh_
++
+-----
+oc get NetworkPolicy istio-mesh -n $ERDEMO_USER-er-demo
+
+istio-mesh   <none>         26m
+-----
++
+This _NetworkPolicy_ allows ingress to all pods specific to this namespace from the corresponding Red Hat Service Mesh control plane all other other registered _members_.
 
 == Opt-in Auto-Injection Annotations
 
@@ -116,7 +154,10 @@ Verify that this is infact the case either through the OpenShift web console or 
 
 == Envoy _Data Plane_
 
-. Capture the details of the _istio-proxy_ container from the _responser-service_ pod:
+
+=== Service proxy container configuration
+
+. Capture the details of the _istio-proxy_ container configuration from the _responder-service_ pod of the Emergency Response demo :
 +
 -----
 oc get pod -n $ERDEMO_USER-er-demo \
@@ -161,6 +202,14 @@ oc rsh `oc get pod -n $ERDEMO_USER-er-demo | grep "responder-service" | awk '{pr
    curl http://localhost:15000/clusters
 -----
 
+. Inspect the configuration sent by Pilot to your pod's sidecar using _istioctl_:
++
+-----
+istioctl proxy-config cluster -n <POD NAMESPACE> <PODNAME> -o json
+-----
++
+if you search for the destination service name you will see an embedded metadata JSON element that names the specific DestinationRule that pod is currently using to communicate with the external service.
+
 
 -----
 oc rsh `oc get pod -n $ERDEMO_USER-er-demo | grep "responder-service" | awk '{print $1}'` \
@@ -170,11 +219,19 @@ oc rsh `oc get pod -n $ERDEMO_USER-er-demo | grep "responder-service" | awk '{pr
          | /usr/local/bin/jq ".configs | last | .dynamic_route_configs"
 -----
 
-== Getting Started with the Emergency Response demo
+=== Envoy Access Log File
 
------
-echo -en "\n\n$(oc get route $ERDEMO_USER-emergency-console -n $ERDEMO_USER-er-demo -o --template={{.spec.host}}  -n  $ERDEMO_USER-er-demo)\n"
------
+TO-DO:
+* https://aspenmesh.io/how-to-debug-istio-mutual-tls-mtls-policy-issues-using-aspen-mesh/
+* global.proxy.accessLogFile
+* Is this log file any different than what is already being logged from Envoy in Red Hat Service Mesh ?
+* What is a good example of using it to debug Istio configuration and policy issues ?
+
+=== Debugging Envoy and Pilot
+
+The source of truth for a given moment is always found in your pod’s Envoy sidecar configuration.
+In this section of the lab, you link:https://istio.io/docs/ops/troubleshooting/proxy-cmd/[debug Envoy and Pilot].
+
 
 link:https://www.erdemo.io/gettingstarted/[Getting Started]
 
