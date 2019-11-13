@@ -121,7 +121,11 @@ oc whoami --show-console
 .. Open a browser tab and navigate to the URL determined in the previous step.
 .. Authenticate using the values of $ERDEMO_USER and $OCP_PASSWD
 
-== Red Hat Service Mesh global resources
+== Red Hat Service Mesh resources: _cluster-admin_
+
+Red Hat Service Mesh implements _soft multi-tenancy_ that provides a three-tier RBAC model comprising the roles of cluster-admin, mesh-admin and namespace-admin.
+
+In this section of the lab, you are oriented to the Red Hat Service Mesh resources owned by an OpenShift cluster-admin.
 
 === Operator
 
@@ -147,20 +151,21 @@ istio-operator-7fdc886f-t4vw2   1/1     Running   0          15h
 
 === Istio CNI plugin
 
-While injecting the service proxy sidecar, community Istio typically uses an _init container_ to manipulate the iptables rules of the pod in order to intercept requests to application containers.
-Although the service proxy sidecar does not require root to run, the short-lived init container does require _cap_net_admin_ privileges to install iptables rules in each pod just prior to starting the pod's primary containers onboard to the service mesh.
+While injecting the _Envoy_ service proxy sidecar into an application pod, community Istio typically uses an _init container_ to manipulate the iptables rules of the pod in order to intercept requests to application containers.
+Although the _Envoy_ service proxy sidecar does not require root to run, the short-lived init container does require link:https://docs.docker.com/engine/reference/run/#runtime-privilege-and-linux-capabilities[cap_net_admin] privileges to install iptables rules in each pod just prior to starting the pod's primary containers onboard to the service mesh.
 
 The use of this _init container_ in each application pod with elevated _cap_net_admin_ privileges is a security vulnerability.
 Subsequently, Red Hat Service Mesh avoids this approach.
 
-Instead, Red Hat Service Mesh makes use of the link:https://istio.io/docs/setup/additional-setup/cni/[istio-cni plugin] for setting up of iptables routing rules to a pod injected with the _Envoy_ side-car container.
-The _istio-cni_ container network plugin that adheres to the link:https://github.com/containernetworking/cni[container network interface] specification.
+Instead, Red Hat Service Mesh makes use of the link:https://istio.io/docs/setup/additional-setup/cni/[istio-cni plugin].
+The _istio-cni_ plugin is an implementation of the link:https://github.com/containernetworking/cni[Linux container network interface] specification.
+The _istio-cni_ plugin is responsible for manipulating iptables routing rules on a pod injected with the _Envoy_ side-car container.
 
-As the CNI pods still run with elevated privileges, they are deployed in the _istio-operator_ namespace (which in your lab environment is only modifiable by a cluster-admin).
+The _istio-cni_ plugin still run with elevated privileges.
+Subsequently, the _istio-cni_ plugin is implemented as a _DaemonSet_ in the _istio-operator_ namespace (which typically will be owned by the OpenShift cluster-admin).
 
-To redirect traffic in the application pod’s network namespace to/from the Istio proxy sidecar, the Istio CNI plugin configures the namespace’s iptables.
 
-. View the previously installed _istio-cni_ pods implemented as a OpenShift _DaemonSet_:
+. View the previously installed _istio-cni_ pods implemented as an OpenShift _DaemonSet_ in the cluster-admin's _istio-operator_ namespace:
 +
 -----
 oc get daemonset istio-node -n istio-operator
@@ -175,7 +180,7 @@ istio-node-w2fhr                1/1     Running   0          15h
 +
 As a _DaemonSet_, a Istio _CNI_ pod runs on every node of the OpenShift cluster.
 
-. Notice that Linux container image used is a supported variant of _istio-cni_ :
+. Notice the use of the Red Hat supported _istio-cni_ Linux container image:
 +
 -----
 oc describe daemonset istio-node -n istio-operator | grep Image
@@ -218,19 +223,22 @@ TO-DO:  Elaborate on all of the above
 
 
 
-== Red Hat Service Mesh Control Plane
+== Red Hat Service Mesh resources: _mesh-admin_
 
-Your lab environment includes your own Red Hat Service Mesh _control plane_.
-The lifecycle of the service mesh _control plane_ is managed by the cluster scoped Red Hat Service Mesh operator.
+Your lab environment includes your own dedicated Red Hat Service Mesh _control plane_.
+This dedicated Red Hat Service Mesh _control plane_ is owned by your own _mesh admin_ user.
+The lifecycle of your service mesh _control plane_ is managed by the cluster scoped Red Hat Service Mesh operator.
 
-. Switch the administrator of your Service Mesh _control plane_ ( who has also been given view access to the _istio-operator_ namespace)
+=== Resources
+
+. Switch to the _mesh-admin_ user:
 +
 -----
 oc login -u $SM_CP_ADMIN -p $OCP_PASSWD
 -----
 
 
-. Determine version of community Istio that this version of Red Hat Service Mesh is based on:
+. Determine version of Red Hat Service Mesh being used in your lab environment:
 +
 -----
 istioctl version --remote=true -i $SM_CP_ADMIN-istio-system
@@ -239,6 +247,8 @@ istioctl version --remote=true -i $SM_CP_ADMIN-istio-system
 client version: 1.3.5
 control plane version: 1.0.1-1
 -----
++
+NOTE: Red Hat Service Mesh 1.1 is expected to release Jan 29, 2020 and be link:https://issues.jboss.org/projects/OSSM/issues/OSSM-54?filter=allopenissues[based on Istio 1.3 or Istio 1.4].
 
 
 . Notice the existence of the Service Mesh _control plane_ deployments:
@@ -313,11 +323,11 @@ map[]
 +
 In the next lab, you as the service mesh control plane admin will add the namespace where your Emergency Response application resides to this currently empty ServiceMeshMemberRoll.
 
-=== Service Mesh _Control Plane_ settings
+===  _Control Plane_ settings
 
 TO-DO:  How to view and edit service mesh control plane settings ?
 
-== Emergency Response Demo
+== Emergency Response Demo: _namespace-admin_
 
 For the purpose of this course, your service mesh control plane will manage your own instance of the link:https://www.erdemo.io[Emergency Response application].
 
@@ -325,6 +335,8 @@ The intent of the Emergency Resonse demo is to showcase the breadth of the Red H
 
 The services of the Emergency Response demo use a mix of both HTTP based synchroneous communication and AMQ Streams based asynchroneous communication.
 As such, the Emergency Response demo is an excellent application to highlight the existing capabilities and limitations of a service mesh.
+
+=== Resources
 
 . Your $ERDEMO_USER account has admin privileges to your dedicated Emergency Response application.
 +
@@ -381,7 +393,7 @@ oc get statefulset -l application=datagrid-service
 datagrid-service   3/3     3d5h
 -----
 
-=== Getting Started with the Emergency Response demo
+=== Getting Started
 
 . The Emergency Response Demo includes a web console where you can view emergency _incidents_ being accepted by volunteer _responders_.
 This web console is accessible at the following URL:

@@ -25,21 +25,22 @@ As part of this last exercise, students will observe analytics and tracing of tr
 Each course module listed below will consist of a slide presentation and one or more corresponding hands-on labs.
 
 . *01_Multi_Tenancy*
-.. Slides: What's New with Service Mesh (Erik Jacobs)
+.. link:https://docs.google.com/presentation/d/1w8zRozOmmRN84RN-Sl51tswyAn7Lo7QQQjFYbne-Ys0/edit#slide=id.g38d28c45af_2_208[Istio & Jaeger - Introduction and Overview]
 .. Labs
-... 01_1_Multi_Tenancy_Lab (jeff)
-.... Review Service Mesh operator and CRDs
-.... Review Service Mesh control plane
-... 01_2_Service_Mesh_MSA_Lab (jeff)
+... 01_1_Assets_Lab 
+.... Access to OCP environment
+.... Review Service Mesh operator, _istio-cni_ plugin and CRDs
+.... Review Service Mesh _control plane_
 .... Introduce Emergency Response demo 
-.... Add Emergency Response namespace to _ServiceMeshMemberRoll_
-.... Start Emergency Response demo 
-.... Envoy configuration via ADS
+... 01_2_Multi_Tenancy_Lab
+.... Understand importance of Service Mesh multi-tenancy
+.... Understand ServiceMeshMemberRoll
+.... Understand Envoy Data Plane
 .. Slides: Red Hat Service Mesh Engineering Design Decisions (Kevin Connor)
 
 . *02_Secure* 
-.. Slides: Service Mesh Security (bernard)
-.. Labs (bernard)
+.. Slides: Service Mesh Security 
+.. Labs
 ... 02_1_Vulnerable_MSA_Lab
 .... Deploy man-n-middle attack
 ... 02_1_Secure_MSA_using_mTLS_Lab 

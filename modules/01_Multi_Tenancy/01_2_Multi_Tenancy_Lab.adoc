@@ -13,7 +13,7 @@
 
 :numbered:
 
-== Overview
+== Multi-tenancy Overview
 
 Faulty or compromised control planes should not be able affect any other tenants on the cluster. 
 This means that control plane components and service accounts have to be locked down using appropriate Kubernetes Roles and network access limited by NetworkPolicies.
@@ -107,7 +107,7 @@ curl https://raw.githubusercontent.com/gpe-mw-training/ocp_service_mesh_advanced
     -o /tmp/inject_istio_annotation.sh && \
     chmod 775 /tmp/inject_istio_annotation.sh && \
     /tmp/inject_istio_annotation.sh
-------
+-----
 
 . After completion of the script, review the list Emergency Response related pods:
 +
@@ -128,24 +128,25 @@ Notice that each of these pods indicates that two containers have started.
 . You could use a script such as the following to identify a list of container names for each of the pods:
 +
 -----
+
 for POD_NAME in $(oc get pods -n $ERDEMO_USER-er-demo -l group=erd-services -o jsonpath='{range .items[*]}{.metadata.name}{"\n"}')
 do
     oc get pod $POD_NAME  -n $ERDEMO_USER-er-demo -o jsonpath='{.metadata.name}{"    :\t\t"}{.spec.containers[*].name}{"\n"}'
 done
 
+
 ...
 
-
-user50-disaster-simulator-1-p9gfl    :          user50-disaster-simulator istio-proxy
-user50-incident-priority-service-1-hgmdn    :           user50-incident-priority-service istio-proxy
-user50-incident-service-1-sz4dk    :            user50-incident-service istio-proxy
-user50-mission-service-1-jz2r8    :             user50-mission-service istio-proxy
-user50-process-service-4-cz5sz    :             user50-process-service istio-proxy
-user50-responder-service-1-qm5gn    :           user50-responder-service istio-proxy
-user50-responder-simulator-1-tdrz2    :         user50-responder-simulator istio-proxy
+user50-disaster-simulator-1-p9gfl    :          user50-disaster-simulator        istio-proxy
+user50-incident-priority-service-1-hgmdn    :   user50-incident-priority-service istio-proxy
+user50-incident-service-1-sz4dk    :            user50-incident-service          istio-proxy
+user50-mission-service-1-jz2r8    :             user50-mission-service           istio-proxy
+user50-process-service-4-cz5sz    :             user50-process-service           istio-proxy
+user50-responder-service-1-qm5gn    :           user50-responder-service         istio-proxy
+user50-responder-simulator-1-tdrz2    :         user50-responder-simulator       istio-proxy
 -----
- 
-.. Notice that the output indicates the existence of an _istio-proxy_ container co-located with the primary business service containers for each pod.
+
+.. Notice that each pod now contains an _istio-proxy_ container co-located with the primary business service container.
 .. Istio uses Kubernetes' link:https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/#mutatingadmissionwebhook[MutatingAdmissionWebhook] for automatically injecting the sidecar proxy into user pods.
 
 . The two databases leveraged by the Emergency Response demo ( _postgresql_ and _user50-process-service-postgresql_ ) are also now injected with an envoy proxy.
@@ -153,6 +154,10 @@ user50-responder-simulator-1-tdrz2    :         user50-responder-simulator istio
 Verify that this is infact the case either through the OpenShift web console or the oc utility.
 
 == Envoy _Data Plane_
+
+=== Modified iptables 
+
+TO-DO:  https://github.com/istio/cni#validate-the-iptables-are-modified
 
 
 === Service proxy container configuration
