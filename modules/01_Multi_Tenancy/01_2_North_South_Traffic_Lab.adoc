@@ -1,0 +1,124 @@
+:noaudio:
+:scrollbar:
+:toc2:
+:linkattrs:
+:data-uri:
+
+= North / South Traffic Lab
+
+.Goals
+* Take a phased approach toward management of a micro-service architected application
+* Use API Gateway to apply policies to _north-south_ traffic into the  Emergency Response application
+
+:numbered:
+
+== Overview
+
+Securing and managing a micro-service architected application is often going to be a phased endeavor driven by (among other variables) the sophistication of your customer.
+
+One potential strategy for onboarding customers on this journey could be to start by applying API policies to _north / south_ traffic into the application.
+
+Red Hat has a supported product that is well suited for exactly this use-case:  Red Hat 3scale API Management.
+In addition, as you'll experience in later labs of this course, API policy management (via Red Hat 3scale) and service mesh management (via Red Hat Service Mesh) are *complementary* technologies.
+
+In this lab, you will quickly ease your customer into the management of their _north / south_ API traffic by applying API policies using Red Hat 3scale API Management.
+
+[blue]#In later labs of this course, this traffic will eventually be routed through the _ingress-gateway_ of Red Hat Service Mesh such that *both* service mesh network policies and api management policies are applied#.
+
+== Access Multi-Tenant 3scale API Management
+
+Your lab environment includes access to a _multi-tenant_ 3scale API Management installation.
+
+For the purposes of this lab, you serve as the administrator of your own 3scale API Management _tenant_ (domain).
+
+. Access your 3scale by Red Hat Admin Portal by pointing your browser to the output of the following:
++
+[source,texinfo]
+-----
+echo -en "\n\nhttps://$(oc get routes -n $API_MANAGER_NS | grep admin | grep $ERDEMO_USER | awk '{print $2}')\n"
+-----
++
+image::images/3scale_login.png[]
+
+. Authenticate using the following values:
+
+. *Username*:  $API_TENANT_USERNAME
+. *Password*:  $API_TENANT_PASSWORD
+
+== API Gateways
+Your lab environment is provisioned with a set of API gateways that are specific to your _tenant_.
+You have full administrative access to your tenant-specific API gateways.
+These are the API gateways that you initially use to apply API policies to your back-end services.
+
+. Get a list of these API gateways by executing the following command:
++
+[source,sh]
+-----
+oc get deploy -n $GW_PROJECT
+
+
+NAME            DESIRED   CURRENT   UP-TO-DATE   AVAILABLE   AGE
+user50-prod-apicast    1         0         0            0           7h
+user50-stage-apicast   1         0         0            0           7h
+-----
+
+. Note that the value of `$THREESCALE_PORTAL_ENDPOINT` is already set for you in `prod-apicast` and `stage-apicast` gateways:
++
+[source,sh]
+-----
+oc describe deploy prod-apicast -n $GW_PROJECT | grep THREESCALE_PORTAL_ENDPOINT
+
+...
+
+      THREESCALE_PORTAL_ENDPOINT:    https://b753490aa7586f8e0663f5d5ec62b63cf9e71540d9138e4869eede4446e8e871@user1-3scale-mt-amp0-admin.apps.3295.openshift.opentlc.com
+-----
+
+* The API Gateways use the value of `THREESCALE_PORTAL_ENDPOINT` to invoke the _system-provider_ of your API Manager _tenant_ and retrieve details of your APIs (aka: _policy_config_).
+
+. Resume the paused deploy objects:
++
+[source,sh]
+-----
+oc rollout resume deploy stage-apicast prod-apicast -n $GW_PROJECT
+-----
+
+== Secure _incident_ service
+
+. In the Admin Portal of your 3scale API Manager tenant, navigate to: `Audience -> Accounts -> Listing -> Developer`
++
+image::images/3scale_navigate_app.png[]
+
+. In the `Apps` column, click the link indicating the number of existing _applications_ (most likely 0) associated with the _Developer_ account.
+. In the top right corner, click `Create Application`.
+. Populate the new form with the following:
+.. *Application plan:* incident-service_app_plan
+.. *Service plan:* Default
+.. *Name:* incident_service_app
++
+Click `Create Application`.
+
+. From the resultant page, copy the `User Key`
++
+image::images/3scale_navigate_app.png[]
+
+. Set the value of this `User Key` as a shell environment variable:
++
+-----
+echo "export INCIDENT_SERVICE_API_KEY=<change me>" >> $HOME/.bashrc
+-----
+
+== Test
+
+-----
+curl -v -X GET https://$(oc get route -n $GW_PROJECT | grep prod | awk '{print $2}')/incidents?user_key=$INCIDENT_SERVICE_API_KEY
+-----
+
+[blue]#Congratulations! You have successfully secured _north / south_ traffic into your micro-service architected Emergency Response application using the API Gateways of Red Hat's 3scale API Manager product.#
+
+API Management is a complementary technology to Service Mesh.
+In subsequent labs of this course, you apply service mesh policies to _east / west_ traffic within your Emergency Response application.
+
+
+ifdef::showscript[]
+
+endif::showscript[]
