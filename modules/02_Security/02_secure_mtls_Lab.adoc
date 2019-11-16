@@ -16,7 +16,7 @@
 * Enable transport security (mTLS) for inter-service communication in Emergency Response Demo app
 * Set authorization policies for inter-service communication in Emergency Response Demo
 
-[NOTE]
+[IMPORTANT]
 .Revisited lab flow
 ====
 Lab flow:
@@ -31,26 +31,32 @@ Lab flow:
 
 ====
 
+IMPORTANT: In real life, the tasks described here will have to be done partially by the controlplane admin, partially by the application owner. Switching between users is tedious, so suggest to perform all tasks as controlplane admin user.
+
 :numbered:
 
 == Red Hat Service Mesh Control Plane Installation Review
 
-NOTE: Review names of namespaces, crd's etc....
+Before starting the lab, let's review the Red Hat Service Mesh installation.
 
-Before starting the lab, let's review the Red Hat Service Mesh installation
-
-* The Service Mesh Controlplane is installed in the namespace `admin<x>-istio-system`.
-* The Controlplane is defined by the `ServiceshMeshControlPlane` custom resource.
+. Ensure you're logged into OpenShift as the control plane admin user.
++
+----
+$ oc login $LAB_MASTER_API -u $SM_CP_ADMIN -p $OCP_PASSWD
+----
+. The Service Mesh control plane is installed in the namespace `$SM_CP_ADMIN-istio-system`. +
+The control plane is defined by the `ServiceshMeshControlPlane` custom resource.
 +
 ----
 $ oc get servicemeshcontrolplane -n $RHSM_CONTROL_PLANE_NS
 ----
 +
+.Output
 ----
 NAME           READY
 full-install   True
 ----
-* Review the `ServicMeshControlPlane` CR:
+. Review the `ServiceMeshControlPlane` Custom Resource:
 +
 ----
 $ oc get servicemeshcontrolplane full-install -o yaml -n $RHSM_CONTROL_PLANE_NS
@@ -60,16 +66,20 @@ $ oc get servicemeshcontrolplane full-install -o yaml -n $RHSM_CONTROL_PLANE_NS
 apiVersion: maistra.io/v1
 kind: ServiceMeshControlPlane
 metadata:
-  creationTimestamp: '2019-10-23T21:01:01Z'
+  annotations:
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"maistra.io/v1","kind":"ServiceMeshControlPlane","metadata":{"annotations":{},"name":"full-install","namespace":"admin50-istio-system"},"spec":{"istio":{"gateways":{"istio-egressgateway":{"autoscaleEnabled":false},"istio-ingressgateway":{"autoscaleEnabled":false
+,"ior_enabled":false}},"global":{"disablePolicyChecks":false,"mtls":false,"proxy":{"resources":{"limits":{"cpu":"500m","memory":"128Mi"},"requests":{"cpu":"100m","memory":"128Mi"}}}},"kiali":{"dashboard":{"passphrase":"redhat","user":"admin"}},"mixer":{"policy":{"autoscaleEnabled":
+false},"telemetry":{"autoscaleEnabled":false,"resources":{"limits":{"cpu":"500m","memory":"4G"},"requests":{"cpu":"100m","memory":"1G"}}}},"pilot":{"autoscaleEnabled":false,"traceSampling":100},"tracing":{"enabled":true}},"threeScale":{"enabled":false}}}
+  creationTimestamp: "2019-11-12T15:08:30Z"
   finalizers:
-    - maistra.io/istio-operator
+  - maistra.io/istio-operator
   generation: 1
   name: full-install
-  namespace: istio-system
-  resourceVersion: '2394271'
-  selfLink: >-
-    /apis/maistra.io/v1/namespaces/istio-system/servicemeshcontrolplanes/full-install
-  uid: 37f6be7f-f5d8-11e9-a89b-06c64aecfabc
+  namespace: admin50-istio-system
+  resourceVersion: "704679"
+  selfLink: /apis/maistra.io/v1/namespaces/admin50-istio-system/servicemeshcontrolplanes/full-install
+  uid: 4998df80-055e-11ea-8412-0aaef3f8697a
 spec:
   istio:
     gateways:
@@ -77,11 +87,10 @@ spec:
         autoscaleEnabled: false
       istio-ingressgateway:
         autoscaleEnabled: false
+        ior_enabled: false
     global:
-      controlPlaneSecurityEnabled: false
       disablePolicyChecks: false
-      mtls:
-        enabled: false
+      mtls: false
       proxy:
         resources:
           limits:
@@ -90,10 +99,10 @@ spec:
           requests:
             cpu: 100m
             memory: 128Mi
-    grafana:
-      enabled: true
     kiali:
-      enabled: true
+      dashboard:
+        passphrase: redhat
+        user: admin
     mixer:
       policy:
         autoscaleEnabled: false
@@ -108,30 +117,25 @@ spec:
             memory: 1G
     pilot:
       autoscaleEnabled: false
-      resources:
-        limits:
-          cpu: 500m
-          memory: 3G
       traceSampling: 100
-    threescale:
-      enabled: false
     tracing:
       enabled: true
-      jaeger:
-        template: all-in-one
+  threeScale:
+    enabled: false
 status:
 [...]
 ----
 +
-* Note that `mTLS` is set to `disabled`. This means that mTLs is not enforced, and pods will be able to communicate over plain HTTP.
+* Note that `mTLS` is set to `disabled`. This means that mTLs is not enforced, and services will be able to communicate over plain HTTP.
 * Setting the mTLS as globally disabled is the recommended starting point when migrating an existing set of applications to use Istio and mTLS.
-. As part of the Service Mesh installation, a global _ServiceMeshPolicy_ is created in the Service Mesh ControlPlane namespace. +
+. As part of the Service Mesh installation, a global _ServiceMeshPolicy_ is created in the Service Mesh control plane namespace. +
 The scope of the ServiceMeshPolicy is the Service Mesh. It can be overridden by namespace-scoped and service-scoped policies.
 +
 ----
 $ oc get servicemeshpolicy default -o yaml -n $RHSM_CONTROL_PLANE_NS
 ----
 +
+.Output
 ----
 apiVersion: authentication.maistra.io/v1
 kind: ServiceMeshPolicy
@@ -163,7 +167,7 @@ spec:
         mode: PERMISSIVE
 ----
 +
-* The global policy for mTLS is set to `PERMISSIVE`, which means that the proxy sidecar will accept and pass on non mTLS encrypted traffic
+* The global policy for mTLS is set to `PERMISSIVE`, which means that the proxy sidecar will accept non mTLS encrypted traffic
 
 . _Citadel_ is the Service Mesh component responsible for the creation and rotation of the certificates that will be used for mTLS communication between services in the cluster. +
 For every service account in the namespaces which are managed by the Service Mesh, Citadel creates a secret with a certificate and key pair. +
@@ -171,7 +175,7 @@ These certificates have a lifespan of 3 months and will be rotated automatically
 The _Subject Alternative Name_ field on the certificate corresponds to the _SPIFFE_ identity name of the service account. +
 As part of client-side verification when using mTLS, this identity is verified against the _secure naming information_ maintained by the service mesh. The secure naming information contains N-to-N mappings from the server identities, which are encoded in certificates, to the service names.
 . In the Emergency Response Demo project, verify that the following secrets have been created: `istio-disaster-simulator-service`, `istio.emergency-console`, `istio.incident-piority-service`, `istio.incident-service`, `istio.mission-service`, `istio.process-service`, `istio.process-viewer`, `istio.responder-service`, `istio.responder-simulator-service`
-. Using `oc`, visualize the contents of the `istio.incident-service` secret.
+. Visualize the contents of the `istio.incident-service` secret.
 +
 ----
 $ oc get secret istio.incident-service -o jsonpath={.data.cert-chain\\.pem} | base64 --decode -n $ER_DEMO_NS
@@ -207,30 +211,32 @@ image::images/istio-citadel-certificate.png[]
 * The certificate subject name is set to `URI:spiffe://cluster.local/ns/<emergency-response-demo namespace>/sa/incident-service`. This is corresponds to the identity of the service as managed by Istio. 
 * The certificate validity is 3 months.
 
-NOTE: Check if Citadel certificate lifepsan is configurable.
+IMPORTANT: Check if Citadel certificate lifepsan is configurable.
 
 
 === Istio Ingress Gateway and Certificates
 
-In an OpenShift environment, a Route is used to expose services outside the cluster. When using Service Mesh, this has the disadvantage that traffic is routed directly to the pods of the service, bypssing the sidecar proxy on the ingress.
+In an OpenShift environment, a Route is used to expose services outside the cluster. Through the route, traffic is directed to the service pods. 
 
-The Service Mesh installs a _Ingress Gateway service_ (which is a Envoy proxy container running on its own). The idea is to route all incoming traffic into the mesh through the ingress gateway, to ensure mesh policies and routing rules are applied to incoming traffic.
+In a Service Mesh, a better approach is to use a gateway for traffic coming into the service mesh. This allows service mesh policies and routing rules to be applied to traffic entering the service mesh.
 
-_Gateway_ and _VirtualService_ objects are defined to route the traffic from the ingress gateway to the target service pods.
+The Service Mesh installs an _Istio Ingress Gateway service_ (which is a Envoy proxy container running on its own). All incoming traffic into the service mesh should be routed through the Istio Ingress Gateway, to ensure mesh policies and routing rules are applied to incoming traffic.
 
-One way to do so is to create a _Gateway_ and a _VirtualService_ for each service exposed outside of the cluster. An alternative is to use a single wildcard Gateway and a VirtualService per service. This is the approach taken in this lab.
+To route the traffic from the Ingress Gateway to the target services, _Gateway_ and _VirtualService_ objects are defined .
 
-The Ingress Gateway also ensures end-to-end encryption using HTTPS for incoming traffic: TLS termination happens at the Istio Ingress Gateway, and is reencrypted by the Gateway using Service Mesh mTLS functionality. To achieve this, the external TLS key and certificate is mounted into the Ingress Gateway pods with a secret.
+One way to do so is to create a _Gateway_ and a _VirtualService_ for each service exposed outside of the cluster. An alternative is to use a single wildcard Gateway and a VirtualService per service. The latter is the approach taken in this lab.
+
+The Ingress Gateway also ensures end-to-end encryption for incoming traffic: TLS termination happens at the Ingress Gateway, and traffic is re-encrypted by the Gateway using Service Mesh mTLS functionality before routing to the service. To achieve this, the public TLS key and certificate are mounted into the Ingress Gateway pods using a Secret.
 
 NOTE: There is a limitation when combining certificates, Gateway and VirtualService objects to route traffic into the mesh with end-to-end transport security. +
-Only one certificate/key pair can be mounted into the Ingress gateway. This (wildcard) certificate will be used by the different Gateway objects. However, configuring more than one gateway using the same TLS certificate will cause browsers that leverage HTTP/2 connection reuse (i.e., most browsers) to produce 404 errors when accessing a second host after a connection to another host has already been established. +
+Only one certificate/key pair can be mounted into the Istio Ingress Gateway. This (wildcard) certificate will be used by the different Gateway objects. However, configuring more than one Gateway using the same TLS certificate will cause browsers that leverage HTTP/2 connection reuse (i.e., most browsers) to produce 404 errors when accessing a second host after a connection to another host has already been established. +
 For a description of the problem, see https://istio.io/docs/ops/traffic-management/deploy-guidelines/#browser-problem-when-multiple-gateways-configured-with-same-tls-certificate +
-The workaround for this problem is to configure a single wildcard Gateway and bind the different VirtualServices to this single gateway.
-An another alternative consists of having several Ingress Gateway services, each handling their own internal service and managing their own (non-wildcard) certificate. This means however that a certificate has to be provided for every service exposed outside of the mesh.
+The workaround for this problem is to configure a single wildcard Gateway and bind the different VirtualServices to this single Gateway.
+An another alternative consists of having several Istio Ingress Gateway services, each handling their own internal service and managing their own (non-wildcard) certificate. This means however that a public certificate has to be provided for every service exposed outside of the mesh.
 
-. Obtain a wildcard certificate and key for the gateway domain. All services exposed through the Istio Ingress will be part of this domain. The domain should be a subdomain of the global OpenShift application cluster domain, for example `<user>.apps.<openshift domain>`. +
+. Obtain a wildcard certificate and key for the gateway domain. All services exposed through the Service Mesh Ingress will be part of this domain. The domain should be a subdomain of the global OpenShift cluster application domain, for example `<user>.apps.<openshift domain>`. +
 In this lab we will use a self-signed certificate.
-* Create a configuration file for openSSL (replace <user> with your username initials or another unique identifier, and <openshift domain> with the OpenShift cluster domain):
+* Create a configuration file for openSSL:
 +
 ----
 $ cat <<EOF | sudo tee ./cert.cfg
@@ -240,14 +246,14 @@ distinguished_name = req_distinguished_name
 prompt             = no
 
 [req_distinguished_name]
-commonName=<user>.apps.<openshift domain>
+commonName=$ERDEMO_USER.apps.$SUBDOMAIN_BASE
 
 [req_ext]
 subjectAltName   = @alt_names
 
 [alt_names]
-DNS.1  = <user>.apps.<openshift domain>
-DNS.2  = *.<user>.apps.<openshift domain>
+DNS.1  = $ERDEMO_USER.apps.$SUBDOMAIN_BASE
+DNS.2  = *.$ERDEMO_USER.apps.$SUBDOMAIN_BASE
 EOF
 ----
 * Create a self-signed certificate and private key:
@@ -261,21 +267,21 @@ $ openssl req -x509 -config cert.cfg -extensions req_ext -nodes -days 730 -newke
 ----
 $ oc create secret tls istio-ingressgateway-certs --cert tls.crt --key tls.key -n $RHSM_CONTROL_PLANE_NS
 ----
-. Restart the Istio ingress gateway pod:
+. Restart the Istio Ingress Gateway pod:
 +
 ----
-$ oc rollout latest istio-ingressgateway -n $RHSM_CONTROL_PLANE_NS
+$ oc patch deployment istio-ingressgateway -p '{"spec":{"template":{"metadata":{"annotations":{"kubectl.kubernetes.io/restartedAt": "'`date -Iseconds`'"}}}}}' -n $RHSM_CONTROL_PLANE_NS
 ----
 
 
-=== Istio Ingress Wildcard Gateway
+=== Wildcard Gateway
 
-Now we can define a wildcard gateway for our services:
+Now we can define a wildcard Gateway for our services:
 
-. Create a file called `wildcard-gateway.yml` with the following contents (replace `<user>` and `<openshift domain>` with the appropriate values for your cluster):
+. Execute the following command to create a file called `wildcard-gateway.yml` with the definition of the wildcard Gateway:
 +
 ----
----
+$ echo "---
 apiVersion: networking.istio.io/v1alpha3
 kind: Gateway
 metadata:
@@ -293,7 +299,8 @@ spec:
       privateKey: /etc/istio/ingressgateway-certs/tls.key
       serverCertificate: /etc/istio/ingressgateway-certs/tls.crt
     hosts:
-    - "*.<user>.apps.<openshift domain>"
+    - \"*.$ERDEMO_USER.apps.$SUBDOMAIN_BASE\"
+" > wildcard-gateway.yml
 ----
 . Create the wildcard Gateway:
 +
@@ -303,22 +310,22 @@ $ oc create -f wildcard-gateway.yml -n $RHSM_CONTROL_PLANE_NS
 
 == Configure the Emergency Response Demo services for mTLS
 
-In this part of the lab you will configure the different services of the Emergency Response Demo for mTLS, as well as use the Ingress gateway as external entrypoint for the services.
+In this part of the lab you will configure the different services of the Emergency Response Demo for mTLS, as well as use the Istio Ingress Gateway as external entrypoint for the services.
 
 === Incident Service
 
-Enabling mTLS for the incident service involves the following tasks:
+Enabling mTLS for the Incident Service involves the following tasks:
 
 * Inject the Envoy proxy sidecar container into the Incident Service pod  - only needed if this was not yet done in a previous lab.
 * Create a DestinationRule and Policy to enforce mTLS when calling the Incident Service.
-* Create a VirtualService and a Route for external access to the Incident Service through the Service Mesh Ingress Gateway.
+* Create a VirtualService and a Route for external access to the Incident Service through the Istio Ingress Gateway.
 
 {empty} +
 
 . Replace the health checks in the Incident Service DeploymentConfig to use a command based health check with curl rather than a HTTP based health check.
 +
 ----
-$ oc edit dc incident-service -o yaml -n $ER_DEMO_NS
+$ oc edit dc $ERDEMO_USER-incident-service -o yaml -n $ER_DEMO_NS
 ----
 +
 Replace the existing liveness and readiness probes with command based probes:
@@ -346,11 +353,17 @@ Replace the existing liveness and readiness probes with command based probes:
           timeoutSeconds: 3
 [...]
 ----
++
+Alternatively you can use the following `oc patch` command to patch the DeploymentConfig:
++
+----
+$ oc patch dc $ERDEMO_USER-incident-service --type='json' -p '[{"op": "remove", "path": "/spec/template/spec/containers/0/livenessProbe/httpGet"}, {"op": "add", "path": "/spec/template/spec/containers/0/livenessProbe", "value": { "exec": { "command" : ["curl", "http://127.0.0.1:8080/actuator/health"]}, "initialDelaySeconds": 30, "timeoutSeconds": 3, "periodSeconds": 30, "successThreshold": 1, "failureThreshold": 3}}, {"op": "remove", "path": "/spec/template/spec/containers/0/readinessProbe/httpGet"}, {"op": "add", "path": "/spec/template/spec/containers/0/readinessProbe", "value": { "exec": { "command" : ["curl", "http://127.0.0.1:8080/actuator/health"]}, "initialDelaySeconds": 30, "timeoutSeconds": 3, "periodSeconds": 30, "successThreshold": 1, "failureThreshold": 3}}]' -n $ER_DEMO_NS
+----
 * When enforcing strict mTLS when calling the incident service, the HTTP based healthcheck will fail, as it is executed from the kubelet, and is not able to present a suitable certificate. The command based health checks are executed in the container itself, so they are not impacted.
 * The Service Mesh sidecar injector service can be configured to rewrite HTTP probes at sidecar injection time, so that the requests will be sent to Pilot, which will then redirect to the application. This global configuration is set in the `istio-sidecar-injector` configmap. However, the Service Mesh operator does not allow edits to the configmap (the operator reverts changes to the original configmap), and there is no way in the current version to configure this setting in the ServiceMeshControlPlane CR.
 * The latest versions of upstream Istio also allow to have HTTP probe rewrite per service, by setting an annotation (`sidecar.istio.io/rewriteAppHTTPProbers: "true"`) on the pods. The Red Hat Service Mesh does not yet support this functionality.
 
-. Annotate the Incident Service pods with the `sidecar.istio.io/inject: "true"` annotation.
+. Annotate the Incident Service pods with the `sidecar.istio.io/inject: "true"` annotation. Skip this step if the service has been annotated in a previous lab.
 +
 ----
 oc edit dc incident-service -o yaml -n $ER_DEMO_NS
@@ -367,15 +380,22 @@ In the `.spec.template.metadata` section, add the annotation:
       labels:
 [...]
 ----
-. This forces a redeployment of the Incident Service. Verify that the Envoy proxy sidecar has been injected sucessfully: the new pod consists of two containers, `incident-service` and `istio-proxy`.
++
+Alternatively, run the following `oc patch` command:
++
+----
+$ oc patch dc $ERDEMO_USER-incident-service --type='json' -p '[{"op": "add", "path": "/spec/template/metadata", "value": {"annotations":{"sidecar.istio.io/inject": "true"}, "labels":{"app":"incident-service","group":"erd-services"}}}]' -n $ER_DEMO_NS
+----
++
+This forces a redeployment of the Incident Service. Verify that the Envoy proxy sidecar has been injected sucessfully: the new pod consists of two containers, `incident-service` and `istio-proxy`.
 +
 image::images/incident-service-pod-sidecar.png[]
 
 . Create a _Policy_ for the Incident Service service.
-.. Create a file called `incident-service-policy.yml` with the following content:
+.. Create a file called `incident-service-policy.yml` with the following command:
 +
 ----
----
+$ echo "---
 apiVersion: authentication.istio.io/v1alpha1
 kind: Policy
 metadata:
@@ -385,9 +405,10 @@ spec:
   - mtls:
       mode: PERMISSIVE
   targets:
-  - name: incident-service
+  - name: $ERDEMO_USER-incident-service
+" > incident-service-policy.yml
 ----
-** Note that the policy mode is set to `PERMISSIVE`. This means that the service will accept both HTTP and mutual TLS traffic, so services that are (not yet) part of the service mesh can still call the service. Once all services in the application are part of the mesh, the different policy modes can be switched to `STRICT` mode.
+** Note that the policy mTLS mode is set to `PERMISSIVE`. This means that the service proxy will accept both HTTP and mutual TLS traffic, so services that are not yet part of the service mesh can still call the Incident Service. Once all services in the application are part of the mesh, the different policy mTLS modes can be switched to `STRICT` mode.
 +
 .. Create the Policy:
 +
@@ -395,19 +416,21 @@ spec:
 $ oc create -f incident-service-policy.yml -n $ER_DEMO_NS
 ----
 
-. Create a _DestinationRule_ for the Incident Service. DestinationRule defines policies that apply to traffic intended for a service after routing has occurred. In our case we configure clients of the Incident Service to use mTLS, using the certificates generated by Citadel.
-.. Create a file called `incident-service-mtls-destinationrule.yml` with the following content - replace `<emergency-response-demo namespace>` with the name of the namespace of the incident service:
+. Create a _DestinationRule_ for the Incident Service. A DestinationRule defines policies that apply to traffic intended for a service after routing has occurred. In our case we configure clients of the Incident Service to use mTLS, using the certificates generated by Citadel.
+.. Create a file called `incident-service-mtls-destinationrule.yml` with the following command:
 +
 ----
+$ echo "---
 apiVersion: networking.istio.io/v1alpha3
 kind: DestinationRule
 metadata:
   name: incident-service-client-mtls
 spec:
-  host: incident-service.<emergency-response-demo namespace>.svc.cluster.local
+  host: $ERDEMO_USER-incident-service.$ER_DEMO_NS.svc.cluster.local
   trafficPolicy:
     tls:
       mode: ISTIO_MUTUAL
+" > incident-service-mtls-destinationrule.yml
 ----
 .. Create the DestinationRule:
 +
@@ -416,18 +439,19 @@ $ oc create -f incident-service-mtls-destinationrule.yml -n $ER_DEMO_NS
 ----
 
 . Create a _VirtualService_ for the Incident Service. A VirtualService defines a set of traffic routing rules to apply when a host is addressed. Each routing rule defines matching criteria for traffic of a specific protocol. If the traffic is matched, then it is sent to a named destination service.
-.. Create a file called `incident-service-virtualservice.yml` with the following content (replace `<user>`, `<openshift domain>` and `<controlplane namespace>` with the appropriate values for your cluster):
+.. Create a file called `incident-service-virtualservice.yml` with the following command:
 +
 ----
+$ echo "---
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
 metadata:
   name: incident-service-virtualservice
 spec:
   hosts:
-  - incident-service.<user>.apps.<openshift domain>
+  - incident-service.$ERDEMO_USER.apps.$SUBDOMAIN_BASE
   gateways:
-  - erd-wildcard-gateway.<controlplane namespace>.svc.cluster.local
+  - erd-wildcard-gateway.$RHSM_CONTROL_PLANE_NS.svc.cluster.local
   http:
   - match:
     - uri:
@@ -436,7 +460,8 @@ spec:
     - destination:
         port:
           number: 8080
-        host: incident-service
+        host: $ERDEMO_USER-incident-service.$ER_DEMO_NS.svc.cluster.local
+" > incident-service-virtualservice.yml
 ----
 .. Create the VirtualService:
 +
@@ -444,20 +469,21 @@ spec:
 $ oc create -f incident-service-virtualservice.yml -n $ER_DEMO_NS
 ----
 
-. Create a route for the Incident Service which points to the Service Mesh Ingress Gateway service.
-.. Create a file called `incident-service-gateway.yml` with the following content (replace `<openshift domain>` with the domain of your cluster):
+. Create a route for the Incident Service which points to the Istio Ingress Gateway service.
+.. Create a file called `incident-service-gateway.yml` with the following command:
 +
 ----
+$ echo "---
 apiVersion: route.openshift.io/v1
 kind: Route
 metadata:
   annotations:
-    openshift.io/host.generated: "true"
+    openshift.io/host.generated: \"true\"
   labels:
     app: incident-service
   name: incident-service-gateway
 spec:
-  host: incident-service.<user>.apps.<openshift domain>
+  host: incident-service.$ERDEMO_USER.apps.$SUBDOMAIN_BASE
   port:
     targetPort: https
   tls:
@@ -467,8 +493,9 @@ spec:
     name: istio-ingressgateway
     weight: 100
   wildcardPolicy: None
+" > incident-service-gateway.yml
 ----
-.. Create the route in the `istio-system` namespace:
+.. Create the route in the control plane namespace:
 +
 ----
 $ oc create -f incident-service-gateway.yml -n $RHSM_CONTROL_PLANE_NS
@@ -477,13 +504,13 @@ $ oc create -f incident-service-gateway.yml -n $RHSM_CONTROL_PLANE_NS
 . Delete the existing Incident Service route
 +
 ----
-$ oc delete route incident-service -n $ER_DEMO_NS
+$ oc delete route $ERDEMO_USER-incident-service -n $ER_DEMO_NS
 ----
 
 . Verify that the Incident Service can be reached through the Istio Ingress Gateway:
 +
 ----
-$ curl -v -k https://incident-service.<user>.apps.<openshift domain>/incidents
+$ curl -v -k https://incident-service.$ERDEMO_USER.apps.$SUBDOMAIN_BASE/incidents
 ----
 +
 .Sample Output
@@ -533,14 +560,14 @@ $ curl -v -k https://incident-service.<user>.apps.<openshift domain>/incidents
 []
 ----
 
-. To check that the traffic between the Istio Ingress Gateway service and the Incident service service uses mTLS, the `istioctl` tool can be used:
+. To check that the traffic between the Istio Ingress Gateway service and the Incident Service service uses mTLS, the `istioctl` tool can be used:
 +
 ----
 $ ISTIO_INGRESSGATEWAY_POD=$(oc get pod -l app=istio-ingressgateway -o jsonpath={.items.metadata.name} -n $RHSM_CONTROL_PLANE_NS)
-$ istioctl -n $RHSM_CONTROL_PLANE_NS authn tls-check ${ISTIO_INGRESSGATEWAY_POD} incident-service.$ER_DEMO_NS.svc.cluster.local
+$ istioctl -n $RHSM_CONTROL_PLANE_NS authn tls-check ${ISTIO_INGRESSGATEWAY_POD} $ERDEMO_USER-incident-service.$ER_DEMO_NS.svc.cluster.local
 ----
 +
-.Output
+.Sample Output
 ----
 HOST:PORT                                                           STATUS     SERVER        CLIENT     AUTHN POLICY                                             DESTINATION RULE
 incident-service.emergency-response-demo.svc.cluster.local:8080     OK         HTTP/mTLS     mTLS       incident-service-strict-mtls/emergency-response-demo     incident-service-client-mtls/emergency-response-demo
@@ -549,16 +576,16 @@ incident-service.emergency-response-demo.svc.cluster.local:8080     OK         H
 * `CLIENT` is the mode used on the client - the Istio Ingress gateway. The client uses mTLS to call the Incident Service.
 
 . Another way to verify that the traffic between the Istio Ingress Gateway and the Incident Service uses mTLS is to check the Istio Grafana dashboards. +
-In a browser window, navigate to the Istio Grafana instance (https://grafana-<controlplane namespace>.apps.<openshift domain>) and log in with your admin OpenShift credentials. Locate the _Istio Workload Dashboard_,. Select the `Incident Service` workload in the `emergency-response-demo` namespace. Scroll down to the _Inbound Workloads_ section. +
+In a browser window, navigate to the Istio Grafana instance (https://grafana-<controlplane namespace>.apps.<openshift domain>) and log in with your admin OpenShift credentials. Locate the _Istio Workload Dashboard_. Select the `Incident Service` workload in the `emergency-response-demo` namespace. Scroll down to the _Inbound Workloads_ section. +
 Use curl to send some requests to the Incident Service. Observe the graphs and notice a spike in the incoming requests from the Ingress Gateway. Notice that the traffic is marked as mTLS.
 +
 image::images/istio-grafana-workload-inbound.png[]
 
-. Perform a run of the Emergency Response Demo to validate that the application is still working  as expected.
+. Perform a run of the Emergency Response Demo to validate that the application is still working as expected.
 
 === Responder Service
 
-The procedure for enabling mTLS communication for the Responder Service and other services in the Emergency Response Demo application is very similar to the Incident Service. Only some differences will be highlighted.
+The procedure for enabling mTLS communication for the Responder Service and other services in the Emergency Response Demo application is very similar to the Incident Service. Only some differences will be highlighted in the next section.
 
 . Replace the health checks in the Responder Service DeploymentConfig to use a command based health check with curl rather than a HTTP based health check.
 +
@@ -591,11 +618,18 @@ Replace the existing liveness and readiness probes with command based probes:
           timeoutSeconds: 3
 [...]
 ----
++
+Alternatively, run the following `oc patch` command:
++
+----
+$ oc patch dc $ERDEMO_USER-responder-service --type='json' -p '[{"op": "remove", "path": "/spec/template/spec/containers/0/livenessProbe/httpGet"}, {"op": "add", "path": "/spec/template/spec/containers/0/livenessProbe", "value": { "exec": { "command" : ["curl", "http://127.0.0.1:8080/actuator/health"]},"initialDelaySeconds": 30, "timeoutSeconds": 3, "periodSeconds": 30, "successThreshold": 1, "failureThreshold": 3}}, {"op": "remove", "path": "/spec/template/spec/containers/0/readinessProbe/httpGet"}, {"op": "add", "path": "/spec/template/spec/containers/0/readinessProbe", "value": { "exec": { "command" : ["curl", "http://127.0.0.1:8080/actuator/health"]},"initialDelaySeconds": 30, "timeoutSeconds": 3, "periodSeconds": 30, "successThreshold": 1, "failureThreshold": 3}}]' -n $ER_DEMO_NS
+----
 
 . Annotate the Responder Service pods with the `sidecar.istio.io/inject: "true"` annotation.
 . _Policy_ for the Responder Service service.
 +
 ----
+$ echo "---
 apiVersion: authentication.istio.io/v1alpha1
 kind: Policy
 metadata:
@@ -605,35 +639,39 @@ spec:
   - mtls:
       mode: PERMISSIVE
   targets:
-  - name: responder-service
+  - name: $ERDEMO_USER-responder-service
+" > responder-service-policy.yml
 ----
 
 . _DestinationRule_ for the Responder Service:
 +
 ----
+$ echo "---
 apiVersion: networking.istio.io/v1alpha3
 kind: DestinationRule
 metadata:
   name: responder-service-client-mtls
 spec:
-  host: responder-service.<emergency-response-demo namespace>.svc.cluster.local
+  host: $ERDEMO_USER-responder-service.$ER_DEMO_NS.svc.cluster.local
   trafficPolicy:
     tls:
       mode: ISTIO_MUTUAL
+" > responder-service-mtls-destinationrule.yml
 ----
 
 . _VirtualService_ for the Responder Service:
 +
 ----
+$ echo "---
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
 metadata:
   name: responder-service-virtualservice
 spec:
   hosts:
-  - "responder-service.<user>.apps.<openshift domain>"
+  - \"responder-service.$ERDEMO_USER.apps.$SUBDOMAIN_BASE\"
   gateways:
-  - erd-wildcard-gateway.<controlplane namespace>.svc.cluster.local
+  - erd-wildcard-gateway.$RHSM_CONTROL_PLANE_NS.svc.cluster.local
   http:
   - match:
     - uri:
@@ -646,12 +684,14 @@ spec:
     - destination:
         port:
           number: 8080
-        host: responder-service
+        host: $ERDEMO_USER-responder-service.$ER_DEMO_NS.svc.cluster.local
+" > responder-service-virtualservice.yml
 ----
 
 . Route for the Responder Service:
 +
 ----
+$ echo "---
 apiVersion: route.openshift.io/v1
 kind: Route
 metadata:
@@ -661,7 +701,7 @@ metadata:
     app: responder-service
   name: responder-service-gateway
 spec:
-  host: "responder-service.<user>.apps.<openshift domain>"
+  host: "responder-service.$ERDEMO_USER.apps.$SUBDOMAIN_BASE"
   port:
     targetPort: https
   tls:
@@ -671,11 +711,12 @@ spec:
     name: istio-ingressgateway
     weight: 100
   wildcardPolicy: None
+" > responder-service-gateway.yml
 ----
 . Delete the existing Responder Service route
 +
 ----
-$ oc delete route responder-service -n $ER_DEMO_NS
+$ oc delete route $ERDEMO_USER-responder-service -n $ER_DEMO_NS
 ----
 
 === Disaster Simulator
@@ -711,11 +752,17 @@ Replace the existing liveness and readiness probes with command based probes:
           timeoutSeconds: 3
 [...]
 ----
-
++
+Alternatively, run the following `oc patch` command:
++
+----
+$ oc patch dc $ERDEMO_USER-disaster-simulator --type='json' -p '[{"op": "remove", "path": "/spec/template/spec/containers/0/livenessProbe/httpGet"}, {"op": "add", "path": "/spec/template/spec/containers/0/livenessProbe", "value": { "exec": { "command" : ["curl", "http://127.0.0.1:8080"]}, "initialDelaySeconds": 10, "timeoutSeconds": 1, "periodSeconds": 10, "successThreshold": 1, "failureThreshold": 3}}, {"op": "remove", "path": "/spec/template/spec/containers/0/readinessProbe/httpGet"}, {"op": "add", "path": "/spec/template/spec/containers/0/readinessProbe", "value": { "exec": { "command" : ["curl", "http://127.0.0.1:8080"]},"initialDelaySeconds": 10, "timeoutSeconds": 1, "periodSeconds": 10, "successThreshold": 1, "failureThreshold": 3}}]' -n $ER_DEMO_NS
+----
 . Annotate the Disaster Simulator pods with the `sidecar.istio.io/inject: "true"` annotation.
 . _Policy_ for the Disaster Simulator service.
 +
 ----
+$ echo "---
 apiVersion: authentication.istio.io/v1alpha1
 kind: Policy
 metadata:
@@ -725,35 +772,39 @@ spec:
   - mtls:
       mode: PERMISSIVE
   targets:
-  - name: disaster-simulator
+  - name: $ERDEMO_USER-disaster-simulator
+" > disaster-simulator-policy.yml
 ----
 
-. _DestinationRule_ for the Responder Service:
+. _DestinationRule_ for the Disaster Simulator Service:
 +
 ----
+$ echo "---
 apiVersion: networking.istio.io/v1alpha3
 kind: DestinationRule
 metadata:
   name: disaster-simulator-client-mtls
 spec:
-  host: disaster-simulator.<emergency-response-demo namespace>.svc.cluster.local
+  host: $ERDEMO_USER-disaster-simulator.$ER_DEMO_NS.svc.cluster.local
   trafficPolicy:
     tls:
       mode: ISTIO_MUTUAL
+" > disaster-simulator-mtls-destinationrule.yml
 ----
 
 . _VirtualService_ for the Responder Service:
 +
 ----
+$ echo "---
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
 metadata:
   name: disaster-simulator-virtualservice
 spec:
   hosts:
-  - disaster-simulator.<user>.apps.<openshift domain>
+  - disaster-simulator.$ERDEMO_USER.apps.$SUBDOMAIN_BASE
   gateways:
-  - erd-wildcard-gateway.<controlplane namespace>.svc.cluster.local
+  - erd-wildcard-gateway.$RHSM_CONTROL_PLANE_NS.svc.cluster.local
   http:
   - match:
     - uri:
@@ -762,12 +813,14 @@ spec:
     - destination:
         port:
           number: 8080
-        host: disaster-simulator
+        host: $ERDEMO_USER-disaster-simulator.$ER_DEMO_NS.svc.cluster.local
+" > disaster-simulator-virtualservice.yml
 ----
 
-. Route for the Responder Service:
+. Route for the Disaster Simulator:
 +
 ----
+$ echo "---
 apiVersion: route.openshift.io/v1
 kind: Route
 metadata:
@@ -777,7 +830,7 @@ metadata:
     app: disaster-simulator
   name: disaster-simulator-gateway
 spec:
-  host: disaster-simulator.<user>.apps.<openshift domain>
+  host: disaster-simulator.$ERDEMO_USER.apps.$SUBDOMAIN_BASE
   port:
     targetPort: https
   tls:
@@ -787,11 +840,12 @@ spec:
     name: istio-ingressgateway
     weight: 100
   wildcardPolicy: None
+" > disaster-simulator-gateway.yml
 ----
 . Delete the existing Disaster Simulator route
 +
 ----
-$ oc delete route disaster-simulator -n $ER_DEMO_NS
+$ oc delete route $ERDEMO_USER-disaster-simulator -n $ER_DEMO_NS
 ----
 
 === Incident Priority Service
@@ -799,7 +853,7 @@ $ oc delete route disaster-simulator -n $ER_DEMO_NS
 . Replace the health checks in the Incident Priority Service DeploymentConfig to use a command based health check with curl rather than a HTTP based health check.
 +
 ----
-$ oc edit dc incident-priority-service -o yaml -n $ER_DEMO_NS
+$ oc edit dc $ERDEMO_USER-incident-priority-service -o yaml -n $ER_DEMO_NS
 ----
 +
 Replace the existing liveness and readiness probes with command based probes:
@@ -827,11 +881,17 @@ Replace the existing liveness and readiness probes with command based probes:
           timeoutSeconds: 3
 [...]
 ----
-
++
+Alternatively, run the following `oc patch` command:
++
+----
+$ oc patch dc $ERDEMO_USER-incident-priority-service --type='json' -p '[{"op": "remove", "path": "/spec/template/spec/containers/0/livenessProbe/httpGet"}, {"op": "add", "path": "/spec/template/spec/containers/0/livenessProbe", "value": { "exec": { "command" : ["curl", "http://127.0.0.1:8080/health"]}, "initialDelaySeconds": 30, "timeoutSeconds": 3, "periodSeconds": 30, "successThreshold": 1, "failureThreshold": 3}}, {"op": "remove", "path": "/spec/template/spec/containers/0/readinessProbe/httpGet"}, {"op": "add", "path": "/spec/template/spec/containers/0/readinessProbe", "value": { "exec": { "command" : ["curl", "http://127.0.0.1:8080/health"]},"initialDelaySeconds": 10, "timeoutSeconds": 3, "periodSeconds": 30, "successThreshold": 1, "failureThreshold": 3}}]' -n $ER_DEMO_NS
+----
 . Annotate the Incident Priority Service pods with the `sidecar.istio.io/inject: "true"` annotation.
 . _Policy_ for the Incident Priority Service.
 +
 ----
+$ echo "---
 apiVersion: authentication.istio.io/v1alpha1
 kind: Policy
 metadata:
@@ -842,34 +902,38 @@ spec:
       mode: PERMISSIVE
   targets:
   - name: incident-priority-service
+" > incident-priority-service-policy.yml
 ----
 
 . _DestinationRule_ for the Incident Priority Service:
 +
 ----
+$ echo "---
 apiVersion: networking.istio.io/v1alpha3
 kind: DestinationRule
 metadata:
   name: incident-priority-service-client-mtls
 spec:
-  host: incident-priority-service.<emergency-response-demo namespace>.svc.cluster.local
+  host: $ERDEMO_USER-incident-priority-service.$ER_DEMO_NS.svc.cluster.local
   trafficPolicy:
     tls:
       mode: ISTIO_MUTUAL
+" > incident-priority-service-mtls-destionationrule.yml"
 ----
 
 . _VirtualService_ for the Incident Priority Service:
 +
 ----
+$ echo "---
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
 metadata:
   name: incident-priority-service-virtualservice
 spec:
   hosts:
-  - incident-priority-service.<user>.apps.<openshift domain>
+  - incident-priority-service.$ERDEMO_USER.apps.$SUBDOMAIN_BASE
   gateways:
-  - erd-wildcard-gateway.<controlplane namespace>.svc.cluster.local
+  - erd-wildcard-gateway.$RHSM_CONTROL_PLANE_NS.svc.cluster.local
   http:
   - match:
     - uri:
@@ -880,12 +944,14 @@ spec:
     - destination:
         port:
           number: 8080
-        host: incident-priority-service
+        host: $ERDEMO_USER-incident-priority-service.$ER_DEMO_NS.svc.cluster.local
+" > incident-priority-service-virtualservice.yml
 ----
 
 . Route for the Incident Priority Service:
 +
 ----
+$ echo "---
 apiVersion: route.openshift.io/v1
 kind: Route
 metadata:
@@ -895,7 +961,7 @@ metadata:
     app: incident-priority-service
   name: incident-priority-service-gateway
 spec:
-  host: incident-priority-service.<user>.apps.<openshift domain>
+  host: incident-priority-service.$ERDEMO_USER.apps.$SUBDOMAIN_BASE
   port:
     targetPort: https
   tls:
@@ -905,11 +971,12 @@ spec:
     name: istio-ingressgateway
     weight: 100
   wildcardPolicy: None
+" > incident-priority-service-gateway.yml
 ----
 . Delete the existing Incident Priority Service route
 +
 ----
-$ oc delete route incident-priority-service -n $ER_DEMO_NS
+$ oc delete route $ERDEMO_USER-incident-priority-service -n $ER_DEMO_NS
 ----
 
 === Process Service
@@ -947,11 +1014,17 @@ Replace the existing liveness and readiness probes with command based probes:
           timeoutSeconds: 3
 [...]
 ----
-
-. Annotate the Process Service pods with the `sidecar.istio.io/inject: "true"` annotation.
-. _Policy_ for the Responder Service service.
++
+Alternatively, run the following `oc patch` command:
 +
 ----
+$ oc patch dc $ERDEMO_USER-process-service --type='json' -p '[{"op": "remove", "path": "/spec/template/spec/containers/0/livenessProbe/httpGet"}, {"op": "add", "path": "/spec/template/spec/containers/0/livenessProbe", "value": { "exec": { "command" : ["curl", "http://127.0.0.1:8080/acuator/health"]},"initialDelaySeconds": 60, "timeoutSeconds": 3, "periodSeconds": 30, "successThreshold": 1, "failureThreshold": 3}}, {"op": "remove", "path": "/spec/template/spec/containers/0/readinessProbe/httpGet"}, {"op": "add", "path": "/spec/template/spec/containers/0/readinessProbe", "value": { "exec": { "command" : ["curl", "http://127.0.0.1:8080/actuator/health"]},"initialDelaySeconds": 45, "timeoutSeconds": 3, "periodSeconds": 30, "successThreshold": 1, "failureThreshold": 3}}]' -n $ER_DEMO_NS
+----
+. Annotate the Process Service pods with the `sidecar.istio.io/inject: "true"` annotation.
+. _Policy_ for the Process Service service.
++
+----
+$ echo "---
 apiVersion: authentication.istio.io/v1alpha1
 kind: Policy
 metadata:
@@ -962,20 +1035,23 @@ spec:
       mode: PERMISSIVE
   targets:
   - name: process-service
+" > process-service-policy.yml
 ----
 
-. _DestinationRule_ for the Responder Service:
+. _DestinationRule_ for the Process Service:
 +
 ----
+$ echo "---
 apiVersion: networking.istio.io/v1alpha3
 kind: DestinationRule
 metadata:
   name: process-service-client-mtls
 spec:
-  host: process-service.<emergency-response-demo namespace>.svc.cluster.local
+  host: $ERDEMO_USER-process-service.$ER_DEMO_NS.svc.cluster.local
   trafficPolicy:
     tls:
       mode: ISTIO_MUTUAL
+" > process-service-mtls-destinationrule.yml
 ----
 
 === Mission Service
@@ -1011,11 +1087,17 @@ Replace the existing liveness and readiness probes with command based probes:
           timeoutSeconds: 1
 [...]
 ----
-
++
+Alternatively, run the following `oc patch` command:
++
+----
+$ oc patch dc $ERDEMO_USER-mission-service --type='json' -p '[{"op": "remove", "path": "/spec/template/spec/containers/0/livenessProbe/httpGet"}, {"op": "add", "path": "/spec/template/spec/containers/0/livenessProbe", "value": { "exec": { "command" : ["curl", "http://127.0.0.1:8080"]},"initialDelaySeconds": 10, "timeoutSeconds": 1, "periodSeconds": 10, "successThreshold": 1, "failureThreshold": 3}}, {"op": "remove", "path": "/spec/template/spec/containers/0/readinessProbe/httpGet"}, {"op": "add", "path": "/spec/template/spec/containers/0/readinessProbe", "value": { "exec": { "command" : ["curl", "http://127.0.0.1:8080"]},"initialDelaySeconds": 10, "timeoutSeconds": 1, "periodSeconds": 10, "successThreshold": 1, "failureThreshold": 3}}]' -n $ER_DEMO_NS
+----
 . Annotate the Mission Service pods with the `sidecar.istio.io/inject: "true"` annotation.
 . _Policy_ for the Mission Service service.
 +
 ----
+$ echo "---
 apiVersion: authentication.istio.io/v1alpha1
 kind: Policy
 metadata:
@@ -1026,34 +1108,38 @@ spec:
       mode: PERMISSIVE
   targets:
   - name: mission-service
+" > mission-service-policy.yml
 ----
 
 . _DestinationRule_ for the Mission Service:
 +
 ----
+$ echo "---
 apiVersion: networking.istio.io/v1alpha3
 kind: DestinationRule
 metadata:
   name: mission-service-client-mtls
 spec:
-  host: mission-service.<emergency-response-demo namespace>.svc.cluster.local
+  host: $ERDEMO_USER-mission-service.$ER_DEMO_NS.svc.cluster.local
   trafficPolicy:
     tls:
       mode: ISTIO_MUTUAL
+" > mission-service-mtls-destinationrule.yml
 ----
 
 . _VirtualService_ for the Mission Service:
 +
 ----
+$ echo "---
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
 metadata:
   name: mission-service-virtualservice
 spec:
   hosts:
-  - mission-service.<user>.app.<openshift-domain>
+  - mission-service.$ERDEMO_USER.apps.$SUBDOMAIN_BASE
   gateways:
-  - erd-wildcard-gateway.<controlplane namespace>.svc.cluster.local
+  - erd-wildcard-gateway.$RHSM_CONTROL_PLANE_NS.svc.cluster.local
   http:
   - match:
     - uri:
@@ -1062,12 +1148,14 @@ spec:
     - destination:
         port:
           number: 8080
-        host: mission-service
+        host: $ERDEMO_USER-mission-service.$ER_DEMO_NS.svc.cluster.local
+" > mission-service-virtualservice.yml
 ----
 
 . Route for the Mission Service:
 +
 ----
+$ echo "---
 apiVersion: route.openshift.io/v1
 kind: Route
 metadata:
@@ -1077,7 +1165,7 @@ metadata:
     app: mission-service
   name: mission-service-gateway
 spec:
-  host: mission-service.<user>.apps.<openshift domain>
+  host: mission-service.$ERDEMO_USER.apps.$SUBDOMAIN_BASE
   port:
     targetPort: https
   tls:
@@ -1087,11 +1175,12 @@ spec:
     name: istio-ingressgateway
     weight: 100
   wildcardPolicy: None
+" > mission-service-gateway.yml
 ----
 . Delete the existing Mission Service route:
 +
 ----
-$ oc delete route mission-service -n $ER_DEMO_NS
+$ oc delete route $ERDEMO_USER-mission-service -n $ER_DEMO_NS
 ----
 
 === Responder Simulator
@@ -1127,11 +1216,18 @@ Replace the existing liveness and readiness probes with command based probes:
           timeoutSeconds: 1
 [...]
 ----
++
+Alternatively, run the following `oc patch` command:
++
+----
+$ oc patch dc $ERDEMO_USER-responder-simulator --type='json' -p '[{"op": "remove", "path": "/spec/template/spec/containers/0/livenessProbe/httpGet"}, {"op": "add", "path": "/spec/template/spec/containers/0/livenessProbe", "value": { "exec": { "command" : ["curl", "http://127.0.0.1:8080/metrics"]},"initialDelaySeconds": 10, "timeoutSeconds": 1, "periodSeconds": 10, "successThreshold": 1, "failureThreshold": 3}}, {"op": "remove", "path": "/spec/template/spec/containers/0/readinessProbe/httpGet"}, {"op": "add", "path": "/spec/template/spec/containers/0/readinessProbe", "value": { "exec": { "command" : ["curl", "http://127.0.0.1:8080/metrics"]},"initialDelaySeconds": 10, "timeoutSeconds": 1, "periodSeconds": 10, "successThreshold": 1, "failureThreshold": 3}}]' -n $ER_DEMO_NS
+----
 
 . Annotate the Responder Simulator pods with the `sidecar.istio.io/inject: "true"` annotation.
 . _Policy_ for the Responder Simulator service.
 +
 ----
+$ echo "---
 apiVersion: authentication.istio.io/v1alpha1
 kind: Policy
 metadata:
@@ -1142,34 +1238,38 @@ spec:
       mode: PERMISSIVE
   targets:
   - name: responder-simulator
+" > responder-simulator-policy.yml
 ----
 
 . _DestinationRule_ for the Responder Simulator:
 +
 ----
+$ echo "---
 apiVersion: networking.istio.io/v1alpha3
 kind: DestinationRule
 metadata:
   name: responder-simulator-client-mtls
 spec:
-  host: responder-simulator.<emergency-response-demo namespace>.svc.cluster.local
+  host: $ERDEMO_USER-responder-simulator.$ER_DEMO_NS.svc.cluster.local
   trafficPolicy:
     tls:
       mode: ISTIO_MUTUAL
+" > responder-simulator-mtls-destinationrule.yml
 ----
 
 . _VirtualService_ for the Responder Simulator:
 +
 ----
+$ echo "---
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
 metadata:
   name: responder-simulator-virtualservice
 spec:
   hosts:
-  - responder-simulator.<user>.apps.<openshift-domain>
+  - responder-simulator.$ERDEMO_USER.apps.$SUBDOMAIN_BASE
   gateways:
-  - erd-wildcard-gateway.<controlplane namespace>.svc.cluster.local
+  - erd-wildcard-gateway.$RHSM_CONTROL_PLANE_NS.svc.cluster.local
   http:
   - match:
     - uri:
@@ -1178,12 +1278,14 @@ spec:
     - destination:
         port:
           number: 8080
-        host: responder-simulator
+        host: $ERDEMO_USER-responder-simulator.$ER_DEMO_NS.svc.cluster.local
+" > responder-simulator-virtualservice.yml
 ----
 
 . Route for the Responder Simulator:
 +
 ----
+$ echo "---
 apiVersion: route.openshift.io/v1
 kind: Route
 metadata:
@@ -1193,7 +1295,7 @@ metadata:
     app: responder-simulator
   name: responder-simulator-gateway
 spec:
-  host: responder-simulator.<user>.apps.<openshit domain>
+  host: responder-simulator.$ERDEMO_USER.apps.$SUBDOMAIN_BASE
   port:
     targetPort: https
   tls:
@@ -1203,11 +1305,12 @@ spec:
     name: istio-ingressgateway
     weight: 100
   wildcardPolicy: None
+" > responder-simulator-gateway.yml
 ----
 . Delete the existing Responder Simulator route
 +
 ----
-$ oc delete route responder-simulator -n $ER_DEMO_NS
+$ oc delete route $ERDEMO_USER-responder-simulator -n $ER_DEMO_NS
 ----
 
 === Process Viewer
@@ -1243,11 +1346,18 @@ Replace the existing liveness and readiness probes with command based probes:
           timeoutSeconds: 3
 [...]
 ----
++
+Alternatively, run the following `oc patch` command:
++
+----
+$ oc patch dc $ERDEMO_USER-process-viewer --type='json' -p '[{"op": "remove", "path": "/spec/template/spec/containers/0/livenessProbe/httpGet"}, {"op": "add", "path": "/spec/template/spec/containers/0/livenessProbe", "value": { "exec": { "command" : ["curl", "http://127.0.0.1:8080/health"]},"initialDelaySeconds": 15, "timeoutSeconds": 3, "periodSeconds": 30, "successThreshold": 1, "failureThreshold": 3}}, {"op": "remove", "path": "/spec/template/spec/containers/0/readinessProbe/httpGet"}, {"op": "add", "path": "/spec/template/spec/containers/0/readinessProbe", "value": { "exec": { "command" : ["curl", "http://127.0.0.1:8080/health"]},"initialDelaySeconds": 5, "timeoutSeconds": 3, "periodSeconds": 30, "successThreshold": 1, "failureThreshold": 3}}]' -n $ER_DEMO_NS
+----
 
 . Annotate the Process Viewer pods with the `sidecar.istio.io/inject: "true"` annotation.
 . _Policy_ for the Process Viewer service.
 +
 ----
+$ echo "---
 apiVersion: authentication.istio.io/v1alpha1
 kind: Policy
 metadata:
@@ -1258,34 +1368,38 @@ spec:
       mode: PERMISSIVE
   targets:
   - name: process-viewer
+" > process-viewer-policy.yml
 ----
 
 . _DestinationRule_ for Process Viewer:
 +
 ----
+$ echo "---
 apiVersion: networking.istio.io/v1alpha3
 kind: DestinationRule
 metadata:
   name: process-viewer-client-mtls
 spec:
-  host: process-viewer.<emergency-response-demo namespace>.svc.cluster.local
+  host: $ERDEMO_USER-process-viewer.$ER_DEMO_NS.svc.cluster.local
   trafficPolicy:
     tls:
       mode: ISTIO_MUTUAL
+" > process-viewer-mtls-destinationrule.yml
 ----
 
 . _VirtualService_ for Process Viewer:
 +
 ----
+$ echo "---
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
 metadata:
   name: process-viewer-virtualservice
 spec:
   hosts:
-  - process-viewer.<user>.apps.<openshift domain>
+  - process-viewer.$ERDEMO_USER.apps.$SUBDOMAIN_BASE
   gateways:
-  - erd-wildcard-gateway.<controlplane namespace>.svc.cluster.local
+  - erd-wildcard-gateway.$RHSM_CONTROL_PLANE_NS.svc.cluster.local
   http:
   - match:
     - uri:
@@ -1296,12 +1410,14 @@ spec:
     - destination:
         port:
           number: 8080
-        host: process-viewer
+        host: $ERDEMO_USER-process-viewer.$ER_DEMO_NS.svc.cluster.local
+" > process-viewer-virtualservice.yml
 ----
 
 . Route for Process Viewer:
 +
 ----
+$ echo "---
 apiVersion: route.openshift.io/v1
 kind: Route
 metadata:
@@ -1311,7 +1427,7 @@ metadata:
     app: process-viewer
   name: process-viewer-gateway
 spec:
-  host: process-viewer.<user>.apps.<openshift-domain>
+  host: process-viewer.$ERDEMO_USER.apps.$SUBDOMAIN_BASE
   port:
     targetPort: https
   tls:
@@ -1321,11 +1437,12 @@ spec:
     name: istio-ingressgateway
     weight: 100
   wildcardPolicy: None
+" > process-viewer-gateway.yml
 ----
 . Delete the existing Process Viewer route
 +
 ----
-$ oc delete route process-viewer -n $ER_DEMO_NS
+$ oc delete route $ERDEMO_USER-process-viewer -n $ER_DEMO_NS
 ----
 
 === Emergency Console
@@ -1361,11 +1478,18 @@ Replace the existing liveness and readiness probes with command based probes:
           timeoutSeconds: 3
 [...]
 ----
++
+Alternatively, run the following `oc patch` command:
++
+----
+$ oc patch dc $ERDEMO_USER-emergency-console --type='json' -p '[{"op": "remove", "path": "/spec/template/spec/containers/0/livenessProbe/httpGet"}, {"op": "add", "path": "/spec/template/spec/containers/0/livenessProbe", "value": { "exec": { "command" : ["curl", "http://127.0.0.1:8080"]}, "initialDelaySeconds": 30, "timeoutSeconds": 3, "periodSeconds": 30, "successThreshold": 1, "failureThreshold": 3}}, {"op": "remove", "path": "/spec/template/spec/containers/0/readinessProbe/httpGet"}, {"op": "add", "path": "/spec/template/spec/containers/0/readinessProbe", "value": { "exec": { "command" : ["curl", "http://127.0.0.1:8080"]},"initialDelaySeconds": 30, "timeoutSeconds": 3, "periodSeconds": 30, "successThreshold": 1, "failureThreshold": 3}}]' -n $ER_DEMO_NS
+----
 
 . Annotate the Emergency Console pods with the `sidecar.istio.io/inject: "true"` annotation.
 . _Policy_ for the Emergency Console service.
 +
 ----
+$ echo "---
 apiVersion: authentication.istio.io/v1alpha1
 kind: Policy
 metadata:
@@ -1376,34 +1500,38 @@ spec:
       mode: PERMISSIVE
   targets:
   - name: emergency-console
+" > emergency-console-policy.yml
 ----
 
 . _DestinationRule_ for Emergency Console:
 +
 ----
+$ echo "---
 apiVersion: networking.istio.io/v1alpha3
 kind: DestinationRule
 metadata:
   name: emergency-console-client-mtls
 spec:
-  host: emergency-console.<emergency-response-demo namespace>.svc.cluster.local
+  host: $ERDEMO_USER-emergency-console.$ER_DEMO_NS.svc.cluster.local
   trafficPolicy:
     tls:
       mode: ISTIO_MUTUAL
+" > emergency-console-mtls-destinationrule.yml
 ----
 
 . _VirtualService_ for Emergency Console:
 +
 ----
+$ echo "---
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
 metadata:
   name: emergency-console-virtualservice
 spec:
   hosts:
-  - emergency-console.<user>.apps.<openshift domain>
+  - emergency-console.$ERDEMO_USER.apps.$SUBDOMAIN_BASE
   gateways:
-  - erd-wildcard-gateway.<controlplane namespace>.svc.cluster.local
+  - erd-wildcard-gateway.$RHSM_CONTROL_PLANE_NS.svc.cluster.local
   http:
   - match:
     - uri:
@@ -1412,12 +1540,14 @@ spec:
     - destination:
         port:
           number: 8080
-        host: emergency-console
+        host: $ERDEMO_USER-emergency-console.$ER_DEMO_NS.svc.cluster.local
+" > emergency-console-virtualservice.yml
 ----
 
 . Route for Emergency Console:
 +
 ----
+$ echo "---
 apiVersion: route.openshift.io/v1
 kind: Route
 metadata:
@@ -1427,7 +1557,7 @@ metadata:
     app: emergency-console
   name: emergency-console-gateway
 spec:
-  host: emergency-console.<user>.apps.<openshift domain>
+  host: emergency-console.$ERDEMO_USER.apps.$SUBDOMAIN_BASE
   port:
     targetPort: https
   tls:
@@ -1437,21 +1567,22 @@ spec:
     name: istio-ingressgateway
     weight: 100
   wildcardPolicy: None
+" > emergency-console-gateway.yml
 ----
 . Delete the existing Emergency Console route
 +
 ----
-$ oc delete route emergency-console -n $ER_DEMO_NS
+$ oc delete route $ERDEMO_USER-emergency-console -n $ER_DEMO_NS
 ----
 
 . The redirect URL in the `emergency-realm` in the SSO service needs to be changed. +
-Log in into the Red Hat SSO instance administration console, and navigate to the `emergency realm` realm, and then to the `js` client. In the _Valid Redirect URIs_ section, remove the existing redirect URL for Emergency Console, and add the new URL for the Emergency Console:
+Log in into the Red Hat SSO instance administration console, and navigate to the realm corresponding to your Emergency Response Demo deployment (`$ERDEMO_USER-emergency-realm`), and then to the `js` client. In the _Valid Redirect URIs_ section, remove the existing redirect URL for Emergency Console, and add the new URL for the Emergency Console:
 +
 ----
-https://emergency-console.<user>.apps.<openshift domain>/*
+https://emergency-console.$ERDEMO_USER.apps.$SUBDOMAIN_BASE/*
 ----
 +
-NOTE: check realm name
+IMPORTANT: user access to sso administration console
 
 === PostgreSQL
 
@@ -1463,6 +1594,7 @@ Service Mesh mTLS can also be enabled for TCP traffic. The Incident Service, Res
 . _Policy_ for the PostgresQL service.
 +
 ----
+$ echo "---
 apiVersion: authentication.istio.io/v1alpha1
 kind: Policy
 metadata:
@@ -1473,20 +1605,23 @@ spec:
       mode: PERMISSIVE
   targets:
   - name: postgresql
+" > postgresql-policy.yml
 ----
 
 . _DestinationRule_ for PostgreSQL:
 +
 ----
+$ echo "---
 apiVersion: networking.istio.io/v1alpha3
 kind: DestinationRule
 metadata:
   name: postgresql-client-mtls
 spec:
-  host: postgresql.<emergency-response-demo namespace>.svc.cluster.local
+  host: postgresql.$ER_DEMO_NS.svc.cluster.local
   trafficPolicy:
     tls:
       mode: ISTIO_MUTUAL
+" > postgresql-mtls-destinationrule.yml
 ----
 
 . After successful redeployment of the PostgreSQL pods, scale up the Incident Service and Responder Service.
@@ -1496,9 +1631,10 @@ spec:
 . Scale down the Process Service to 0 pods
 . Annotate the Process Service PostgreSQL pod with the `sidecar.istio.io/inject: "true"` annotation.
 
-. _Policy_ for the PostgresQL service.
+. _Policy_ for the Process Service PostgresQL service.
 +
 ----
+$ echo "---
 apiVersion: authentication.istio.io/v1alpha1
 kind: Policy
 metadata:
@@ -1509,21 +1645,23 @@ spec:
       mode: PERMISSIVE
   targets:
   - name: postgresql
+" > process-postgresql-policy.yml
 ----
 
 . _DestinationRule_ for PostgreSQL:
 +
 ----
----
+$ echo "---
 apiVersion: networking.istio.io/v1alpha3
 kind: DestinationRule
 metadata:
   name: process-service-postgresql-client-mtls
 spec:
-  host: process-service-postgresql.<emergency-response-demo namespace>.svc.cluster.local
+  host: process-service-postgresql.$ER_DEMO_NS.svc.cluster.local
   trafficPolicy:
     tls:
       mode: ISTIO_MUTUAL
+" > process-postgresql-mtls-destinationrule.yml
 ----
 
 . After successful redeployment of the PostgreSQL pod, scale up the Process Service.
@@ -1534,7 +1672,7 @@ spec:
 . Edit the different Policy objects, set the mTLS mode to `STRICT`:
 +
 ----
-$ oc patch policy incident-service-mtls --type='json' -p '[{"op":"replace","path":"/spec/peers/0/mtls/mode", "value": "STRICT"}]' -n -n $ER_DEMO_NS
+$ oc patch policy incident-service-mtls --type='json' -p '[{"op":"replace","path":"/spec/peers/0/mtls/mode", "value": "STRICT"}]' -n $ER_DEMO_NS
 ----
 
 . Repeat for the other policy objects.
@@ -1549,9 +1687,9 @@ Possible solutions: +
 NOTE: When using mTLS to the Postgresql database, the Process Service does not always start correctly, and frequently shows database errors in the logs: +
 `org.postgresql.util.PSQLException: An I/O error occurred while sending to the backend.` +
 `org.postgresql.util.PSQLException: Connection has been closed automatically because a new connection was opened for the same PooledConnection or the PooledConnection has been closed.` +
-This error require further investigation.
+This error requires further investigation.
 
-NOTE: The communication beween the Mission Service and datagrid is not managed by the service mesh. There are several bug reports about Istio mTLS not working with StatefulSets. Also, the communication between the mission service and the datagrid uses the HotRod protocol, with support for transport level security.
+NOTE: The communication beween the Mission Service and the Datagrid is not managed by the service mesh. There are several bug reports about Istio mTLS not working with StatefulSets. Also, the communication between the mission service and the datagrid uses the HotRod protocol, with support for transport level security.
 
 NOTE: The communication beween the services and Kafka is not managed by the service mesh. Strimzi/kafka has its own security mechanisms, including transport security and authentication/authorization. 
 
@@ -1576,9 +1714,10 @@ $ oc patch servicemeshpolicy default --type='json' -p '[{"op":"replace","path":"
 ----
 
 . Create a ServiceMeshRbacConfig object.
-* On the local file system, create a file called `servicemesh-rbac.yml` with the following contents (replace `<emergency-response-demo namespace>` with the name of the namespace of the Emergency Response Demo):
+* On the local file system, create a file called `servicemesh-rbac.yml` with the following command:
 +
 ----
+$ echo "---
 apiVersion: rbac.maistra.io/v1
 kind: ServiceMeshRbacConfig
 metadata:
@@ -1587,13 +1726,14 @@ spec:
   mode: ON_WITH_INCLUSION
   inclusion:
     services:
-      - incident-service.<emergency-response-demo namespace>.svc.cluster.local
+      - incident-service.$ER_DEMO_NS.svc.cluster.local
+" > servicemesh-rbac.yml
 ----
 +
 ** The name of the ServiceMeshRbacConfig must be `default`.
 ** The mode is set to `ON_WITH_INCLUSION`. This means that RBAC is only enabled for the services listed in the `inclusion` whitelist. +
 Other possible values are `ON`, `OFF`, `ON_WITH_EXCLUSION`.
-** In our case, Service Mesh authorization is only enabled for the Incident Service in the Emergency Response Demo workspace. 
+** In our case, Service Mesh authorization is only enabled for the Incident Service in the Emergency Response Demo namespace. 
 * Create the object in the Service Mesh controlplane namespace:
 +
 ----
@@ -1608,6 +1748,7 @@ $ INCIDENT_SERVICE_URL=$(oc get route incident-service-gateway -n $RHSM_CONTROL_
 $ curl -v -k https://$INCIDENT_SERVICE_URL/incidents
 ----
 +
+.Output
 ----
 *   Trying 35.156.140.248:443...
 * TCP_NODELAY set
@@ -1656,7 +1797,7 @@ $ curl -v -k https://$INCIDENT_SERVICE_URL/incidents
 * Connection #0 to host incident-service.erd.apps.cluster-a3c6.a3c6.example.opentlc.com left intact
 RBAC: access denied
 ----
-** The HTTP return code is 403, with message "RBAC: acces denied".
+** The HTTP return code is 403, with message "RBAC: access denied".
 * To test a call to the Incident Service from within the cluster, open the Disaster Simulator home page in a browser, and click on the _Clear Incidents_ button. Check the logs of the Disaster Simulator pod. Expect to see something like:
 +
 ----
@@ -1665,17 +1806,19 @@ INFO: Reset incidents: HTTP response status 403
 ----
 
 . Create a _ServiceRole_ object for the services in the Emergency Response Demo namespace.
-* On the local filesystem, create a file called `sr-incident-service-internal.yml` with the following contents (replace `<emergency-response-demo namespace>` with the name of the namespace of the Emergency Response Demo):
+* On the local filesystem, create a file called `sr-incident-service-internal.yml` with the following command:
 +
 ----
+$ echo "---
 apiVersion: rbac.istio.io/v1alpha1
 kind: ServiceRole
 metadata:
   name: incident-service-internal
 spec:
   rules:
-    - services: ["incident-service.<emergency-response-demo namespace>.svc.cluster.local"]
+    - services: ["$ERDEMO_USER-incident-service.$ER_DEMO_NS.svc.cluster.local"]
       methods: ["*"]
+" > sr-incident-service-internal.yml
 ----
 ** This policy allows to call the Incident Service service using all HTTP methods.
 * Create the ServiceRole object in the Emergency Response Demo namespace:
@@ -1685,9 +1828,10 @@ $ oc create -f sr-incident-service-internal.yml -n $ER_DEMO_NS
 ----
 
 . Create a _ServiceRoleBinding_ referencing the ServiceRole you just created and bind it to all services in the Emergency Response Demo namespace.
-* On the local filesystem, create a file called `srb-incident-service-internal.yml` with the following contents (replace `<emergency-response-demo namespace>` with the name of the namespace of the Emergency Response Demo):
+* On the local filesystem, create a file called `srb-incident-service-internal.yml` with the following command:
 +
 ----
+$ echo "---
 apiVersion: rbac.istio.io/v1alpha1
 kind: ServiceRoleBinding
 metadata:
@@ -1695,10 +1839,11 @@ metadata:
 spec:
   subjects:
     - properties:
-        source.namespace: "<emergency-response-demo namespace>"
+        source.namespace: "$ER_DEMO_NS"
   roleRef:
     kind: ServiceRole
     name: "incident-service-internal"
+" > rb-incident-service-internal.yml
 ----
 * Create the ServiceRoleBinding object in the Emergency Response Demo namespace:
 +
@@ -1715,17 +1860,19 @@ INFO: Reset incidents: HTTP response status 200
 * A curl request to the `/incidents` endpoint of the Incident Service still errors out with a HTTP 403 return code.
 
 . Create a _ServiceRole_ object for the external access to the Incident Service. This Service Role grants only HTTP GET access to the Incident Service REST APIs.
-* On the local filesystem, create a file called `srb-incident-service-ingress.yml` with the following contents (replace `<emergency-response-demo namespace>` with the name of the namespace of the Emergency Response Demo):
+* On the local filesystem, create a file called `srb-incident-service-ingress.yml` with the following command:
 +
 ----
+$ echo "---
 apiVersion: rbac.istio.io/v1alpha1
 kind: ServiceRole
 metadata:
   name: incident-service-ingress
 spec:
   rules:
-    - services: ["incident-service.<emergency-response-demo namespace>.svc.cluster.local"]
+    - services: ["$ERDEMO_USER-incident-service.$ER_DEMO_NS.svc.cluster.local"]
       methods: ["GET"]
+" > srb-incident-service-ingress.yml
 ----
 ** This policy allows to call the Incident Service service using HTTP GET, but disallows other HTTP methods.
 * Create the ServiceRole object in the Emergency Response Demo namespace:
@@ -1734,20 +1881,22 @@ spec:
 $ oc create -f sr-incident-service-ingress.yml -n $ER_DEMO_NS 
 ----
 
-. Create a _ServiceRoleBinding_ referencing the ServiceRole you just created and bind it to the SPIFFE identity of the Service Mesh Ingress Gateway service.
-* On the local filesystem, create a file called `srb-incident-service-ingress.yml` with the following contents (replace `<controlplane namespace>` with the name of the Service Mesh controlplane namespace):
+. Create a _ServiceRoleBinding_ referencing the ServiceRole you just created and bind it to the SPIFFE identity of the Istio Ingress Gateway service.
+* On the local filesystem, create a file called `srb-incident-service-ingress.yml` with the following command:
 +
 ----
+$ echo "---
 apiVersion: rbac.istio.io/v1alpha1
 kind: ServiceRoleBinding
 metadata:
   name: incident-service-ingress
 spec:
   subjects:
-    - user: "cluster.local/ns/<controlplane namespace>/sa/istio-ingressgateway-service-account"
+    - user: "cluster.local/ns/$ER_DEMO_NS/sa/istio-ingressgateway-service-account"
   roleRef:
     kind: ServiceRole
     name: "incident-service-internal"
+" > srb-incident-service-ingress.yml
 ----
 * Create the ServiceRoleBinding object in the Emergency Response Demo namespace:
 +
@@ -1762,6 +1911,7 @@ $ oc create -f srb-incident-service-ingress.yml -n $ER_DEMO_NS
 $ curl -k -v -X POST -H "Content-type: application/json" -d '{"lat": 34.14338, "lon": -77.86569, "numberOfPeople": 3, "medicalNeeded": true, "victimName": "victim",  "victimPhoneNumber": "111-111-111" }' https://$INCIDENT_SERVICE_URL/incidents
 ----
 +
+.Output
 ----
 Note: Unnecessary use of -X or --request, POST is already inferred.
 *   Trying 35.158.14.219:443...
@@ -1821,13 +1971,15 @@ Istio supports end-user authentication using JWT (JSON Web Token). End-user auth
 
 In this lab you will secure the Ingress Gateway service with JWT. You will use Red Hat SSO as JWT Token provider.
 
-IMPORTANT: verify the RHSSO setup in the lab environment - realm name, admin access, ...
-
 . Configure the Red Hat SSO instance to be able to obtain a JWT token.
-* Log in as administrator into the Administration console of the Red Hat SSO instance deployed as part of the Emergency Response Demo. 
-* In the SSO Administration console, navigate to the realm associated with your instance of the Emergency Response Demo.
+* Log in as realm administrator into the Administration console of the Red Hat SSO instance deployed as part of the Emergency Response Demo.
+** Obtain the URL for the administration console of the SSO instance:
 +
-IMPORTANT: Check realm name
+----
+$ echo "https://sso-user-sso.$SUBDOMAIN_BASE//auth/admin/$ERDEMO_USER-emergency-realm/console"
+----
+** In a browser window, navigate to the SSO console. Use the username and password you used to register in the Emergency Response application. +
+You are directed to the administration section of your realm.
 * Open the _Clients_ tab and click _Create_ to create a new client.
 * Enter `curl` as the Client ID and click _Save_:
 +
@@ -1835,17 +1987,14 @@ image::images/sso-client-create.png[]
 * In the _Settings_ tab, disable _Standard Flow_ and enable _Direct Access Grants_, then click _Save_:
 +
 image::images/sso-client-settings.png[]
-* Check that you have at least one user defined. On the left pane, click on _Users_, and then click on _View all users_. Expect to see the user with which you registered into the Emergency Response Demo console:
-+
-image::images/sso-users.png[]
 . Obtain a JWT token.
 * In a terminal, use the `curl` utility to obtain a token based on your SSO username and password.
 +
 ----
-$ export RHSSO_URL=<url of the RHSSO server>
-$ export REALM=<name of the emergency response demo realm>
+$ export RHSSO_URL=sso-user-sso.$SUBDOMAIN_BASE
+$ export REALM=$ERDEMO_USER-emergency-realm
 $ export USER=<realm username>
-$ export PASSWD=<real password>
+$ export PASSWD=<realm password>
 $ TKN=$(curl -X POST "$RHSSO_URL/auth/realms/$REALM/protocol/openid-connect/token" \
  -H "Content-Type: application/x-www-form-urlencoded" \
  -d "username=$USER" \
@@ -1865,10 +2014,11 @@ eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJrLVZtbjU2SG9keWZLSjBBLTFab01Z
 +
 image::images/jwt-token.png[]
 
-. Create a _Policy_ object to configure end-user authentication for the Ingress Gateway service.
-* On the local filesystem, create a file called `ingressgateway-origin.yml` with the following contents:
+. Create a _Policy_ object to configure end-user authentication for the Istio Ingress Gateway service.
+* On the local filesystem, create a file called `ingressgateway-origin.yml` with the following command:
 +
 ----
+$ echo "---
 apiVersion: authentication.istio.io/v1alpha1
 kind: Policy
 metadata:
@@ -1878,13 +2028,14 @@ spec:
     - name: istio-ingressgateway
   origins:
     - jwt:
-        issuer: <token issuer>
-        jwksUri: <JWT Web Key url>
+        issuer: https://sso-user-sso.$SUBDOMAIN_BASE/auth/realms/$ERDEMO_USER-emergency-realm
+        jwksUri: https://sso-user-sso.$SUBDOMAIN_BASE/auth/realms/$ERDEMO_USER-emergency-realm/protocol/openid-connect/certs
   principalBinding: USE_ORIGIN
+" > ingressgateway-origin.yml
 ----
 +
-** Replace <token issuer> with the value of the _iss_ field in the token. It's value should be `<url of the RHSSO server>/auth/realms/<realm name>`.
-** Replace <JWT Web Key url> with the value of `<url of the RHSSO server>/auth/realms/<realm name>/protocol/openid-connect/certs`
+** Make sure that the value of the `issuer` element corresponds to the value of the _iss_ field in the token.
+** Make sure that the value of the `jwksUri` element corresponds to the `issuer` url followed by `/protocol/openid-connect/certs`
 * Create the Policy object in the Control Plane namespace:
 +
 ----
@@ -1899,6 +2050,7 @@ $ INCIDENT_SERVICE_URL=$(oc get route incident-service-gateway -n $RHSM_CONTROL_
 $ curl -v -k https://$INCIDENT_SERVICE_URL/incidents
 ----
 +
+.Output
 ----
 *   Trying 35.158.14.219:443...
 * TCP_NODELAY set
@@ -1947,7 +2099,7 @@ $ curl -v -k https://$INCIDENT_SERVICE_URL/incidents
 Origin authentication failed.
 ----
 +
-** The HTTP return code is 401, with message "Origin authentication failed".
+The HTTP return code is 401, with message "Origin authentication failed".
 * Obtain a new token, and add the token as a `Authorization` header to the request:
 +
 ----
@@ -1962,6 +2114,7 @@ $ TKN=$(curl -X POST "$RHSSO_URL/auth/realms/$REALM/protocol/openid-connect/toke
 $ curl -v -k -H "Authorization: Bearer $TKN" https://$INCIDENT_SERVICE_URL/incidents
 ----
 +
+.Output
 ----
 *   Trying 35.156.140.248:443...
 * TCP_NODELAY set
@@ -2014,16 +2167,17 @@ Byb2ZpbGUiLCJlbWFpbF92ZXJpZmllZCI6ZmFsc2UsIm5hbWUiOiJCZXJuYXJkIFRpc29uIiwicHJlZm
 * Connection #0 to host incident-service.erd.apps.cluster-a3c6.a3c6.example.opentlc.com left intact
 []
 ----
-** The request succeeds with a HTTP return code 200.
++
+The request succeeds with a HTTP return code 200.
 
 NOTE: All external traffic to the Emergence Response application goes through the Ingress Gateway, and all requests require a valid JWT token. This means that the Disaster Simulator UI and the Emergency Console won't work as expected anymore. To fix this would require to have a separate Ingress Gateway for these services, which does not require origin authentication.
 
-NOTE: The Service Mesh Policy only checks for a valid token, based on the issuer, the validy of the signature on the token and the token expiry time. It is possible to configure more fine-grained authorization based on groups or roles, however, the way that Red Hat SSO encodes role information in a JWT Token is incompatible with how the Service Mesh expects this information.
+NOTE: The Service Mesh Policy only checks for a valid token, based on the issuer, the validy of the signature on the token and the token expiry time. It is possible to configure more fine-grained authorization based on groups or roles, however, the way Red Hat SSO encodes role information in a JWT Token is incompatible with how the Service Mesh expects this information.
 
-NOTE: The Service Mesh will only propagate the JWT token one hop. It will take the body of the JWT token and pass it along to the application in a separate header. The JWT body will be sent in the `sec-istio-auth-userinfo` header. It will be the responsibility of the application to propagate the token to downstream services or resubmit for a new token based on the end user’s identity and the service’s identity.
+NOTE: The Service Mesh only propagates the JWT token one hop. The service proxy takes the body of the JWT token and sends it along to the application in a separate HTTP header. The JWT body is sent in the `sec-istio-auth-userinfo` header. It is the responsibility of the application to propagate the token to downstream services or resubmit for a new token based on the end user’s identity and the service’s identity.
 
 Before continuing with the remainder of the labs, delete the end-user authentication policy:
-+
+
 ----
-oc delete policy ingressgateway-origin -n $RHSM_CONTROL_PLANE_NS 
+$ oc delete policy ingressgateway-origin -n $RHSM_CONTROL_PLANE_NS 
 ----
