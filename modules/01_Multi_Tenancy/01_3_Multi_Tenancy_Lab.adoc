@@ -18,7 +18,9 @@
 Faulty or compromised control planes should not be able affect any other tenants on the cluster. 
 This means that control plane components and service accounts have to be locked down using appropriate Kubernetes Roles and network access limited by NetworkPolicies.
 
-link:https://docs.google.com/document/d/1eMnLBpcJNMahoE6cYKcECp_Jcy4Haj3qc36RBAO9J-U/edit#[Operator-Based Soft Multi-Tenancy]
+.References:
+* link:https://docs.google.com/document/d/1eMnLBpcJNMahoE6cYKcECp_Jcy4Haj3qc36RBAO9J-U/edit#[Operator-Based Soft Multi-Tenancy]
+* link:https://maistra.io/docs/comparison-with-istio/#_cluster_scoped_custom_resources[Comparison with Istio]
 
 
 == ServiceMeshMemberRoll
@@ -26,7 +28,7 @@ link:https://docs.google.com/document/d/1eMnLBpcJNMahoE6cYKcECp_Jcy4Haj3qc36RBAO
 . Switch to your service mesh control plane administrator user:
 +
 -----
-oc login -u $SM_CP_ADMIN
+oc login -u $SM_CP_ADMIN -p OCP_PASSWD
 -----
 
 . Register the $ERDEMO_USER-er-demo namespace as namespace _member_ to be monitored and manged by your service mesh control plane.
@@ -67,7 +69,7 @@ istio-sidecar-injector-admin-role-binding-admin50-istio-system   24h
 prometheus-admin50-istio-system                                  24h
 -----
 +
-The use of a project scoped _RoleBinding_ rather than a cluster-scoped _ClusterRoleBinding_ is a key enabler of _multi-tenant_ capabilities of the Red Hat Service Mesh product.+
+The use of a project scoped _RoleBinding_ rather than a cluster-scoped _ClusterRoleBinding_ is a key enabler of _multi-tenant_ capabilities of the Red Hat Service Mesh product.
 
 . Red Hat OpenShift Service Mesh configures each member project to ensure network access between itself, the control plane, and other member projects.
 +
@@ -226,7 +228,7 @@ oc rsh `oc get pod -n $ERDEMO_USER-er-demo | grep "responder-service" | awk '{pr
 
 === Envoy Access Log File
 
-TO-DO:
+.TO-DO:
 * https://aspenmesh.io/how-to-debug-istio-mutual-tls-mtls-policy-issues-using-aspen-mesh/
 * global.proxy.accessLogFile
 * Is this log file any different than what is already being logged from Envoy in Red Hat Service Mesh ?

@@ -18,6 +18,8 @@
 
 === Client Utilities
 
+. openssl
+
 . link:https://stedolan.github.io/jq/download/[jq]
 
 . link:https://mirror.openshift.com/pub/openshift-v4/clients/oc/4.2/[oc utility version 4.2]
@@ -291,6 +293,8 @@ oc get ServiceMeshPolicies -n $RHSM_CONTROL_PLANE_NS
 NAME      AGE
 default   24h
 -----
++
+NOTE: This Red Hat Service Mesh specific resource replaces the upstream community Istio _MeshPolicy_ (which is cluster scoped and not compatible with multi-tenancy).  As you will see in a later lab, this resource is used to configure mutual TLS (mTLS) security within a single service mesh.
 
 . Notice the existance of various namespace scoped _RoleBinding_ resources in the service mesh control plane:
 +
@@ -321,7 +325,7 @@ oc get ServiceMeshMemberRoll default -o template --template='{{"\n"}}{{.spec}}{{
 map[]
 -----
 +
-In the next lab, you as the service mesh control plane admin will add the namespace where your Emergency Response application resides to this currently empty ServiceMeshMemberRoll.
+In a later lab, you as the service mesh control plane admin will add the namespace where your Emergency Response application resides to this currently empty ServiceMeshMemberRoll.
 
 ===  _Control Plane_ settings
 
@@ -404,6 +408,12 @@ echo -en "\n\n$(oc get route $ERDEMO_USER-emergency-console -o template --templa
 
 . You can log into the web console and simulate an emergency by following the instructions in the link:https://www.erdemo.io/gettingstarted/[Getting Started guide].
 
+
+== Appendix
+
+=== Reference
+
+. link:https://servicemesh.io/[The Service Mesh: What Every Software Engineer Needs to Know about the World's Most Over-Hyped Technology]
 
 ifdef::showscript[]
 

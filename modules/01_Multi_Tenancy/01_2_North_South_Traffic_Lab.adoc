@@ -31,6 +31,12 @@ Your lab environment includes access to a _multi-tenant_ 3scale API Management i
 
 For the purposes of this lab, you serve as the administrator of your own 3scale API Management _tenant_ (domain).
 
+. At the command line, log into your OpenShift environment as the owner of the Emergency Response application:
++
+-----
+oc login -u $ERDEMO_USER -p $OCP_PASSWD
+-----
+
 . Access your 3scale by Red Hat Admin Portal by pointing your browser to the output of the following:
 +
 [source,texinfo]

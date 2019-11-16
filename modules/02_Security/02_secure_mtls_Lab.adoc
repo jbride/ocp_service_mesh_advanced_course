@@ -39,8 +39,15 @@ NOTE: Review names of namespaces, crd's etc....
 
 Before starting the lab, let's review the Red Hat Service Mesh installation
 
-* The Service Mesh Controlplane is installed in the namespace `admin<x>-istio-system`.
-* The Controlplane is defined by the `ServiceshMeshControlPlane` custom resource.
+. Switch to your service mesh control plane administrator user:
++
+-----
+oc login -u $SM_CP_ADMIN -p OCP_PASSWD
+-----
+
+. The Service Mesh Controlplane is installed in the namespace `admin<x>-istio-system`.
++
+The Controlplane is defined by the `ServiceshMeshControlPlane` custom resource.
 +
 ----
 $ oc get servicemeshcontrolplane -n $RHSM_CONTROL_PLANE_NS
@@ -50,7 +57,8 @@ $ oc get servicemeshcontrolplane -n $RHSM_CONTROL_PLANE_NS
 NAME           READY
 full-install   True
 ----
-* Review the `ServicMeshControlPlane` CR:
+
+. Review the `ServicMeshControlPlane` CR:
 +
 ----
 $ oc get servicemeshcontrolplane full-install -o yaml -n $RHSM_CONTROL_PLANE_NS
@@ -174,7 +182,7 @@ As part of client-side verification when using mTLS, this identity is verified a
 . Using `oc`, visualize the contents of the `istio.incident-service` secret.
 +
 ----
-$ oc get secret istio.incident-service -o jsonpath={.data.cert-chain\\.pem} | base64 --decode -n $ER_DEMO_NS
+$ oc get secret istio.incident-service -o jsonpath={.data.cert-chain\\.pem} -n $ER_DEMO_NS | base64 --decode 
 ----
 +
 .Sample Output
@@ -230,7 +238,7 @@ An another alternative consists of having several Ingress Gateway services, each
 
 . Obtain a wildcard certificate and key for the gateway domain. All services exposed through the Istio Ingress will be part of this domain. The domain should be a subdomain of the global OpenShift application cluster domain, for example `<user>.apps.<openshift domain>`. +
 In this lab we will use a self-signed certificate.
-* Create a configuration file for openSSL (replace <user> with your username initials or another unique identifier, and <openshift domain> with the OpenShift cluster domain):
+* Create a configuration file for openSSL that substitutes the previously set environment variables: _$ERDEMO_USER_ and _$SUBDOMAIN_BASE_:
 +
 ----
 $ cat <<EOF | sudo tee ./cert.cfg
@@ -240,14 +248,14 @@ distinguished_name = req_distinguished_name
 prompt             = no
 
 [req_distinguished_name]
-commonName=<user>.apps.<openshift domain>
+commonName=$ERDEMO_USER.apps.$SUBDOMAIN_BASE
 
 [req_ext]
 subjectAltName   = @alt_names
 
 [alt_names]
-DNS.1  = <user>.apps.<openshift domain>
-DNS.2  = *.<user>.apps.<openshift domain>
+DNS.1  = $ERDEMO_USER.apps.$SUBDOMAIN_BASE
+DNS.2  = *.$ERDEMO_USER.apps.$SUBDOMAIN_BASE
 EOF
 ----
 * Create a self-signed certificate and private key:
@@ -264,7 +272,7 @@ $ oc create secret tls istio-ingressgateway-certs --cert tls.crt --key tls.key -
 . Restart the Istio ingress gateway pod:
 +
 ----
-$ oc rollout latest istio-ingressgateway -n $RHSM_CONTROL_PLANE_NS
+$ oc rollout latest deploy istio-ingressgateway -n $RHSM_CONTROL_PLANE_NS
 ----
 
 
@@ -272,11 +280,11 @@ $ oc rollout latest istio-ingressgateway -n $RHSM_CONTROL_PLANE_NS
 
 Now we can define a wildcard gateway for our services:
 
-. Create a file called `wildcard-gateway.yml` with the following contents (replace `<user>` and `<openshift domain>` with the appropriate values for your cluster):
+. Create a file called `wildcard-gateway.yml` with the following contents:
 +
 ----
 ---
-apiVersion: networking.istio.io/v1alpha3
+echo "apiVersion: networking.istio.io/v1alpha3
 kind: Gateway
 metadata:
   name: erd-wildcard-gateway
@@ -293,8 +301,9 @@ spec:
       privateKey: /etc/istio/ingressgateway-certs/tls.key
       serverCertificate: /etc/istio/ingressgateway-certs/tls.crt
     hosts:
-    - "*.<user>.apps.<openshift domain>"
+    - \"*.$ERDEMO_USER.apps.$SUBDOMAIN_BASE\"" > wildcard-gateway.yml
 ----
+
 . Create the wildcard Gateway:
 +
 ----
