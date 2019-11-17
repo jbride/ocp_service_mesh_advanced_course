@@ -223,14 +223,14 @@ In a Service Mesh, a better approach is to use a gateway for traffic coming into
 
 The Service Mesh installs an _Istio Ingress Gateway service_ (which is a Envoy proxy container running on its own). All incoming traffic into the service mesh should be routed through the Istio Ingress Gateway, to ensure mesh policies and routing rules are applied to incoming traffic.
 
-To route the traffic from the Ingress Gateway to the target services, _Gateway_ and _VirtualService_ objects are defined .
+To route the traffic from the Ingress Gateway to the target services, _Gateway_ and _VirtualService_ resources are defined .
 
 One way to do so is to create a _Gateway_ and a _VirtualService_ for each service exposed outside of the cluster. An alternative is to use a single wildcard Gateway and a VirtualService per service. The latter is the approach taken in this lab.
 
 The Ingress Gateway also ensures end-to-end encryption for incoming traffic: TLS termination happens at the Ingress Gateway, and traffic is re-encrypted by the Gateway using Service Mesh mTLS functionality before routing to the service. To achieve this, the public TLS key and certificate are mounted into the Ingress Gateway pods using a Secret.
 
-NOTE: There is a limitation when combining certificates, Gateway and VirtualService objects to route traffic into the mesh with end-to-end transport security. +
-Only one certificate/key pair can be mounted into the Istio Ingress Gateway. This (wildcard) certificate will be used by the different Gateway objects. However, configuring more than one Gateway using the same TLS certificate will cause browsers that leverage HTTP/2 connection reuse (i.e., most browsers) to produce 404 errors when accessing a second host after a connection to another host has already been established. +
+NOTE: There is a limitation when combining certificates, Gateway and VirtualService resources to route traffic into the mesh with end-to-end transport security. +
+Only one certificate/key pair can be mounted into the Istio Ingress Gateway. This (wildcard) certificate will be used by the different Gateway resources. However, configuring more than one Gateway using the same TLS certificate will cause browsers that leverage HTTP/2 connection reuse (i.e., most browsers) to produce 404 errors when accessing a second host after a connection to another host has already been established. +
 For a description of the problem, see https://istio.io/docs/ops/traffic-management/deploy-guidelines/#browser-problem-when-multiple-gateways-configured-with-same-tls-certificate +
 The workaround for this problem is to configure a single wildcard Gateway and bind the different VirtualServices to this single Gateway.
 An another alternative consists of having several Istio Ingress Gateway services, each handling their own internal service and managing their own (non-wildcard) certificate. This means however that a public certificate has to be provided for every service exposed outside of the mesh.
@@ -1671,13 +1671,13 @@ spec:
 === Strict mTLS Policy
 
 . Test the Emergency Response Demo application. Everything should work as expected.
-. Edit the different Policy objects, set the mTLS mode to `STRICT`:
+. Edit the different Policy resources, set the mTLS mode to `STRICT`:
 +
 ----
 $ oc patch policy incident-service-mtls --type='json' -p '[{"op":"replace","path":"/spec/peers/0/mtls/mode", "value": "STRICT"}]' -n $ER_DEMO_NS
 ----
 
-. Repeat for the other policy objects.
+. Repeat for the other policy resources.
 . Test the application again. Everything should still be working as expected.
 
 With strict mTLS enforced, the Prometheus pod in the `emergency-response-monitoring` namespace cannot longer scrape metric data from the pods in the `emergency-response-demo` namespace. +
@@ -1699,7 +1699,7 @@ NOTE: The communication beween the services and Kafka is not managed by the serv
 
 With Service Mesh Authorization Policy, you can define service-to-service authorization policies to control which services can communicate with other services.
 
-Service Mesh Authorization is enabled using a _ServiceMeshRbacConfig_ object. The Authorization Policies are defined using a combination of _ServiceRole_ and _ServiceRoleBinding_ objects. The ServiceRole defines list of permissions, which are then bound to a one or more _Subjects_ using a ServiceRoleBinding.
+Service Mesh Authorization is enabled using a _ServiceMeshRbacConfig_ resource. The Authorization Policies are defined using a combination of _ServiceRole_ and _ServiceRoleBinding_ resources. The ServiceRole defines list of permissions, which are then bound to a one or more _Subjects_ using a ServiceRoleBinding.
 
 As a use-case for this lab, we can define and enable the following policy:
 
@@ -1709,13 +1709,13 @@ As a use-case for this lab, we can define and enable the following policy:
 {nbsp}
 
 . The Service Mesh RBAC Policy requires mTLS strict mode. +
-To enable mesh-wide strict mTLS, the default _ServiceMeshPolicy_ object needs to be patched to change the mTLS mode from PERMISSIVE to STRICT:
+To enable mesh-wide strict mTLS, the default _ServiceMeshPolicy_ resource needs to be patched to change the mTLS mode from PERMISSIVE to STRICT:
 +
 ----
 $ oc patch servicemeshpolicy default --type='json' -p '[{"op":"replace","path":"/spec/peers/0/mtls/mode","value":"STRICT"}]' -n $RHSM_CONTROL_PLANE_NS
 ----
 
-. Create a ServiceMeshRbacConfig object.
+. Create a ServiceMeshRbacConfig resource.
 * On the local file system, create a file called `servicemesh-rbac.yml` with the following command:
 +
 ----
@@ -1736,7 +1736,7 @@ spec:
 ** The mode is set to `ON_WITH_INCLUSION`. This means that RBAC is only enabled for the services listed in the `inclusion` whitelist. +
 Other possible values are `ON`, `OFF`, `ON_WITH_EXCLUSION`.
 ** In our case, Service Mesh authorization is only enabled for the Incident Service in the Emergency Response Demo namespace. 
-* Create the object in the Service Mesh controlplane namespace:
+* Create the resource in the Service Mesh controlplane namespace:
 +
 ----
 $ oc create -f servicemesh-rbac.yml -n $RHSM_CONTROL_PLANE_NS
@@ -1807,7 +1807,7 @@ Oct 30, 2019 2:19:52 PM com.redhat.cajun.navy.datagenerate.RestClientVerticle la
 INFO: Reset incidents: HTTP response status 403
 ----
 
-. Create a _ServiceRole_ object for the services in the Emergency Response Demo namespace.
+. Create a _ServiceRole_ resource for the services in the Emergency Response Demo namespace.
 * On the local filesystem, create a file called `sr-incident-service-internal.yml` with the following command:
 +
 ----
@@ -1823,7 +1823,7 @@ spec:
 " > sr-incident-service-internal.yml
 ----
 ** This policy allows to call the Incident Service service using all HTTP methods.
-* Create the ServiceRole object in the Emergency Response Demo namespace:
+* Create the ServiceRole resource in the Emergency Response Demo namespace:
 +
 ----
 $ oc create -f sr-incident-service-internal.yml -n $ER_DEMO_NS 
@@ -1847,7 +1847,7 @@ spec:
     name: "incident-service-internal"
 " > rb-incident-service-internal.yml
 ----
-* Create the ServiceRoleBinding object in the Emergency Response Demo namespace:
+* Create the ServiceRoleBinding resource in the Emergency Response Demo namespace:
 +
 ----
 $ oc create -f srb-incident-service-internal.yml -n $ER_DEMO_NS 
@@ -1861,7 +1861,7 @@ INFO: Reset incidents: HTTP response status 200
 ----
 * A curl request to the `/incidents` endpoint of the Incident Service still errors out with a HTTP 403 return code.
 
-. Create a _ServiceRole_ object for the external access to the Incident Service. This Service Role grants only HTTP GET access to the Incident Service REST APIs.
+. Create a _ServiceRole_ resource for the external access to the Incident Service. This Service Role grants only HTTP GET access to the Incident Service REST APIs.
 * On the local filesystem, create a file called `srb-incident-service-ingress.yml` with the following command:
 +
 ----
@@ -1877,7 +1877,7 @@ spec:
 " > srb-incident-service-ingress.yml
 ----
 ** This policy allows to call the Incident Service service using HTTP GET, but disallows other HTTP methods.
-* Create the ServiceRole object in the Emergency Response Demo namespace:
+* Create the ServiceRole resource in the Emergency Response Demo namespace:
 +
 ----
 $ oc create -f sr-incident-service-ingress.yml -n $ER_DEMO_NS 
@@ -1900,7 +1900,7 @@ spec:
     name: "incident-service-internal"
 " > srb-incident-service-ingress.yml
 ----
-* Create the ServiceRoleBinding object in the Emergency Response Demo namespace:
+* Create the ServiceRoleBinding resource in the Emergency Response Demo namespace:
 +
 ----
 $ oc create -f srb-incident-service-ingress.yml -n $ER_DEMO_NS 
@@ -1969,7 +1969,7 @@ RBAC: access denied
 
 == Origin Authentiction
 
-Istio supports end-user authentication using JWT (JSON Web Token). End-user authentication verifies the original client making the request as an end-user (or device). The end-user request requires to pass in a JWT token which will be verified by the target service proxy. End-user authentication is configured in the `origins` section of a Policy object.
+Istio supports end-user authentication using JWT (JSON Web Token). End-user authentication verifies the original client making the request as an end-user (or device). The end-user request requires to pass in a JWT token which will be verified by the target service proxy. End-user authentication is configured in the `origins` section of a Policy resource.
 
 In this lab you will secure the Ingress Gateway service with JWT. You will use Red Hat SSO as JWT Token provider.
 
@@ -2016,7 +2016,7 @@ eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJrLVZtbjU2SG9keWZLSjBBLTFab01Z
 +
 image::images/jwt-token.png[]
 
-. Create a _Policy_ object to configure end-user authentication for the Istio Ingress Gateway service.
+. Create a _Policy_ resource to configure end-user authentication for the Istio Ingress Gateway service.
 * On the local filesystem, create a file called `ingressgateway-origin.yml` with the following command:
 +
 ----
@@ -2038,7 +2038,7 @@ spec:
 +
 ** Make sure that the value of the `issuer` element corresponds to the value of the _iss_ field in the token.
 ** Make sure that the value of the `jwksUri` element corresponds to the `issuer` url followed by `/protocol/openid-connect/certs`
-* Create the Policy object in the Control Plane namespace:
+* Create the Policy resource in the Control Plane namespace:
 +
 ----
 $ oc create -f ingressgateway-origin.yml -n $RHSM_CONTROL_PLANE_NS 
