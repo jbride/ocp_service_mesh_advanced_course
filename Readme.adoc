@@ -38,36 +38,29 @@ Each course module listed below will consist of a slide presentation and one or 
 .... Understand Envoy Data Plane
 .. Slides: Red Hat Service Mesh Engineering Design Decisions (Kevin Connor)
 
-. *02_Secure* 
+. *02_Security* 
 .. Slides: Service Mesh Security 
-.. Labs
-... 02_1_Vulnerable_MSA_Lab
-.... Deploy man-n-middle attack
-... 02_1_Secure_MSA_using_mTLS_Lab 
-.... mTLS communication applied
-.... Navigate to Grafana & Kiali dashboards to view encrypted connections
-.... man-in-middle attack thwarted
+.. Labs:
+... 02_1_Secure_mTLS_Lab 
 
-. *03_Control*
+. *03_Resiliancy*
 .. Slides: ???
 .. Labs:
-... 03_1_Security_Policies_Lab 
-... 03_2_Apply_API_Policies_Lab (jeff)
-... 03_3_Onboard_API_Consumers_Lab
-
-. *04_Service_Resiliancy*
-.. Slides: ???
-.. Labs:
-... 04_1_Service_Resiliancy_Lab (jeff)
+... 03_1_Service_Resiliancy_Lab (jeff)
 .... Add retries to PAM invocations postgresql
 .... Add circuit-breaker to clients invoking PAM postgresql
 
-. *05_Observe* 
+. *04_Observability* 
 .. Slides ???
 .. Labs
-... 05_1_Observe_Tracing_Lab (bernard)
-... 05_2_Prometheus_AlertManager_Lab (bernard)
-... 05_3_Kiali_Service_Graph_Lab (????  .... Bernard)
+... 04_1_Distributed_Tracing_Lab (bernard)
+... 04_2_Prometheus_AlertManager_Lab (bernard)
+... 04_3_Kiali_Service_Graph_Lab (????  .... Bernard)
+
+. *05_Mixer_Adapters*
+.. Slides (Jeff)
+.. Labs
+... 05_1_API_Mgmt_Adapter_Lab
 
 . *06_Production Considerations*
 .. Slides: Production_Considerations_and_Load_Testing (Kevin Connor)
