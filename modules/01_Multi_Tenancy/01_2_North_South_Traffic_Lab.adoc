@@ -134,6 +134,14 @@ echo "export SYSTEM_PROVIDER_URL=https://$(oc get routes -n $API_MANAGER_NS | gr
 +
 This is the URL to the API Manager _system-provider_ specific to your tenant that all API gateways use to pull information about APIs.
 
+.. *API_ADMIN_ACCESS_TOKEN*
++
+-----
+echo "export API_ADMIN_ACCESS_TOKEN=$(oc describe  deploy prod-apicast -n $ERDEMO_USER-gw | grep THREESCALE_PORTAL_ENDPOINT | cut -d'@' -f1 | cut -d'/' -f3)" >> $HOME/.bashrc
+-----
++
+This access token is specific to your API _tenant_ and is used by API gateways to invoke the _System Management API_ of 3scale.
+
 . Source your local shell configuration file:
 +
 -----
