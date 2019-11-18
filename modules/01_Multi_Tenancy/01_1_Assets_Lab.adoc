@@ -37,16 +37,19 @@ However, for the purpose of this course, this version of _istioctl_ works well.
 
 +
 -----
+mkdir -p $HOME/lab
+
+
 curl https://raw.githubusercontent.com/gpe-mw-training/ocp_service_mesh_advanced/master/utils/set_env_vars.sh \
-    -o /tmp/set_env_vars.sh && \
-    chmod 775 /tmp/set_env_vars.sh
+    -o $HOME/lab/set_env_vars.sh && \
+    chmod 775 $HOME/lab/set_env_vars.sh
 -----
 
 . Using your favorite text editor, modify the variables as discussed in the shell script you previously downloaded.
 . Execute the shell script so that the environment variables are applied to your existing shell:
 +
 -----
-./tmp/set_env_vars.sh
+$HOME/lab/set_env_vars.sh
 -----
 
 == OpenShift
@@ -108,8 +111,9 @@ oc get projects
 +
 -----
 
-istio-operator         Service Mesh Operator         Active
+3scale-mt-api0         3scale-mt-api0                Active
 admin50-istio-system   admin50 Service Mesh System   Active
+istio-operator         Service Mesh Operator         Active
 user50-er-demo                                       Active
 -----
 

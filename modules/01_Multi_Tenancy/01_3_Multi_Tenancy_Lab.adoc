@@ -106,9 +106,9 @@ The $ERDEMO_USER is the admin of the $ERDEMO_USER-er-demo namespace where the Em
 +
 -----
 curl https://raw.githubusercontent.com/gpe-mw-training/ocp_service_mesh_advanced/master/utils/inject_istio_annotation.sh \
-    -o /tmp/inject_istio_annotation.sh && \
-    chmod 775 /tmp/inject_istio_annotation.sh && \
-    /tmp/inject_istio_annotation.sh
+    -o $HOME/lab/inject_istio_annotation.sh && \
+    chmod 775 $HOME/lab/inject_istio_annotation.sh && \
+    $HOME/lab/inject_istio_annotation.sh
 -----
 
 . After completion of the script, review the list Emergency Response related pods:
@@ -171,13 +171,13 @@ oc get pod -n $ERDEMO_USER-er-demo \
        $(oc get pod -n $ERDEMO_USER-er-demo | grep "^$ERDEMO_USER-responder-service" | awk '{print $1}') \
        -o json \
        | jq .spec.containers[1] \
-        > /tmp/responder_envoy.json
+        > $HOME/lab/responder_envoy.json
 -----
 
 . Study the details of the _istio-proxy_ container:
 +
 -----
-less /tmp/responder_envoy.json
+less $HOME/lab/responder_envoy.json
 -----
 
 . Answer the following questions pertaining to this _istio-proxy_ container:
@@ -221,8 +221,8 @@ if you search for the destination service name you will see an embedded metadata
 -----
 oc rsh `oc get pod -n $ERDEMO_USER-er-demo | grep "responder-service" | awk '{print $1}'` \
          curl http://localhost:15000/config_dump \
-         > /tmp/config_dump \
-         && less /tmp/config_dump \
+         > $HOME/lab/config_dump \
+         && less $HOME/lab/config_dump \
          | /usr/local/bin/jq ".configs | last | .dynamic_route_configs"
 -----
 
@@ -248,8 +248,8 @@ ifdef::showscript[]
 oc project istio-system && \
          oc rsh `oc get pod | grep "istio-ingressgateway" | awk '{print $1}'` \
          curl http://localhost:15000/config_dump \
-         > /tmp/config_dump \
-         && less /tmp/config_dump \
+         > $HOME/lab/config_dump \
+         && less $HOME/lab/config_dump \
          | /usr/local/bin/jq ".configs | last | .dynamic_route_configs"
 -----
 
