@@ -1684,7 +1684,7 @@ With strict mTLS enforced, the Prometheus pod in the `emergency-response-monitor
 Adding the `emergency-response-monitoring` namespace to the service mesh and injecting the Envoy proxy in the prometheus pod does not work: scraping targets for Prometheus are pod IPs, not service names. The Envoy proxy does not process the traffic properly when directed to a pod IP instead of a service URL. +
 Possible solutions: +
 - Applications expose Prometheus metrics on a separate port, and TLS is disabled for that port in the DestinationRule. +
-- Applications expose Prometheus metrics on a separate port,  and that port is configured for pass-through in the Servie Mesh proxy init container (which sets up the networking in the pod so that a;l tyraffic is intercepted by the proxy side-car). This is a mesh-wide setting, so all appication services must use the same port. Also it seems not possible to configure the init-container settings using the Service Mesh CR.
+- Applications expose Prometheus metrics on a separate port,  and that port is configured for pass-through in the Servie Mesh proxy init container (which sets up the networking in the pod so that all traffic is intercepted by the proxy side-car). This is a mesh-wide setting, so all appication services must use the same port. Also it seems not possible to configure the init-container settings using the Service Mesh CR.
 
 NOTE: When using mTLS to the Postgresql database, the Process Service does not always start correctly, and frequently shows database errors in the logs: +
 `org.postgresql.util.PSQLException: An I/O error occurred while sending to the backend.` +
