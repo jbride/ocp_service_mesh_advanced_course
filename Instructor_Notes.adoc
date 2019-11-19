@@ -9,35 +9,29 @@
 . Instructor uses _MachineSet API_ to scale to appropriately sized cluster 
 .. Emergency Response (16GB RAM) + Istio Control Plane (6GB RAM) = 22GB RAM per student
 
-== *Red Hat Service Mesh*
-. Instructor installs RHSM operator and CRDs
-. Instructor layers 1 Service Mesh Control Plane per student
-.. user[1-100] has view access to _istio-operator_ namespace
-.. user[1-100] has view access to their own dedicated service mesh control plane
-.. admin[1-100] has admin access to service mesh control plane  (but is not a cluster admin)
-. For the above provisioning, the ansible found in the course link:https://github.com/gpe-mw-training/ocp_service_mesh_advanced[Lab Assets] are recommended.
-
 == Emergency Response Demo 
 . Instructor layers 1 Emergency Response Demo per student
-. Both uer[1-100] and admin[1-100] have admin access to this _emergency-response-demo_ namespace
+. Example:
++
+-----
+start_id=1
+end_id=20
 
-== RH-SSO
-. Used as Identity Provider (via OIDC) for the following:
-.. OCP 4 
-.. 3scale
-.. Emergency Response Demo ??
+for x in $(seq $start_id $end_id); do
+   ansible-playbook -i inventories/inventory playbooks/install.yml \
+      -e project_admin=user$x \
+      -e set_realm_admin_as_default=True
+done
+-----
 
-== 3scale Control Plane - (TO-DO)
-... Insructor provisions 1 3scale Control Plane
-... Instructor creates 1 tenant per student
-.... user[1-100] is an API provider for their tenant
-.... admin[1-100] is a admin of their tenant
+== 3scale Control Plane
+. link:https://github.com/gpe-mw-ansible-org/3scale_multitenant[3scale_multitenant] ansible is recommended (for the time being).
++
+This ansible does the following:
 
+.. Provisions 1 3scale Control Plane
+.. Provisions 1 tenant per student
+.. Provisions 1 set of API gateways (staging and production) per tenant
 
-==  *Client tooling* 
-The following is to be installed on by the student on their laptop:
-
-. Browser
-. oc 4.2 utility
-. istioctl
-
+== *Red Hat Service Mesh*
+. The ansible found in the course link:https://github.com/gpe-mw-training/ocp_service_mesh_advanced[Lab Assets] is recommended.

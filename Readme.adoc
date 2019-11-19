@@ -43,10 +43,10 @@ Each course module listed below will consist of a slide presentation and one or 
 .. Labs:
 ... 02_1_Secure_mTLS_Lab 
 
-. *03_Resiliancy*
+. *03_Reliability*
 .. Slides: ???
 .. Labs:
-... 03_1_Service_Resiliancy_Lab (jeff)
+... 03_1_Reliability_Lab (jeff)
 .... Add retries to PAM invocations postgresql
 .... Add circuit-breaker to clients invoking PAM postgresql
 
