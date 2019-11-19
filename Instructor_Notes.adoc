@@ -11,7 +11,9 @@
 
 == Emergency Response Demo 
 . Instructor layers 1 Emergency Response Demo per student
-. Example:
+.. git clone https://github.com/btison/emergency-response-demo-install.git
+.. git checkout ocp4-int-1.5.1
+.. execute:
 +
 -----
 start_id=1

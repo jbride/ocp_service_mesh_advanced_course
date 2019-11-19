@@ -31,7 +31,7 @@ This means that control plane components and service accounts have to be locked 
 oc login -u $SM_CP_ADMIN -p $OCP_PASSWD
 -----
 
-. Register the $ERDEMO_USER-er-demo namespace as namespace _member_ to be monitored and manged by your service mesh control plane.
+. Register the $ER_DEMO_NS namespace as namespace _member_ to be monitored and manged by your service mesh control plane.
 +
 -----
 echo "apiVersion: maistra.io/v1
@@ -40,24 +40,24 @@ metadata:
   name: default
 spec:
   members:
-  - $ERDEMO_USER-er-demo" | oc apply -n $SM_CP_ADMIN-istio-system -f -
+  - $ER_DEMO_NS" | oc apply -n $RHSM_CONTROL_PLANE_NS -f -
 -----
 +
 Recall that the _ServiceMeshMemberRoll_ exists in the service mesh control plane (which is owned by the admin: $SM_CP_ADMIN )
 
-. Notice that your $ERDEMO_USER-er-demo namespace now includes _kiali_ and _maistra_ annotations:
+. Notice that your $ER_DEMO_NS namespace now includes _kiali_ and _maistra_ annotations:
 +
 -----
-echo -en "\n\n$(oc get project $ERDEMO_USER-er-demo -o template --template='{{.metadata.labels}}')\n\n"
+echo -en "\n\n$(oc get project $ER_DEMO_NS -o template --template='{{.metadata.labels}}')\n\n"
 
 
 map[kiali.io/member-of:admin50-istio-system maistra.io/member-of:admin50-istio-system]
 -----
 
-. Notice also that your $ERDEMO_USER-er-demo namespace now includes namespace scoped _RoleBindings_ associated with the Istio related service accounts from your specific service mesh control plane:
+. Notice also that your $ER_DEMO_NS namespace now includes namespace scoped _RoleBindings_ associated with the Istio related service accounts from your specific service mesh control plane:
 +
 -----
-oc get RoleBinding  -n user50-er-demo -l release=istio
+oc get RoleBinding  -n $ER_DEMO_NS -l release=istio
 
 istio-citadel-admin50-istio-system                               24h
 istio-egressgateway-admin50-istio-system                         24h
@@ -73,15 +73,43 @@ The use of a project scoped _RoleBinding_ rather than a cluster-scoped _ClusterR
 
 . Red Hat OpenShift Service Mesh configures each member project to ensure network access between itself, the control plane, and other member projects.
 +
-Notice that your $ERDEMO_USER-er-demo namespace now also includes a _NetworkPolicy_ called: _istio-mesh_
+Notice that your $ER_DEMO_NS namespace now also includes a _NetworkPolicy_ called: _istio-mesh_
 +
 -----
-oc get NetworkPolicy istio-mesh -n $ERDEMO_USER-er-demo
+oc get NetworkPolicy istio-mesh -n $ER_DEMO_NS
 
 istio-mesh   <none>         26m
 -----
 +
 This _NetworkPolicy_ allows ingress to all pods specific to this namespace from the corresponding Red Hat Service Mesh control plane all other other registered _members_.
+
+. Notice also that your $ER_DEMO_NS namespace now includes _istio_ related secrets:
++
+-----
+oc get secrets -n $ER_DEMO_NS | grep istio
+
+...
+
+stio.builder                                   istio.io/key-and-cert                 3      9m58s
+istio.default                                   istio.io/key-and-cert                 3      9m55s
+istio.deployer                                  istio.io/key-and-cert                 3      9m57s
+istio.disaster-simulator-service                istio.io/key-and-cert                 3      9m58s
+istio.emergency-console                         istio.io/key-and-cert                 3      9m54s
+istio.incident-priority-service                 istio.io/key-and-cert                 3      9m57s
+istio.incident-service                          istio.io/key-and-cert                 3      9m54s
+istio.kafka-cluster-entity-operator             istio.io/key-and-cert                 3      9m54s
+istio.kafka-cluster-kafka                       istio.io/key-and-cert                 3      9m55s
+istio.kafka-cluster-zookeeper                   istio.io/key-and-cert                 3      9m55s
+istio.mission-service                           istio.io/key-and-cert                 3      9m56s
+istio.postgresql                                istio.io/key-and-cert                 3      9m56s
+istio.process-service                           istio.io/key-and-cert                 3      9m57s
+istio.process-viewer                            istio.io/key-and-cert                 3      9m54s
+istio.responder-service                         istio.io/key-and-cert                 3      9m54s
+istio.responder-simulator-service               istio.io/key-and-cert                 3      9m53s
+-----
++
+These secrets support mutual TLS functionality provided by the Red Hat Service Mesh.
+More information about these secrets is provided in the next module of this course.
 
 == Opt-in Auto-Injection Annotations
 
@@ -97,7 +125,7 @@ In this section of this lab you (as the owner of the Emergency Response applicat
 oc login -u $ERDEMO_USER
 -----
 +
-The $ERDEMO_USER is the admin of the $ERDEMO_USER-er-demo namespace where the Emergency Response application resides.
+The $ERDEMO_USER is the admin of the $ER_DEMO_NS namespace where the Emergency Response application resides.
 
 . Review the contents of link:https://github.com/gpe-mw-training/ocp_service_mesh_advanced/blob/master/utils/inject_istio_annotation.sh[this script].
 
@@ -114,7 +142,7 @@ curl https://raw.githubusercontent.com/gpe-mw-training/ocp_service_mesh_advanced
 . After completion of the script, review the list Emergency Response related pods:
 +
 -----
-oc get pods -l group=erd-services -n $ERDEMO_USER-er-demo
+oc get pods -l group=erd-services -n $ER_DEMO_NS
 
 user50-disaster-simulator-1-p9gfl          2/2     Running   7          9h
 user50-incident-priority-service-1-hgmdn   2/2     Running   4          9h
@@ -131,9 +159,9 @@ Notice that each of these pods indicates that two containers have started.
 +
 -----
 
-for POD_NAME in $(oc get pods -n $ERDEMO_USER-er-demo -l group=erd-services -o jsonpath='{range .items[*]}{.metadata.name}{"\n"}')
+for POD_NAME in $(oc get pods -n $ER_DEMO_NS -l group=erd-services -o jsonpath='{range .items[*]}{.metadata.name}{"\n"}')
 do
-    oc get pod $POD_NAME  -n $ERDEMO_USER-er-demo -o jsonpath='{.metadata.name}{"    :\t\t"}{.spec.containers[*].name}{"\n"}'
+    oc get pod $POD_NAME  -n $ER_DEMO_NS -o jsonpath='{.metadata.name}{"    :\t\t"}{.spec.containers[*].name}{"\n"}'
 done
 
 
@@ -151,7 +179,7 @@ user50-responder-simulator-1-tdrz2    :         user50-responder-simulator      
 .. Notice that each pod now contains an _istio-proxy_ container co-located with the primary business service container.
 .. Istio uses Kubernetes' link:https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/#mutatingadmissionwebhook[MutatingAdmissionWebhook] for automatically injecting the sidecar proxy into user pods.
 
-. The two databases leveraged by the Emergency Response demo ( _postgresql_ and _user50-process-service-postgresql_ ) are also now injected with an envoy proxy.
+. The two databases leveraged by the Emergency Response demo ( _postgresql_ and _$ERDEMO_USER-process-service-postgresql_ ) are also now injected with an envoy proxy.
 +
 Verify that this is infact the case either through the OpenShift web console or the oc utility.
 
@@ -200,12 +228,12 @@ endif::showscript[]
 link:https://www.envoyproxy.io/docs/envoy/v1.12.0/operations/admin#operations-admin-interface[Envoy Administration API]
 
 -----
-oc rsh `oc get pod -n $ERDEMO_USER-er-demo | grep "responder-service" | awk '{print $1}'` \
+oc rsh `oc get pod -n $ER_DEMO_NS | grep "responder-service" | awk '{print $1}'` \
     curl http://localhost:15000/help
 -----
 
 -----
-oc rsh `oc get pod -n $ERDEMO_USER-er-demo | grep "responder-service" | awk '{print $1}'` \
+oc rsh `oc get pod -n $ER_DEMO_NS | grep "responder-service" | awk '{print $1}'` \
    curl http://localhost:15000/clusters
 -----
 
@@ -219,11 +247,11 @@ if you search for the destination service name you will see an embedded metadata
 
 
 -----
-oc rsh `oc get pod -n $ERDEMO_USER-er-demo | grep "responder-service" | awk '{print $1}'` \
+oc rsh `oc get pod -n $ER_DEMO_NS | grep "responder-service" | awk '{print $1}'` \
          curl http://localhost:15000/config_dump \
          > $HOME/lab/config_dump \
          && less $HOME/lab/config_dump \
-         | /usr/local/bin/jq ".configs | last | .dynamic_route_configs"
+         | jq ".configs | last | .dynamic_route_configs"
 -----
 
 === Envoy Access Log File
@@ -245,7 +273,7 @@ link:https://www.erdemo.io/gettingstarted/[Getting Started]
 ifdef::showscript[]
 
 -----
-oc project istio-system && \
+oc project $RHSM_CONTROL_PLANE_NS && \
          oc rsh `oc get pod | grep "istio-ingressgateway" | awk '{print $1}'` \
          curl http://localhost:15000/config_dump \
          > $HOME/lab/config_dump \
