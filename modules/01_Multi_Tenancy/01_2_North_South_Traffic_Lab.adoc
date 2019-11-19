@@ -129,7 +129,7 @@ echo "export INCIDENT_SERVICE_ID=<change me>" >> $HOME/.bashrc
 .. *SYSTEM_PROVIDER_URL*
 +
 -----
-echo "export SYSTEM_PROVIDER_URL=https://$(oc get routes -n $API_MANAGER_NS | grep admin | grep $ERDEMO_USER | awk '{print $2}')" >> $HOME/.bashrc
+echo "export SYSTEM_PROVIDER_URL=$(oc get routes -n $API_MANAGER_NS | grep admin | grep $ERDEMO_USER | awk '{print $2}')" >> $HOME/.bashrc
 -----
 +
 This is the URL to the API Manager _system-provider_ specific to your tenant that all API gateways use to pull information about APIs.

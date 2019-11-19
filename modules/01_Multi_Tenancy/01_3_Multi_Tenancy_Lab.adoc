@@ -167,8 +167,8 @@ TO-DO:  https://github.com/istio/cni#validate-the-iptables-are-modified
 . Capture the details of the _istio-proxy_ container configuration from the _responder-service_ pod of the Emergency Response demo :
 +
 -----
-oc get pod -n $ERDEMO_USER-er-demo \
-       $(oc get pod -n $ERDEMO_USER-er-demo | grep "^$ERDEMO_USER-responder-service" | awk '{print $1}') \
+oc get pod -n $ER_DEMO_NS \
+       $(oc get pod -n $ER_DEMO_NS | grep "^$ERDEMO_USER-responder-service" | awk '{print $1}') \
        -o json \
        | jq .spec.containers[1] \
         > $HOME/lab/responder_envoy.json
