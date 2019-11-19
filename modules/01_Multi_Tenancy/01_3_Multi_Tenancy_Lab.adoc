@@ -28,7 +28,7 @@ This means that control plane components and service accounts have to be locked 
 . Switch to your service mesh control plane administrator user:
 +
 -----
-oc login -u $SM_CP_ADMIN -p OCP_PASSWD
+oc login -u $SM_CP_ADMIN -p $OCP_PASSWD
 -----
 
 . Register the $ERDEMO_USER-er-demo namespace as namespace _member_ to be monitored and manged by your service mesh control plane.
