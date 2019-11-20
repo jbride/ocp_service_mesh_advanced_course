@@ -438,7 +438,38 @@ Your use case may require more fine-grained routing rules.
 In this last section of the lab, you specify that GET requests to the incident-service `/incidents` endpoint can bypass the 3scale Istio Mixer adapter and invoke the incident-service without API policies having been applied.
 Instead, all POST requests to the `/incidents` endpoint will continue to have API policies applied via the 3scale Istio Mixer adapter.
 
-. Modify the existing `usethreescale` rule:
+=== HTTP POST
+
+In the admin console of the 3scale tenant, you need to configure a _mapping rule_ for your _incident-service_ API service.
+This mapping rule will allow for HTTP POST requests to the incident service (so as to create incidents).
+
+. Access your 3scale by Red Hat Admin Portal by pointing your browser to the output of the following:
++
+-----
+echo -en "\n\nhttps://$(oc get routes -n $API_MANAGER_NS | grep admin | grep $ERDEMO_USER | awk '{print $2}')\n"
+-----
+
+. Authenticate using the following values:
+.. *Username*:  $API_TENANT_USERNAME
+.. *Password*:  $API_TENANT_PASSWORD
+
+. In the Admin Portal of your 3scale API Manager tenant, navigate to: `API: Incident-service -> Integration -> Configuration -> edit APIcast configuration`
++
+images/edit_apicast_configs.png[]
+
+. Scroll down to the _MAPPING RULES_ section and add a new mapping rule with the following value:
+.. *Verb*: POST
+.. *Pattern*: /
++
+image::images/post_mapping.png[]
+
+. Scroll down to the bottom and click: `Update & test in Staging Environment`.
+. Afterwards, click the link the link in the left panel:  `Integration -> Configuration`.
+. Click the blue button to `Promote to Production`:
++
+image::images/promote.png[]
+ 
+. At the command line, modify the existing `usethreescale` rule in the $RHSM_CONTROL_PLAN_NS:
 +
 -----
 oc patch rule.config.istio.io threescale \
@@ -483,6 +514,7 @@ info    ControlZ available at 172.17.0.10:9876
 In particular, notice that the new policies were put into effect with no error messages logged.
 
 
+=== Test
 . Try again to invoke your incidents-service *without* the incident service _user_key_:
 +
 -----
