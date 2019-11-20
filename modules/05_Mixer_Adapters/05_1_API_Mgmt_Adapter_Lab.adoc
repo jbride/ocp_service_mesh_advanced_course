@@ -333,7 +333,7 @@ Further research into the issue is needed.
 .. As a work-around for the current problem, modify the `threescale-adapter-config.yaml` file with a modified rule that specifies that API Management policies should be applied when the target is the _incident-service_:
 +
 -----
-sed -i "s/match: .*/match: destination.service.name == \"incident-service\"/" \
+sed -i "s/match: .*/match: destination.service.name == \"$ERDEMO_USER-incident-service\"/" \
       $HOME/lab/istio-integration/istio/threescale-adapter-config.yaml
 -----
 
@@ -424,7 +424,7 @@ $ oc logs -f `oc get pod -n $RHSM_CONTROL_PLANE_NS | grep "3scale-istio-adapter"
 +
 -----
 $ curl -v \
-       `echo "http://"$(oc get route istio-ingressgateway -n $RHSM_CONTROL_PLANE_NS -o template --template {{.spec.host}})"/products?user_key=$CATALOG_USER_KEY"`
+       `echo "http://"$(oc get route istio-ingressgateway -n $RHSM_CONTROL_PLANE_NS -o template --template {{.spec.host}})"/incidents?user_key=$INCIDENT_SERVICE_API_KEY"`
 -----
 
 [blue]#Congratulations! The catalog service is again being managed and secured by the Red Hat 3scale API Management manager.#
