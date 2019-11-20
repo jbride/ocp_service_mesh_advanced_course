@@ -45,7 +45,7 @@ curl https://raw.githubusercontent.com/gpe-mw-training/ocp_service_mesh_advanced
     chmod 775 $HOME/lab/set_env_vars.sh
 -----
 
-. Using your favorite text editor, modify the variables as discussed in the shell script you previously downloaded.
+. Using your favorite text editor, modify the environment variables in this downloaded shell script, as discussed and shared by the instructor
 . Execute the shell script so that the environment variables are applied to your existing shell:
 +
 -----
@@ -357,7 +357,7 @@ oc login -u $ERDEMO_USER -p $OCP_PASSWD
 You can view its OpenShift DeploymentConfigs in the _$ERDEMO_USER-er-demo_ namespace as follows:
 +
 -----
-$ oc get dc -n $ERDEMO_USER-er-demo
+$ oc get dc -n $ER_DEMO_NS
 
 NAME                                REVISION   DESIRED   CURRENT  
 postgresql                          1          1         0        
@@ -380,14 +380,14 @@ In the next lab of this course, you will resume all of these DeploymentConfigs a
 . Notice the Emergency Response demo also makes use of Red Hat AMQ Streams for event-driven, streams-based communication between many of its services:
 +
 -----
-oc get deploy -n $ERDEMO_USER-er-demo
+oc get deploy -n $ER_DEMO_NS
 
 NAME                            READY   UP-TO-DATE   AVAILABLE   AGE
 kafka-cluster-entity-operator   1/1     1            1           3d5h
 -----
 +
 -----
-oc get statefulset -l strimzi.io/kind=Kafka -n $ERDEMO_USER-er-demo
+oc get statefulset -l strimzi.io/kind=Kafka -n $ER_DEMO_NS
 
 kafka-cluster-kafka       3/3     3d5h
 kafka-cluster-zookeeper   0/3     3d5h
@@ -396,7 +396,7 @@ kafka-cluster-zookeeper   0/3     3d5h
 . Also, notice the Emergency Response demo also makes use of Red Hat JBoss _Data Grid_:
 +
 -----
-oc get statefulset -l application=datagrid-service
+oc get statefulset -l application=datagrid-service -n $ER_DEMO_NS
 
 datagrid-service   3/3     3d5h
 -----
@@ -407,7 +407,7 @@ datagrid-service   3/3     3d5h
 This web console is accessible at the following URL:
 +
 -----
-echo -en "\n\n$(oc get route $ERDEMO_USER-emergency-console -o template --template={{.spec.host}} -n $ERDEMO_USER-er-demo)\n\n"
+echo -en "\n\n$(oc get route $ERDEMO_USER-emergency-console -o template --template={{.spec.host}} -n $ER_DEMO_NS)\n\n"
 -----
 
 . You can log into the web console and simulate an emergency by following the instructions in the link:https://www.erdemo.io/gettingstarted/[Getting Started guide].
