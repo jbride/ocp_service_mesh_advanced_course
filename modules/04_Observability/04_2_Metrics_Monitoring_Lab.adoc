@@ -427,7 +427,7 @@ spec:
               number: 8080
             subset: v2
           weight: 80
-" | oc apply -f - -n $ER_DEMO_NS"
+" | oc apply -f - -n $ER_DEMO_NS
 ----
 * In the example above, roughly 80% of the requests will be routed to version v2 of the Incident Service.
 .. Create some traffic to the Incident Service:
