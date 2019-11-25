@@ -7,7 +7,7 @@
 = North / South Traffic Lab
 
 .Goals
-* Take a phased approach toward management of a micro-service architected application
+* Utilize a phased approach toward management of a micro-service architected application
 * Use API Gateway to apply policies to _north-south_ traffic into the  Emergency Response application
 
 :numbered:
@@ -47,9 +47,8 @@ echo -en "\n\nhttps://$(oc get routes -n $API_MANAGER_NS | grep admin | grep $ER
 image::images/3scale_login.png[]
 
 . Authenticate using the following values:
-
-. *Username*:  $API_TENANT_USERNAME
-. *Password*:  $API_TENANT_PASSWORD
+.. *Username*:  $API_TENANT_USERNAME
+.. *Password*:  $API_TENANT_PASSWORD
 
 == API Gateways
 Your lab environment is provisioned with a set of API gateways that are specific to your _tenant_.

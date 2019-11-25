@@ -153,12 +153,11 @@ istio-operator-7fdc886f-t4vw2   1/1     Running   0          15h
 .. The administrator of the _istio-operator_ namespace is the OpenShift cluster-admin.
 
 
-
-
 === Istio CNI plugin
 
-While injecting the _Envoy_ service proxy sidecar into an application pod, community Istio typically uses an _init container_ to manipulate the iptables rules of the pod in order to intercept requests to application containers.
-Although the _Envoy_ service proxy sidecar does not require root to run, the short-lived init container does require link:https://docs.docker.com/engine/reference/run/#runtime-privilege-and-linux-capabilities[cap_net_admin] privileges to install iptables rules in each pod just prior to starting the pod's primary containers onboard to the service mesh.
+While injecting the _Envoy_ service proxy sidecar into an application pod, community Istio typically uses an link:https://kubernetes.io/docs/concepts/workloads/pods/init-containers/[init-container] to manipulate the iptables rules of the node where the pod runs.
+It modifies these iptables in order to intercept requests to application containers.
+Although the _Envoy_ service proxy sidecar does not require root to run, this short-lived _init-container_ does require link:https://docs.docker.com/engine/reference/run/#runtime-privilege-and-linux-capabilities[cap_net_admin] privileges.
 
 The use of this _init container_ in each application pod with elevated _cap_net_admin_ privileges is a security vulnerability.
 Subsequently, Red Hat Service Mesh avoids this approach.
@@ -197,13 +196,18 @@ registry.redhat.io/openshift-service-mesh/istio-cni-rhel8:1.0.1
 
 
 === CRDs
+Custom Resource Definitions (CRDs) facilitate domain specific extensions to the OpenShift master API.
+Red Hat Service Mesh defines several CRDs to faciliate the provisioning and lifecycle of a service mesh.
+
+
 . View the Service Mesh related _custom resource definitions_ that extend the OpenShift master API:
 +
 -----
 oc get crd --as=system:admin | grep 'maistra\|istio'
 -----
 
-.. You'll have to impersonate an OpenShift Cluster Admin to do so.  This normally would not be provided to you in a production environment.
+.. You'll have to impersonate an OpenShift Cluster Admin to do so.  
+This normally would not be provided to you in a production environment.
 
 .. Some of the more prominant CRD extensions of the OpenShift master include the following:
 
@@ -227,6 +231,64 @@ Allows for over-riding of _ServiceMeshControlPlane_ settings with either _namesp
 
 TO-DO:  Elaborate on all of the above
 
+=== MutatingWebHooks
+
+Injecting of the _Envoy_ sidecar container into a deployment can be done manually or automatically.
+Most of the time, you will prefer automatic injection.
+Among other features, automatic injection of sidecar containers into a deployment requires an OpenShift _Admission Controller_.
+
+An admission controller is a piece of code that intercepts requests to the Kubernetes API server prior to persistence of the object, but after the request is authenticated and authorized. 
+You can define two types of admission webhooks: 
+
+* validating admission Webhook 
++
+With validating admission Webhooks, you may reject requests to enforce custom admission policies. 
+
+* mutating admission webhook
++
+With mutating admission Webhooks, you may change requests to enforce custom defaults.
+
+
+. Impersonate cluster-admin and get a list of _mutatingwebhookconfiguration_ resources on the OpenShift cluster:
++
+-----
+oc get mutatingwebhookconfiguration --as=system:admin
+
+...
+
+istio-sidecar-injector-admin1-istio-system   2019-11-12T15:12:58Z
+istio-sidecar-injector-admin2-istio-system   2019-11-12T15:15:18Z
+-----
+
+. Extract the details of your _mutatingwebhookconfiguration_ specific to your Red Hat Service Mesh installation:
++
+-----
+oc get mutatingwebhookconfiguration istio-sidecar-injector-$RHSM_CONTROL_PLANE_NS -o yaml --as=system:admin > ~/lab/$RHSM_CONTROL_PLANE_NS-mutatingwebhookconfiguration.yaml
+-----
++
+Study the content of the output file `$RHSM_CONTROL_PLANE_NS-mutatingwebhookconfiguration.yaml` and notice the following:
+
+.. The _/inject_ endpoint of the _istio-sidecar-injector_ service from your own service mesh control plane will be invoked when auto-injecting the _Envoy_ service proxy into an application pod.
++
+-----
+    service:
+      name: istio-sidecar-injector
+      namespace: admin50-istio-system
+      path: /inject
+-----
+
+.. The scope of your MutatingWebHook is the namespace of your own service mesh control plane:
++
+-----
+  namespaceSelector:
+    matchExpressions:
+    - key: maistra.io/member-of
+      operator: In
+      values:
+      - admin50-istio-system
+    - key: maistra.io/ignore-namespace
+      operator: DoesNotExist
+-----
 
 
 == Red Hat Service Mesh resources: _mesh-admin_
@@ -243,7 +305,6 @@ The lifecycle of your service mesh _control plane_ is managed by the cluster sco
 oc login -u $SM_CP_ADMIN -p $OCP_PASSWD
 -----
 
-
 . Determine version of Red Hat Service Mesh being used in your lab environment:
 +
 -----
@@ -255,7 +316,6 @@ control plane version: 1.0.1-1
 -----
 +
 NOTE: Red Hat Service Mesh 1.1 is expected to release Jan 29, 2020 and be link:https://issues.jboss.org/projects/OSSM/issues/OSSM-54?filter=allopenissues[based on Istio 1.3 or Istio 1.4].
-
 
 . Notice the existence of the Service Mesh _control plane_ deployments:
 +
@@ -331,9 +391,6 @@ map[]
 +
 In a later lab, you as the service mesh control plane admin will add the namespace where your Emergency Response application resides to this currently empty ServiceMeshMemberRoll.
 
-===  _Control Plane_ settings
-
-TO-DO:  How to view and edit service mesh control plane settings ?
 
 == Emergency Response Demo: _namespace-admin_
 
