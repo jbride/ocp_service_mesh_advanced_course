@@ -78,9 +78,9 @@ Status:
 . Obtain the URL to the Jaeger UI:
 +
 ----
-$ echo -en "\n\n$(oc get route jaeger -o template --template={{.spec.host}} -n $RHSM_CONTROL_PLANE_NS)\n\n"
+$ echo -en "\n\nhttps://$(oc get route jaeger -o template --template={{.spec.host}} -n $RHSM_CONTROL_PLANE_NS)\n\n"
 ----
-. In a browser window, navigate to the Jaeger UI - use HTTPS scheme - and log in with the username and password of the control plane admin user. +
+. In a browser window, navigate to the Jaeger UI and log in with the username and password of the control plane admin user. +
 Expect to see the Jaeger UI home page:
 +
 image::images/jaeger-ui.png[]
