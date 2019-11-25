@@ -386,7 +386,7 @@ In the `.spec.template.metadata` section, add the annotation:
 Alternatively, run the following `oc patch` command:
 +
 ----
-$ oc patch dc $ERDEMO_USER-incident-service --type='json' -p '[{"op": "add", "path": "/spec/template/metadata", "value": {"annotations":{"sidecar.istio.io/inject": "true"}, "labels":{"app":"incident-service","group":"erd-services"}}}]' -n $ER_DEMO_NS
+$ oc patch dc $ERDEMO_USER-incident-service --type='json' -p "[{\"op\": \"add\", \"path\": \"/spec/template/metadata\", \"value\": {\"annotations\":{\"sidecar.istio.io/inject\": \"true\"}, \"labels\":{\"app\":\"$ERDEMO_USER-incident-service\",\"group\":\"erd-services\"}}}]" -n $ER_DEMO_NS
 ----
 +
 This forces a redeployment of the Incident Service. Verify that the Envoy proxy sidecar has been injected sucessfully: the new pod consists of two containers, `incident-service` and `istio-proxy`.
@@ -628,6 +628,10 @@ $ oc patch dc $ERDEMO_USER-responder-service --type='json' -p '[{"op": "remove",
 ----
 
 . Annotate the Responder Service pods with the `sidecar.istio.io/inject: "true"` annotation.
++
+----
+$ oc patch dc $ERDEMO_USER-responder-service --type='json' -p "[{\"op\": \"add\", \"path\": \"/spec/template/metadata\", \"value\": {\"annotations\":{\"sidecar.istio.io/inject\": \"true\"}, \"labels\":{\"app\":\"$ERDEMO_USER-responder-service\",\"group\":\"erd-services\"}}}]" -n $ER_DEMO_NS
+----
 . _Policy_ for the Responder Service service.
 +
 ----
@@ -643,6 +647,10 @@ spec:
   targets:
   - name: $ERDEMO_USER-responder-service
 " > responder-service-policy.yml
+----
++
+----
+$ oc create -f responder-service-policy.yml -n $ER_DEMO_NS
 ----
 
 . _DestinationRule_ for the Responder Service:
@@ -660,7 +668,10 @@ spec:
       mode: ISTIO_MUTUAL
 " > responder-service-mtls-destinationrule.yml
 ----
-
++
+----
+$ oc create -f responder-service-mtls-destinationrule.yml -n $ER_DEMO_NS
+----
 . _VirtualService_ for the Responder Service:
 +
 ----
@@ -689,7 +700,10 @@ spec:
         host: $ERDEMO_USER-responder-service.$ER_DEMO_NS.svc.cluster.local
 " > responder-service-virtualservice.yml
 ----
-
++
+----
+$ oc create -f responder-service-virtualservice.yml -n $ER_DEMO_NS
+----
 . Route for the Responder Service:
 +
 ----
@@ -715,10 +729,19 @@ spec:
   wildcardPolicy: None
 " > responder-service-gateway.yml
 ----
++
+----
+$ oc create -f responder-service-gateway.yml -n $RHSM_CONTROL_PLANE_NS
+----
 . Delete the existing Responder Service route
 +
 ----
 $ oc delete route $ERDEMO_USER-responder-service -n $ER_DEMO_NS
+----
+. To test external access to the Responder Service:
++
+----
+$ curl -v -k https://responder-service.$ERDEMO_USER.apps.$SUBDOMAIN_BASE/responders/available
 ----
 
 === Disaster Simulator
@@ -761,6 +784,10 @@ Alternatively, run the following `oc patch` command:
 $ oc patch dc $ERDEMO_USER-disaster-simulator --type='json' -p '[{"op": "remove", "path": "/spec/template/spec/containers/0/livenessProbe/httpGet"}, {"op": "add", "path": "/spec/template/spec/containers/0/livenessProbe", "value": { "exec": { "command" : ["curl", "http://127.0.0.1:8080"]}, "initialDelaySeconds": 10, "timeoutSeconds": 1, "periodSeconds": 10, "successThreshold": 1, "failureThreshold": 3}}, {"op": "remove", "path": "/spec/template/spec/containers/0/readinessProbe/httpGet"}, {"op": "add", "path": "/spec/template/spec/containers/0/readinessProbe", "value": { "exec": { "command" : ["curl", "http://127.0.0.1:8080"]},"initialDelaySeconds": 10, "timeoutSeconds": 1, "periodSeconds": 10, "successThreshold": 1, "failureThreshold": 3}}]' -n $ER_DEMO_NS
 ----
 . Annotate the Disaster Simulator pods with the `sidecar.istio.io/inject: "true"` annotation.
++
+----
+$ oc patch dc $ERDEMO_USER-disaster-simulator --type='json' -p "[{\"op\": \"add\", \"path\": \"/spec/template/metadata\", \"value\": {\"annotations\":{\"sidecar.istio.io/inject\": \"true\"}, \"labels\":{\"app\":\"$ERDEMO_USER-disaster-simulator\",\"group\":\"erd-services\"}}}]" -n $ER_DEMO_NS
+----
 . _Policy_ for the Disaster Simulator service.
 +
 ----
@@ -777,6 +804,10 @@ spec:
   - name: $ERDEMO_USER-disaster-simulator
 " > disaster-simulator-policy.yml
 ----
++
+----
+$ oc create -f disaster-simulator-policy.yml -n $ER_DEMO_NS
+----
 
 . _DestinationRule_ for the Disaster Simulator Service:
 +
@@ -792,6 +823,10 @@ spec:
     tls:
       mode: ISTIO_MUTUAL
 " > disaster-simulator-mtls-destinationrule.yml
+----
++
+----
+$ oc create -f disaster-simulator-mtls-destinationrule.yml -n $ER_DEMO_NS
 ----
 
 . _VirtualService_ for the Responder Service:
@@ -817,6 +852,10 @@ spec:
           number: 8080
         host: $ERDEMO_USER-disaster-simulator.$ER_DEMO_NS.svc.cluster.local
 " > disaster-simulator-virtualservice.yml
+----
++
+----
+$ oc create -f disaster-simulator-virtualservice.yml -n $ER_DEMO_NS
 ----
 
 . Route for the Disaster Simulator:
@@ -844,10 +883,21 @@ spec:
   wildcardPolicy: None
 " > disaster-simulator-gateway.yml
 ----
++
+----
+$ oc create -f disaster-simulator-gateway.yml -n $RHSM_CONTROL_PLANE_NS
+----
+
 . Delete the existing Disaster Simulator route
 +
 ----
 $ oc delete route $ERDEMO_USER-disaster-simulator -n $ER_DEMO_NS
+----
+
+. To test external access to the Disaster Simulator:
++
+----
+$ curl -v -k https://disaster-simulator.$ERDEMO_USER.apps.$SUBDOMAIN_BASE
 ----
 
 === Incident Priority Service
@@ -890,6 +940,10 @@ Alternatively, run the following `oc patch` command:
 $ oc patch dc $ERDEMO_USER-incident-priority-service --type='json' -p '[{"op": "remove", "path": "/spec/template/spec/containers/0/livenessProbe/httpGet"}, {"op": "add", "path": "/spec/template/spec/containers/0/livenessProbe", "value": { "exec": { "command" : ["curl", "http://127.0.0.1:8080/health"]}, "initialDelaySeconds": 30, "timeoutSeconds": 3, "periodSeconds": 30, "successThreshold": 1, "failureThreshold": 3}}, {"op": "remove", "path": "/spec/template/spec/containers/0/readinessProbe/httpGet"}, {"op": "add", "path": "/spec/template/spec/containers/0/readinessProbe", "value": { "exec": { "command" : ["curl", "http://127.0.0.1:8080/health"]},"initialDelaySeconds": 10, "timeoutSeconds": 3, "periodSeconds": 30, "successThreshold": 1, "failureThreshold": 3}}]' -n $ER_DEMO_NS
 ----
 . Annotate the Incident Priority Service pods with the `sidecar.istio.io/inject: "true"` annotation.
++
+----
+$ oc patch dc $ERDEMO_USER-incident-priority-service --type='json' -p "[{\"op\": \"add\", \"path\": \"/spec/template/metadata\", \"value\": {\"annotations\":{\"sidecar.istio.io/inject\": \"true\"}, \"labels\":{\"app\":\"$ERDEMO_USER-incident-priority-service\",\"group\":\"erd-services\"}}}]" -n $ER_DEMO_NS
+----
 . _Policy_ for the Incident Priority Service.
 +
 ----
@@ -906,7 +960,10 @@ spec:
   - name: incident-priority-service
 " > incident-priority-service-policy.yml
 ----
-
++
+----
+$ oc create -f incident-priority-service-policy.yml -n $ER_DEMO_NS
+----
 . _DestinationRule_ for the Incident Priority Service:
 +
 ----
@@ -920,7 +977,11 @@ spec:
   trafficPolicy:
     tls:
       mode: ISTIO_MUTUAL
-" > incident-priority-service-mtls-destionationrule.yml"
+" > incident-priority-service-mtls-destinationrule.yml
+----
++
+----
+$ oc create -f incident-priority-service-mtls-destinationrule.yml -n $ER_DEMO_NS
 ----
 
 . _VirtualService_ for the Incident Priority Service:
@@ -949,6 +1010,10 @@ spec:
         host: $ERDEMO_USER-incident-priority-service.$ER_DEMO_NS.svc.cluster.local
 " > incident-priority-service-virtualservice.yml
 ----
++
+----
+$ oc create -f incident-priority-service-virtualservice.yml -n $ER_DEMO_NS
+----
 
 . Route for the Incident Priority Service:
 +
@@ -975,15 +1040,26 @@ spec:
   wildcardPolicy: None
 " > incident-priority-service-gateway.yml
 ----
++
+----
+$ oc create -f incident-priority-service-gateway.yml -n $RHSM_CONTROL_PLANE_NS
+----
+
 . Delete the existing Incident Priority Service route
 +
 ----
 $ oc delete route $ERDEMO_USER-incident-priority-service -n $ER_DEMO_NS
 ----
 
+. To test external access to the Incident Priority Service:
++
+----
+$ curl -v -k https://incident-priority-service.$ERDEMO_USER.apps.$SUBDOMAIN_BASE/priority/qwerty
+----
+
 === Process Service
 
-The process service is not exposed outside of the cluster, so there is no need for a VirtualService and route.
+The process service is not exposed outside of the cluster, so there is no need for a VirtualService and Route.
 
 . Replace the health checks in the Process Service DeploymentConfig to use a command based health check with curl rather than a HTTP based health check.
 +
@@ -1023,6 +1099,10 @@ Alternatively, run the following `oc patch` command:
 $ oc patch dc $ERDEMO_USER-process-service --type='json' -p '[{"op": "remove", "path": "/spec/template/spec/containers/0/livenessProbe/httpGet"}, {"op": "add", "path": "/spec/template/spec/containers/0/livenessProbe", "value": { "exec": { "command" : ["curl", "http://127.0.0.1:8080/acuator/health"]},"initialDelaySeconds": 60, "timeoutSeconds": 3, "periodSeconds": 30, "successThreshold": 1, "failureThreshold": 3}}, {"op": "remove", "path": "/spec/template/spec/containers/0/readinessProbe/httpGet"}, {"op": "add", "path": "/spec/template/spec/containers/0/readinessProbe", "value": { "exec": { "command" : ["curl", "http://127.0.0.1:8080/actuator/health"]},"initialDelaySeconds": 45, "timeoutSeconds": 3, "periodSeconds": 30, "successThreshold": 1, "failureThreshold": 3}}]' -n $ER_DEMO_NS
 ----
 . Annotate the Process Service pods with the `sidecar.istio.io/inject: "true"` annotation.
++
+----
+$ oc patch dc $ERDEMO_USER-process-service --type='json' -p "[{\"op\": \"add\", \"path\": \"/spec/template/metadata\", \"value\": {\"annotations\":{\"sidecar.istio.io/inject\": \"true\"}, \"labels\":{\"app\":\"$ERDEMO_USER-process-service\",\"group\":\"erd-services\"}}}]" -n $ER_DEMO_NS
+----
 . _Policy_ for the Process Service service.
 +
 ----
@@ -1039,6 +1119,10 @@ spec:
   - name: process-service
 " > process-service-policy.yml
 ----
++
+----
+$ oc create -f process-service-policy.yml -n $ER_DEMO_NS
+----
 
 . _DestinationRule_ for the Process Service:
 +
@@ -1054,6 +1138,10 @@ spec:
     tls:
       mode: ISTIO_MUTUAL
 " > process-service-mtls-destinationrule.yml
+----
++
+----
+$ oc create -f process-service-mtls-destinationrule.yml -n $ER_DEMO_NS
 ----
 
 === Mission Service
@@ -1096,6 +1184,10 @@ Alternatively, run the following `oc patch` command:
 $ oc patch dc $ERDEMO_USER-mission-service --type='json' -p '[{"op": "remove", "path": "/spec/template/spec/containers/0/livenessProbe/httpGet"}, {"op": "add", "path": "/spec/template/spec/containers/0/livenessProbe", "value": { "exec": { "command" : ["curl", "http://127.0.0.1:8080"]},"initialDelaySeconds": 10, "timeoutSeconds": 1, "periodSeconds": 10, "successThreshold": 1, "failureThreshold": 3}}, {"op": "remove", "path": "/spec/template/spec/containers/0/readinessProbe/httpGet"}, {"op": "add", "path": "/spec/template/spec/containers/0/readinessProbe", "value": { "exec": { "command" : ["curl", "http://127.0.0.1:8080"]},"initialDelaySeconds": 10, "timeoutSeconds": 1, "periodSeconds": 10, "successThreshold": 1, "failureThreshold": 3}}]' -n $ER_DEMO_NS
 ----
 . Annotate the Mission Service pods with the `sidecar.istio.io/inject: "true"` annotation.
++
+----
+$ oc patch dc $ERDEMO_USER-mission-service --type='json' -p "[{\"op\": \"add\", \"path\": \"/spec/template/metadata\", \"value\": {\"annotations\":{\"sidecar.istio.io/inject\": \"true\"}, \"labels\":{\"app\":\"$ERDEMO_USER-mission-service\",\"group\":\"erd-services\"}}}]" -n $ER_DEMO_NS
+----
 . _Policy_ for the Mission Service service.
 +
 ----
@@ -1112,6 +1204,10 @@ spec:
   - name: mission-service
 " > mission-service-policy.yml
 ----
++
+----
+$ oc create -f mission-service-policy.yml -n $ER_DEMO_NS
+----
 
 . _DestinationRule_ for the Mission Service:
 +
@@ -1127,6 +1223,10 @@ spec:
     tls:
       mode: ISTIO_MUTUAL
 " > mission-service-mtls-destinationrule.yml
+----
++
+----
+$ oc create -f mission-service-mtls-destinationrule.yml -n $ER_DEMO_NS
 ----
 
 . _VirtualService_ for the Mission Service:
@@ -1152,6 +1252,10 @@ spec:
           number: 8080
         host: $ERDEMO_USER-mission-service.$ER_DEMO_NS.svc.cluster.local
 " > mission-service-virtualservice.yml
+----
++
+----
+$ oc create -f mission-service-virtualservice.yml -n $ER_DEMO_NS
 ----
 
 . Route for the Mission Service:
@@ -1179,10 +1283,21 @@ spec:
   wildcardPolicy: None
 " > mission-service-gateway.yml
 ----
++
+----
+$ oc create -f mission-service-gateway.yml -n $RHSM_CONTROL_PLANE_NS
+----
+
 . Delete the existing Mission Service route:
 +
 ----
 $ oc delete route $ERDEMO_USER-mission-service -n $ER_DEMO_NS
+----
+
+. To test external access to the Incident Priority Service:
++
+----
+$ curl -v -k https://mission-service.$ERDEMO_USER.apps.$SUBDOMAIN_BASE/api/missions
 ----
 
 === Responder Simulator
@@ -1226,6 +1341,11 @@ $ oc patch dc $ERDEMO_USER-responder-simulator --type='json' -p '[{"op": "remove
 ----
 
 . Annotate the Responder Simulator pods with the `sidecar.istio.io/inject: "true"` annotation.
++
+----
+$ oc patch dc $ERDEMO_USER-responder-simulator --type='json' -p "[{\"op\": \"add\", \"path\": \"/spec/template/metadata\", \"value\": {\"annotations\":{\"sidecar.istio.io/inject\": \"true\"}, \"labels\":{\"app\":\"$ERDEMO_USER-responder-simulator\",\"group\":\"erd-services\"}}}]" -n $ER_DEMO_NS
+----
+
 . _Policy_ for the Responder Simulator service.
 +
 ----
@@ -1242,6 +1362,10 @@ spec:
   - name: responder-simulator
 " > responder-simulator-policy.yml
 ----
++
+----
+$ oc create -f responder-simulator-policy.yml -n $ER_DEMO_NS
+----
 
 . _DestinationRule_ for the Responder Simulator:
 +
@@ -1257,6 +1381,10 @@ spec:
     tls:
       mode: ISTIO_MUTUAL
 " > responder-simulator-mtls-destinationrule.yml
+----
++
+----
+$ oc create -f responder-simulator-mtls-destinationrule.yml -n $ER_DEMO_NS
 ----
 
 . _VirtualService_ for the Responder Simulator:
@@ -1282,6 +1410,10 @@ spec:
           number: 8080
         host: $ERDEMO_USER-responder-simulator.$ER_DEMO_NS.svc.cluster.local
 " > responder-simulator-virtualservice.yml
+----
++
+----
+$ oc create -f responder-simulator-virtualservice.yml -n $ER_DEMO_NS
 ----
 
 . Route for the Responder Simulator:
@@ -1309,10 +1441,21 @@ spec:
   wildcardPolicy: None
 " > responder-simulator-gateway.yml
 ----
++
+----
+$ oc create -f responder-simulator-gateway.yml -n $RHSM_CONTROL_PLANE_NS
+----
+
 . Delete the existing Responder Simulator route
 +
 ----
 $ oc delete route $ERDEMO_USER-responder-simulator -n $ER_DEMO_NS
+----
+
+. To test external access to the Responder Simulator:
++
+----
+$ curl -v -k https://responder-simulator.$ERDEMO_USER.apps.$SUBDOMAIN_BASE/stats/mc
 ----
 
 === Process Viewer
@@ -1356,6 +1499,11 @@ $ oc patch dc $ERDEMO_USER-process-viewer --type='json' -p '[{"op": "remove", "p
 ----
 
 . Annotate the Process Viewer pods with the `sidecar.istio.io/inject: "true"` annotation.
++
+----
+$ oc patch dc $ERDEMO_USER-process-viewer --type='json' -p "[{\"op\": \"add\", \"path\": \"/spec/template/metadata\", \"value\": {\"annotations\":{\"sidecar.istio.io/inject\": \"true\"}, \"labels\":{\"app\":\"$ERDEMO_USER-process-viewer\"}}}]" -n $ER_DEMO_NS
+----
+
 . _Policy_ for the Process Viewer service.
 +
 ----
@@ -1372,6 +1520,10 @@ spec:
   - name: process-viewer
 " > process-viewer-policy.yml
 ----
++
+----
+$ oc create -f process-viewer-policy.yml -n $ER_DEMO_NS
+----
 
 . _DestinationRule_ for Process Viewer:
 +
@@ -1387,6 +1539,10 @@ spec:
     tls:
       mode: ISTIO_MUTUAL
 " > process-viewer-mtls-destinationrule.yml
+----
++
+----
+$ oc create -f process-viewer-mtls-destinationrule.yml -n $ER_DEMO_NS
 ----
 
 . _VirtualService_ for Process Viewer:
@@ -1415,6 +1571,10 @@ spec:
         host: $ERDEMO_USER-process-viewer.$ER_DEMO_NS.svc.cluster.local
 " > process-viewer-virtualservice.yml
 ----
++
+----
+$ oc create -f process-viewer-virtualservice.yml -n $ER_DEMO_NS
+----
 
 . Route for Process Viewer:
 +
@@ -1441,10 +1601,21 @@ spec:
   wildcardPolicy: None
 " > process-viewer-gateway.yml
 ----
++
+----
+$ oc create -f process-viewer-gateway.yml -n $RHSM_CONTROL_PLANE_NS
+----
+
 . Delete the existing Process Viewer route
 +
 ----
 $ oc delete route $ERDEMO_USER-process-viewer -n $ER_DEMO_NS
+----
+
+. To test external access to the Incident Priority Service:
++
+----
+$ curl -v -k https://process-viewer.$ERDEMO_USER.apps.$SUBDOMAIN_BASE/image/process/incident-process
 ----
 
 === Emergency Console
@@ -1488,6 +1659,11 @@ $ oc patch dc $ERDEMO_USER-emergency-console --type='json' -p '[{"op": "remove",
 ----
 
 . Annotate the Emergency Console pods with the `sidecar.istio.io/inject: "true"` annotation.
++
+----
+$ oc patch dc $ERDEMO_USER-emergency-console --type='json' -p "[{\"op\": \"add\", \"path\": \"/spec/template/metadata\", \"value\": {\"annotations\":{\"sidecar.istio.io/inject\": \"true\"}, \"labels\":{\"app\":\"$ERDEMO_USER-emergency-console\"}}}]" -n $ER_DEMO_NS
+----
+
 . _Policy_ for the Emergency Console service.
 +
 ----
@@ -1504,6 +1680,10 @@ spec:
   - name: emergency-console
 " > emergency-console-policy.yml
 ----
++
+----
+$ oc create -f emergency-console-policy.yml -n $ER_DEMO_NS
+----
 
 . _DestinationRule_ for Emergency Console:
 +
@@ -1519,6 +1699,10 @@ spec:
     tls:
       mode: ISTIO_MUTUAL
 " > emergency-console-mtls-destinationrule.yml
+----
++
+----
+$ oc create -f emergency-console-mtls-destinationrule.yml -n $ER_DEMO_NS
 ----
 
 . _VirtualService_ for Emergency Console:
@@ -1544,6 +1728,10 @@ spec:
           number: 8080
         host: $ERDEMO_USER-emergency-console.$ER_DEMO_NS.svc.cluster.local
 " > emergency-console-virtualservice.yml
+----
++
+----
+$ oc create -f emergency-console-virtualservice.yml -n $ER_DEMO_NS
 ----
 
 . Route for Emergency Console:
@@ -1571,20 +1759,33 @@ spec:
   wildcardPolicy: None
 " > emergency-console-gateway.yml
 ----
++
+----
+$ oc create -f emergency-console-gateway.yml -n $RHSM_CONTROL_PLANE_NS
+----
+
 . Delete the existing Emergency Console route
 +
 ----
 $ oc delete route $ERDEMO_USER-emergency-console -n $ER_DEMO_NS
 ----
 
-. The redirect URL in the `emergency-realm` in the SSO service needs to be changed. +
-Log in into the Red Hat SSO instance administration console, and navigate to the realm corresponding to your Emergency Response Demo deployment (`$ERDEMO_USER-emergency-realm`), and then to the `js` client. In the _Valid Redirect URIs_ section, remove the existing redirect URL for Emergency Console, and add the new URL for the Emergency Console:
+. The redirect URL in the `emergency-realm` in the SSO ionstance needs to be changed.
+* Obtain the URL for the administration console of the SSO instance:
++
+----
+$ echo -en "\n\nhttps://sso-user-sso.apps.$SUBDOMAIN_BASE/auth/admin/$ERDEMO_USER-emergency-realm/console\n\n"
+----
+* In a browser window, navigate to the SSO console. Use the username and password you used to register in the Emergency Response application. +
+You are directed to the administration section of your realm.
+* Open the _Clients_ tab and open the settings for the `js` client.
+* In the _Valid Redirect URIs_ section, remove the existing redirect URL for Emergency Console, and add the new URL for the Emergency Console:
 +
 ----
 https://emergency-console.$ERDEMO_USER.apps.$SUBDOMAIN_BASE/*
 ----
-+
-IMPORTANT: user access to sso administration console
+
+. Test access to the Emergency Console in a browser window. Use the URL `https:emergency-console.$ERDEMO_USER.apps.$SUBDOMAIN_BASE`.
 
 === PostgreSQL
 
@@ -1592,6 +1793,10 @@ Service Mesh mTLS can also be enabled for TCP traffic. The Incident Service, Res
 
 . Scale down the Incident Service and Responder Service pods to 0 pods
 . Annotate the PostgreSQL pod with the `sidecar.istio.io/inject: "true"` annotation.
++
+----
+$ oc patch dc postgresql --type='json' -p "[{\"op\": \"add\", \"path\": \"/spec/template/metadata\", \"value\": {\"annotations\":{\"sidecar.istio.io/inject\": \"true\"}, \"labels\":{\"app\":\"postgresql\", \"name\":\"postgresql\"}}}]" -n $ER_DEMO_NS
+----
 
 . _Policy_ for the PostgresQL service.
 +
@@ -1609,6 +1814,10 @@ spec:
   - name: postgresql
 " > postgresql-policy.yml
 ----
++
+----
+$ oc create -f postgresql-policy.yml -n $ER_DEMO_NS
+----
 
 . _DestinationRule_ for PostgreSQL:
 +
@@ -1625,6 +1834,10 @@ spec:
       mode: ISTIO_MUTUAL
 " > postgresql-mtls-destinationrule.yml
 ----
++
+----
+$ oc create -f postgresql-mtls-destinationrule.yml -n $ER_DEMO_NS
+----
 
 . After successful redeployment of the PostgreSQL pods, scale up the Incident Service and Responder Service.
 
@@ -1632,6 +1845,10 @@ spec:
 
 . Scale down the Process Service to 0 pods
 . Annotate the Process Service PostgreSQL pod with the `sidecar.istio.io/inject: "true"` annotation.
++
+----
+$ oc patch dc $ERDEMO_USER-process-service-postgresql --type='json' -p "[{\"op\": \"add\", \"path\": \"/spec/template/metadata\", \"value\": {\"annotations\":{\"sidecar.istio.io/inject\": \"true\"}, \"labels\":{\"app\":\"$ERDEMO_USER-process-service\", \"name\":\"$ERDEMO_USER-process-service-postgresql\"}}}]" -n $ER_DEMO_NS
+----
 
 . _Policy_ for the Process Service PostgresQL service.
 +
@@ -1684,7 +1901,7 @@ With strict mTLS enforced, the Prometheus pod in the `emergency-response-monitor
 Adding the `emergency-response-monitoring` namespace to the service mesh and injecting the Envoy proxy in the prometheus pod does not work: scraping targets for Prometheus are pod IPs, not service names. The Envoy proxy does not process the traffic properly when directed to a pod IP instead of a service URL. +
 Possible solutions: +
 - Applications expose Prometheus metrics on a separate port, and TLS is disabled for that port in the DestinationRule. +
-- Applications expose Prometheus metrics on a separate port,  and that port is configured for pass-through in the Servie Mesh proxy init container (which sets up the networking in the pod so that all traffic is intercepted by the proxy side-car). This is a mesh-wide setting, so all appication services must use the same port. Also it seems not possible to configure the init-container settings using the Service Mesh CR.
+- Applications expose Prometheus metrics on a separate port,  and that port is configured for pass-through in the Service Mesh proxy init container (which sets up the networking in the pod so that all traffic is intercepted by the proxy side-car). This is a mesh-wide setting, so all application services must use the same port. Also it seems not possible to configure the init-container settings using the Service Mesh CR.
 
 NOTE: When using mTLS to the Postgresql database, the Process Service does not always start correctly, and frequently shows database errors in the logs: +
 `org.postgresql.util.PSQLException: An I/O error occurred while sending to the backend.` +
@@ -1693,7 +1910,7 @@ This error requires further investigation.
 
 NOTE: The communication beween the Mission Service and the Datagrid is not managed by the service mesh. There are several bug reports about Istio mTLS not working with StatefulSets. Also, the communication between the mission service and the datagrid uses the HotRod protocol, with support for transport level security.
 
-NOTE: The communication beween the services and Kafka is not managed by the service mesh. Strimzi/kafka has its own security mechanisms, including transport security and authentication/authorization. 
+NOTE: The communication beween the services and Kafka is not managed by the service mesh. Strimzi/Kafka has its own security mechanisms, including transport security and authentication/authorization. 
 
 == Authorization Policy for Services
 
@@ -1978,7 +2195,7 @@ In this lab you will secure the Ingress Gateway service with JWT. You will use R
 ** Obtain the URL for the administration console of the SSO instance:
 +
 ----
-$ echo "https://sso-user-sso.$SUBDOMAIN_BASE//auth/admin/$ERDEMO_USER-emergency-realm/console"
+$ $ echo -en "\n\nhttps://sso-user-sso.apps.$SUBDOMAIN_BASE/auth/admin/$ERDEMO_USER-emergency-realm/console\n\n"
 ----
 ** In a browser window, navigate to the SSO console. Use the username and password you used to register in the Emergency Response application. +
 You are directed to the administration section of your realm.
