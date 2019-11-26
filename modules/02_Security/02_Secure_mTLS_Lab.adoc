@@ -940,7 +940,7 @@ spec:
   - mtls:
       mode: PERMISSIVE
   targets:
-  - name: incident-priority-service
+  - name: $ERDEMO_USER-incident-priority-service
 " > incident-priority-service-policy.yml
 ----
 +
@@ -1099,7 +1099,7 @@ spec:
   - mtls:
       mode: PERMISSIVE
   targets:
-  - name: process-service
+  - name: $ERDEMO_USER-process-service
 " > process-service-policy.yml
 ----
 +
@@ -1184,7 +1184,7 @@ spec:
   - mtls:
       mode: PERMISSIVE
   targets:
-  - name: mission-service
+  - name: $ERDEMO_USER-mission-service
 " > mission-service-policy.yml
 ----
 +
@@ -1342,7 +1342,7 @@ spec:
   - mtls:
       mode: PERMISSIVE
   targets:
-  - name: responder-simulator
+  - name: $ERDEMO_USER-responder-simulator
 " > responder-simulator-policy.yml
 ----
 +
@@ -1500,7 +1500,7 @@ spec:
   - mtls:
       mode: PERMISSIVE
   targets:
-  - name: process-viewer
+  - name: $ERDEMO_USER-process-viewer
 " > process-viewer-policy.yml
 ----
 +
@@ -1660,7 +1660,7 @@ spec:
   - mtls:
       mode: PERMISSIVE
   targets:
-  - name: emergency-console
+  - name: $ERDEMO_USER-emergency-console
 " > emergency-console-policy.yml
 ----
 +
