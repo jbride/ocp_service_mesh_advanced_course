@@ -16,23 +16,6 @@
 * Enable transport security (mTLS) for inter-service communication in Emergency Response Demo app
 * Set authorization policies for inter-service communication in Emergency Response Demo
 
-[IMPORTANT]
-.Revisited lab flow
-====
-Lab flow:
-
-. global mTLS settings: verify/adjust
-. ingress certificate and ingress wildcard gateway
-* add procedure for creating self-signed certificate
-. enable mTLS on Emergency response services
-. enable mTLS on other services - considerations
-. strict mTLS - considerations
-. authorization policies
-
-====
-
-IMPORTANT: In real life, the tasks described here will have to be done partially by the controlplane admin, partially by the application owner. Switching between users is tedious, so suggest to perform all tasks as controlplane admin user.
-
 :numbered:
 
 == Red Hat Service Mesh Control Plane Installation Review
