@@ -549,7 +549,7 @@ $ curl -v -k https://incident-service.$ERDEMO_USER.apps.$SUBDOMAIN_BASE/incident
 +
 ----
 $ ISTIO_INGRESSGATEWAY_POD=$(oc get pod -l app=istio-ingressgateway -o jsonpath={.items.metadata.name} -n $RHSM_CONTROL_PLANE_NS)
-$ istioctl -n $RHSM_CONTROL_PLANE_NS authn tls-check ${ISTIO_INGRESSGATEWAY_POD} $ERDEMO_USER-incident-service.$ER_DEMO_NS.svc.cluster.local
+$ istioctl -n $RHSM_CONTROL_PLANE_NS -i $RHSM_CONTROL_PLANE_NS authn tls-check ${ISTIO_INGRESSGATEWAY_POD} $ERDEMO_USER-incident-service.$ER_DEMO_NS.svc.cluster.local
 ----
 +
 .Sample Output
