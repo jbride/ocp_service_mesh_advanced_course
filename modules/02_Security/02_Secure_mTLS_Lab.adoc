@@ -6,13 +6,11 @@
 == Istio Security: mTLS and authorization policies
 
 .Prerequisites
-
 * Access to OpenShift 4.x cluster
 * Istio Controlplane installed and ready.
 * Emergency Response Demo installed.
 
 .Goals
-
 * Enable transport security (mTLS) for inter-service communication in Emergency Response Demo app
 * Set authorization policies for inter-service communication in Emergency Response Demo
 
@@ -302,8 +300,8 @@ In this part of the lab you will configure the different services of the Emergen
 Enabling mTLS for the Incident Service involves the following tasks:
 
 * Inject the Envoy proxy sidecar container into the Incident Service pod  - only needed if this was not yet done in a previous lab.
-* Create a DestinationRule and Policy to enforce mTLS when calling the Incident Service.
-* Create a VirtualService and a Route for external access to the Incident Service through the Istio Ingress Gateway.
+* Create a _DestinationRule_ and _Policy_ to enforce mTLS when calling the Incident Service.
+* Create a _VirtualService_ and a _Route_ for external access to the Incident Service through the Istio Ingress Gateway.
 
 {empty} +
 
