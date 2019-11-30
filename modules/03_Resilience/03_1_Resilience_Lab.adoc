@@ -1,0 +1,634 @@
+:noaudio:
+:scrollbar:
+:toc2:
+:linkattrs:
+
+== Istio Reliability: Retries, Timeouts and Circuit Breaker
+
+.Goals
+* Understand Istio features for Reliability.
+* Understand retries, timeouts, circuit breaker and outlier detection.
+
+:numbered:
+
+== Introduction
+
+A resilient system is one that can maintain good performance for its users  while coping with failures in the downstream systems on which it depends. +
+Red Hat Service Mesh provides a lot of features to help build more resilient applications; most important being client-side load balancing, circuit breaking via outlier detection, automatic retry, and request timeouts. +
+Red Hat Service Mesh also provides tools to inject faults into applications, allowing you to build programmatic, reproducible tests of your system’s resiliency.
+
+Without a service mesh, it is typically up to each microservice application itself to provide resiliency, by implementing circuit-breakers and handling timeouts when calling upstream services. In the Java world, Hystrix (part of the Netflix OSS suite of libraries) is a popular library for adding circuit-breaker functionalily to an application. MicroProfile Fault Tolerance provides equivalent functionality for MicroProfile applications. 
+
+Needless to say that having to explicitly build in circuit breakers and other resiliency related functionality (like handling of timeouts) places an extra burden on the application developer. The Service Mesh can take over a major part of that burden. 
+
+== Retries
+
+In this section of the lab you will get familiar with some of the Service mesh functionalities for automatic retries.
+
+For the following lab exercises you will use a slightly modified version of the Incident Priority Service which allows injection of return error code and delays.
+
+. Make sure you are logged in as the application owner user.
++
+----
+$ oc login -u $ERDEMO_USER
+----
+. Redeploy the Incident Priority Service using an image with the fault injection code.
++
+----
+$ oc patch dc $ERDEMO_USER-incident-priority-service -p "{\"spec\":{\"triggers\":[{\"type\": \"ConfigChange\"},{\"type\": \"ImageChange\",\"imageChangeParams\": {\"automatic\": true, \"containerNames\":[\"$ERDEMO_USER-incident-priority-service\"], \"from\": {\"kind\": \"ImageStreamTag\", \"namespace\": \"$ER_DEMO_NS\", \"name\": \"$ERDEMO_USER-incident-priority-service:1.0.0-fault\"}}}]}}" -n $ER_DEMO_NS
+----
++
+This will cause a redeployment of the Incident Priority Service. Wait until the service is redeployed successfully.
+. Scale up the number pods of the Incident Priority Service to three:
++
+----
+$ oc scale dc $ERDEMO_USER-incident-priority-service --replicas=3 -n $ER_DEMO_NS
+----
+. Find the name of one of the pods of the Incident Priority Service:
++
+----
+$ INCIDENT_PRIORITY_SERVICE_POD=$(oc get pods -n $ER_DEMO_NS|grep Running|grep $ERDEMO_USER-incident-priority-service.*|awk '{ print $1 }'|head -1)
+----
+. Using `oc exec`, obtain a bash prompt inside the service container:
++
+----
+$ oc exec -it $INCIDENT_PRIORITY_SERVICE_POD -n $ER_DEMO_NS -c $ERDEMO_USER-incident-priority-service /bin/bash 
+----
+. In the container, execute the following _curl_ command to have the service return a HTTP 503 return code when called over its REST APIs:
++
+----
+$ curl -X POST -d '{"error":503,"percentage":100}' http://127.0.0.1:9080/inject
+----
+. Verify that a call to the `priority/{incidentId}` endpoint returns a 503 return code:
++
+----
+$ curl -s -w %{http_code} --output /dev/null http://127.0.0.1:8080/priority/qwerty
+----
++
+.Expected Output
+----
+503
+----
+. Type `exit` to quit the container.
+. Perform a number of REST calls to the `priority/{incidentId}` endpoint of Incident Priority Service.
+* Using _curl_, execute the following command:
++
+----
+$ while :; do curl -k -s -w %{http_code} --output /dev/null https://incident-priority-service.$ERDEMO_USER.apps.$SUBDOMAIN_BASE/priority/qwerty; echo "";sleep .1; done
+----
++
+.Sample Output
+----
+200
+200
+200
+200
+200
+200
+[...]
+200
+200
+200
+^C
+----
+* If you have _siege_ installed on your system, you can use the following command:
++
+----
+$ siege -r 10 -c 1 -v https://incident-priority-service.$ERDEMO_USER.apps.$SUBDOMAIN_BASE/priority/qwerty
+----
++
+.Sample Output
+----
+** SIEGE 4.0.4
+** Preparing 1 concurrent users for battle.
+The server is now under siege...
+HTTP/1.1 200     0.12 secs:      64 bytes ==> GET  /priority/qwerty
+HTTP/1.1 200     0.13 secs:      65 bytes ==> GET  /priority/qwerty
+HTTP/1.1 200     0.12 secs:      64 bytes ==> GET  /priority/qwerty
+HTTP/1.1 200     0.12 secs:      64 bytes ==> GET  /priority/qwerty
+HTTP/1.1 200     0.11 secs:      64 bytes ==> GET  /priority/qwerty
+HTTP/1.1 200     0.12 secs:      65 bytes ==> GET  /priority/qwerty
+HTTP/1.1 200     0.13 secs:      64 bytes ==> GET  /priority/qwerty
+HTTP/1.1 200     0.12 secs:      64 bytes ==> GET  /priority/qwerty
+HTTP/1.1 200     0.12 secs:      65 bytes ==> GET  /priority/qwerty
+HTTP/1.1 200     0.13 secs:      64 bytes ==> GET  /priority/qwerty
+
+Transactions:                     10 hits
+Availability:                 100.00 %
+Elapsed time:                  11.24 secs
+Data transferred:               0.00 MB
+Response time:                  0.12 secs
+Transaction rate:               0.89 trans/sec
+Throughput:                     0.00 MB/sec
+Concurrency:                    0.11
+Successful transactions:          10
+Failed transactions:               0
+Longest transaction:            0.13
+Shortest transaction:           0.11
+----
++
+NOTE: On Fedora you can install siege with `# dnf install siege`.
+. Notice that all the calls succeed, even though 33% of the requests return a 503 return code. +
+This is a result of the automatic retry feature of the Service Mesh. Whenever a call returns a 503, the Envoy proxy will execute a retry targeting one of the other pods of the target service. +
+Verify that the faulty container has indeed been called:
++
+----
+$ oc logs -f $INCIDENT_PRIORITY_SERVICE_POD -n $ER_DEMO_NS
+----
++
+.Sample output
+----
+2019-11-28 16:55:28.812  INFO   --- [ntloop-thread-6] c.r.c.n.i.priority.RestApiVerticle       : Incoming Request
+2019-11-28 16:55:28.812  INFO   --- [ntloop-thread-6] c.r.c.n.i.priority.RestApiVerticle       : Returning error code 503
+2019-11-28 16:55:29.283  INFO   --- [ntloop-thread-6] c.r.c.n.i.priority.RestApiVerticle       : Incoming Request
+2019-11-28 16:55:29.283  INFO   --- [ntloop-thread-6] c.r.c.n.i.priority.RestApiVerticle       : Returning error code 503
+2019-11-28 16:55:29.983  INFO   --- [ntloop-thread-6] c.r.c.n.i.priority.RestApiVerticle       : Incoming Request
+2019-11-28 16:55:29.983  INFO   --- [ntloop-thread-6] c.r.c.n.i.priority.RestApiVerticle       : Returning error code 503
+2019-11-28 16:55:30.460  INFO   --- [ntloop-thread-6] c.r.c.n.i.priority.RestApiVerticle       : Incoming Request
+2019-11-28 16:55:30.460  INFO   --- [ntloop-thread-6] c.r.c.n.i.priority.RestApiVerticle       : Returning error code 503
+2019-11-28 16:55:30.921  INFO   --- [ntloop-thread-6] c.r.c.n.i.priority.RestApiVerticle       : Incoming Request
+2019-11-28 16:55:30.921  INFO   --- [ntloop-thread-6] c.r.c.n.i.priority.RestApiVerticle       : Returning error code 503
+2019-11-28 16:55:31.169  INFO   --- [ntloop-thread-6] c.r.c.n.i.priority.RestApiVerticle       : Incoming Request
+2019-11-28 16:55:31.169  INFO   --- [ntloop-thread-6] c.r.c.n.i.priority.RestApiVerticle       : Returning error code 503
+----
+. Repeat the fault injection procedure for the second pod of the Incident Priority Service. Call the Incident Priority Service using _curl_ or _siege_. +
+Expect all the calls to succeed.
+. Repeat the fault injection procedure for the third pod of the Incident Priority Service. Now all the pods return a 503 code. Call the Incident Priority Service using _curl_ or _siege_. +
+Expect the calls to return a 503 error code.
++
+----
+while :; do curl -k -s -w %{http_code} --output /dev/null https://incident-priority-service.$ERDEMO_USER.apps.$SUBDOMAIN_BASE/priority/qwerty; echo "";sleep .1; done
+----
++
+.Sample Output
+----
+503
+503
+[...]
+503
+503
+503
+503
+^C
+----
+. To reset the application behaviour to normal, log into the pods, and execute the following _curl_ command:
++
+----
+$ curl -X POST http://127.0.0.1:9080/reset
+----
+. By default, automatic retries is only enabled for 503 return codes, not for other 5xx codes. 
+* As an example, log into one of the pods of the Incident Priority Service and have it return a 500 return code.
++
+----
+$ curl -X POST -d '{"error":500,"percentage":100}' http://127.0.0.1:9080/inject
+----
+* Call the Incident Priority Service using _curl_ or _siege_.
++
+----
+while :; do curl -k -s -w %{http_code} --output /dev/null https://incident-priority-service.$ERDEMO_USER.apps.$SUBDOMAIN_BASE/priority/qwerty; echo "";sleep .1; done
+----
++
+.Sample Output
+----
+500
+200
+200
+500
+200
+200
+500
+500
+200
+200
+200
+500
+^C
+----
++
+* Note that the 500 error code is returned to the caller.
+* Question: why is automatic retry by default only enabled for 503 error codes?
+. The Service Mesh retry functionalities can be extended to include other error conditions than a 503 return code. This requires additional configuration in the _VirtualService_ resource associated with the target service.
+* As an example, to extend the retry functionality to include all error codes in the 5xx range, add the following to the `incident-priority-service-virtualservice` VirtualService:
++
+----
+$ oc edit virtualservice incident-priority-service-virtualservice -o yaml -n $ER_DEMO_NS
+----
++
+Add the retry configuration to the route rules for http traffic:
++
+----
+kind: VirtualService
+apiVersion: networking.istio.io/v1alpha3
+[...]
+spec:
+  hosts:
+    - >-
+      incident-priority-service.user50.apps.cluster-ee8d.ee8d.example.opentlc.com
+  gateways:
+    - erd-wildcard-gateway.admin50-istio-system.svc.cluster.local
+  http:
+    - match:
+        - uri:
+            prefix: /priority
+        - uri:
+            exact: /reset
+      route:
+        - destination:
+            host: user50-incident-priority-service.user50-er-demo.svc.cluster.local
+            port:
+              number: 8080
+      retries:
+        attempts: 2
+        retryOn: 5xx
+----
++
+** `retryOn` determines the conditions for retry. In this case it includes all HTTP return codes in the 5xx range. Different conditions can be combined by separating them with a comma.
+** `attempts`: determines the number of retry attempts before giving up.
++
+* Log into one of the pods of the Incident Priority Service and have it return a 500 return code.
+* Call the Incident Priority Service using _curl_ or _siege_. Note that the retry is now also working for 500 return codes.
+* Other retry conditions are:
+** `gateway-error`: similar to the 5xx policy but will only retry requests that result in a 502, 503, or 504.
+** `reset` : a retry is attempted if the upstream server does not respond at all (disconnect/reset/read timeout.)
+** `retriable-4xx` : a retry is attempted if the upstream server responds with a retriable 4xx response code. Currently, the only response code in this category is 409.
++
+The complete list can be found in the Envoy documentation: https://www.envoyproxy.io/docs/envoy/latest/configuration/http/http_filters/router_filter#x-envoy-retry-on
+
+. When done with the lab, reset the Incident Priority Service pods to not return error codes. Also reset the VirtualService resource to its original state (remove the `retries` element). 
+
+== Timeouts
+
+Proper handling of timeouts is another aspect of building resilient systems. Without careful timeout handling, slow services can bring a complete system to a halt by e.g. saturating connection pools in downstream systems,
+
+Red Hat Service mesh allows to define timeout settings at the mesh level, as well as configure behaviour when service responses exceed the predefined timeouts.
+
+. The Incident Priority Service version you deployed in the beginning of the lab also allows to inject delays, to mimic a slow service.
+* Find the name of one of the pods of the Incident Priority Service:
++
+----
+$ INCIDENT_PRIORITY_SERVICE_POD=$(oc get pods -n $ER_DEMO_NS|grep Running|grep $ERDEMO_USER-incident-priority-service.*|awk '{ print $1 }'|head -1)
+----
+* Using `oc exec`, obtain a bash prompt inside the service container:
++
+----
+$ oc exec -it $INCIDENT_PRIORITY_SERVICE_POD -n $ER_DEMO_NS -c $ERDEMO_USER-incident-priority-service /bin/bash 
+----
+* In the container, execute the following _curl_ command to have the service wait for 2 seconds before returning a response when called over its REST APIs:
++
+----
+$ curl -X POST -d '{"delay":2000,"percentage":100}' http://127.0.0.1:9080/inject
+----
+* Verify that a call to the `priority/{incidentId}` endpoint effectively takes two seconds:
++
+----
+$ curl -s -w %{http_code} --output /dev/null http://127.0.0.1:8080/priority/qwerty
+----
++
+.Expected Output after 2 seconds
+----
+200
+----
+* Type `exit` to quit the container.
+. Call the Incident Priority Service using _curl_ or _siege_.
++
+----
+while :; do curl -k -s -w %{http_code} --output /dev/null https://incident-priority-service.$ERDEMO_USER.apps.$SUBDOMAIN_BASE/priority/qwerty; echo "";sleep .1; done
+----
++
+.Sample Output
+----
+200
+200
+200
+200
+200
+200
+200
+200
+200
+^C
+----
++
+With siege:
++
+----
+$ siege -r 5 -c 4 -d1 -v https://incident-priority-service.$ERDEMO_USER.apps.$SUBDOMAIN_BASE/priority/qwerty
+----
++
+.Sample Output
+----
+** SIEGE 4.0.4
+** Preparing 4 concurrent users for battle.
+The server is now under siege...
+HTTP/1.1 200     0.13 secs:      64 bytes ==> GET  /priority/qwerty
+HTTP/1.1 200     0.13 secs:      64 bytes ==> GET  /priority/qwerty
+HTTP/1.1 200     0.12 secs:      64 bytes ==> GET  /priority/qwerty
+HTTP/1.1 200     2.12 secs:      64 bytes ==> GET  /priority/qwerty
+HTTP/1.1 200     2.13 secs:      64 bytes ==> GET  /priority/qwerty
+HTTP/1.1 200     0.13 secs:      64 bytes ==> GET  /priority/qwerty
+HTTP/1.1 200     0.11 secs:      64 bytes ==> GET  /priority/qwerty
+HTTP/1.1 200     0.11 secs:      64 bytes ==> GET  /priority/qwerty
+HTTP/1.1 200     0.12 secs:      64 bytes ==> GET  /priority/qwerty
+HTTP/1.1 200     2.12 secs:      64 bytes ==> GET  /priority/qwerty
+HTTP/1.1 200     0.12 secs:      64 bytes ==> GET  /priority/qwerty
+HTTP/1.1 200     0.12 secs:      64 bytes ==> GET  /priority/qwerty
+HTTP/1.1 200     2.12 secs:      64 bytes ==> GET  /priority/qwerty
+HTTP/1.1 200     0.11 secs:      64 bytes ==> GET  /priority/qwerty
+HTTP/1.1 200     2.12 secs:      64 bytes ==> GET  /priority/qwerty
+HTTP/1.1 200     0.12 secs:      64 bytes ==> GET  /priority/qwerty
+HTTP/1.1 200     0.13 secs:      64 bytes ==> GET  /priority/qwerty
+HTTP/1.1 200     2.12 secs:      64 bytes ==> GET  /priority/qwerty
+HTTP/1.1 200     2.11 secs:      64 bytes ==> GET  /priority/qwerty
+HTTP/1.1 200     0.12 secs:      64 bytes ==> GET  /priority/qwerty
+
+Transactions:                     20 hits
+Availability:                 100.00 %
+Elapsed time:                  13.60 secs
+Data transferred:               0.00 MB
+Response time:                  0.82 secs
+Transaction rate:               1.47 trans/sec
+Throughput:                     0.00 MB/sec
+Concurrency:                    1.21
+Successful transactions:          20
+Failed transactions:               0
+Longest transaction:            2.13
+Shortest transaction:           0.11
+----
++
+* Note that all calls succeed, but roughly 30% of the calls take 2 seconds.
+* No handling of timeouts is the default behaviour of the Service Mesh.
+. Timeouts can be defined in the _VirtualService_ resouvre for the target service. +
+For example, to add a 500ms timeout to the VirtualService configuration. 
++
+----
+$ oc edit virtualservice incident-priority-service-virtualservice -o yaml -n $ER_DEMO_NS
+----
++
+Add the timeout configuration to the route rules for http traffic:
++
+----
+kind: VirtualService
+apiVersion: networking.istio.io/v1alpha3
+[...]
+spec:
+  hosts:
+    - >-
+      incident-priority-service.user50.apps.cluster-ee8d.ee8d.example.opentlc.com
+  gateways:
+    - erd-wildcard-gateway.admin50-istio-system.svc.cluster.local
+  http:
+    - match:
+        - uri:
+            prefix: /priority
+        - uri:
+            exact: /reset
+      route:
+        - destination:
+            host: user50-incident-priority-service.user50-er-demo.svc.cluster.local
+            port:
+              number: 8080
+      timeout: 500ms
+----
+. Call the Incident Priority Service using _curl_ or _siege_.
++
+----
+$ while :; do curl -k -s -w %{http_code} --output /dev/null https://incident-priority-service.$ERDEMO_USER.apps.$SUBDOMAIN_BASE/priority/qwerty; echo "";sleep .1; done
+----
++
+.Sample Output
+----
+200
+504
+504
+200
+200
+504
+200
+200
+200
+200
+504
+^C
+----
++
+With siege:
++
+----
+$ siege -r 5 -c 4 -d1 -v https://incident-priority-service.$ERDEMO_USER.apps.$SUBDOMAIN_BASE/priority/qwerty
+----
++
+.Sample Output
+----
+** SIEGE 4.0.4 
+** Preparing 4 concurrent users for battle.
+The server is now under siege...
+HTTP/1.1 200     0.12 secs:      64 bytes ==> GET  /priority/qwerty
+HTTP/1.1 200     0.13 secs:      64 bytes ==> GET  /priority/qwerty
+HTTP/1.1 200     0.14 secs:      64 bytes ==> GET  /priority/qwerty
+HTTP/1.1 504     0.63 secs:      24 bytes ==> GET  /priority/qwerty
+HTTP/1.1 200     0.11 secs:      64 bytes ==> GET  /priority/qwerty
+HTTP/1.1 504     0.62 secs:      24 bytes ==> GET  /priority/qwerty
+HTTP/1.1 200     0.12 secs:      64 bytes ==> GET  /priority/qwerty
+HTTP/1.1 200     0.12 secs:      64 bytes ==> GET  /priority/qwerty
+HTTP/1.1 200     0.13 secs:      64 bytes ==> GET  /priority/qwerty
+HTTP/1.1 504     0.63 secs:      24 bytes ==> GET  /priority/qwerty
+HTTP/1.1 504     0.61 secs:      24 bytes ==> GET  /priority/qwerty
+HTTP/1.1 200     0.14 secs:      64 bytes ==> GET  /priority/qwerty
+HTTP/1.1 200     0.13 secs:      64 bytes ==> GET  /priority/qwerty
+HTTP/1.1 504     0.61 secs:      24 bytes ==> GET  /priority/qwerty
+HTTP/1.1 200     0.12 secs:      64 bytes ==> GET  /priority/qwerty
+HTTP/1.1 200     0.12 secs:      64 bytes ==> GET  /priority/qwerty
+HTTP/1.1 504     0.63 secs:      24 bytes ==> GET  /priority/qwerty
+HTTP/1.1 200     0.13 secs:      64 bytes ==> GET  /priority/qwerty
+HTTP/1.1 200     0.17 secs:      64 bytes ==> GET  /priority/qwerty
+HTTP/1.1 504     0.61 secs:      24 bytes ==> GET  /priority/qwerty
+
+Transactions:                     13 hits
+Availability:                  65.00 %
+Elapsed time:                  10.62 secs
+Data transferred:               0.00 MB
+Response time:                  0.46 secs
+Transaction rate:               1.22 trans/sec
+Throughput:                     0.00 MB/sec
+Concurrency:                    0.57
+Successful transactions:          13
+Failed transactions:               7
+Longest transaction:            0.63
+Shortest transaction:           0.11
+----
++
+* Note that when calling the slow Incident Service Pod, the Envoy proxy gives up after 500 ms, and returns a 504 error code. A 504 error code means `Gateway Timeout`.
+* It is up the calling application to gracefully handle the error condition.
+. It is possible to combine time-out handling with retries. 
+* In the _VirtualService_ resource of the Incident Priority Service, ensure that the in the `retries` element, `retryOn` is set to `5xx`, and there is a `perTryTimeout` element equal to e.g 200 ms
++
+----
+kind: VirtualService
+apiVersion: networking.istio.io/v1alpha3
+[...]
+spec:
+  hosts:
+    - >-
+      incident-priority-service.user50.apps.cluster-ee8d.ee8d.example.opentlc.com
+  gateways:
+    - erd-wildcard-gateway.admin50-istio-system.svc.cluster.local
+  http:
+    - match:
+        - uri:
+            prefix: /priority
+        - uri:
+            exact: /reset
+      route:
+        - destination:
+            host: user50-incident-priority-service.user50-er-demo.svc.cluster.local
+            port:
+              number: 8080
+      retries:
+        attempts: 2
+        retryOn: 5xx
+        perTryTimeout: 200ms
+----
+. Call the Incident Priority Service using _curl_ or _siege_. Note that all calls return a 200 response code
+
+. When done with the lab, reset the Incident Priority Service pods to not return error codes. Also reset the VirtualService resource to its original state (remove the `timeout` element).
+
+== Circuit Breakers
+
+From the previous labs, you will have noted that failing service pods are still being called before the proxy attempts a retry to another pod. Especially in the case of 503 errors this is less than ideal. A 503 often indicates a temporary situation from which the server could be able to recover, for example an intermittent problem with a database connection or a saturated database connection pool. In these case, keep hammering on the failing system does not really help, and might make things even worse.
+
+That is where circuit breakers come in. When a system is deemed unhealthy, it is temporarily removed from the pool to which requests are being sent - the circuit trips open. After a configurable amount of time, a request is sent to the unhealthy pod to check if the pod was able to recover. If so, it is brought back in the pool - the circuit is closed again. If not, it stays in quarantaine until the next check.
+
+Red Hat Service Mesh implements circuit breakers using outlier detection. As a service mesh administrator you define the criteria that would classify a target pod as an outlier. If the criteria are met when calling the pod, the pod is evicted from the pool of healthy endpoints for the service.
+
+. Inject a 503 fault in one of the pods of the Incident Priority Service.
+* Find the name of one of the pods of the Incident Priority Service:
++
+----
+$ INCIDENT_PRIORITY_SERVICE_POD=$(oc get pods -n $ER_DEMO_NS|grep Running|grep $ERDEMO_USER-incident-priority-service.*|awk '{ print $1 }'|head -1)
+----
+* Using `oc exec`, obtain a bash prompt inside the service container:
++
+----
+$ oc exec -it $INCIDENT_PRIORITY_SERVICE_POD -n $ER_DEMO_NS -c $ERDEMO_USER-incident-priority-service /bin/bash 
+----
+* In the container, execute the following _curl_ command to have the service return a HTTP 503 return code when called over its REST APIs:
++
+----
+$ curl -X POST -d '{"error":503,"percentage":100}' http://127.0.0.1:9080/inject
+----
+. Call the Incident Priority Service using _curl_ or _siege_.
++
+----
+$ while :; do curl -k -s -w %{http_code} --output /dev/null https://incident-priority-service.$ERDEMO_USER.apps.$SUBDOMAIN_BASE/priority/qwerty; echo "";sleep .1; done
+----
+. In the logs of the faulty pod, verify that the service is still being called:
++
+----
+$ oc logs -f $INCIDENT_PRIORITY_SERVICE_POD -n $ER_DEMO_NS
+----
++
+.Sample output
+----
+2019-11-28 16:55:28.812  INFO   --- [ntloop-thread-6] c.r.c.n.i.priority.RestApiVerticle       : Incoming Request
+2019-11-28 16:55:28.812  INFO   --- [ntloop-thread-6] c.r.c.n.i.priority.RestApiVerticle       : Returning error code 503
+2019-11-28 16:55:29.283  INFO   --- [ntloop-thread-6] c.r.c.n.i.priority.RestApiVerticle       : Incoming Request
+2019-11-28 16:55:29.283  INFO   --- [ntloop-thread-6] c.r.c.n.i.priority.RestApiVerticle       : Returning error code 503
+2019-11-28 16:55:29.983  INFO   --- [ntloop-thread-6] c.r.c.n.i.priority.RestApiVerticle       : Incoming Request
+2019-11-28 16:55:29.983  INFO   --- [ntloop-thread-6] c.r.c.n.i.priority.RestApiVerticle       : Returning error code 503
+2019-11-28 16:55:30.460  INFO   --- [ntloop-thread-6] c.r.c.n.i.priority.RestApiVerticle       : Incoming Request
+2019-11-28 16:55:30.460  INFO   --- [ntloop-thread-6] c.r.c.n.i.priority.RestApiVerticle       : Returning error code 503
+2019-11-28 16:55:30.921  INFO   --- [ntloop-thread-6] c.r.c.n.i.priority.RestApiVerticle       : Incoming Request
+2019-11-28 16:55:30.921  INFO   --- [ntloop-thread-6] c.r.c.n.i.priority.RestApiVerticle       : Returning error code 503
+2019-11-28 16:55:31.169  INFO   --- [ntloop-thread-6] c.r.c.n.i.priority.RestApiVerticle       : Incoming Request
+2019-11-28 16:55:31.169  INFO   --- [ntloop-thread-6] c.r.c.n.i.priority.RestApiVerticle       : Returning error code 503
+----
+. Service Mesh outlier detection is configured in the _DestinationRule_ for the service.
+* Open the DestinationRule resource of the Incident Priority Service for editing:
++
+----
+$ oc edit destinationrule incident-priority-service-client-mtls -n $ER_DEMO_NS
+----
+* In the DestinationRule resource, add the outlier detection configuration:
++
+----
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  [...]
+spec:
+  host: user50-incident-priority-service.user50-er-demo.svc.cluster.local
+  trafficPolicy:
+    tls:
+      mode: ISTIO_MUTUAL
+    outlierDetection:
+      baseEjectionTime: 2m
+      consecutiveErrors: 1
+      interval: 1s
+      maxEjectionPercent: 100
+----
++
+* This setting has the net effect of ejecting a pod from the loadbalancing pool if an error is detected. The outlier will be ejected from the healthy pool for a period of time equal to the base ejection time (2 minutes) multiplied by the number of times it has been ejected.  
+. Call the Incident Priority Service using _curl_ or _siege_.
++
+----
+$ while :; do curl -k -s -w %{http_code} --output /dev/null https://incident-priority-service.$ERDEMO_USER.apps.$SUBDOMAIN_BASE/priority/qwerty; echo "";sleep .1; done
+----
++
+.Sample output
+----
+2019-11-29 16:20:04.142  INFO   --- [ntloop-thread-6] c.r.c.n.i.priority.RestApiVerticle       : Incoming Request
+2019-11-29 16:20:04.142  INFO   --- [ntloop-thread-6] c.r.c.n.i.priority.RestApiVerticle       : Returning error code 503
+2019-11-29 16:22:05.026  INFO   --- [ntloop-thread-6] c.r.c.n.i.priority.RestApiVerticle       : Incoming Request
+2019-11-29 16:22:05.026  INFO   --- [ntloop-thread-6] c.r.c.n.i.priority.RestApiVerticle       : Returning error code 503
+2019-11-29 16:22:05.458  INFO   --- [ntloop-thread-6] c.r.c.n.i.priority.RestApiVerticle       : Incoming Request
+----
++
+* Note that after the first call which returns a 503, the pod does not get requests anymore, for approximately 2 minutes. If after that period  the pod still returns errors, it is ejected again from the pool.
+* Service Mesh circuit breaking functionality only works for error codes 503.
+. At this point, reset the Incident Priority Service pods to not respond with delays.  
+
+. Another use case for circuit breakers is avoiding that a service gets flooded with requests. In the _DestinationRule_ resource, the service mesh administrator can configure the number of concurrent HTTP requests that are allowed to the target service pod before requests are being short-circuited. +
+Add connection pool settings to the _DestinationRule_ resource of the Incident Priority Service:
+* Open the DestinationRule resource of the Incident Priority Service for editing:
++
+----
+$ oc edit destinationrule incident-priority-service-client-mtls -n $ER_DEMO_NS
+----
+* In the DestinationRule resource, add the connection pool configuration:
++
+----
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  [...]
+spec:
+  host: user50-incident-priority-service.user50-er-demo.svc.cluster.local
+  trafficPolicy:
+    tls:
+      mode: ISTIO_MUTUAL
+    outlierDetection:
+      baseEjectionTime: 3m
+      consecutiveErrors: 1
+      interval: 1s
+      maxEjectionPercent: 100
+    connectionPool:
+      http:
+        http1MaxPendingRequests: 1
+        maxRequestsPerConnection: 1
+      tcp:
+        maxConnections: 1    
+----
++
+* Note that this is a pretty extreme setting, as we only allow one concurrent connection to the Incident Priority Service pod.
+. Use _siege_ to exercise some load against the Incident Priority Service. With Siege you can easily simulate concurrent access to a host.
++
+----
+$ siege -r 100 -c 4 -d0 -v https://incident-priority-service.$ERDEMO_USER.apps.$SUBDOMAIN_BASE/priority/qwerty
+----
++
+In the example above we make use of 4 concurrent users. Depending on the lab conditions this settings might generate quite some 503 responses. In that case lower the number of concurrent users until you get only 200 responses.
+. While the _siege_ load test is still running, log into one of the pods of the Incident Priority Service, and inject a delay of 2000ms
+. Go back to the siege load test, and observe that you have a fair amount of 503 responses. +
+Once the limits in the `connectionPool` are met, the circuit breaker functionality of the Envoy proxy will short-circuit the call to the service and immediately return a 503 response.
+. Open the _DestinationRule_ of the Incident Priority Service for edit, and set the `http1MaxPendingRequests` and the `maxRequestsPerConnection` to e.g. 10.
+. Go back to the siege load test, and observe that you get only 200 responses.
