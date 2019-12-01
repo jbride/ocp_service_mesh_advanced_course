@@ -1,5 +1,7 @@
 = Red Hat OpenShift Service Mesh Advanced - Instuctor Notes
 
+:numbered:
+
 == Lab Assets
 
 . link:https://docs.google.com/spreadsheets/d/1vazinjjbOSN-uDY8u_mmg-lXtrRlZtm1l5vJQucdKz8/edit#gid=959461386[Class Assignment Spreadsheet]
@@ -8,6 +10,16 @@
 . Provisioned from labs.opentlc.com -> OCP4 Workshop Deployer
 . Instructor uses _MachineSet API_ to scale to appropriately sized cluster 
 .. Emergency Response (16GB RAM) + Istio Control Plane (6GB RAM) = 22GB RAM per student
+
+== 3scale Control Plane
+. link:https://github.com/gpe-mw-ansible-org/3scale_multitenant[3scale_multitenant] ansible is recommended (for the time being).
++
+This ansible does the following:
+
+.. Provisions 1 3scale Control Plane
+.. Provisions 1 tenant per student
+.. Provisions 1 set of API gateways (staging and production) per tenant
+
 
 == Emergency Response Demo 
 . Instructor layers 1 Emergency Response Demo per student
@@ -25,15 +37,6 @@ for x in $(seq $start_id $end_id); do
       -e set_realm_admin_as_default=True
 done
 -----
-
-== 3scale Control Plane
-. link:https://github.com/gpe-mw-ansible-org/3scale_multitenant[3scale_multitenant] ansible is recommended (for the time being).
-+
-This ansible does the following:
-
-.. Provisions 1 3scale Control Plane
-.. Provisions 1 tenant per student
-.. Provisions 1 set of API gateways (staging and production) per tenant
 
 == *Red Hat Service Mesh*
 . The ansible found in the course link:https://github.com/gpe-mw-training/ocp_service_mesh_advanced[Lab Assets] is recommended.
