@@ -10,6 +10,7 @@
 * Overview of student lab environment
 * Overview of pre-installed Red Hat Service Mesh _operator_
 * Overview of pre-installed Red Hat Service Mesh _control plane_
+* Overview of the 3 user roles typically involved in a Red Hat Service Mesh managed environment
 * Introduction to Emergency Response demo
 
 :numbered:
@@ -27,6 +28,13 @@ RHEL / Fedora:  `yum install openssl`
 Fedora: `dnf install jq`
 
 . link:https://mirror.openshift.com/pub/openshift-v4/clients/oc/4.2/[oc utility version 4.2]
++
+After installing the `oc` client, please ensure its on your $PATH and that its version is in the OpenShift 4.2 family:
++
+-----
+oc version
+Client Version: v4.2.0
+-----
 
 . link:https://github.com/istio/istio/releases/tag/1.3.5[istioctl utility]
 .. This link provides a more recent version of the _istioctl_ command line utility than the version of istio that Red Hat Service Mesh 1.0 is based on.
@@ -141,7 +149,7 @@ oc whoami --show-console
 
 Red Hat Service Mesh implements _soft multi-tenancy_ that provides a three-tier RBAC model comprising the roles of cluster-admin, mesh-admin and namespace-admin.
 
-In this section of the lab, you are oriented to the Red Hat Service Mesh resources owned by an OpenShift cluster-admin.
+In this section of the lab, you are oriented to the Red Hat Service Mesh resources owned by an OpenShift cluster-admin (ie:  your instructor).
 
 === Operator
 
@@ -160,12 +168,12 @@ istio-operator-7fdc886f-t4vw2   1/1     Running   0          15h
 -----
 +
 .. This operator is global (to the OpenShift cluster) in scope.
-.. The administrator of the _istio-operator_ namespace is the OpenShift cluster-admin.
+.. The administrator of the _istio-operator_ namespace is the OpenShift cluster-admin .
 
 
 === Istio CNI plugin
 
-While injecting the _Envoy_ service proxy sidecar into an application pod, community Istio typically uses an link:https://kubernetes.io/docs/concepts/workloads/pods/init-containers/[init-container] to manipulate the iptables rules of the node where the pod runs.
+While injecting the _Envoy_ service proxy sidecar into an application pod, link:https://istio.io/[community Istio] typically uses an link:https://kubernetes.io/docs/concepts/workloads/pods/init-containers/[init-container] to manipulate the iptables rules of the OpenShift node where the application pod runs.
 It modifies these iptables in order to intercept requests to application containers.
 Although the _Envoy_ service proxy sidecar does not require root to run, this short-lived _init-container_ does require link:https://docs.docker.com/engine/reference/run/#runtime-privilege-and-linux-capabilities[cap_net_admin] privileges.
 
@@ -184,13 +192,9 @@ Subsequently, the _istio-cni_ plugin is implemented as a _DaemonSet_ in the _ist
 +
 -----
 oc get daemonset istio-node -n istio-operator
+NAME         DESIRED   CURRENT   READY   UP-TO-DATE   AVAILABLE   NODE SELECTOR                 AGE
 
-
-istio-node-8lmjb                1/1     Running   0          15h
-istio-node-q625x                1/1     Running   0          15h
-istio-node-r26x7                1/1     Running   0          15h
-istio-node-tpvbx                1/1     Running   0          15h
-istio-node-w2fhr                1/1     Running   0          15h
+istio-node   12        12        12      12           12          beta.kubernetes.io/os=linux   4d21h
 -----
 +
 As a _DaemonSet_, a Istio _CNI_ pod runs on every node of the OpenShift cluster.
@@ -217,37 +221,48 @@ oc get crd --as=system:admin | grep 'maistra\|istio'
 -----
 
 .. You'll have to impersonate an OpenShift Cluster Admin to do so.  
-This normally would not be provided to you in a production environment.
+This normally would not be provided to you (a servie mesh _control plane_ administrator) in a production environment.
+.. You should see about 55 CRDs.
 
-.. Some of the more prominant CRD extensions of the OpenShift master include the following:
+.. Some of the more prominant service mesh related CRD extensions to the OpenShift master API include the following:
 
 ... *adapters.config.istio.io*
++
+link:https://istio.io/docs/reference/config/policy-and-telemetry/adapters/[Mixer adapters] allow Istio to interface to a variety of infrastructure backends for such things as metrics and logs.
+
 ... *destinationrules.networking.istio.io*
++
+link:https://istio.io/docs/reference/config/networking/destination-rule/[DestinationRule] defines policies that apply to traffic intended for a service after routing has occurred. 
+
 ... *gateways.networking.istio.io*
-... *handlers.config.istio.io*
-... *rules.config.istio.io*
++
+link:https://istio.io/docs/reference/config/networking/gateway/[Gateway] describes a load balancer operating at the edge of the mesh receiving incoming or outgoing HTTP/TCP connections
+
+
 ... *servicemeshcontrolplanes.maistra.io*
 +
 Defines the details of a service mesh _control plane_.
 
 ... *servicemeshmemberrolls.maistra.io*
++
+The ServiceMeshMemberRoll lists the projects belonging to the control plane.
 
 ... *servicemeshpolicies.authentication.maistra.io*
 +
 Allows for over-riding of _ServiceMeshControlPlane_ settings with either _namespace-scoped_ or _service-scoped_ policies. 
 
 ... *virtualservices.networking.istio.io*
++
+link:https://istio.io/docs/reference/config/networking/virtual-service/[Virtual Service] defines traffice routing.
 
-
-TO-DO:  Elaborate on all of the above
 
 === MutatingWebHooks
 
 Injecting of the _Envoy_ sidecar container into a deployment can be done manually or automatically.
 Most of the time, you will prefer automatic injection.
-Among other features, automatic injection of sidecar containers into a deployment requires an OpenShift _Admission Controller_.
+Automatic injection of sidecar containers into a deployment requires an OpenShift _Admission Controller_.
 
-An admission controller is a piece of code that intercepts requests to the Kubernetes API server prior to persistence of the object, but after the request is authenticated and authorized. 
+An OpenShift _admission controller_ is a piece of code that intercepts requests to the Kubernetes API server prior to persistence of the object, but after the request is authenticated and authorized. 
 You can define two types of admission webhooks: 
 
 * validating admission Webhook 
@@ -262,28 +277,30 @@ With mutating admission Webhooks, you may change requests to enforce custom defa
 . Impersonate cluster-admin and get a list of _mutatingwebhookconfiguration_ resources on the OpenShift cluster:
 +
 -----
-oc get mutatingwebhookconfiguration --as=system:admin
+oc get mutatingwebhookconfiguration --as=system:admin | grep $SM_CP_NS
 
 ...
 
-istio-sidecar-injector-admin1-istio-system   2019-11-12T15:12:58Z
-istio-sidecar-injector-admin2-istio-system   2019-11-12T15:15:18Z
+istio-sidecar-injector-admin25-istio-system   2019-11-12T15:15:18Z
 -----
 
 . Extract the details of your _mutatingwebhookconfiguration_ specific to your Red Hat Service Mesh installation:
 +
 -----
-oc get mutatingwebhookconfiguration istio-sidecar-injector-$SM_CP_NS -o yaml --as=system:admin > ~/lab/$SM_CP_NS-mutatingwebhookconfiguration.yaml
+oc get mutatingwebhookconfiguration istio-sidecar-injector-$SM_CP_NS \
+       -o yaml \
+       --as=system:admin \
+       > $HOME/lab/$SM_CP_NS-mutatingwebhookconfiguration.yaml
 -----
 +
-Study the content of the output file `$SM_CP_NS-mutatingwebhookconfiguration.yaml` and notice the following:
+Study the content of the output file `$HOME/lab/$SM_CP_NS-mutatingwebhookconfiguration.yaml` and notice the following:
 
 .. The _/inject_ endpoint of the _istio-sidecar-injector_ service from your own service mesh control plane will be invoked when auto-injecting the _Envoy_ service proxy into an application pod.
 +
 -----
     service:
       name: istio-sidecar-injector
-      namespace: admin50-istio-system
+      namespace: admin25-istio-system
       path: /inject
 -----
 
@@ -295,7 +312,7 @@ Study the content of the output file `$SM_CP_NS-mutatingwebhookconfiguration.yam
     - key: maistra.io/member-of
       operator: In
       values:
-      - admin50-istio-system
+      - admin25-istio-system
     - key: maistra.io/ignore-namespace
       operator: DoesNotExist
 -----
@@ -309,7 +326,7 @@ The lifecycle of your service mesh _control plane_ is managed by the cluster sco
 
 === Resources
 
-. Switch to the _mesh-admin_ user:
+. Ensure you are still authenticated into OpenShift as the _mesh-admin_ user:
 +
 -----
 oc login -u $SM_CP_ADMIN -p $OCP_PASSWD
@@ -325,7 +342,7 @@ client version: 1.3.5
 control plane version: 1.0.1-1
 -----
 +
-NOTE: Red Hat Service Mesh 1.1 is expected to release Jan 29, 2020 and be link:https://issues.jboss.org/projects/OSSM/issues/OSSM-54?filter=allopenissues[based on Istio 1.3 or Istio 1.4].
+NOTE: Red Hat Service Mesh 1.1 is expected to release Jan 29, 2020 and is expected to be link:https://issues.jboss.org/projects/OSSM/issues/OSSM-54?filter=allopenissues[based on Istio 1.3 or Istio 1.4].
 
 . Notice the existence of the Service Mesh _control plane_ deployments:
 +
@@ -399,7 +416,7 @@ oc get ServiceMeshMemberRoll default -o template --template='{{"\n"}}{{.spec}}{{
 map[]
 -----
 +
-In a later lab, you as the service mesh control plane admin will add the namespace where your Emergency Response application resides to this currently empty ServiceMeshMemberRoll.
+In a later lab, you (as the service mesh control plane admin) will add the namespace where your Emergency Response application resides to this currently empty ServiceMeshMemberRoll.
 
 
 == Emergency Response Demo: _namespace-admin_
@@ -421,7 +438,8 @@ Switch to this user as follows:
 oc login -u $ERDEMO_USER -p $OCP_PASSWD
 -----
 
-You can view its OpenShift DeploymentConfigs in the _$ERDEMO_USER-er-demo_ namespace as follows:
+
+. You can view its OpenShift DeploymentConfigs in the _$ERDEMO_USER-er-demo_ namespace as follows:
 +
 -----
 $ oc get dc -n $ERDEMO_NS
@@ -474,7 +492,7 @@ datagrid-service   3/3     3d5h
 This web console is accessible at the following URL:
 +
 -----
-echo -en "\n\n$(oc get route $ERDEMO_USER-emergency-console -o template --template={{.spec.host}} -n $ERDEMO_NS)\n\n"
+echo -en "\n\nhttps://$(oc get route $ERDEMO_USER-emergency-console -o template --template={{.spec.host}} -n $ERDEMO_NS)\n\n"
 -----
 
 . You can log into the web console and simulate an emergency by following the instructions in the link:https://www.erdemo.io/gettingstarted/[Getting Started guide].
@@ -485,6 +503,8 @@ echo -en "\n\n$(oc get route $ERDEMO_USER-emergency-console -o template --templa
 === Reference
 
 . link:https://servicemesh.io/[The Service Mesh: What Every Software Engineer Needs to Know about the World's Most Over-Hyped Technology]
+. link:https://issues.jboss.org/projects/OSSM/issues/OSSM-11?filter=allopenissues[Red Hat Service Mesh Jiras]
+. link:https://docs.openshift.com/container-platform/4.2/service_mesh/service_mesh_arch/understanding-ossm.html[Red Hat Service Mesh product documentation]
 
 ifdef::showscript[]
 
