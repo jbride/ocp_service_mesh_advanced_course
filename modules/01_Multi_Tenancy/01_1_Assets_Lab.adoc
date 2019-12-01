@@ -8,7 +8,7 @@
 
 .Goals
 * Overview of student lab environment
-* Overview of pre-installed Red Hat Service Mesh operator
+* Overview of pre-installed Red Hat Service Mesh _operator_
 * Overview of pre-installed Red Hat Service Mesh _control plane_
 * Introduction to Emergency Response demo
 
@@ -19,20 +19,27 @@
 === Client Utilities
 
 . openssl
++
+RHEL / Fedora:  `yum install openssl`
 
 . link:https://stedolan.github.io/jq/download/[jq]
++
+Fedora: `dnf install jq`
 
 . link:https://mirror.openshift.com/pub/openshift-v4/clients/oc/4.2/[oc utility version 4.2]
 
 . link:https://github.com/istio/istio/releases/tag/1.3.5[istioctl utility]
-.. This release of the _istioctl_ command line utility is a more recent than the version of istio that Red Hat Service Mesh 1.0 is based on.
+.. This link provides a more recent version of the _istioctl_ command line utility than the version of istio that Red Hat Service Mesh 1.0 is based on.
 +
 However, for the purpose of this course, this version of _istioctl_ works well.
-.. After downloading, place the _bin/istioctl_ binary somewhere on your $PATH
+.. After downloading, unarchive the download and place the _bin/istioctl_ binary somewhere on your $PATH
 
 === Environment Variables
 
-. Have your instructor share with you the link:https://docs.google.com/spreadsheets/d/1vazinjjbOSN-uDY8u_mmg-lXtrRlZtm1l5vJQucdKz8/edit#gid=959461386[details of your lab environment].
+. Have your instructor share with you the lab details spreadsheet.
++
+image::images/lab_details_spreadsheet.png[]
+
 . Open a terminal window on your local machine and download the script that sets needed environment variables for the labs in this course:
 
 +
@@ -45,7 +52,10 @@ curl https://raw.githubusercontent.com/gpe-mw-training/ocp_service_mesh_advanced
     chmod 775 $HOME/lab/set_env_vars.sh
 -----
 
-. Using your favorite text editor, modify the environment variables in this downloaded shell script, as discussed and shared by the instructor
+. Using your favorite text editor, modify the environment variables in this downloaded shell script.
++
+Refer to the lab details spreadsheet shared by your instructor.
+
 . Execute the shell script so that the environment variables are applied to your existing shell:
 +
 -----
@@ -263,10 +273,10 @@ istio-sidecar-injector-admin2-istio-system   2019-11-12T15:15:18Z
 . Extract the details of your _mutatingwebhookconfiguration_ specific to your Red Hat Service Mesh installation:
 +
 -----
-oc get mutatingwebhookconfiguration istio-sidecar-injector-$RHSM_CONTROL_PLANE_NS -o yaml --as=system:admin > ~/lab/$RHSM_CONTROL_PLANE_NS-mutatingwebhookconfiguration.yaml
+oc get mutatingwebhookconfiguration istio-sidecar-injector-$SM_CP_NS -o yaml --as=system:admin > ~/lab/$SM_CP_NS-mutatingwebhookconfiguration.yaml
 -----
 +
-Study the content of the output file `$RHSM_CONTROL_PLANE_NS-mutatingwebhookconfiguration.yaml` and notice the following:
+Study the content of the output file `$SM_CP_NS-mutatingwebhookconfiguration.yaml` and notice the following:
 
 .. The _/inject_ endpoint of the _istio-sidecar-injector_ service from your own service mesh control plane will be invoked when auto-injecting the _Envoy_ service proxy into an application pod.
 +
@@ -320,7 +330,7 @@ NOTE: Red Hat Service Mesh 1.1 is expected to release Jan 29, 2020 and be link:h
 . Notice the existence of the Service Mesh _control plane_ deployments:
 +
 -----
-oc get deployments -n $RHSM_CONTROL_PLANE_NS
+oc get deployments -n $SM_CP_NS
 
 NAME                     READY   UP-TO-DATE   AVAILABLE   AGE
 grafana                  1/1     1            1           24h
@@ -340,20 +350,20 @@ prometheus               1/1     1            1           24h
 . Notice the existence of a _ServiceMeshControlPlane_ custom resource:
 +
 -----
-oc get ServiceMeshControlPlane -n $RHSM_CONTROL_PLANE_NS
+oc get ServiceMeshControlPlane -n $SM_CP_NS
 
 NAME           READY
 full-install   True
 -----
 +
-During installation of your lab environment, the $RHSM_CONTROL_PLANE_NS namespace was created and this _ServiceMeshControlPlane_ link:https://github.com/gpe-mw-training/ocp_service_mesh_advanced/blob/master/ansible/roles/maistra_control_plane/tasks/main.yml#L3-L5[was applied to it].
+During installation of your lab environment, the $SM_CP_NS namespace was created and this _ServiceMeshControlPlane_ link:https://github.com/gpe-mw-training/ocp_service_mesh_advanced/blob/master/ansible/roles/maistra_control_plane/tasks/main.yml#L3-L5[was applied to it].
 +
 The Red Hat Service Mesh operator detected the presence of this new _ServiceMeshControlPlane_ custom resource and subsequently provisioned the service mesh control plane.
 
 . Notice the existance of a _ServiceMeshPolicy_:
 +
 -----
-oc get ServiceMeshPolicies -n $RHSM_CONTROL_PLANE_NS
+oc get ServiceMeshPolicies -n $SM_CP_NS
 NAME      AGE
 default   24h
 -----
@@ -363,7 +373,7 @@ NOTE: This Red Hat Service Mesh specific resource replaces the upstream communit
 . Notice the existance of various namespace scoped _RoleBinding_ resources in the service mesh control plane:
 +
 -----
-oc get RoleBinding -n $RHSM_CONTROL_PLANE_NS
+oc get RoleBinding -n $SM_CP_NS
 
 
 istio-citadel-admin50-istio-system                               24h
@@ -384,7 +394,7 @@ The use of a project scoped _RoleBinding_ rather than a cluster-scoped _ClusterR
 . Notice the existance of an empty _ServiceMeshMemberRoll_ called _default_ :
 +
 -----
-oc get ServiceMeshMemberRoll default -o template --template='{{"\n"}}{{.spec}}{{"\n\n"}}' -n $RHSM_CONTROL_PLANE_NS
+oc get ServiceMeshMemberRoll default -o template --template='{{"\n"}}{{.spec}}{{"\n\n"}}' -n $SM_CP_NS
 
 map[]
 -----
@@ -414,7 +424,7 @@ oc login -u $ERDEMO_USER -p $OCP_PASSWD
 You can view its OpenShift DeploymentConfigs in the _$ERDEMO_USER-er-demo_ namespace as follows:
 +
 -----
-$ oc get dc -n $ER_DEMO_NS
+$ oc get dc -n $ERDEMO_NS
 
 NAME                                REVISION   DESIRED   CURRENT  
 postgresql                          1          1         0        
@@ -437,14 +447,14 @@ In the next lab of this course, you will resume all of these DeploymentConfigs a
 . Notice the Emergency Response demo also makes use of Red Hat AMQ Streams for event-driven, streams-based communication between many of its services:
 +
 -----
-oc get deploy -n $ER_DEMO_NS
+oc get deploy -n $ERDEMO_NS
 
 NAME                            READY   UP-TO-DATE   AVAILABLE   AGE
 kafka-cluster-entity-operator   1/1     1            1           3d5h
 -----
 +
 -----
-oc get statefulset -l strimzi.io/kind=Kafka -n $ER_DEMO_NS
+oc get statefulset -l strimzi.io/kind=Kafka -n $ERDEMO_NS
 
 kafka-cluster-kafka       3/3     3d5h
 kafka-cluster-zookeeper   0/3     3d5h
@@ -453,7 +463,7 @@ kafka-cluster-zookeeper   0/3     3d5h
 . Also, notice the Emergency Response demo also makes use of Red Hat JBoss _Data Grid_:
 +
 -----
-oc get statefulset -l application=datagrid-service -n $ER_DEMO_NS
+oc get statefulset -l application=datagrid-service -n $ERDEMO_NS
 
 datagrid-service   3/3     3d5h
 -----
@@ -464,7 +474,7 @@ datagrid-service   3/3     3d5h
 This web console is accessible at the following URL:
 +
 -----
-echo -en "\n\n$(oc get route $ERDEMO_USER-emergency-console -o template --template={{.spec.host}} -n $ER_DEMO_NS)\n\n"
+echo -en "\n\n$(oc get route $ERDEMO_USER-emergency-console -o template --template={{.spec.host}} -n $ERDEMO_NS)\n\n"
 -----
 
 . You can log into the web console and simulate an emergency by following the instructions in the link:https://www.erdemo.io/gettingstarted/[Getting Started guide].

@@ -42,7 +42,7 @@ $ oc login $LAB_MASTER_API -u $SM_CP_ADMIN -p $OCP_PASSWD
 . Review the _Tracing_ section of the _ServiceMeshControlPlane_ custom resource:
 +
 ----
-$ oc describe servicemeshcontrolplane full-install -n $RHSM_CONTROL_PLANE_NS 
+$ oc describe servicemeshcontrolplane full-install -n $SM_CP_NS 
 ----
 +
 .Output (truncated)
@@ -78,7 +78,7 @@ Status:
 . Obtain the URL to the Jaeger UI:
 +
 ----
-$ echo -en "\n\nhttps://$(oc get route jaeger -o template --template={{.spec.host}} -n $RHSM_CONTROL_PLANE_NS)\n\n"
+$ echo -en "\n\nhttps://$(oc get route jaeger -o template --template={{.spec.host}} -n $SM_CP_NS)\n\n"
 ----
 . In a browser window, navigate to the Jaeger UI and log in with the username and password of the control plane admin user. +
 Expect to see the Jaeger UI home page:
@@ -90,7 +90,7 @@ image::images/jaeger-ui.png[]
 You might see services and traces in the Jaeger UI belonging to previous interactions with the Emergency Response Demo application. If you want to reset the Jaeger storage, you can force a redeploy of the Jaeger pod - the Jaeger all-in-one image uses in-memory storage, which is cleared when restarting the pod.
 
 ----
-$ oc patch deployment jaeger -p '{"spec":{"template":{"metadata":{"annotations":{"kubectl.kubernetes.io/restartedAt": "'`date -Iseconds`'"}}}}}' -n $RHSM_CONTROL_PLANE_NS
+$ oc patch deployment jaeger -p '{"spec":{"template":{"metadata":{"annotations":{"kubectl.kubernetes.io/restartedAt": "'`date -Iseconds`'"}}}}}' -n $SM_CP_NS
 ----
 ====
 
@@ -123,10 +123,10 @@ Some things to take note of:
 ----
 $ curl -v -k https://incident-service.$ERDEMO_USER.apps.$SUBDOMAIN_BASE/incidents
 ----
-. Refresh the jaeger UI home page. Expect to see `$ERDEMO_USER-incident-service.$ER_DEMO_NS` listed in the _Service_ drop down box.
+. Refresh the jaeger UI home page. Expect to see `$ERDEMO_USER-incident-service.$ERDEMO_NS` listed in the _Service_ drop down box.
 +
 image::images/jaeger-ui-incident-service.png[]
-. Select `$ERDEMO_USER-incident-service.$ER_DEMO_NS` in the _Service_ list, and click _Find Traces_ to list the traces generated for the request to the Incident Service.
+. Select `$ERDEMO_USER-incident-service.$ERDEMO_NS` in the _Service_ list, and click _Find Traces_ to list the traces generated for the request to the Incident Service.
 +
 image::images/jaeger-ui-incident-service-traces.png[]
 +
@@ -153,14 +153,14 @@ image::images/jaeger-ui-incident-service-trace-tags.png[]
 . Refresh the Jaeger UI. Expect to see a number of services belonging to the Emergency Response Demo in the _Service_ drop-down box.
 +
 image::images/jaeger-ui-er-services.png[]
-. Note that the different traces are not correlated to each other. For example, query for traces for `$ERDEMO_USER-disaster-simulator.$ER_DEMO_NS`. You should find a number of traces, consisting of two spans:
+. Note that the different traces are not correlated to each other. For example, query for traces for `$ERDEMO_USER-disaster-simulator.$ERDEMO_NS`. You should find a number of traces, consisting of two spans:
 +
 image::images/jaeger-ui-disaster-simulator-traces.png[]
 +
 These traces correspond to the HTTP POST calls from the Disaster Simulator application to the Incident Service when creating incidents. +
 Within the Incident Service, as a result of creating an incident, a message is sent to a Kafka topic and consumed by the Process service. +
 The Process service performs amongst other things a REST call to the Responder Service and the Incident Priority Service. +
-You can find these traces by querying for `$ERDEMO_USER-process-service.$ER_DEMO_NS` trace:
+You can find these traces by querying for `$ERDEMO_USER-process-service.$ERDEMO_NS` trace:
 +
 image::images/jaeger-ui-process-service-traces.png[]
 +
@@ -173,7 +173,7 @@ In this lab, you will deploy an instrumented version of the Incident Service, wh
 .. Edit the ConfigMap of the Incident Service. The instrumented version of tyhe Incident Service requires some additional properties:
 +
 ----
-$ oc edit configmap incident-service -n $ER_DEMO_NS
+$ oc edit configmap incident-service -n $ERDEMO_NS
 ----
 +
 Add the following lines to the `application.properties` file in the configmap - replace <admin user> with the name of the control plane admin user:
@@ -190,7 +190,7 @@ opentracing.jaeger.enable-b3-propagation=true
 .. Patch the Incident Service DeploymentConfig resource to point to the `1.0.0-jaeger` tag of the Incident Service image:
 +
 ----
-$ oc patch dc $ERDEMO_USER-incident-service -p "{\"spec\":{\"triggers\":[{\"type\": \"ConfigChange\"},{\"type\": \"ImageChange\",\"imageChangeParams\": {\"automatic\": true, \"containerNames\":[\"$ERDEMO_USER-incident-service\"], \"from\": {\"kind\": \"ImageStreamTag\", \"namespace\": \"$ER_DEMO_NS\", \"name\": \"$ERDEMO_USER-incident-service:1.0.0-jaeger\"}}}]}}" -n $ER_DEMO_NS
+$ oc patch dc $ERDEMO_USER-incident-service -p "{\"spec\":{\"triggers\":[{\"type\": \"ConfigChange\"},{\"type\": \"ImageChange\",\"imageChangeParams\": {\"automatic\": true, \"containerNames\":[\"$ERDEMO_USER-incident-service\"], \"from\": {\"kind\": \"ImageStreamTag\", \"namespace\": \"$ERDEMO_NS\", \"name\": \"$ERDEMO_USER-incident-service:1.0.0-jaeger\"}}}]}}" -n $ERDEMO_NS
 ----
 +
 This will force a redeployment of the Incident Service. +

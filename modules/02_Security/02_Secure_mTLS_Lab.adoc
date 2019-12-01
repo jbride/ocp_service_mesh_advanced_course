@@ -29,7 +29,7 @@ $ oc login $LAB_MASTER_API -u $SM_CP_ADMIN -p $OCP_PASSWD
 The control plane is defined by the `ServiceshMeshControlPlane` custom resource.
 +
 ----
-$ oc get servicemeshcontrolplane -n $RHSM_CONTROL_PLANE_NS
+$ oc get servicemeshcontrolplane -n $SM_CP_NS
 ----
 +
 .Output
@@ -41,7 +41,7 @@ full-install   True
 . Review the `ServiceMeshControlPlane` Custom Resource:
 +
 ----
-$ oc get servicemeshcontrolplane full-install -o yaml -n $RHSM_CONTROL_PLANE_NS
+$ oc get servicemeshcontrolplane full-install -o yaml -n $SM_CP_NS
 ----
 +
 ----
@@ -114,7 +114,7 @@ status:
 The scope of the ServiceMeshPolicy is the Service Mesh. It can be overridden by namespace-scoped and service-scoped policies.
 +
 ----
-$ oc get servicemeshpolicy default -o yaml -n $RHSM_CONTROL_PLANE_NS
+$ oc get servicemeshpolicy default -o yaml -n $SM_CP_NS
 ----
 +
 .Output
@@ -160,7 +160,7 @@ As part of client-side verification when using mTLS, this identity is verified a
 . Visualize the contents of the `istio.incident-service` secret.
 +
 ----
-$ oc get secret istio.incident-service -o jsonpath={.data.cert-chain\\.pem} -n $ER_DEMO_NS | base64 --decode 
+$ oc get secret istio.incident-service -o jsonpath={.data.cert-chain\\.pem} -n $ERDEMO_NS | base64 --decode 
 ----
 +
 .Sample Output
@@ -247,12 +247,12 @@ $ openssl req -x509 -config cert.cfg -extensions req_ext -nodes -days 730 -newke
 . Create a secret in the Service Mesh control plane namespace with the certificates. The secret must be named `istio-ingressgateway-certs`:
 +
 ----
-$ oc create secret tls istio-ingressgateway-certs --cert tls.crt --key tls.key -n $RHSM_CONTROL_PLANE_NS
+$ oc create secret tls istio-ingressgateway-certs --cert tls.crt --key tls.key -n $SM_CP_NS
 ----
 . Restart the Istio Ingress Gateway pod:
 +
 ----
-$ oc patch deployment istio-ingressgateway -p '{"spec":{"template":{"metadata":{"annotations":{"kubectl.kubernetes.io/restartedAt": "'`date -Iseconds`'"}}}}}' -n $RHSM_CONTROL_PLANE_NS
+$ oc patch deployment istio-ingressgateway -p '{"spec":{"template":{"metadata":{"annotations":{"kubectl.kubernetes.io/restartedAt": "'`date -Iseconds`'"}}}}}' -n $SM_CP_NS
 ----
 
 
@@ -288,7 +288,7 @@ spec:
 . Create the wildcard Gateway:
 +
 ----
-$ oc create -f wildcard-gateway.yml -n $RHSM_CONTROL_PLANE_NS
+$ oc create -f wildcard-gateway.yml -n $SM_CP_NS
 ----
 
 == Configure the Emergency Response Demo services for mTLS
@@ -308,7 +308,7 @@ Enabling mTLS for the Incident Service involves the following tasks:
 . Replace the health checks in the Incident Service DeploymentConfig to use a command based health check with curl rather than a HTTP based health check.
 +
 ----
-$ oc edit dc $ERDEMO_USER-incident-service -o yaml -n $ER_DEMO_NS
+$ oc edit dc $ERDEMO_USER-incident-service -o yaml -n $ERDEMO_NS
 ----
 +
 Replace the existing liveness and readiness probes with command based probes:
@@ -340,7 +340,7 @@ Replace the existing liveness and readiness probes with command based probes:
 Alternatively you can use the following `oc patch` command to patch the DeploymentConfig:
 +
 ----
-$ oc patch dc $ERDEMO_USER-incident-service --type='json' -p '[{"op": "remove", "path": "/spec/template/spec/containers/0/livenessProbe/httpGet"}, {"op": "add", "path": "/spec/template/spec/containers/0/livenessProbe", "value": { "exec": { "command" : ["curl", "http://127.0.0.1:8080/actuator/health"]}, "initialDelaySeconds": 30, "timeoutSeconds": 3, "periodSeconds": 30, "successThreshold": 1, "failureThreshold": 3}}, {"op": "remove", "path": "/spec/template/spec/containers/0/readinessProbe/httpGet"}, {"op": "add", "path": "/spec/template/spec/containers/0/readinessProbe", "value": { "exec": { "command" : ["curl", "http://127.0.0.1:8080/actuator/health"]}, "initialDelaySeconds": 30, "timeoutSeconds": 3, "periodSeconds": 30, "successThreshold": 1, "failureThreshold": 3}}]' -n $ER_DEMO_NS
+$ oc patch dc $ERDEMO_USER-incident-service --type='json' -p '[{"op": "remove", "path": "/spec/template/spec/containers/0/livenessProbe/httpGet"}, {"op": "add", "path": "/spec/template/spec/containers/0/livenessProbe", "value": { "exec": { "command" : ["curl", "http://127.0.0.1:8080/actuator/health"]}, "initialDelaySeconds": 30, "timeoutSeconds": 3, "periodSeconds": 30, "successThreshold": 1, "failureThreshold": 3}}, {"op": "remove", "path": "/spec/template/spec/containers/0/readinessProbe/httpGet"}, {"op": "add", "path": "/spec/template/spec/containers/0/readinessProbe", "value": { "exec": { "command" : ["curl", "http://127.0.0.1:8080/actuator/health"]}, "initialDelaySeconds": 30, "timeoutSeconds": 3, "periodSeconds": 30, "successThreshold": 1, "failureThreshold": 3}}]' -n $ERDEMO_NS
 ----
 * When enforcing strict mTLS when calling the incident service, the HTTP based healthcheck will fail, as it is executed from the kubelet, and is not able to present a suitable certificate. The command based health checks are executed in the container itself, so they are not impacted.
 * The Service Mesh sidecar injector service can be configured to rewrite HTTP probes at sidecar injection time, so that the requests will be sent to Pilot, which will then redirect to the application. This global configuration is set in the `istio-sidecar-injector` configmap. However, the Service Mesh operator does not allow edits to the configmap (the operator reverts changes to the original configmap), and there is no way in the current version to configure this setting in the ServiceMeshControlPlane CR.
@@ -349,7 +349,7 @@ $ oc patch dc $ERDEMO_USER-incident-service --type='json' -p '[{"op": "remove", 
 . Annotate the Incident Service pods with the `sidecar.istio.io/inject: "true"` annotation. Skip this step if the service has been annotated in a previous lab.
 +
 ----
-oc edit dc incident-service -o yaml -n $ER_DEMO_NS
+oc edit dc incident-service -o yaml -n $ERDEMO_NS
 ----
 +
 In the `.spec.template.metadata` section, add the annotation:
@@ -367,7 +367,7 @@ In the `.spec.template.metadata` section, add the annotation:
 Alternatively, run the following `oc patch` command:
 +
 ----
-$ oc patch dc $ERDEMO_USER-incident-service --type='json' -p "[{\"op\": \"add\", \"path\": \"/spec/template/metadata\", \"value\": {\"annotations\":{\"sidecar.istio.io/inject\": \"true\"}, \"labels\":{\"app\":\"$ERDEMO_USER-incident-service\",\"group\":\"erd-services\"}}}]" -n $ER_DEMO_NS
+$ oc patch dc $ERDEMO_USER-incident-service --type='json' -p "[{\"op\": \"add\", \"path\": \"/spec/template/metadata\", \"value\": {\"annotations\":{\"sidecar.istio.io/inject\": \"true\"}, \"labels\":{\"app\":\"$ERDEMO_USER-incident-service\",\"group\":\"erd-services\"}}}]" -n $ERDEMO_NS
 ----
 +
 This forces a redeployment of the Incident Service. Verify that the Envoy proxy sidecar has been injected sucessfully: the new pod consists of two containers, `incident-service` and `istio-proxy`.
@@ -396,7 +396,7 @@ spec:
 .. Create the Policy:
 +
 ----
-$ oc create -f incident-service-policy.yml -n $ER_DEMO_NS
+$ oc create -f incident-service-policy.yml -n $ERDEMO_NS
 ----
 
 . Create a _DestinationRule_ for the Incident Service. A DestinationRule defines policies that apply to traffic intended for a service after routing has occurred. In our case we configure clients of the Incident Service to use mTLS, using the certificates generated by Citadel.
@@ -409,7 +409,7 @@ kind: DestinationRule
 metadata:
   name: incident-service-client-mtls
 spec:
-  host: $ERDEMO_USER-incident-service.$ER_DEMO_NS.svc.cluster.local
+  host: $ERDEMO_USER-incident-service.$ERDEMO_NS.svc.cluster.local
   trafficPolicy:
     tls:
       mode: ISTIO_MUTUAL
@@ -418,7 +418,7 @@ spec:
 .. Create the DestinationRule:
 +
 ----
-$ oc create -f incident-service-mtls-destinationrule.yml -n $ER_DEMO_NS
+$ oc create -f incident-service-mtls-destinationrule.yml -n $ERDEMO_NS
 ----
 
 . Create a _VirtualService_ for the Incident Service. A VirtualService defines a set of traffic routing rules to apply when a host is addressed. Each routing rule defines matching criteria for traffic of a specific protocol. If the traffic is matched, then it is sent to a named destination service.
@@ -434,7 +434,7 @@ spec:
   hosts:
   - incident-service.$ERDEMO_USER.apps.$SUBDOMAIN_BASE
   gateways:
-  - erd-wildcard-gateway.$RHSM_CONTROL_PLANE_NS.svc.cluster.local
+  - erd-wildcard-gateway.$SM_CP_NS.svc.cluster.local
   http:
   - match:
     - uri:
@@ -443,13 +443,13 @@ spec:
     - destination:
         port:
           number: 8080
-        host: $ERDEMO_USER-incident-service.$ER_DEMO_NS.svc.cluster.local
+        host: $ERDEMO_USER-incident-service.$ERDEMO_NS.svc.cluster.local
 " > incident-service-virtualservice.yml
 ----
 .. Create the VirtualService:
 +
 ----
-$ oc create -f incident-service-virtualservice.yml -n $ER_DEMO_NS
+$ oc create -f incident-service-virtualservice.yml -n $ERDEMO_NS
 ----
 
 . Create a route for the Incident Service which points to the Istio Ingress Gateway service.
@@ -481,13 +481,13 @@ spec:
 .. Create the route in the control plane namespace:
 +
 ----
-$ oc create -f incident-service-gateway.yml -n $RHSM_CONTROL_PLANE_NS
+$ oc create -f incident-service-gateway.yml -n $SM_CP_NS
 ----
 
 . Delete the existing Incident Service route
 +
 ----
-$ oc delete route $ERDEMO_USER-incident-service -n $ER_DEMO_NS
+$ oc delete route $ERDEMO_USER-incident-service -n $ERDEMO_NS
 ----
 
 . Verify that the Incident Service can be reached through the Istio Ingress Gateway:
@@ -546,8 +546,8 @@ $ curl -v -k https://incident-service.$ERDEMO_USER.apps.$SUBDOMAIN_BASE/incident
 . To check that the traffic between the Istio Ingress Gateway service and the Incident Service service uses mTLS, the `istioctl` tool can be used:
 +
 ----
-$ ISTIO_INGRESSGATEWAY_POD=$(oc get pod -l app=istio-ingressgateway -o jsonpath={.items.metadata.name} -n $RHSM_CONTROL_PLANE_NS)
-$ istioctl -n $RHSM_CONTROL_PLANE_NS -i $RHSM_CONTROL_PLANE_NS authn tls-check ${ISTIO_INGRESSGATEWAY_POD} $ERDEMO_USER-incident-service.$ER_DEMO_NS.svc.cluster.local
+$ ISTIO_INGRESSGATEWAY_POD=$(oc get pod -l app=istio-ingressgateway -o jsonpath={.items.metadata.name} -n $SM_CP_NS)
+$ istioctl -n $SM_CP_NS -i $SM_CP_NS authn tls-check ${ISTIO_INGRESSGATEWAY_POD} $ERDEMO_USER-incident-service.$ERDEMO_NS.svc.cluster.local
 ----
 +
 .Sample Output
@@ -573,7 +573,7 @@ The procedure for enabling mTLS communication for the Responder Service and othe
 . Replace the health checks in the Responder Service DeploymentConfig to use a command based health check with curl rather than a HTTP based health check.
 +
 ----
-$ oc edit dc responder-service -o yaml -n $ER_DEMO_NS
+$ oc edit dc responder-service -o yaml -n $ERDEMO_NS
 ----
 +
 Replace the existing liveness and readiness probes with command based probes:
@@ -605,13 +605,13 @@ Replace the existing liveness and readiness probes with command based probes:
 Alternatively, run the following `oc patch` command:
 +
 ----
-$ oc patch dc $ERDEMO_USER-responder-service --type='json' -p '[{"op": "remove", "path": "/spec/template/spec/containers/0/livenessProbe/httpGet"}, {"op": "add", "path": "/spec/template/spec/containers/0/livenessProbe", "value": { "exec": { "command" : ["curl", "http://127.0.0.1:8080/actuator/health"]},"initialDelaySeconds": 30, "timeoutSeconds": 3, "periodSeconds": 30, "successThreshold": 1, "failureThreshold": 3}}, {"op": "remove", "path": "/spec/template/spec/containers/0/readinessProbe/httpGet"}, {"op": "add", "path": "/spec/template/spec/containers/0/readinessProbe", "value": { "exec": { "command" : ["curl", "http://127.0.0.1:8080/actuator/health"]},"initialDelaySeconds": 30, "timeoutSeconds": 3, "periodSeconds": 30, "successThreshold": 1, "failureThreshold": 3}}]' -n $ER_DEMO_NS
+$ oc patch dc $ERDEMO_USER-responder-service --type='json' -p '[{"op": "remove", "path": "/spec/template/spec/containers/0/livenessProbe/httpGet"}, {"op": "add", "path": "/spec/template/spec/containers/0/livenessProbe", "value": { "exec": { "command" : ["curl", "http://127.0.0.1:8080/actuator/health"]},"initialDelaySeconds": 30, "timeoutSeconds": 3, "periodSeconds": 30, "successThreshold": 1, "failureThreshold": 3}}, {"op": "remove", "path": "/spec/template/spec/containers/0/readinessProbe/httpGet"}, {"op": "add", "path": "/spec/template/spec/containers/0/readinessProbe", "value": { "exec": { "command" : ["curl", "http://127.0.0.1:8080/actuator/health"]},"initialDelaySeconds": 30, "timeoutSeconds": 3, "periodSeconds": 30, "successThreshold": 1, "failureThreshold": 3}}]' -n $ERDEMO_NS
 ----
 
 . Annotate the Responder Service pods with the `sidecar.istio.io/inject: "true"` annotation.
 +
 ----
-$ oc patch dc $ERDEMO_USER-responder-service --type='json' -p "[{\"op\": \"add\", \"path\": \"/spec/template/metadata\", \"value\": {\"annotations\":{\"sidecar.istio.io/inject\": \"true\"}, \"labels\":{\"app\":\"$ERDEMO_USER-responder-service\",\"group\":\"erd-services\"}}}]" -n $ER_DEMO_NS
+$ oc patch dc $ERDEMO_USER-responder-service --type='json' -p "[{\"op\": \"add\", \"path\": \"/spec/template/metadata\", \"value\": {\"annotations\":{\"sidecar.istio.io/inject\": \"true\"}, \"labels\":{\"app\":\"$ERDEMO_USER-responder-service\",\"group\":\"erd-services\"}}}]" -n $ERDEMO_NS
 ----
 . _Policy_ for the Responder Service service.
 +
@@ -631,7 +631,7 @@ spec:
 ----
 +
 ----
-$ oc create -f responder-service-policy.yml -n $ER_DEMO_NS
+$ oc create -f responder-service-policy.yml -n $ERDEMO_NS
 ----
 
 . _DestinationRule_ for the Responder Service:
@@ -643,7 +643,7 @@ kind: DestinationRule
 metadata:
   name: responder-service-client-mtls
 spec:
-  host: $ERDEMO_USER-responder-service.$ER_DEMO_NS.svc.cluster.local
+  host: $ERDEMO_USER-responder-service.$ERDEMO_NS.svc.cluster.local
   trafficPolicy:
     tls:
       mode: ISTIO_MUTUAL
@@ -651,7 +651,7 @@ spec:
 ----
 +
 ----
-$ oc create -f responder-service-mtls-destinationrule.yml -n $ER_DEMO_NS
+$ oc create -f responder-service-mtls-destinationrule.yml -n $ERDEMO_NS
 ----
 . _VirtualService_ for the Responder Service:
 +
@@ -665,7 +665,7 @@ spec:
   hosts:
   - \"responder-service.$ERDEMO_USER.apps.$SUBDOMAIN_BASE\"
   gateways:
-  - erd-wildcard-gateway.$RHSM_CONTROL_PLANE_NS.svc.cluster.local
+  - erd-wildcard-gateway.$SM_CP_NS.svc.cluster.local
   http:
   - match:
     - uri:
@@ -678,12 +678,12 @@ spec:
     - destination:
         port:
           number: 8080
-        host: $ERDEMO_USER-responder-service.$ER_DEMO_NS.svc.cluster.local
+        host: $ERDEMO_USER-responder-service.$ERDEMO_NS.svc.cluster.local
 " > responder-service-virtualservice.yml
 ----
 +
 ----
-$ oc create -f responder-service-virtualservice.yml -n $ER_DEMO_NS
+$ oc create -f responder-service-virtualservice.yml -n $ERDEMO_NS
 ----
 . Route for the Responder Service:
 +
@@ -712,12 +712,12 @@ spec:
 ----
 +
 ----
-$ oc create -f responder-service-gateway.yml -n $RHSM_CONTROL_PLANE_NS
+$ oc create -f responder-service-gateway.yml -n $SM_CP_NS
 ----
 . Delete the existing Responder Service route
 +
 ----
-$ oc delete route $ERDEMO_USER-responder-service -n $ER_DEMO_NS
+$ oc delete route $ERDEMO_USER-responder-service -n $ERDEMO_NS
 ----
 . To test external access to the Responder Service:
 +
@@ -730,7 +730,7 @@ $ curl -v -k https://responder-service.$ERDEMO_USER.apps.$SUBDOMAIN_BASE/respond
 . Replace the health checks in the Disaster Simulator DeploymentConfig to use a command based health check with curl rather than a HTTP based health check.
 +
 ----
-$ oc edit dc disaster-simulator -o yaml -n $ER_DEMO_NS
+$ oc edit dc disaster-simulator -o yaml -n $ERDEMO_NS
 ----
 +
 Replace the existing liveness and readiness probes with command based probes:
@@ -762,12 +762,12 @@ Replace the existing liveness and readiness probes with command based probes:
 Alternatively, run the following `oc patch` command:
 +
 ----
-$ oc patch dc $ERDEMO_USER-disaster-simulator --type='json' -p '[{"op": "remove", "path": "/spec/template/spec/containers/0/livenessProbe/httpGet"}, {"op": "add", "path": "/spec/template/spec/containers/0/livenessProbe", "value": { "exec": { "command" : ["curl", "http://127.0.0.1:8080"]}, "initialDelaySeconds": 10, "timeoutSeconds": 1, "periodSeconds": 10, "successThreshold": 1, "failureThreshold": 3}}, {"op": "remove", "path": "/spec/template/spec/containers/0/readinessProbe/httpGet"}, {"op": "add", "path": "/spec/template/spec/containers/0/readinessProbe", "value": { "exec": { "command" : ["curl", "http://127.0.0.1:8080"]},"initialDelaySeconds": 10, "timeoutSeconds": 1, "periodSeconds": 10, "successThreshold": 1, "failureThreshold": 3}}]' -n $ER_DEMO_NS
+$ oc patch dc $ERDEMO_USER-disaster-simulator --type='json' -p '[{"op": "remove", "path": "/spec/template/spec/containers/0/livenessProbe/httpGet"}, {"op": "add", "path": "/spec/template/spec/containers/0/livenessProbe", "value": { "exec": { "command" : ["curl", "http://127.0.0.1:8080"]}, "initialDelaySeconds": 10, "timeoutSeconds": 1, "periodSeconds": 10, "successThreshold": 1, "failureThreshold": 3}}, {"op": "remove", "path": "/spec/template/spec/containers/0/readinessProbe/httpGet"}, {"op": "add", "path": "/spec/template/spec/containers/0/readinessProbe", "value": { "exec": { "command" : ["curl", "http://127.0.0.1:8080"]},"initialDelaySeconds": 10, "timeoutSeconds": 1, "periodSeconds": 10, "successThreshold": 1, "failureThreshold": 3}}]' -n $ERDEMO_NS
 ----
 . Annotate the Disaster Simulator pods with the `sidecar.istio.io/inject: "true"` annotation.
 +
 ----
-$ oc patch dc $ERDEMO_USER-disaster-simulator --type='json' -p "[{\"op\": \"add\", \"path\": \"/spec/template/metadata\", \"value\": {\"annotations\":{\"sidecar.istio.io/inject\": \"true\"}, \"labels\":{\"app\":\"$ERDEMO_USER-disaster-simulator\",\"group\":\"erd-services\"}}}]" -n $ER_DEMO_NS
+$ oc patch dc $ERDEMO_USER-disaster-simulator --type='json' -p "[{\"op\": \"add\", \"path\": \"/spec/template/metadata\", \"value\": {\"annotations\":{\"sidecar.istio.io/inject\": \"true\"}, \"labels\":{\"app\":\"$ERDEMO_USER-disaster-simulator\",\"group\":\"erd-services\"}}}]" -n $ERDEMO_NS
 ----
 . _Policy_ for the Disaster Simulator service.
 +
@@ -787,7 +787,7 @@ spec:
 ----
 +
 ----
-$ oc create -f disaster-simulator-policy.yml -n $ER_DEMO_NS
+$ oc create -f disaster-simulator-policy.yml -n $ERDEMO_NS
 ----
 
 . _DestinationRule_ for the Disaster Simulator Service:
@@ -799,7 +799,7 @@ kind: DestinationRule
 metadata:
   name: disaster-simulator-client-mtls
 spec:
-  host: $ERDEMO_USER-disaster-simulator.$ER_DEMO_NS.svc.cluster.local
+  host: $ERDEMO_USER-disaster-simulator.$ERDEMO_NS.svc.cluster.local
   trafficPolicy:
     tls:
       mode: ISTIO_MUTUAL
@@ -807,7 +807,7 @@ spec:
 ----
 +
 ----
-$ oc create -f disaster-simulator-mtls-destinationrule.yml -n $ER_DEMO_NS
+$ oc create -f disaster-simulator-mtls-destinationrule.yml -n $ERDEMO_NS
 ----
 
 . _VirtualService_ for the Responder Service:
@@ -822,7 +822,7 @@ spec:
   hosts:
   - disaster-simulator.$ERDEMO_USER.apps.$SUBDOMAIN_BASE
   gateways:
-  - erd-wildcard-gateway.$RHSM_CONTROL_PLANE_NS.svc.cluster.local
+  - erd-wildcard-gateway.$SM_CP_NS.svc.cluster.local
   http:
   - match:
     - uri:
@@ -831,12 +831,12 @@ spec:
     - destination:
         port:
           number: 8080
-        host: $ERDEMO_USER-disaster-simulator.$ER_DEMO_NS.svc.cluster.local
+        host: $ERDEMO_USER-disaster-simulator.$ERDEMO_NS.svc.cluster.local
 " > disaster-simulator-virtualservice.yml
 ----
 +
 ----
-$ oc create -f disaster-simulator-virtualservice.yml -n $ER_DEMO_NS
+$ oc create -f disaster-simulator-virtualservice.yml -n $ERDEMO_NS
 ----
 
 . Route for the Disaster Simulator:
@@ -866,13 +866,13 @@ spec:
 ----
 +
 ----
-$ oc create -f disaster-simulator-gateway.yml -n $RHSM_CONTROL_PLANE_NS
+$ oc create -f disaster-simulator-gateway.yml -n $SM_CP_NS
 ----
 
 . Delete the existing Disaster Simulator route
 +
 ----
-$ oc delete route $ERDEMO_USER-disaster-simulator -n $ER_DEMO_NS
+$ oc delete route $ERDEMO_USER-disaster-simulator -n $ERDEMO_NS
 ----
 
 . To test external access to the Disaster Simulator:
@@ -886,7 +886,7 @@ $ curl -v -k https://disaster-simulator.$ERDEMO_USER.apps.$SUBDOMAIN_BASE
 . Replace the health checks in the Incident Priority Service DeploymentConfig to use a command based health check with curl rather than a HTTP based health check.
 +
 ----
-$ oc edit dc $ERDEMO_USER-incident-priority-service -o yaml -n $ER_DEMO_NS
+$ oc edit dc $ERDEMO_USER-incident-priority-service -o yaml -n $ERDEMO_NS
 ----
 +
 Replace the existing liveness and readiness probes with command based probes:
@@ -918,12 +918,12 @@ Replace the existing liveness and readiness probes with command based probes:
 Alternatively, run the following `oc patch` command:
 +
 ----
-$ oc patch dc $ERDEMO_USER-incident-priority-service --type='json' -p '[{"op": "remove", "path": "/spec/template/spec/containers/0/livenessProbe/httpGet"}, {"op": "add", "path": "/spec/template/spec/containers/0/livenessProbe", "value": { "exec": { "command" : ["curl", "http://127.0.0.1:8080/health"]}, "initialDelaySeconds": 30, "timeoutSeconds": 3, "periodSeconds": 30, "successThreshold": 1, "failureThreshold": 3}}, {"op": "remove", "path": "/spec/template/spec/containers/0/readinessProbe/httpGet"}, {"op": "add", "path": "/spec/template/spec/containers/0/readinessProbe", "value": { "exec": { "command" : ["curl", "http://127.0.0.1:8080/health"]},"initialDelaySeconds": 10, "timeoutSeconds": 3, "periodSeconds": 30, "successThreshold": 1, "failureThreshold": 3}}]' -n $ER_DEMO_NS
+$ oc patch dc $ERDEMO_USER-incident-priority-service --type='json' -p '[{"op": "remove", "path": "/spec/template/spec/containers/0/livenessProbe/httpGet"}, {"op": "add", "path": "/spec/template/spec/containers/0/livenessProbe", "value": { "exec": { "command" : ["curl", "http://127.0.0.1:8080/health"]}, "initialDelaySeconds": 30, "timeoutSeconds": 3, "periodSeconds": 30, "successThreshold": 1, "failureThreshold": 3}}, {"op": "remove", "path": "/spec/template/spec/containers/0/readinessProbe/httpGet"}, {"op": "add", "path": "/spec/template/spec/containers/0/readinessProbe", "value": { "exec": { "command" : ["curl", "http://127.0.0.1:8080/health"]},"initialDelaySeconds": 10, "timeoutSeconds": 3, "periodSeconds": 30, "successThreshold": 1, "failureThreshold": 3}}]' -n $ERDEMO_NS
 ----
 . Annotate the Incident Priority Service pods with the `sidecar.istio.io/inject: "true"` annotation.
 +
 ----
-$ oc patch dc $ERDEMO_USER-incident-priority-service --type='json' -p "[{\"op\": \"add\", \"path\": \"/spec/template/metadata\", \"value\": {\"annotations\":{\"sidecar.istio.io/inject\": \"true\"}, \"labels\":{\"app\":\"$ERDEMO_USER-incident-priority-service\",\"group\":\"erd-services\"}}}]" -n $ER_DEMO_NS
+$ oc patch dc $ERDEMO_USER-incident-priority-service --type='json' -p "[{\"op\": \"add\", \"path\": \"/spec/template/metadata\", \"value\": {\"annotations\":{\"sidecar.istio.io/inject\": \"true\"}, \"labels\":{\"app\":\"$ERDEMO_USER-incident-priority-service\",\"group\":\"erd-services\"}}}]" -n $ERDEMO_NS
 ----
 . _Policy_ for the Incident Priority Service.
 +
@@ -943,7 +943,7 @@ spec:
 ----
 +
 ----
-$ oc create -f incident-priority-service-policy.yml -n $ER_DEMO_NS
+$ oc create -f incident-priority-service-policy.yml -n $ERDEMO_NS
 ----
 . _DestinationRule_ for the Incident Priority Service:
 +
@@ -954,7 +954,7 @@ kind: DestinationRule
 metadata:
   name: incident-priority-service-client-mtls
 spec:
-  host: $ERDEMO_USER-incident-priority-service.$ER_DEMO_NS.svc.cluster.local
+  host: $ERDEMO_USER-incident-priority-service.$ERDEMO_NS.svc.cluster.local
   trafficPolicy:
     tls:
       mode: ISTIO_MUTUAL
@@ -962,7 +962,7 @@ spec:
 ----
 +
 ----
-$ oc create -f incident-priority-service-mtls-destinationrule.yml -n $ER_DEMO_NS
+$ oc create -f incident-priority-service-mtls-destinationrule.yml -n $ERDEMO_NS
 ----
 
 . _VirtualService_ for the Incident Priority Service:
@@ -977,7 +977,7 @@ spec:
   hosts:
   - incident-priority-service.$ERDEMO_USER.apps.$SUBDOMAIN_BASE
   gateways:
-  - erd-wildcard-gateway.$RHSM_CONTROL_PLANE_NS.svc.cluster.local
+  - erd-wildcard-gateway.$SM_CP_NS.svc.cluster.local
   http:
   - match:
     - uri:
@@ -988,12 +988,12 @@ spec:
     - destination:
         port:
           number: 8080
-        host: $ERDEMO_USER-incident-priority-service.$ER_DEMO_NS.svc.cluster.local
+        host: $ERDEMO_USER-incident-priority-service.$ERDEMO_NS.svc.cluster.local
 " > incident-priority-service-virtualservice.yml
 ----
 +
 ----
-$ oc create -f incident-priority-service-virtualservice.yml -n $ER_DEMO_NS
+$ oc create -f incident-priority-service-virtualservice.yml -n $ERDEMO_NS
 ----
 
 . Route for the Incident Priority Service:
@@ -1023,13 +1023,13 @@ spec:
 ----
 +
 ----
-$ oc create -f incident-priority-service-gateway.yml -n $RHSM_CONTROL_PLANE_NS
+$ oc create -f incident-priority-service-gateway.yml -n $SM_CP_NS
 ----
 
 . Delete the existing Incident Priority Service route
 +
 ----
-$ oc delete route $ERDEMO_USER-incident-priority-service -n $ER_DEMO_NS
+$ oc delete route $ERDEMO_USER-incident-priority-service -n $ERDEMO_NS
 ----
 
 . To test external access to the Incident Priority Service:
@@ -1045,7 +1045,7 @@ The process service is not exposed outside of the cluster, so there is no need f
 . Replace the health checks in the Process Service DeploymentConfig to use a command based health check with curl rather than a HTTP based health check.
 +
 ----
-$ oc edit dc process-service -o yaml -n $ER_DEMO_NS
+$ oc edit dc process-service -o yaml -n $ERDEMO_NS
 ----
 +
 Replace the existing liveness and readiness probes with command based probes:
@@ -1077,12 +1077,12 @@ Replace the existing liveness and readiness probes with command based probes:
 Alternatively, run the following `oc patch` command:
 +
 ----
-$ oc patch dc $ERDEMO_USER-process-service --type='json' -p '[{"op": "remove", "path": "/spec/template/spec/containers/0/livenessProbe/httpGet"}, {"op": "add", "path": "/spec/template/spec/containers/0/livenessProbe", "value": { "exec": { "command" : ["curl", "http://127.0.0.1:8080/acuator/health"]},"initialDelaySeconds": 60, "timeoutSeconds": 3, "periodSeconds": 30, "successThreshold": 1, "failureThreshold": 3}}, {"op": "remove", "path": "/spec/template/spec/containers/0/readinessProbe/httpGet"}, {"op": "add", "path": "/spec/template/spec/containers/0/readinessProbe", "value": { "exec": { "command" : ["curl", "http://127.0.0.1:8080/actuator/health"]},"initialDelaySeconds": 45, "timeoutSeconds": 3, "periodSeconds": 30, "successThreshold": 1, "failureThreshold": 3}}]' -n $ER_DEMO_NS
+$ oc patch dc $ERDEMO_USER-process-service --type='json' -p '[{"op": "remove", "path": "/spec/template/spec/containers/0/livenessProbe/httpGet"}, {"op": "add", "path": "/spec/template/spec/containers/0/livenessProbe", "value": { "exec": { "command" : ["curl", "http://127.0.0.1:8080/acuator/health"]},"initialDelaySeconds": 60, "timeoutSeconds": 3, "periodSeconds": 30, "successThreshold": 1, "failureThreshold": 3}}, {"op": "remove", "path": "/spec/template/spec/containers/0/readinessProbe/httpGet"}, {"op": "add", "path": "/spec/template/spec/containers/0/readinessProbe", "value": { "exec": { "command" : ["curl", "http://127.0.0.1:8080/actuator/health"]},"initialDelaySeconds": 45, "timeoutSeconds": 3, "periodSeconds": 30, "successThreshold": 1, "failureThreshold": 3}}]' -n $ERDEMO_NS
 ----
 . Annotate the Process Service pods with the `sidecar.istio.io/inject: "true"` annotation.
 +
 ----
-$ oc patch dc $ERDEMO_USER-process-service --type='json' -p "[{\"op\": \"add\", \"path\": \"/spec/template/metadata\", \"value\": {\"annotations\":{\"sidecar.istio.io/inject\": \"true\"}, \"labels\":{\"app\":\"$ERDEMO_USER-process-service\",\"group\":\"erd-services\"}}}]" -n $ER_DEMO_NS
+$ oc patch dc $ERDEMO_USER-process-service --type='json' -p "[{\"op\": \"add\", \"path\": \"/spec/template/metadata\", \"value\": {\"annotations\":{\"sidecar.istio.io/inject\": \"true\"}, \"labels\":{\"app\":\"$ERDEMO_USER-process-service\",\"group\":\"erd-services\"}}}]" -n $ERDEMO_NS
 ----
 . _Policy_ for the Process Service service.
 +
@@ -1102,7 +1102,7 @@ spec:
 ----
 +
 ----
-$ oc create -f process-service-policy.yml -n $ER_DEMO_NS
+$ oc create -f process-service-policy.yml -n $ERDEMO_NS
 ----
 
 . _DestinationRule_ for the Process Service:
@@ -1114,7 +1114,7 @@ kind: DestinationRule
 metadata:
   name: process-service-client-mtls
 spec:
-  host: $ERDEMO_USER-process-service.$ER_DEMO_NS.svc.cluster.local
+  host: $ERDEMO_USER-process-service.$ERDEMO_NS.svc.cluster.local
   trafficPolicy:
     tls:
       mode: ISTIO_MUTUAL
@@ -1122,7 +1122,7 @@ spec:
 ----
 +
 ----
-$ oc create -f process-service-mtls-destinationrule.yml -n $ER_DEMO_NS
+$ oc create -f process-service-mtls-destinationrule.yml -n $ERDEMO_NS
 ----
 
 === Mission Service
@@ -1130,7 +1130,7 @@ $ oc create -f process-service-mtls-destinationrule.yml -n $ER_DEMO_NS
 . Replace the health checks in the Mission Service DeploymentConfig to use a command based health check with curl rather than a HTTP based health check.
 +
 ----
-$ oc edit dc mission-service -o yaml -n $ER_DEMO_NS
+$ oc edit dc mission-service -o yaml -n $ERDEMO_NS
 ----
 +
 Replace the existing liveness and readiness probes with command based probes:
@@ -1162,12 +1162,12 @@ Replace the existing liveness and readiness probes with command based probes:
 Alternatively, run the following `oc patch` command:
 +
 ----
-$ oc patch dc $ERDEMO_USER-mission-service --type='json' -p '[{"op": "remove", "path": "/spec/template/spec/containers/0/livenessProbe/httpGet"}, {"op": "add", "path": "/spec/template/spec/containers/0/livenessProbe", "value": { "exec": { "command" : ["curl", "http://127.0.0.1:8080"]},"initialDelaySeconds": 10, "timeoutSeconds": 1, "periodSeconds": 10, "successThreshold": 1, "failureThreshold": 3}}, {"op": "remove", "path": "/spec/template/spec/containers/0/readinessProbe/httpGet"}, {"op": "add", "path": "/spec/template/spec/containers/0/readinessProbe", "value": { "exec": { "command" : ["curl", "http://127.0.0.1:8080"]},"initialDelaySeconds": 10, "timeoutSeconds": 1, "periodSeconds": 10, "successThreshold": 1, "failureThreshold": 3}}]' -n $ER_DEMO_NS
+$ oc patch dc $ERDEMO_USER-mission-service --type='json' -p '[{"op": "remove", "path": "/spec/template/spec/containers/0/livenessProbe/httpGet"}, {"op": "add", "path": "/spec/template/spec/containers/0/livenessProbe", "value": { "exec": { "command" : ["curl", "http://127.0.0.1:8080"]},"initialDelaySeconds": 10, "timeoutSeconds": 1, "periodSeconds": 10, "successThreshold": 1, "failureThreshold": 3}}, {"op": "remove", "path": "/spec/template/spec/containers/0/readinessProbe/httpGet"}, {"op": "add", "path": "/spec/template/spec/containers/0/readinessProbe", "value": { "exec": { "command" : ["curl", "http://127.0.0.1:8080"]},"initialDelaySeconds": 10, "timeoutSeconds": 1, "periodSeconds": 10, "successThreshold": 1, "failureThreshold": 3}}]' -n $ERDEMO_NS
 ----
 . Annotate the Mission Service pods with the `sidecar.istio.io/inject: "true"` annotation.
 +
 ----
-$ oc patch dc $ERDEMO_USER-mission-service --type='json' -p "[{\"op\": \"add\", \"path\": \"/spec/template/metadata\", \"value\": {\"annotations\":{\"sidecar.istio.io/inject\": \"true\"}, \"labels\":{\"app\":\"$ERDEMO_USER-mission-service\",\"group\":\"erd-services\"}}}]" -n $ER_DEMO_NS
+$ oc patch dc $ERDEMO_USER-mission-service --type='json' -p "[{\"op\": \"add\", \"path\": \"/spec/template/metadata\", \"value\": {\"annotations\":{\"sidecar.istio.io/inject\": \"true\"}, \"labels\":{\"app\":\"$ERDEMO_USER-mission-service\",\"group\":\"erd-services\"}}}]" -n $ERDEMO_NS
 ----
 . _Policy_ for the Mission Service service.
 +
@@ -1187,7 +1187,7 @@ spec:
 ----
 +
 ----
-$ oc create -f mission-service-policy.yml -n $ER_DEMO_NS
+$ oc create -f mission-service-policy.yml -n $ERDEMO_NS
 ----
 
 . _DestinationRule_ for the Mission Service:
@@ -1199,7 +1199,7 @@ kind: DestinationRule
 metadata:
   name: mission-service-client-mtls
 spec:
-  host: $ERDEMO_USER-mission-service.$ER_DEMO_NS.svc.cluster.local
+  host: $ERDEMO_USER-mission-service.$ERDEMO_NS.svc.cluster.local
   trafficPolicy:
     tls:
       mode: ISTIO_MUTUAL
@@ -1207,7 +1207,7 @@ spec:
 ----
 +
 ----
-$ oc create -f mission-service-mtls-destinationrule.yml -n $ER_DEMO_NS
+$ oc create -f mission-service-mtls-destinationrule.yml -n $ERDEMO_NS
 ----
 
 . _VirtualService_ for the Mission Service:
@@ -1222,7 +1222,7 @@ spec:
   hosts:
   - mission-service.$ERDEMO_USER.apps.$SUBDOMAIN_BASE
   gateways:
-  - erd-wildcard-gateway.$RHSM_CONTROL_PLANE_NS.svc.cluster.local
+  - erd-wildcard-gateway.$SM_CP_NS.svc.cluster.local
   http:
   - match:
     - uri:
@@ -1231,12 +1231,12 @@ spec:
     - destination:
         port:
           number: 8080
-        host: $ERDEMO_USER-mission-service.$ER_DEMO_NS.svc.cluster.local
+        host: $ERDEMO_USER-mission-service.$ERDEMO_NS.svc.cluster.local
 " > mission-service-virtualservice.yml
 ----
 +
 ----
-$ oc create -f mission-service-virtualservice.yml -n $ER_DEMO_NS
+$ oc create -f mission-service-virtualservice.yml -n $ERDEMO_NS
 ----
 
 . Route for the Mission Service:
@@ -1266,13 +1266,13 @@ spec:
 ----
 +
 ----
-$ oc create -f mission-service-gateway.yml -n $RHSM_CONTROL_PLANE_NS
+$ oc create -f mission-service-gateway.yml -n $SM_CP_NS
 ----
 
 . Delete the existing Mission Service route:
 +
 ----
-$ oc delete route $ERDEMO_USER-mission-service -n $ER_DEMO_NS
+$ oc delete route $ERDEMO_USER-mission-service -n $ERDEMO_NS
 ----
 
 . To test external access to the Incident Priority Service:
@@ -1286,7 +1286,7 @@ $ curl -v -k https://mission-service.$ERDEMO_USER.apps.$SUBDOMAIN_BASE/api/missi
 . Replace the health checks in the Responder Simulator DeploymentConfig to use a command based health check with curl rather than a HTTP based health check.
 +
 ----
-$ oc edit dc responder-simulator -o yaml -n $ER_DEMO_NS
+$ oc edit dc responder-simulator -o yaml -n $ERDEMO_NS
 ----
 +
 Replace the existing liveness and readiness probes with command based probes:
@@ -1318,13 +1318,13 @@ Replace the existing liveness and readiness probes with command based probes:
 Alternatively, run the following `oc patch` command:
 +
 ----
-$ oc patch dc $ERDEMO_USER-responder-simulator --type='json' -p '[{"op": "remove", "path": "/spec/template/spec/containers/0/livenessProbe/httpGet"}, {"op": "add", "path": "/spec/template/spec/containers/0/livenessProbe", "value": { "exec": { "command" : ["curl", "http://127.0.0.1:8080/metrics"]},"initialDelaySeconds": 10, "timeoutSeconds": 1, "periodSeconds": 10, "successThreshold": 1, "failureThreshold": 3}}, {"op": "remove", "path": "/spec/template/spec/containers/0/readinessProbe/httpGet"}, {"op": "add", "path": "/spec/template/spec/containers/0/readinessProbe", "value": { "exec": { "command" : ["curl", "http://127.0.0.1:8080/metrics"]},"initialDelaySeconds": 10, "timeoutSeconds": 1, "periodSeconds": 10, "successThreshold": 1, "failureThreshold": 3}}]' -n $ER_DEMO_NS
+$ oc patch dc $ERDEMO_USER-responder-simulator --type='json' -p '[{"op": "remove", "path": "/spec/template/spec/containers/0/livenessProbe/httpGet"}, {"op": "add", "path": "/spec/template/spec/containers/0/livenessProbe", "value": { "exec": { "command" : ["curl", "http://127.0.0.1:8080/metrics"]},"initialDelaySeconds": 10, "timeoutSeconds": 1, "periodSeconds": 10, "successThreshold": 1, "failureThreshold": 3}}, {"op": "remove", "path": "/spec/template/spec/containers/0/readinessProbe/httpGet"}, {"op": "add", "path": "/spec/template/spec/containers/0/readinessProbe", "value": { "exec": { "command" : ["curl", "http://127.0.0.1:8080/metrics"]},"initialDelaySeconds": 10, "timeoutSeconds": 1, "periodSeconds": 10, "successThreshold": 1, "failureThreshold": 3}}]' -n $ERDEMO_NS
 ----
 
 . Annotate the Responder Simulator pods with the `sidecar.istio.io/inject: "true"` annotation.
 +
 ----
-$ oc patch dc $ERDEMO_USER-responder-simulator --type='json' -p "[{\"op\": \"add\", \"path\": \"/spec/template/metadata\", \"value\": {\"annotations\":{\"sidecar.istio.io/inject\": \"true\"}, \"labels\":{\"app\":\"$ERDEMO_USER-responder-simulator\",\"group\":\"erd-services\"}}}]" -n $ER_DEMO_NS
+$ oc patch dc $ERDEMO_USER-responder-simulator --type='json' -p "[{\"op\": \"add\", \"path\": \"/spec/template/metadata\", \"value\": {\"annotations\":{\"sidecar.istio.io/inject\": \"true\"}, \"labels\":{\"app\":\"$ERDEMO_USER-responder-simulator\",\"group\":\"erd-services\"}}}]" -n $ERDEMO_NS
 ----
 
 . _Policy_ for the Responder Simulator service.
@@ -1345,7 +1345,7 @@ spec:
 ----
 +
 ----
-$ oc create -f responder-simulator-policy.yml -n $ER_DEMO_NS
+$ oc create -f responder-simulator-policy.yml -n $ERDEMO_NS
 ----
 
 . _DestinationRule_ for the Responder Simulator:
@@ -1357,7 +1357,7 @@ kind: DestinationRule
 metadata:
   name: responder-simulator-client-mtls
 spec:
-  host: $ERDEMO_USER-responder-simulator.$ER_DEMO_NS.svc.cluster.local
+  host: $ERDEMO_USER-responder-simulator.$ERDEMO_NS.svc.cluster.local
   trafficPolicy:
     tls:
       mode: ISTIO_MUTUAL
@@ -1365,7 +1365,7 @@ spec:
 ----
 +
 ----
-$ oc create -f responder-simulator-mtls-destinationrule.yml -n $ER_DEMO_NS
+$ oc create -f responder-simulator-mtls-destinationrule.yml -n $ERDEMO_NS
 ----
 
 . _VirtualService_ for the Responder Simulator:
@@ -1380,7 +1380,7 @@ spec:
   hosts:
   - responder-simulator.$ERDEMO_USER.apps.$SUBDOMAIN_BASE
   gateways:
-  - erd-wildcard-gateway.$RHSM_CONTROL_PLANE_NS.svc.cluster.local
+  - erd-wildcard-gateway.$SM_CP_NS.svc.cluster.local
   http:
   - match:
     - uri:
@@ -1389,12 +1389,12 @@ spec:
     - destination:
         port:
           number: 8080
-        host: $ERDEMO_USER-responder-simulator.$ER_DEMO_NS.svc.cluster.local
+        host: $ERDEMO_USER-responder-simulator.$ERDEMO_NS.svc.cluster.local
 " > responder-simulator-virtualservice.yml
 ----
 +
 ----
-$ oc create -f responder-simulator-virtualservice.yml -n $ER_DEMO_NS
+$ oc create -f responder-simulator-virtualservice.yml -n $ERDEMO_NS
 ----
 
 . Route for the Responder Simulator:
@@ -1424,13 +1424,13 @@ spec:
 ----
 +
 ----
-$ oc create -f responder-simulator-gateway.yml -n $RHSM_CONTROL_PLANE_NS
+$ oc create -f responder-simulator-gateway.yml -n $SM_CP_NS
 ----
 
 . Delete the existing Responder Simulator route
 +
 ----
-$ oc delete route $ERDEMO_USER-responder-simulator -n $ER_DEMO_NS
+$ oc delete route $ERDEMO_USER-responder-simulator -n $ERDEMO_NS
 ----
 
 . To test external access to the Responder Simulator:
@@ -1444,7 +1444,7 @@ $ curl -v -k https://responder-simulator.$ERDEMO_USER.apps.$SUBDOMAIN_BASE/stats
 . Replace the health checks in the Process Viewer DeploymentConfig to use a command based health check with curl rather than a HTTP based health check.
 +
 ----
-$ oc edit dc process-viewer -o yaml -n $ER_DEMO_NS
+$ oc edit dc process-viewer -o yaml -n $ERDEMO_NS
 ----
 +
 Replace the existing liveness and readiness probes with command based probes:
@@ -1476,13 +1476,13 @@ Replace the existing liveness and readiness probes with command based probes:
 Alternatively, run the following `oc patch` command:
 +
 ----
-$ oc patch dc $ERDEMO_USER-process-viewer --type='json' -p '[{"op": "remove", "path": "/spec/template/spec/containers/0/livenessProbe/httpGet"}, {"op": "add", "path": "/spec/template/spec/containers/0/livenessProbe", "value": { "exec": { "command" : ["curl", "http://127.0.0.1:8080/health"]},"initialDelaySeconds": 15, "timeoutSeconds": 3, "periodSeconds": 30, "successThreshold": 1, "failureThreshold": 3}}, {"op": "remove", "path": "/spec/template/spec/containers/0/readinessProbe/httpGet"}, {"op": "add", "path": "/spec/template/spec/containers/0/readinessProbe", "value": { "exec": { "command" : ["curl", "http://127.0.0.1:8080/health"]},"initialDelaySeconds": 5, "timeoutSeconds": 3, "periodSeconds": 30, "successThreshold": 1, "failureThreshold": 3}}]' -n $ER_DEMO_NS
+$ oc patch dc $ERDEMO_USER-process-viewer --type='json' -p '[{"op": "remove", "path": "/spec/template/spec/containers/0/livenessProbe/httpGet"}, {"op": "add", "path": "/spec/template/spec/containers/0/livenessProbe", "value": { "exec": { "command" : ["curl", "http://127.0.0.1:8080/health"]},"initialDelaySeconds": 15, "timeoutSeconds": 3, "periodSeconds": 30, "successThreshold": 1, "failureThreshold": 3}}, {"op": "remove", "path": "/spec/template/spec/containers/0/readinessProbe/httpGet"}, {"op": "add", "path": "/spec/template/spec/containers/0/readinessProbe", "value": { "exec": { "command" : ["curl", "http://127.0.0.1:8080/health"]},"initialDelaySeconds": 5, "timeoutSeconds": 3, "periodSeconds": 30, "successThreshold": 1, "failureThreshold": 3}}]' -n $ERDEMO_NS
 ----
 
 . Annotate the Process Viewer pods with the `sidecar.istio.io/inject: "true"` annotation.
 +
 ----
-$ oc patch dc $ERDEMO_USER-process-viewer --type='json' -p "[{\"op\": \"add\", \"path\": \"/spec/template/metadata\", \"value\": {\"annotations\":{\"sidecar.istio.io/inject\": \"true\"}, \"labels\":{\"app\":\"$ERDEMO_USER-process-viewer\"}}}]" -n $ER_DEMO_NS
+$ oc patch dc $ERDEMO_USER-process-viewer --type='json' -p "[{\"op\": \"add\", \"path\": \"/spec/template/metadata\", \"value\": {\"annotations\":{\"sidecar.istio.io/inject\": \"true\"}, \"labels\":{\"app\":\"$ERDEMO_USER-process-viewer\"}}}]" -n $ERDEMO_NS
 ----
 
 . _Policy_ for the Process Viewer service.
@@ -1503,7 +1503,7 @@ spec:
 ----
 +
 ----
-$ oc create -f process-viewer-policy.yml -n $ER_DEMO_NS
+$ oc create -f process-viewer-policy.yml -n $ERDEMO_NS
 ----
 
 . _DestinationRule_ for Process Viewer:
@@ -1515,7 +1515,7 @@ kind: DestinationRule
 metadata:
   name: process-viewer-client-mtls
 spec:
-  host: $ERDEMO_USER-process-viewer.$ER_DEMO_NS.svc.cluster.local
+  host: $ERDEMO_USER-process-viewer.$ERDEMO_NS.svc.cluster.local
   trafficPolicy:
     tls:
       mode: ISTIO_MUTUAL
@@ -1523,7 +1523,7 @@ spec:
 ----
 +
 ----
-$ oc create -f process-viewer-mtls-destinationrule.yml -n $ER_DEMO_NS
+$ oc create -f process-viewer-mtls-destinationrule.yml -n $ERDEMO_NS
 ----
 
 . _VirtualService_ for Process Viewer:
@@ -1538,7 +1538,7 @@ spec:
   hosts:
   - process-viewer.$ERDEMO_USER.apps.$SUBDOMAIN_BASE
   gateways:
-  - erd-wildcard-gateway.$RHSM_CONTROL_PLANE_NS.svc.cluster.local
+  - erd-wildcard-gateway.$SM_CP_NS.svc.cluster.local
   http:
   - match:
     - uri:
@@ -1549,12 +1549,12 @@ spec:
     - destination:
         port:
           number: 8080
-        host: $ERDEMO_USER-process-viewer.$ER_DEMO_NS.svc.cluster.local
+        host: $ERDEMO_USER-process-viewer.$ERDEMO_NS.svc.cluster.local
 " > process-viewer-virtualservice.yml
 ----
 +
 ----
-$ oc create -f process-viewer-virtualservice.yml -n $ER_DEMO_NS
+$ oc create -f process-viewer-virtualservice.yml -n $ERDEMO_NS
 ----
 
 . Route for Process Viewer:
@@ -1584,13 +1584,13 @@ spec:
 ----
 +
 ----
-$ oc create -f process-viewer-gateway.yml -n $RHSM_CONTROL_PLANE_NS
+$ oc create -f process-viewer-gateway.yml -n $SM_CP_NS
 ----
 
 . Delete the existing Process Viewer route
 +
 ----
-$ oc delete route $ERDEMO_USER-process-viewer -n $ER_DEMO_NS
+$ oc delete route $ERDEMO_USER-process-viewer -n $ERDEMO_NS
 ----
 
 . To test external access to the Incident Priority Service:
@@ -1604,7 +1604,7 @@ $ curl -v -k https://process-viewer.$ERDEMO_USER.apps.$SUBDOMAIN_BASE/image/proc
 . Replace the health checks in the Emergency Console DeploymentConfig to use a command based health check with curl rather than a HTTP based health check.
 +
 ----
-$ oc edit dc emergency-console -o yaml -n $ER_DEMO_NS
+$ oc edit dc emergency-console -o yaml -n $ERDEMO_NS
 ----
 +
 Replace the existing liveness and readiness probes with command based probes:
@@ -1636,13 +1636,13 @@ Replace the existing liveness and readiness probes with command based probes:
 Alternatively, run the following `oc patch` command:
 +
 ----
-$ oc patch dc $ERDEMO_USER-emergency-console --type='json' -p '[{"op": "remove", "path": "/spec/template/spec/containers/0/livenessProbe/httpGet"}, {"op": "add", "path": "/spec/template/spec/containers/0/livenessProbe", "value": { "exec": { "command" : ["curl", "http://127.0.0.1:8080"]}, "initialDelaySeconds": 30, "timeoutSeconds": 3, "periodSeconds": 30, "successThreshold": 1, "failureThreshold": 3}}, {"op": "remove", "path": "/spec/template/spec/containers/0/readinessProbe/httpGet"}, {"op": "add", "path": "/spec/template/spec/containers/0/readinessProbe", "value": { "exec": { "command" : ["curl", "http://127.0.0.1:8080"]},"initialDelaySeconds": 30, "timeoutSeconds": 3, "periodSeconds": 30, "successThreshold": 1, "failureThreshold": 3}}]' -n $ER_DEMO_NS
+$ oc patch dc $ERDEMO_USER-emergency-console --type='json' -p '[{"op": "remove", "path": "/spec/template/spec/containers/0/livenessProbe/httpGet"}, {"op": "add", "path": "/spec/template/spec/containers/0/livenessProbe", "value": { "exec": { "command" : ["curl", "http://127.0.0.1:8080"]}, "initialDelaySeconds": 30, "timeoutSeconds": 3, "periodSeconds": 30, "successThreshold": 1, "failureThreshold": 3}}, {"op": "remove", "path": "/spec/template/spec/containers/0/readinessProbe/httpGet"}, {"op": "add", "path": "/spec/template/spec/containers/0/readinessProbe", "value": { "exec": { "command" : ["curl", "http://127.0.0.1:8080"]},"initialDelaySeconds": 30, "timeoutSeconds": 3, "periodSeconds": 30, "successThreshold": 1, "failureThreshold": 3}}]' -n $ERDEMO_NS
 ----
 
 . Annotate the Emergency Console pods with the `sidecar.istio.io/inject: "true"` annotation.
 +
 ----
-$ oc patch dc $ERDEMO_USER-emergency-console --type='json' -p "[{\"op\": \"add\", \"path\": \"/spec/template/metadata\", \"value\": {\"annotations\":{\"sidecar.istio.io/inject\": \"true\"}, \"labels\":{\"app\":\"$ERDEMO_USER-emergency-console\"}}}]" -n $ER_DEMO_NS
+$ oc patch dc $ERDEMO_USER-emergency-console --type='json' -p "[{\"op\": \"add\", \"path\": \"/spec/template/metadata\", \"value\": {\"annotations\":{\"sidecar.istio.io/inject\": \"true\"}, \"labels\":{\"app\":\"$ERDEMO_USER-emergency-console\"}}}]" -n $ERDEMO_NS
 ----
 
 . _Policy_ for the Emergency Console service.
@@ -1663,7 +1663,7 @@ spec:
 ----
 +
 ----
-$ oc create -f emergency-console-policy.yml -n $ER_DEMO_NS
+$ oc create -f emergency-console-policy.yml -n $ERDEMO_NS
 ----
 
 . _DestinationRule_ for Emergency Console:
@@ -1675,7 +1675,7 @@ kind: DestinationRule
 metadata:
   name: emergency-console-client-mtls
 spec:
-  host: $ERDEMO_USER-emergency-console.$ER_DEMO_NS.svc.cluster.local
+  host: $ERDEMO_USER-emergency-console.$ERDEMO_NS.svc.cluster.local
   trafficPolicy:
     tls:
       mode: ISTIO_MUTUAL
@@ -1683,7 +1683,7 @@ spec:
 ----
 +
 ----
-$ oc create -f emergency-console-mtls-destinationrule.yml -n $ER_DEMO_NS
+$ oc create -f emergency-console-mtls-destinationrule.yml -n $ERDEMO_NS
 ----
 
 . _VirtualService_ for Emergency Console:
@@ -1698,7 +1698,7 @@ spec:
   hosts:
   - emergency-console.$ERDEMO_USER.apps.$SUBDOMAIN_BASE
   gateways:
-  - erd-wildcard-gateway.$RHSM_CONTROL_PLANE_NS.svc.cluster.local
+  - erd-wildcard-gateway.$SM_CP_NS.svc.cluster.local
   http:
   - match:
     - uri:
@@ -1707,12 +1707,12 @@ spec:
     - destination:
         port:
           number: 8080
-        host: $ERDEMO_USER-emergency-console.$ER_DEMO_NS.svc.cluster.local
+        host: $ERDEMO_USER-emergency-console.$ERDEMO_NS.svc.cluster.local
 " > emergency-console-virtualservice.yml
 ----
 +
 ----
-$ oc create -f emergency-console-virtualservice.yml -n $ER_DEMO_NS
+$ oc create -f emergency-console-virtualservice.yml -n $ERDEMO_NS
 ----
 
 . Route for Emergency Console:
@@ -1742,13 +1742,13 @@ spec:
 ----
 +
 ----
-$ oc create -f emergency-console-gateway.yml -n $RHSM_CONTROL_PLANE_NS
+$ oc create -f emergency-console-gateway.yml -n $SM_CP_NS
 ----
 
 . Delete the existing Emergency Console route
 +
 ----
-$ oc delete route $ERDEMO_USER-emergency-console -n $ER_DEMO_NS
+$ oc delete route $ERDEMO_USER-emergency-console -n $ERDEMO_NS
 ----
 
 . The redirect URL in the `emergency-realm` in the SSO ionstance needs to be changed.
@@ -1776,7 +1776,7 @@ Service Mesh mTLS can also be enabled for TCP traffic. The Incident Service, Res
 . Annotate the PostgreSQL pod with the `sidecar.istio.io/inject: "true"` annotation.
 +
 ----
-$ oc patch dc postgresql --type='json' -p "[{\"op\": \"add\", \"path\": \"/spec/template/metadata\", \"value\": {\"annotations\":{\"sidecar.istio.io/inject\": \"true\"}, \"labels\":{\"app\":\"postgresql\", \"name\":\"postgresql\"}}}]" -n $ER_DEMO_NS
+$ oc patch dc postgresql --type='json' -p "[{\"op\": \"add\", \"path\": \"/spec/template/metadata\", \"value\": {\"annotations\":{\"sidecar.istio.io/inject\": \"true\"}, \"labels\":{\"app\":\"postgresql\", \"name\":\"postgresql\"}}}]" -n $ERDEMO_NS
 ----
 
 . _Policy_ for the PostgresQL service.
@@ -1797,7 +1797,7 @@ spec:
 ----
 +
 ----
-$ oc create -f postgresql-policy.yml -n $ER_DEMO_NS
+$ oc create -f postgresql-policy.yml -n $ERDEMO_NS
 ----
 
 . _DestinationRule_ for PostgreSQL:
@@ -1809,7 +1809,7 @@ kind: DestinationRule
 metadata:
   name: postgresql-client-mtls
 spec:
-  host: postgresql.$ER_DEMO_NS.svc.cluster.local
+  host: postgresql.$ERDEMO_NS.svc.cluster.local
   trafficPolicy:
     tls:
       mode: ISTIO_MUTUAL
@@ -1817,7 +1817,7 @@ spec:
 ----
 +
 ----
-$ oc create -f postgresql-mtls-destinationrule.yml -n $ER_DEMO_NS
+$ oc create -f postgresql-mtls-destinationrule.yml -n $ERDEMO_NS
 ----
 
 . After successful redeployment of the PostgreSQL pods, scale up the Incident Service and Responder Service.
@@ -1828,7 +1828,7 @@ $ oc create -f postgresql-mtls-destinationrule.yml -n $ER_DEMO_NS
 . Annotate the Process Service PostgreSQL pod with the `sidecar.istio.io/inject: "true"` annotation.
 +
 ----
-$ oc patch dc $ERDEMO_USER-process-service-postgresql --type='json' -p "[{\"op\": \"add\", \"path\": \"/spec/template/metadata\", \"value\": {\"annotations\":{\"sidecar.istio.io/inject\": \"true\"}, \"labels\":{\"app\":\"$ERDEMO_USER-process-service\", \"name\":\"$ERDEMO_USER-process-service-postgresql\"}}}]" -n $ER_DEMO_NS
+$ oc patch dc $ERDEMO_USER-process-service-postgresql --type='json' -p "[{\"op\": \"add\", \"path\": \"/spec/template/metadata\", \"value\": {\"annotations\":{\"sidecar.istio.io/inject\": \"true\"}, \"labels\":{\"app\":\"$ERDEMO_USER-process-service\", \"name\":\"$ERDEMO_USER-process-service-postgresql\"}}}]" -n $ERDEMO_NS
 ----
 
 . _Policy_ for the Process Service PostgresQL service.
@@ -1857,7 +1857,7 @@ kind: DestinationRule
 metadata:
   name: process-service-postgresql-client-mtls
 spec:
-  host: process-service-postgresql.$ER_DEMO_NS.svc.cluster.local
+  host: process-service-postgresql.$ERDEMO_NS.svc.cluster.local
   trafficPolicy:
     tls:
       mode: ISTIO_MUTUAL
@@ -1872,7 +1872,7 @@ spec:
 . Edit the different Policy resources, set the mTLS mode to `STRICT`:
 +
 ----
-$ oc patch policy incident-service-mtls --type='json' -p '[{"op":"replace","path":"/spec/peers/0/mtls/mode", "value": "STRICT"}]' -n $ER_DEMO_NS
+$ oc patch policy incident-service-mtls --type='json' -p '[{"op":"replace","path":"/spec/peers/0/mtls/mode", "value": "STRICT"}]' -n $ERDEMO_NS
 ----
 
 . Repeat for the other policy resources.
@@ -1910,7 +1910,7 @@ As a use-case for this lab, we can define and enable the following policy:
 To enable mesh-wide strict mTLS, the default _ServiceMeshPolicy_ resource needs to be patched to change the mTLS mode from PERMISSIVE to STRICT:
 +
 ----
-$ oc patch servicemeshpolicy default --type='json' -p '[{"op":"replace","path":"/spec/peers/0/mtls/mode","value":"STRICT"}]' -n $RHSM_CONTROL_PLANE_NS
+$ oc patch servicemeshpolicy default --type='json' -p '[{"op":"replace","path":"/spec/peers/0/mtls/mode","value":"STRICT"}]' -n $SM_CP_NS
 ----
 
 . Create a ServiceMeshRbacConfig resource.
@@ -1926,7 +1926,7 @@ spec:
   mode: ON_WITH_INCLUSION
   inclusion:
     services:
-      - incident-service.$ER_DEMO_NS.svc.cluster.local
+      - incident-service.$ERDEMO_NS.svc.cluster.local
 " > servicemesh-rbac.yml
 ----
 +
@@ -1937,14 +1937,14 @@ Other possible values are `ON`, `OFF`, `ON_WITH_EXCLUSION`.
 * Create the resource in the Service Mesh controlplane namespace:
 +
 ----
-$ oc create -f servicemesh-rbac.yml -n $RHSM_CONTROL_PLANE_NS
+$ oc create -f servicemesh-rbac.yml -n $SM_CP_NS
 ----
 
 . At this point, no service can call the Incident Service, not from within the mesh nor from the outside. You can test this as follows:
 * Call the `/incidents` REST endpoint of the incident service with `curl`:
 +
 ----
-$ INCIDENT_SERVICE_URL=$(oc get route incident-service-gateway -n $RHSM_CONTROL_PLANE_NS -o template --template={{.spec.host}})
+$ INCIDENT_SERVICE_URL=$(oc get route incident-service-gateway -n $SM_CP_NS -o template --template={{.spec.host}})
 $ curl -v -k https://$INCIDENT_SERVICE_URL/incidents
 ----
 +
@@ -2016,7 +2016,7 @@ metadata:
   name: incident-service-internal
 spec:
   rules:
-    - services: ["$ERDEMO_USER-incident-service.$ER_DEMO_NS.svc.cluster.local"]
+    - services: ["$ERDEMO_USER-incident-service.$ERDEMO_NS.svc.cluster.local"]
       methods: ["*"]
 " > sr-incident-service-internal.yml
 ----
@@ -2024,7 +2024,7 @@ spec:
 * Create the ServiceRole resource in the Emergency Response Demo namespace:
 +
 ----
-$ oc create -f sr-incident-service-internal.yml -n $ER_DEMO_NS 
+$ oc create -f sr-incident-service-internal.yml -n $ERDEMO_NS 
 ----
 
 . Create a _ServiceRoleBinding_ referencing the ServiceRole you just created and bind it to all services in the Emergency Response Demo namespace.
@@ -2039,7 +2039,7 @@ metadata:
 spec:
   subjects:
     - properties:
-        source.namespace: "$ER_DEMO_NS"
+        source.namespace: "$ERDEMO_NS"
   roleRef:
     kind: ServiceRole
     name: "incident-service-internal"
@@ -2048,7 +2048,7 @@ spec:
 * Create the ServiceRoleBinding resource in the Emergency Response Demo namespace:
 +
 ----
-$ oc create -f srb-incident-service-internal.yml -n $ER_DEMO_NS 
+$ oc create -f srb-incident-service-internal.yml -n $ERDEMO_NS 
 ----
 . Check that the Incident Service can now be called from other services in the Emergency Response Demo namespace, but not from the outside.
 * Click on the _Clear Incidents_ button of the Disaster Simulator home page. Check the logs of the Disaster Simulator pod. Expect to see something like:
@@ -2070,7 +2070,7 @@ metadata:
   name: incident-service-ingress
 spec:
   rules:
-    - services: ["$ERDEMO_USER-incident-service.$ER_DEMO_NS.svc.cluster.local"]
+    - services: ["$ERDEMO_USER-incident-service.$ERDEMO_NS.svc.cluster.local"]
       methods: ["GET"]
 " > srb-incident-service-ingress.yml
 ----
@@ -2078,7 +2078,7 @@ spec:
 * Create the ServiceRole resource in the Emergency Response Demo namespace:
 +
 ----
-$ oc create -f sr-incident-service-ingress.yml -n $ER_DEMO_NS 
+$ oc create -f sr-incident-service-ingress.yml -n $ERDEMO_NS 
 ----
 
 . Create a _ServiceRoleBinding_ referencing the ServiceRole you just created and bind it to the SPIFFE identity of the Istio Ingress Gateway service.
@@ -2092,7 +2092,7 @@ metadata:
   name: incident-service-ingress
 spec:
   subjects:
-    - user: "cluster.local/ns/$ER_DEMO_NS/sa/istio-ingressgateway-service-account"
+    - user: "cluster.local/ns/$ERDEMO_NS/sa/istio-ingressgateway-service-account"
   roleRef:
     kind: ServiceRole
     name: "incident-service-internal"
@@ -2101,7 +2101,7 @@ spec:
 * Create the ServiceRoleBinding resource in the Emergency Response Demo namespace:
 +
 ----
-$ oc create -f srb-incident-service-ingress.yml -n $ER_DEMO_NS 
+$ oc create -f srb-incident-service-ingress.yml -n $ERDEMO_NS 
 ----
 . Check that the Incident Service can now be called from outside of the cluster, but only for HTTP GET endpoints.
 * A curl request to the `/incidents` endpoint of the Incident Service returns a HTTP 200 code.
@@ -2239,14 +2239,14 @@ spec:
 * Create the Policy resource in the Control Plane namespace:
 +
 ----
-$ oc create -f ingressgateway-origin.yml -n $RHSM_CONTROL_PLANE_NS 
+$ oc create -f ingressgateway-origin.yml -n $SM_CP_NS 
 ----
 
 . With the Policy in place, all requests through the Ingress Gateway will require a valid token.
 * Try to access the `/incidents` endpoint of the Incident Service:
 +
 ----
-$ INCIDENT_SERVICE_URL=$(oc get route incident-service-gateway -n $RHSM_CONTROL_PLANE_NS -o template --template={{.spec.host}})
+$ INCIDENT_SERVICE_URL=$(oc get route incident-service-gateway -n $SM_CP_NS -o template --template={{.spec.host}})
 $ curl -v -k https://$INCIDENT_SERVICE_URL/incidents
 ----
 +
@@ -2379,5 +2379,5 @@ NOTE: The Service Mesh only propagates the JWT token one hop. The service proxy 
 Before continuing with the remainder of the labs, delete the end-user authentication policy:
 
 ----
-$ oc delete policy ingressgateway-origin -n $RHSM_CONTROL_PLANE_NS 
+$ oc delete policy ingressgateway-origin -n $SM_CP_NS 
 ----

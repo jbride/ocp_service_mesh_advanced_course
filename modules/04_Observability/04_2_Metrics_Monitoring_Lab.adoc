@@ -35,7 +35,7 @@ $ oc login $LAB_MASTER_API -u $SM_CP_ADMIN -p $OCP_PASSWD
 . Obtain the URL of the Prometheus UI:
 +
 ----
-$ echo -en "\n\nhttps://$(oc get route prometheus -o template --template={{.spec.host}} -n $RHSM_CONTROL_PLANE_NS)\n\n"
+$ echo -en "\n\nhttps://$(oc get route prometheus -o template --template={{.spec.host}} -n $SM_CP_NS)\n\n"
 ----
 . In a browser window, navigate to the Prometheus UI. Navigate to  the _Status -> Targets_ page. This page shows al the scraping targets discovered by the Prometheus server:
 +
@@ -64,7 +64,7 @@ The metrics are prefixed according to their source:
 ** The `metric` resources will be translated into Prometheus metrics. To see the list of default metrics:
 +
 ----
-$ oc get metric -n $RHSM_CONTROL_PLANE_NS
+$ oc get metric -n $SM_CP_NS
 ----
 +
 .Output
@@ -121,7 +121,7 @@ spec:
 ** The `prometheus` handler describes the Prometheus metrics and references the metric custom resources in the instance_name fields. It also defines the name that can be used in Prometheus queries later (with the `istio` prefix), like `requests_total`, and the labels used to group the metrics:
 +
 ----
-$ oc get handler prometheus -o yaml -n $RHSM_CONTROL_PLANE_NS
+$ oc get handler prometheus -o yaml -n $SM_CP_NS
 ----
 +
 .Output (truncated)
@@ -163,7 +163,7 @@ spec:
 ** Finally, the _Rule_ resources bind the metrics to the handlers.
 +
 ----
-$ oc get rule -n $RHSM_CONTROL_PLANE_NS
+$ oc get rule -n $SM_CP_NS
 ----
 +
 .Output
@@ -178,7 +178,7 @@ tcpkubeattrgenrulerule    9d
 ----
 +
 ----
-$ oc get rule promhttp -o yaml -n $RHSM_CONTROL_PLANE_NS
+$ oc get rule promhttp -o yaml -n $SM_CP_NS
 ----
 +
 .Output (truncated)
@@ -204,7 +204,7 @@ spec:
 .. Obtain the URL for the Grafana instance:
 +
 ----
-$ echo -en "\n\nhttps://$(oc get route grafana -o template --template={{.spec.host}} -n $RHSM_CONTROL_PLANE_NS)\n\n"
+$ echo -en "\n\nhttps://$(oc get route grafana -o template --template={{.spec.host}} -n $SM_CP_NS)\n\n"
 ----
 .. In a browser window, navigate to the Grafana home page. Log in with the control plane admin username and password.
 +
@@ -227,7 +227,7 @@ In this section of the lab, you will create a custom metric which will count the
 . Label the deployed version of the Incident Service as `v1`:
 +
 ----
-$ oc patch dc $ERDEMO_USER-incident-service -p '{"spec":{"template":{"metadata":{"labels":{"version":"v1"}}}}}' -n $ER_DEMO_NS
+$ oc patch dc $ERDEMO_USER-incident-service -p '{"spec":{"template":{"metadata":{"labels":{"version":"v1"}}}}}' -n $ERDEMO_NS
 ----
 +
 This will force a redeployment of the Incident Service pods.
@@ -343,9 +343,9 @@ spec:
       from:
         kind: ImageStreamTag
         name: $ERDEMO_USER-incident-service:1.0.0-jaeger
-        namespace: $ER_DEMO_NS
+        namespace: $ERDEMO_NS
     type: ImageChange
-" | oc create -f - -n $ER_DEMO_NS 
+" | oc create -f - -n $ERDEMO_NS 
 ----
 +
 * Note that for the sake of simplicity we are deploying the same image of the Incident Service. Only the value of the _version_ label marks the difference between the two versions.
@@ -384,7 +384,7 @@ kind: DestinationRule
 metadata:
   name: incident-service-client-mtls
 spec:
-  host: $ERDEMO_USER-incident-service.$ER_DEMO_NS.svc.cluster.local
+  host: $ERDEMO_USER-incident-service.$ERDEMO_NS.svc.cluster.local
   trafficPolicy:
     tls:
       mode: ISTIO_MUTUAL
@@ -395,7 +395,7 @@ spec:
   - name: v2
     labels:
       version: v2
-" | oc apply -f - -n $ER_DEMO_NS
+" | oc apply -f - -n $ERDEMO_NS
 ----
 .. Add routing instructions to the VirtualService.
 +
@@ -409,25 +409,25 @@ spec:
   hosts:
   - incident-service.$ERDEMO_USER.apps.$SUBDOMAIN_BASE
   gateways:
-  - erd-wildcard-gateway.$RHSM_CONTROL_PLANE_NS.svc.cluster.local
+  - erd-wildcard-gateway.$SM_CP_NS.svc.cluster.local
   http:
     - match:
         - uri:
             prefix: /incidents
       route:
         - destination:
-            host: $ERDEMO_USER-incident-service.$ER_DEMO_NS.svc.cluster.local
+            host: $ERDEMO_USER-incident-service.$ERDEMO_NS.svc.cluster.local
             port:
               number: 8080
             subset: v1
           weight: 20
         - destination:
-            host: $ERDEMO_USER-incident-service.$ER_DEMO_NS.svc.cluster.local
+            host: $ERDEMO_USER-incident-service.$ERDEMO_NS.svc.cluster.local
             port:
               number: 8080
             subset: v2
           weight: 80
-" | oc apply -f - -n $ER_DEMO_NS
+" | oc apply -f - -n $ERDEMO_NS
 ----
 * In the example above, roughly 80% of the requests will be routed to version v2 of the Incident Service.
 .. Create some traffic to the Incident Service:
@@ -461,7 +461,7 @@ spec:
       version: destination.labels[\"version\"] | \"unknown\"
       destination: destination.service.name | \"unknown\"
     monitored_resource_type: '\"UNSPECIFIED\"'
-"  | oc create -f - -n $ER_DEMO_NS
+"  | oc create -f - -n $ERDEMO_NS
 ----
 * For each instance of `version-count`, the configuration directs Mixer to supply a value of 1 for the instance. Because Envoy generates an instance for each request, this means that this metric records the total number of requests received.
 * A set of dimensions are specified for each `version-count` instance. Dimensions provide a way to slice, aggregate, and analyze metric data according to different needs and directions of inquiry. For instance, it may be desirable to only consider requests for a certain destination service when troubleshooting application behavior.
@@ -481,13 +481,13 @@ spec:
   params:
     metrics:
     - name: version_count
-      instance_name: version-count.instance.$ER_DEMO_NS
+      instance_name: version-count.instance.$ERDEMO_NS
       kind: COUNTER
       label_names:
       - source
       - version
       - destination
-" | oc create -f - -n $ER_DEMO_NS
+" | oc create -f - -n $ERDEMO_NS
 ----
 +
 * This configuration specifies a new Prometheus metric named `version_count`. 
@@ -508,7 +508,7 @@ spec:
   - handler: version-count-handler
     instances:
     - version-count
-" | oc create -f - -n $ER_DEMO_NS
+" | oc create -f - -n $ERDEMO_NS
 ----
 * _Match_ is an attribute based predicate. When Mixer receives a request it evaluates the match expression and executes all the associated actions if the match evaluates to true.
 * In this example, the `version-count` metric will only be generated when the request is a HTTP request and the destination service is the Incident Service.
@@ -543,7 +543,7 @@ The recording and alerting rules need to be added to the ConfigMap.
 .. Extract the current Prometheus configuration from the ConfigMap to your local system:
 +
 ----
-$ oc extract cm/prometheus -n $RHSM_CONTROL_PLANE_NS --to=. --keys=prometheus.yml
+$ oc extract cm/prometheus -n $SM_CP_NS --to=. --keys=prometheus.yml
 ----
 .. Open the `prometheus.yml` file with your favourite text editor and make the following changes:
 ... In the `global` section, add the evaluation interval for recording and alerting rules:
@@ -610,14 +610,14 @@ groups:
 .. Delete the `prometheus` ConfigMap in the control plane namespace and create a new one from the configuration and rule files.
 +
 ----
-$ oc delete configmap prometheus -n $RHSM_CONTROL_PLANE_NS
-$ oc create configmap prometheus -n $RHSM_CONTROL_PLANE_NS --from-file=prometheus.yml --from-file=ingress.rules --from-file=ingress-alert.rules --save-config=true
-$ oc label configmap prometheus -n $RHSM_CONTROL_PLANE_NS app=prometheus app.kubernetes.io/component=prometheus app.kubernetes.io/instance=$RHSM_CONTROL_PLANE_NS app.kubernetes.io/managed-by=maistra-istio-operator app.kubernetes.io/name=prometheus app.kubernetes.io/part-of=istio app.kubernetes.io/version=1.0.1-8.el8-1 chart=prometheus heritage=Tiller maistra.io/owner=$RHSM_CONTROL_PLANE_NS release=istio
+$ oc delete configmap prometheus -n $SM_CP_NS
+$ oc create configmap prometheus -n $SM_CP_NS --from-file=prometheus.yml --from-file=ingress.rules --from-file=ingress-alert.rules --save-config=true
+$ oc label configmap prometheus -n $SM_CP_NS app=prometheus app.kubernetes.io/component=prometheus app.kubernetes.io/instance=$SM_CP_NS app.kubernetes.io/managed-by=maistra-istio-operator app.kubernetes.io/name=prometheus app.kubernetes.io/part-of=istio app.kubernetes.io/version=1.0.1-8.el8-1 chart=prometheus heritage=Tiller maistra.io/owner=$SM_CP_NS release=istio
 ----
 . Restart the Prometheus pod in the control plane namespace:
 +
 ----
-$ oc patch deployment prometheus -p '{"spec":{"template":{"metadata":{"annotations":{"kubectl.kubernetes.io/restartedAt": "'`date -Iseconds`'"}}}}}' -n $RHSM_CONTROL_PLANE_NS
+$ oc patch deployment prometheus -p '{"spec":{"template":{"metadata":{"annotations":{"kubectl.kubernetes.io/restartedAt": "'`date -Iseconds`'"}}}}}' -n $SM_CP_NS
 ----
 . In the Prometheus UI, navigate to the _Status->Rules_ page, and verify that the recording and alerting rules are present.
 +
@@ -649,7 +649,7 @@ metadata:
   name: incident-service-virtualservice
 spec:
   gateways:
-    - erd-wildcard-gateway.$RHSM_CONTROL_PLANE_NS.svc.cluster.local
+    - erd-wildcard-gateway.$SM_CP_NS.svc.cluster.local
   hosts:
     - incident-service.$ERDEMO_USER.apps.$SUBDOMAIN_BASE
   http:
@@ -658,13 +658,13 @@ spec:
             prefix: /incidents
       route:
         - destination:
-            host: $ERDEMO_USER-incident-service.$ER_DEMO_NS.svc.cluster.local
+            host: $ERDEMO_USER-incident-service.$ERDEMO_NS.svc.cluster.local
             port:
               number: 8080
             subset: v1
           weight: 20
         - destination:
-            host: $ERDEMO_USER-incident-service.$ER_DEMO_NS.svc.cluster.local
+            host: $ERDEMO_USER-incident-service.$ERDEMO_NS.svc.cluster.local
             port:
               number: 8080
             subset: v2
@@ -674,7 +674,7 @@ spec:
           fixedDelay: 2s
           percentage:
             value: 30 
-" | oc apply -f - $ER_DEMO_NS
+" | oc apply -f - $ERDEMO_NS
 ----
 +
 * In this case a delay of 2 seconds will be injected in 30% of the requests to the Incident Service.

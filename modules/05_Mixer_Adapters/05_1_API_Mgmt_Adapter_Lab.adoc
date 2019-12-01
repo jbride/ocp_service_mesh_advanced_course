@@ -66,7 +66,7 @@ spec:
       name: http
       protocol: HTTP
     hosts:
-    - \"istio-ingressgateway-$RHSM_CONTROL_PLANE_NS.apps.$SUBDOMAIN_BASE\"
+    - \"istio-ingressgateway-$SM_CP_NS.apps.$SUBDOMAIN_BASE\"
 
 ---
 apiVersion: networking.istio.io/v1alpha3
@@ -95,7 +95,7 @@ Notice that a match is made for all context paths exposed by the incident servic
 . Create the gateway and virtual service in your $MSA_PROJECT :
 +
 -----
-oc create -f $HOME/lab/incident-service-gw-vs.yml -n $ER_DEMO_NS
+oc create -f $HOME/lab/incident-service-gw-vs.yml -n $ERDEMO_NS
 -----
 
 . As the administrator of your service mesh control plane, check the routes registered with the istio-ingressgateway:
@@ -103,7 +103,7 @@ oc create -f $HOME/lab/incident-service-gw-vs.yml -n $ER_DEMO_NS
 -----
 oc login -u $SM_CP_ADMIN -p $OCP_PASSWD
 
-oc project $RHSM_CONTROL_PLANE_NS && \
+oc project $SM_CP_NS && \
          oc rsh `oc get pod | grep "istio-ingressgateway" | awk '{print $1}'` \
          curl http://localhost:15000/config_dump \
          > /tmp/config_dump \
@@ -121,7 +121,7 @@ Later in the lab, you'll re-introduce the use of the API _user_key_ .
 .. GET a listing of Emergency Response incidents:
 +
 -----
-$ curl -v -X GET -H "Content-Type: application/json" `echo "http://"$(oc get route istio-ingressgateway -n $RHSM_CONTROL_PLANE_NS -o template --template {{.spec.host}})""`/incidents/ | jq .
+$ curl -v -X GET -H "Content-Type: application/json" `echo "http://"$(oc get route istio-ingressgateway -n $SM_CP_NS -o template --template {{.spec.host}})""`/incidents/ | jq .
 
 ...
 
@@ -180,7 +180,7 @@ NOTE: The remaining tasks in this lab need to be executed by the administrator o
 . View the value of the _disablePolicyChecks_ variable:
 +
 -----
-oc describe cm istio -n $RHSM_CONTROL_PLANE_NS | grep disablePolicyChecks
+oc describe cm istio -n $SM_CP_NS | grep disablePolicyChecks
 
 disablePolicyChecks: false
 -----
@@ -219,7 +219,7 @@ spec:
     PARAM_THREESCALE_ALLOW_INSECURE_CONN: false
     PARAM_THREESCALE_CLIENT_TIMEOUT_SECONDS: 10
     PARAM_THREESCALE_GRPC_CONN_MAX_SECONDS: 60" \
-    | oc apply -n $RHSM_CONTROL_PLANE_NS -f -
+    | oc apply -n $SM_CP_NS -f -
 -----
 +
 Notice that the above configuration enables the _threeScale_ mixer plugin and also specifies the exact tag of the _3scale-istio-adapter_ link:https://access.redhat.com/containers/?tab=tags#/registry.access.redhat.com/openshift-service-mesh/3scale-istio-adapter-rhel8[image to pull] (from registery.redhat.io).
@@ -231,7 +231,7 @@ Monitor the pods of your service mesh control plane as they all bounce.
 . Review 3scale Istio Adapter components in your service mesh control plane namespace:
 +
 -----
-oc get all -l app=3scale-istio-adapter -n $RHSM_CONTROL_PLANE_NS
+oc get all -l app=3scale-istio-adapter -n $SM_CP_NS
 -----
 
 .. The response should list the _3scale-istio-adapter_ related deployment, replicaset and pod.
@@ -255,7 +255,7 @@ Much of these files consist of the adapter's configuration link:https://develope
 .. Adapters:
 +
 -----
-oc get adapters.config.istio.io -n $RHSM_CONTROL_PLANE_NS
+oc get adapters.config.istio.io -n $SM_CP_NS
 
 threescale   3h26m
 -----
@@ -263,7 +263,7 @@ threescale   3h26m
 .. Template:
 +
 -----
-oc get templates.config.istio.io -n $RHSM_CONTROL_PLANE_NS
+oc get templates.config.istio.io -n $SM_CP_NS
 
 threescale-authorization   3h26m
 -----
@@ -344,7 +344,7 @@ sed -i "s/match: .*/match: destination.service.name == \"$ERDEMO_USER-incident-s
 . Load the Red Hat 3scale API Management Istio Handler configurations:
 +
 -----
-oc create -f $HOME/lab/istio-integration/istio/threescale-adapter-config.yaml -n $RHSM_CONTROL_PLANE_NS
+oc create -f $HOME/lab/istio-integration/istio/threescale-adapter-config.yaml -n $SM_CP_NS
 
 ...
 
@@ -356,15 +356,15 @@ rule.config.istio.io "threescale" created
 .. If for whatever reason you want to delete these 3scale Istio mixer adapter configurations, execute the following:
 +
 -----
-oc delete rule.config.istio.io threescale -n $RHSM_CONTROL_PLANE_NS
-oc delete instance.config.istio.io threescale-authorization -n $RHSM_CONTROL_PLANE_NS
-oc delete handler.config.istio.io threescale -n $RHSM_CONTROL_PLANE_NS
+oc delete rule.config.istio.io threescale -n $SM_CP_NS
+oc delete instance.config.istio.io threescale-authorization -n $SM_CP_NS
+oc delete handler.config.istio.io threescale -n $SM_CP_NS
 -----
 
 . Verify that the Istio Handler configurations were created in the service mesh control plane namespace:
 +
 -----
-oc get handler threescale -n $RHSM_CONTROL_PLANE_NS -o yaml
+oc get handler threescale -n $SM_CP_NS -o yaml
 
 apiVersion: v1
 items:
@@ -390,7 +390,7 @@ items:
 +
 -----
 curl -v \
-       `echo "http://"$(oc get route istio-ingressgateway -n $RHSM_CONTROL_PLANE_NS -o template --template {{.spec.host}})"/incidents"`
+       `echo "http://"$(oc get route istio-ingressgateway -n $SM_CP_NS -o template --template {{.spec.host}})"/incidents"`
 
 ...
 
@@ -410,8 +410,8 @@ In the above request however, the API _user_key_ associated with your incident s
 .. View the log file of the 3scale adapter:
 +
 -----
-oc logs -f `oc get pod -n $RHSM_CONTROL_PLANE_NS | grep "3scale-istio-adapter" | awk '{print $1}'` \
-          -n $RHSM_CONTROL_PLANE_NS \
+oc logs -f `oc get pod -n $SM_CP_NS | grep "3scale-istio-adapter" | awk '{print $1}'` \
+          -n $SM_CP_NS \
           -c 3scale-istio-adapter
 
 
@@ -424,7 +424,7 @@ oc logs -f `oc get pod -n $RHSM_CONTROL_PLANE_NS | grep "3scale-istio-adapter" |
 +
 -----
 curl -v \
-       `echo "http://"$(oc get route istio-ingressgateway -n $RHSM_CONTROL_PLANE_NS -o template --template {{.spec.host}})"/incidents?user_key=$INCIDENT_SERVICE_API_KEY"`
+       `echo "http://"$(oc get route istio-ingressgateway -n $SM_CP_NS -o template --template {{.spec.host}})"/incidents?user_key=$INCIDENT_SERVICE_API_KEY"`
 -----
 
 [blue]#Congratulations! The incident-service is again being managed and secured by the Red Hat 3scale API Management manager.#
@@ -474,8 +474,8 @@ image::images/promote.png[]
 -----
 oc patch rule.config.istio.io threescale \
        --type=json \
-       --patch '[{"op": "add", "path": "/spec/match", "value":"destination.service.name == \"'$ERDEMO_USER'-incident-service\" && source.namespace != \"'$ER_DEMO_NS'\" && request.method == \"POST\" && request.path.startsWith(\"/incidents\")"  }]' \
-       -n $RHSM_CONTROL_PLANE_NS 
+       --patch '[{"op": "add", "path": "/spec/match", "value":"destination.service.name == \"'$ERDEMO_USER'-incident-service\" && source.namespace != \"'$ERDEMO_NS'\" && request.method == \"POST\" && request.path.startsWith(\"/incidents\")"  }]' \
+       -n $SM_CP_NS 
 -----
 +
 This modification introduces a fine grained _match_ rule with several conditions. 
@@ -484,14 +484,14 @@ Only when all of the conditions are met, will the inbound traffic be routed to t
 The conditions of the rule are as follows:
 
 .. The destination service needs to be your incident service.
-.. The inbound request needs to originate from outside the $ER_DEMO_NS (that is, from the istio-ingress of the $RHSM_CONTROL_PLANE_NS namespace).
+.. The inbound request needs to originate from outside the $ERDEMO_NS (that is, from the istio-ingress of the $SM_CP_NS namespace).
 .. The HTTP verb is of type: `POST`.
 .. The target is the `/incidents/` endpoint.
 
 .. View the log file of the _istio-policy_ pod:
 +
 -----
-oc logs -f `oc get pod -n $RHSM_CONTROL_PLANE_NS | grep "istio-policy" | awk '{print $1}'` -c mixer -n $RHSM_CONTROL_PLANE_NS
+oc logs -f `oc get pod -n $SM_CP_NS | grep "istio-policy" | awk '{print $1}'` -c mixer -n $SM_CP_NS
 
 ....
 
@@ -519,7 +519,7 @@ In particular, notice that the new policies were put into effect with no error m
 +
 -----
 curl -v \
-       `echo "http://"$(oc get route istio-ingressgateway -n $RHSM_CONTROL_PLANE_NS -o template --template {{.spec.host}})"/incidents"`
+       `echo "http://"$(oc get route istio-ingressgateway -n $SM_CP_NS -o template --template {{.spec.host}})"/incidents"`
 -----
 +
 This request should have now been routed directly to your backend incident-service.
@@ -532,7 +532,7 @@ Subsequently, the API _user_key_ is not needed.
 curl -v \
        -X POST \
        -H "Content-Type: application/json" \
-       `echo "http://"$(oc get route istio-ingressgateway -n $RHSM_CONTROL_PLANE_NS -o template --template {{.spec.host}})"/incidents"` \
+       `echo "http://"$(oc get route istio-ingressgateway -n $SM_CP_NS -o template --template {{.spec.host}})"/incidents"` \
        -d '{
   "lat": "34.14338",
   "lon": "-77.86569",
@@ -553,7 +553,7 @@ Subsequently, because the API _user_key_ was not applied, the response should be
 curl -v \
        -X POST \
        -H "Content-Type: application/json" \
-       `echo "http://"$(oc get route istio-ingressgateway -n $RHSM_CONTROL_PLANE_NS -o template --template {{.spec.host}})"/incidents?user_key=$INCIDENT_SERVICE_API_KEY"` \
+       `echo "http://"$(oc get route istio-ingressgateway -n $SM_CP_NS -o template --template {{.spec.host}})"/incidents?user_key=$INCIDENT_SERVICE_API_KEY"` \
        -d '{
   "lat": "34.14338",
   "lon": "-77.86569",

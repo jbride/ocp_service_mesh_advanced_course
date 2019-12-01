@@ -68,8 +68,8 @@ DNS.2  = *.$NAMESPACE.apps.$SUBDOMAIN_BASE
 EOF
 
 openssl req -x509 -config /tmp/cert.cfg -extensions req_ext -nodes -days 730 -newkey rsa:2048 -sha256 -keyout /tmp/tls.key -out /tmp/tls.crt
-oc create secret tls istio-ingressgateway-certs --cert /tmp/tls.crt --key /tmp/tls.key -n $RHSM_CONTROL_PLANE_NS
-oc patch deployment istio-ingressgateway -p '{"spec":{"template":{"metadata":{"annotations":{"kubectl.kubernetes.io/restartedAt": "'`date -Iseconds`'"}}}}}' -n $RHSM_CONTROL_PLANE_NS
+oc create secret tls istio-ingressgateway-certs --cert /tmp/tls.crt --key /tmp/tls.key -n $SM_CP_NS
+oc patch deployment istio-ingressgateway -p '{"spec":{"template":{"metadata":{"annotations":{"kubectl.kubernetes.io/restartedAt": "'`date -Iseconds`'"}}}}}' -n $SM_CP_NS
 }
 
 
@@ -113,7 +113,7 @@ spec:
     name: istio-ingressgateway
     weight: 100
   wildcardPolicy: None" \
-  | oc create -n $RHSM_CONTROL_PLANE_NS -f - 
+  | oc create -n $SM_CP_NS -f - 
 
 echo "apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService

@@ -18,7 +18,7 @@ Kiali is the Red Hat Service Mesh console. Kiali helps you define, validate, and
 . Obtain the URL of the Kiali console:
 +
 ----
-$ echo -en "\n\nhttps://$(oc get route kiali -o template --template={{.spec.host}} -n $RHSM_CONTROL_PLANE_NS)\n\n"
+$ echo -en "\n\nhttps://$(oc get route kiali -o template --template={{.spec.host}} -n $SM_CP_NS)\n\n"
 ----
 . In a browser window, navigate to the Kiali homepage. Login with the control plane admin user and credentials. +
 Expect to see the Kiali home page:

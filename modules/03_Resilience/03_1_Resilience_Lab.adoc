@@ -35,24 +35,24 @@ $ oc login -u $ERDEMO_USER
 . Redeploy the Incident Priority Service using an image with the fault injection code.
 +
 ----
-$ oc patch dc $ERDEMO_USER-incident-priority-service -p "{\"spec\":{\"triggers\":[{\"type\": \"ConfigChange\"},{\"type\": \"ImageChange\",\"imageChangeParams\": {\"automatic\": true, \"containerNames\":[\"$ERDEMO_USER-incident-priority-service\"], \"from\": {\"kind\": \"ImageStreamTag\", \"namespace\": \"$ER_DEMO_NS\", \"name\": \"$ERDEMO_USER-incident-priority-service:1.0.0-fault\"}}}]}}" -n $ER_DEMO_NS
+$ oc patch dc $ERDEMO_USER-incident-priority-service -p "{\"spec\":{\"triggers\":[{\"type\": \"ConfigChange\"},{\"type\": \"ImageChange\",\"imageChangeParams\": {\"automatic\": true, \"containerNames\":[\"$ERDEMO_USER-incident-priority-service\"], \"from\": {\"kind\": \"ImageStreamTag\", \"namespace\": \"$ERDEMO_NS\", \"name\": \"$ERDEMO_USER-incident-priority-service:1.0.0-fault\"}}}]}}" -n $ERDEMO_NS
 ----
 +
 This will cause a redeployment of the Incident Priority Service. Wait until the service is redeployed successfully.
 . Scale up the number pods of the Incident Priority Service to three:
 +
 ----
-$ oc scale dc $ERDEMO_USER-incident-priority-service --replicas=3 -n $ER_DEMO_NS
+$ oc scale dc $ERDEMO_USER-incident-priority-service --replicas=3 -n $ERDEMO_NS
 ----
 . Find the name of one of the pods of the Incident Priority Service:
 +
 ----
-$ INCIDENT_PRIORITY_SERVICE_POD=$(oc get pods -n $ER_DEMO_NS|grep Running|grep $ERDEMO_USER-incident-priority-service.*|awk '{ print $1 }'|head -1)
+$ INCIDENT_PRIORITY_SERVICE_POD=$(oc get pods -n $ERDEMO_NS|grep Running|grep $ERDEMO_USER-incident-priority-service.*|awk '{ print $1 }'|head -1)
 ----
 . Using `oc exec`, obtain a bash prompt inside the service container:
 +
 ----
-$ oc exec -it $INCIDENT_PRIORITY_SERVICE_POD -n $ER_DEMO_NS -c $ERDEMO_USER-incident-priority-service /bin/bash 
+$ oc exec -it $INCIDENT_PRIORITY_SERVICE_POD -n $ERDEMO_NS -c $ERDEMO_USER-incident-priority-service /bin/bash 
 ----
 . In the container, execute the following _curl_ command to have the service return a HTTP 503 return code when called over its REST APIs:
 +
@@ -133,7 +133,7 @@ This is a result of the automatic retry feature of the Service Mesh. Whenever a 
 Verify that the faulty container has indeed been called:
 +
 ----
-$ oc logs -f $INCIDENT_PRIORITY_SERVICE_POD -n $ER_DEMO_NS
+$ oc logs -f $INCIDENT_PRIORITY_SERVICE_POD -n $ERDEMO_NS
 ----
 +
 .Sample output
@@ -211,7 +211,7 @@ while :; do curl -k -s -w %{http_code} --output /dev/null https://incident-prior
 * As an example, to extend the retry functionality to include all error codes in the 5xx range, add the following to the `incident-priority-service-virtualservice` VirtualService:
 +
 ----
-$ oc edit virtualservice incident-priority-service-virtualservice -o yaml -n $ER_DEMO_NS
+$ oc edit virtualservice incident-priority-service-virtualservice -o yaml -n $ERDEMO_NS
 ----
 +
 Add the retry configuration to the route rules for http traffic:
@@ -266,12 +266,12 @@ Red Hat Service mesh allows to define timeout settings at the mesh level, as wel
 * Find the name of one of the pods of the Incident Priority Service:
 +
 ----
-$ INCIDENT_PRIORITY_SERVICE_POD=$(oc get pods -n $ER_DEMO_NS|grep Running|grep $ERDEMO_USER-incident-priority-service.*|awk '{ print $1 }'|head -1)
+$ INCIDENT_PRIORITY_SERVICE_POD=$(oc get pods -n $ERDEMO_NS|grep Running|grep $ERDEMO_USER-incident-priority-service.*|awk '{ print $1 }'|head -1)
 ----
 * Using `oc exec`, obtain a bash prompt inside the service container:
 +
 ----
-$ oc exec -it $INCIDENT_PRIORITY_SERVICE_POD -n $ER_DEMO_NS -c $ERDEMO_USER-incident-priority-service /bin/bash 
+$ oc exec -it $INCIDENT_PRIORITY_SERVICE_POD -n $ERDEMO_NS -c $ERDEMO_USER-incident-priority-service /bin/bash 
 ----
 * In the container, execute the following _curl_ command to have the service wait for 2 seconds before returning a response when called over its REST APIs:
 +
@@ -361,7 +361,7 @@ Shortest transaction:           0.11
 For example, to add a 500ms timeout to the VirtualService configuration. 
 +
 ----
-$ oc edit virtualservice incident-priority-service-virtualservice -o yaml -n $ER_DEMO_NS
+$ oc edit virtualservice incident-priority-service-virtualservice -o yaml -n $ERDEMO_NS
 ----
 +
 Add the timeout configuration to the route rules for http traffic:
@@ -504,12 +504,12 @@ Red Hat Service Mesh implements circuit breakers using outlier detection. As a s
 * Find the name of one of the pods of the Incident Priority Service:
 +
 ----
-$ INCIDENT_PRIORITY_SERVICE_POD=$(oc get pods -n $ER_DEMO_NS|grep Running|grep $ERDEMO_USER-incident-priority-service.*|awk '{ print $1 }'|head -1)
+$ INCIDENT_PRIORITY_SERVICE_POD=$(oc get pods -n $ERDEMO_NS|grep Running|grep $ERDEMO_USER-incident-priority-service.*|awk '{ print $1 }'|head -1)
 ----
 * Using `oc exec`, obtain a bash prompt inside the service container:
 +
 ----
-$ oc exec -it $INCIDENT_PRIORITY_SERVICE_POD -n $ER_DEMO_NS -c $ERDEMO_USER-incident-priority-service /bin/bash 
+$ oc exec -it $INCIDENT_PRIORITY_SERVICE_POD -n $ERDEMO_NS -c $ERDEMO_USER-incident-priority-service /bin/bash 
 ----
 * In the container, execute the following _curl_ command to have the service return a HTTP 503 return code when called over its REST APIs:
 +
@@ -524,7 +524,7 @@ $ while :; do curl -k -s -w %{http_code} --output /dev/null https://incident-pri
 . In the logs of the faulty pod, verify that the service is still being called:
 +
 ----
-$ oc logs -f $INCIDENT_PRIORITY_SERVICE_POD -n $ER_DEMO_NS
+$ oc logs -f $INCIDENT_PRIORITY_SERVICE_POD -n $ERDEMO_NS
 ----
 +
 .Sample output
@@ -546,7 +546,7 @@ $ oc logs -f $INCIDENT_PRIORITY_SERVICE_POD -n $ER_DEMO_NS
 * Open the DestinationRule resource of the Incident Priority Service for editing:
 +
 ----
-$ oc edit destinationrule incident-priority-service-client-mtls -n $ER_DEMO_NS
+$ oc edit destinationrule incident-priority-service-client-mtls -n $ERDEMO_NS
 ----
 * In the DestinationRule resource, add the outlier detection configuration:
 +
@@ -592,7 +592,7 @@ Add connection pool settings to the _DestinationRule_ resource of the Incident P
 * Open the DestinationRule resource of the Incident Priority Service for editing:
 +
 ----
-$ oc edit destinationrule incident-priority-service-client-mtls -n $ER_DEMO_NS
+$ oc edit destinationrule incident-priority-service-client-mtls -n $ERDEMO_NS
 ----
 * In the DestinationRule resource, add the connection pool configuration:
 +
