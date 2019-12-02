@@ -18,11 +18,6 @@
 Faulty or compromised control planes should not be able affect any other tenants on the cluster. 
 This means that control plane components and service accounts have to be locked down using appropriate Kubernetes Roles and network access limited by NetworkPolicies.
 
-.References:
-* link:https://docs.google.com/document/d/1eMnLBpcJNMahoE6cYKcECp_Jcy4Haj3qc36RBAO9J-U/edit#[Operator-Based Soft Multi-Tenancy]
-* link:https://maistra.io/docs/comparison-with-istio/#_cluster_scoped_custom_resources[Comparison with Istio]
-
-
 == ServiceMeshMemberRoll
 
 . Switch to your service mesh control plane administrator user:
@@ -59,14 +54,14 @@ map[kiali.io/member-of:admin50-istio-system maistra.io/member-of:admin50-istio-s
 -----
 oc get RoleBinding  -n $ERDEMO_NS -l release=istio
 
-istio-citadel-admin50-istio-system                               24h
-istio-egressgateway-admin50-istio-system                         24h
-istio-galley-admin-role-binding-admin50-istio-system             24h
-istio-ingressgateway-admin50-istio-system                        24h
-istio-mixer-admin-role-binding-admin50-istio-system              24h
-istio-pilot-admin50-istio-system                                 24h
-istio-sidecar-injector-admin-role-binding-admin50-istio-system   24h
-prometheus-admin50-istio-system                                  24h
+istio-citadel-admin50-istio-system                               24s
+istio-egressgateway-admin50-istio-system                         24s
+istio-galley-admin-role-binding-admin50-istio-system             24s
+istio-ingressgateway-admin50-istio-system                        24s
+istio-mixer-admin-role-binding-admin50-istio-system              24s
+istio-pilot-admin50-istio-system                                 24s
+istio-sidecar-injector-admin-role-binding-admin50-istio-system   24s
+prometheus-admin50-istio-system                                  24s
 -----
 +
 The use of a project scoped _RoleBinding_ rather than a cluster-scoped _ClusterRoleBinding_ is a key enabler of _multi-tenant_ capabilities of the Red Hat Service Mesh product.
@@ -81,7 +76,7 @@ oc get NetworkPolicy istio-mesh -n $ERDEMO_NS
 istio-mesh   <none>         26m
 -----
 +
-This _NetworkPolicy_ allows ingress to all pods specific to this namespace from all other registered _members of the same Red Hat Service Mesh control plane.
+This _NetworkPolicy_ allows ingress to all pods specific to this namespace from all other registered _members_ of the same Red Hat Service Mesh control plane.
 
 . Notice also that your $ERDEMO_NS namespace now includes _istio_ related secrets:
 +
@@ -126,14 +121,14 @@ In this section of this lab you (as the owner of the Emergency Response applicat
 oc login -u $ERDEMO_USER
 -----
 +
-The $ERDEMO_USER is the admin of the $ERDEMO_NS namespace where the Emergency Response application resides.
+The $ERDEMO_USER is the admin of the $ERDEMO_NS namespace where your Emergency Response application resides.
 
-. Review the contents of link:https://github.com/gpe-mw-training/ocp_service_mesh_advanced/blob/master/utils/inject_istio_annotation.sh[this script] and answer the following questions:
+. Review the contents of link:https://github.com/gpe-mw-training/ocp_service_mesh_advanced/blob/master/utils/inject_istio_annotation.sh[this script] (which will iterate through your Emergency Response Deployment Configs and add the _sidecar.istio/inject=true_ annotation) and answer the following questions:
 
-.. Which Deployment Configs resources of the Emergency Response demo are to be opt into your service mesh ?
+.. Which Deployment Configs resources of the Emergency Response demo are to be opted into your service mesh ?
 .. Which resources of the Emergency Response demo will not be managed by your service mesh ?
 
-. Execute script that adds Envoy auto-injection annotations to Emergency Response services:
+. Execute the shell script that adds Envoy auto-injection annotations to Emergency Response deployments:
 +
 -----
 curl https://raw.githubusercontent.com/gpe-mw-training/ocp_service_mesh_advanced/master/utils/inject_istio_annotation.sh \
@@ -182,13 +177,38 @@ user50-responder-simulator-1-tdrz2    :         user50-responder-simulator      
 .. Notice that each pod now contains an additional _istio-proxy_ container co-located with the primary business service container.
 .. Recall from a previous lab that Red Hat Service Mesh uses a Kubernetes' link:https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/#mutatingadmissionwebhook[MutatingAdmissionWebhook] for automatically injecting the sidecar proxy into user pods.
 
-. The two databases leveraged by the Emergency Response demo ( _postgresql_ and _$ERDEMO_USER-process-service-postgresql_ ) are also now injected with an Envoy proxy.
-+
-Verify that this is infact the case either through the OpenShift web console or the oc utility.
+
 
 == Envoy _Data Plane_
 
 === Architecture
+Envoy has many features useful for inter-service communication.
+To help understand Envoy's features and capabilities, you should be familiar with the following terminology:
+
+* *listeners*
++
+Listeners expose a port to the outside world into which an application can connect.
+ie: a listener on port 8080 would accept traffic and apply any configured behavior to that traffic.
+
+* *routes*
++
+Routes are rules for how to handle traffic that came in on listeners;
+ie: if a request comes in and matches /incident, then the route will direct that traffic to the incident _cluster_.
+
+* *clusters*
++
+Clusters are specific upstream services to which Envoy can direct traffic.
+ie:  incident-v1 and incident-v2 can be separate clusters and _routes_ can specify rules about how traffic can be directed to either v1 or v2 of the incident service.
+
+
+Traffic coming into Envoy comes into a _listener_ and is coming from a _downstream_ system.
+This traffic gets routes to one of Envoy's _clusters_ which is responsible for sending that traffic to an _upstream_ system.
+_Downstream_ to _upstream_ is how traffic always flows through Envoy.
+
+{nbsp}
+{nbsp}
+
+image::images/envoy_architecture.png[]
 
 
 === Service proxy container configuration
@@ -367,10 +387,17 @@ oc rsh `oc get pod -n $ERDEMO_NS | grep "responder-service" | awk '{print $1}'` 
 
 === Reference
 
+* link:https://docs.google.com/document/d/1eMnLBpcJNMahoE6cYKcECp_Jcy4Haj3qc36RBAO9J-U/edit#[Operator-Based Soft Multi-Tenancy]
+* link:https://maistra.io/docs/comparison-with-istio/#_cluster_scoped_custom_resources[Comparison between Red Hat Service Mesh and community Istio]
 . link:https://istio.io/blog/2019/data-plane-setup/[Demystifying Istio's Sidecar Injection Model]
 
 
 ifdef::showscript[]
+
+. The two databases leveraged by the Emergency Response demo ( _postgresql_ and _$ERDEMO_USER-process-service-postgresql_ ) are also now injected with an Envoy proxy.
++
+Verify that this is infact the case either through the OpenShift web console or the oc utility.
+
 === Envoy Access Log File
 
 .TO-DO:

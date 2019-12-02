@@ -497,6 +497,8 @@ echo -en "\n\nhttps://$(oc get route $ERDEMO_USER-emergency-console -o template 
 
 . You can log into the web console and simulate an emergency by following the instructions in the link:https://www.erdemo.io/gettingstarted/[Getting Started guide].
 
+Attempt to create one or more emergency _incidents_ that volunteer community _responders_ respond to.
+
 
 == Appendix
 

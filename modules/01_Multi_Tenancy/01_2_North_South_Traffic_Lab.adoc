@@ -19,7 +19,9 @@ Securing and managing a micro-service architected application is often going to 
 One potential strategy for onboarding customers on this journey could be to start by applying API policies to _north / south_ traffic into the application.
 
 Red Hat has a supported product that is well suited for exactly this use-case:  Red Hat 3scale API Management.
-In addition, as you'll experience in later labs of this course, API policy management (via Red Hat 3scale) and service mesh management (via Red Hat Service Mesh) are *complementary* technologies.
+On-boarding your new customer might potentially be as straight forward as leveraging the 3scale link:https://www.3scale.net/[SaaS offering].
+
+As you'll experience in later labs of this course, API policy management (via Red Hat 3scale) and service mesh management (via Red Hat Service Mesh) are *complementary* technologies.
 
 In this lab, you will quickly ease your customer into the management of their _north / south_ API traffic by applying API policies using Red Hat 3scale API Management.
 
@@ -46,7 +48,7 @@ echo -en "\n\nhttps://$(oc get routes -n $API_MANAGER_NS | grep admin | grep $ER
 +
 image::images/3scale_login.png[]
 
-. Authenticate using the following values:
+. Authenticate using the values of the following environment variables:
 .. *Username*:  $API_TENANT_USERNAME
 .. *Password*:  $API_TENANT_PASSWORD
 
