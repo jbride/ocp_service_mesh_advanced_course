@@ -213,6 +213,16 @@ image::images/envoy_architecture.png[]
 
 === Service proxy container configuration
 
+. Delete _deploy_ pods that are in a _completed_ status and have not yet been deleted:
++
+-----
+curl https://raw.githubusercontent.com/gpe-mw-training/ocp_service_mesh_advanced/master/utils/delete_pod_deploys.sh \
+    -o $HOME/lab/delete_pod_deploys.sh && \
+    chmod 775 $HOME/lab/delete_pod_deploys.sh
+
+$HOME/lab/delete_pod_deploys.sh
+-----
+
 . Capture the details of the _istio-proxy_ container configuration from the _responder-service_ pod of the Emergency Response demo :
 +
 -----
