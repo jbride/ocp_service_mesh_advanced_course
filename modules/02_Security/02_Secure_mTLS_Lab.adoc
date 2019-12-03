@@ -543,7 +543,7 @@ $ curl -v -k https://incident-service.$ERDEMO_USER.apps.$SUBDOMAIN_BASE/incident
 . To check that the traffic between the Istio Ingress Gateway service and the Incident Service service uses mTLS, the `istioctl` tool can be used:
 +
 ----
-$ ISTIO_INGRESSGATEWAY_POD=$(oc get pod -l app=istio-ingressgateway -o jsonpath={.items.metadata.name} -n $SM_CP_NS)
+$ ISTIO_INGRESSGATEWAY_POD=$(oc get pod -l app=istio-ingressgateway -o jsonpath={.items[0].metadata.name} -n $SM_CP_NS)
 $ istioctl -n $SM_CP_NS -i $SM_CP_NS authn tls-check ${ISTIO_INGRESSGATEWAY_POD} $ERDEMO_USER-incident-service.$ERDEMO_NS.svc.cluster.local
 ----
 +
