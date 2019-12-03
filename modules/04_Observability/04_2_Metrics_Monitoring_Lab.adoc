@@ -81,7 +81,7 @@ tcpconnectionsopened   9d
 ----
 +
 ----
-$ oc get rule requestcount -o yaml -n $RHSM_CONTROL PLANE_NS
+$ oc get rule requestcount -o yaml -n $SM_CP_NS
 ----
 +
 .Output (truncated)

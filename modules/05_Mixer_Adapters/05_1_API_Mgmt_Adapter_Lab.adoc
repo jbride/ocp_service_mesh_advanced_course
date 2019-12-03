@@ -469,7 +469,7 @@ image::images/post_mapping.png[]
 +
 image::images/promote.png[]
  
-. At the command line, modify the existing `usethreescale` rule in the $RHSM_CONTROL_PLAN_NS:
+. At the command line, modify the existing `usethreescale` rule in the $SM_CP_NS:
 +
 -----
 oc patch rule.config.istio.io threescale \
