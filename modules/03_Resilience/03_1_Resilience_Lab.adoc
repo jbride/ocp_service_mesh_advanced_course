@@ -2,6 +2,7 @@
 :scrollbar:
 :toc2:
 :linkattrs:
+:data-uri:
 
 == Istio Reliability: Retries, Timeouts and Circuit Breaker
 

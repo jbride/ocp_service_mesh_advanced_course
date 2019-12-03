@@ -2,6 +2,7 @@
 :scrollbar:
 :toc2:
 :linkattrs:
+:data-uri:
 
 == Istio Security: mTLS and authorization policies
 
