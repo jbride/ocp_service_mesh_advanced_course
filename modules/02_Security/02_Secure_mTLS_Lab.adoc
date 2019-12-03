@@ -2189,7 +2189,7 @@ image::images/sso-client-settings.png[]
 * In a terminal, use the `curl` utility to obtain a token based on your SSO username and password.
 +
 ----
-$ export RHSSO_URL=sso-user-sso.$SUBDOMAIN_BASE
+$ export RHSSO_URL=https://sso-user-sso.apps.$SUBDOMAIN_BASE
 $ export REALM=$ERDEMO_USER-emergency-realm
 $ export USER=<realm username>
 $ export PASSWD=<realm password>
