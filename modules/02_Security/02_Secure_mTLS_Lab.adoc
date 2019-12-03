@@ -2013,8 +2013,8 @@ metadata:
   name: incident-service-internal
 spec:
   rules:
-    - services: ["$ERDEMO_USER-incident-service.$ERDEMO_NS.svc.cluster.local"]
-      methods: ["*"]
+    - services: [\"$ERDEMO_USER-incident-service.$ERDEMO_NS.svc.cluster.local\"]
+      methods: [\"*\"]
 " > sr-incident-service-internal.yml
 ----
 ** This policy allows to call the Incident Service service using all HTTP methods.
