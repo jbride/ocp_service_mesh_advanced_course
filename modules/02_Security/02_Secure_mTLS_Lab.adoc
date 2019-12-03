@@ -2093,7 +2093,7 @@ spec:
     - user: \"cluster.local/ns/$SM_CP_NS/sa/istio-ingressgateway-service-account\"
   roleRef:
     kind: ServiceRole
-    name: \"incident-service-internal\"
+    name: \"incident-service-ingress\"
 " > srb-incident-service-ingress.yml
 ----
 * Create the ServiceRoleBinding resource in the Emergency Response Demo namespace:
