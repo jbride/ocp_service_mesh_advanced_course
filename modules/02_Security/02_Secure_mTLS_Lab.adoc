@@ -2036,10 +2036,10 @@ metadata:
 spec:
   subjects:
     - properties:
-        source.namespace: "$ERDEMO_NS"
+        source.namespace: \"$ERDEMO_NS\"
   roleRef:
     kind: ServiceRole
-    name: "incident-service-internal"
+    name: \"incident-service-internal\"
 " > rb-incident-service-internal.yml
 ----
 * Create the ServiceRoleBinding resource in the Emergency Response Demo namespace:
@@ -2067,8 +2067,8 @@ metadata:
   name: incident-service-ingress
 spec:
   rules:
-    - services: ["$ERDEMO_USER-incident-service.$ERDEMO_NS.svc.cluster.local"]
-      methods: ["GET"]
+    - services: [\"$ERDEMO_USER-incident-service.$ERDEMO_NS.svc.cluster.local\"]
+      methods: [\"GET\"]
 " > srb-incident-service-ingress.yml
 ----
 ** This policy allows to call the Incident Service service using HTTP GET, but disallows other HTTP methods.
@@ -2089,10 +2089,10 @@ metadata:
   name: incident-service-ingress
 spec:
   subjects:
-    - user: "cluster.local/ns/$ERDEMO_NS/sa/istio-ingressgateway-service-account"
+    - user: \"cluster.local/ns/$ERDEMO_NS/sa/istio-ingressgateway-service-account\"
   roleRef:
     kind: ServiceRole
-    name: "incident-service-internal"
+    name: \"incident-service-internal\"
 " > srb-incident-service-ingress.yml
 ----
 * Create the ServiceRoleBinding resource in the Emergency Response Demo namespace:
