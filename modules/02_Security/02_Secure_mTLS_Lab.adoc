@@ -160,7 +160,7 @@ As part of client-side verification when using mTLS, this identity is verified a
 . Visualize the contents of the `istio.incident-service` secret.
 +
 ----
-$ oc get secret istio.incident-service -o jsonpath={.data.cert-chain\\.pem} -n $ERDEMO_NS | base64 --decode 
+$ oc get secret istio.incident-service -o jsonpath={.data.cert-chain\\.pem} -n $ERDEMO_NS | base64 --decode
 ----
 +
 .Sample Output
@@ -190,15 +190,12 @@ gl+CKnYHFEIp/w==
 +
 image::images/istio-citadel-certificate.png[]
 +
-* The certificate subject name is set to `URI:spiffe://cluster.local/ns/<emergency-response-demo namespace>/sa/incident-service`. This is corresponds to the identity of the service as managed by Istio. 
+* The certificate subject name is set to `URI:spiffe://cluster.local/ns/<emergency-response-demo namespace>/sa/incident-service`. This corresponds to the identity of the service as managed by Istio.
 * The certificate validity is 3 months.
-
-IMPORTANT: Check if Citadel certificate lifepsan is configurable.
-
 
 === Istio Ingress Gateway and Certificates
 
-In an OpenShift environment, a Route is used to expose services outside the cluster. Through the route, traffic is directed to the service pods. 
+In an OpenShift environment, a Route is used to expose services outside the cluster. Through the route, traffic is directed to the service pods.
 
 In a Service Mesh, a better approach is to use a gateway for traffic coming into the service mesh. This allows service mesh policies and routing rules to be applied to traffic entering the service mesh.
 
@@ -1891,7 +1888,7 @@ This error requires further investigation.
 
 NOTE: The communication beween the Mission Service and the Datagrid is not managed by the service mesh. There are several bug reports about Istio mTLS not working with StatefulSets. Also, the communication between the mission service and the datagrid uses the HotRod protocol, with support for transport level security.
 
-NOTE: The communication beween the services and Kafka is not managed by the service mesh. Strimzi/Kafka has its own security mechanisms, including transport security and authentication/authorization. 
+NOTE: The communication beween the services and Kafka is not managed by the service mesh. Strimzi/Kafka has its own security mechanisms, including transport security and authentication/authorization.
 
 == Authorization Policy for Services
 
@@ -1933,7 +1930,7 @@ spec:
 ** The name of the ServiceMeshRbacConfig must be `default`.
 ** The mode is set to `ON_WITH_INCLUSION`. This means that RBAC is only enabled for the services listed in the `inclusion` whitelist. +
 Other possible values are `ON`, `OFF`, `ON_WITH_EXCLUSION`.
-** In our case, Service Mesh authorization is only enabled for the Incident Service in the Emergency Response Demo namespace. 
+** In our case, Service Mesh authorization is only enabled for the Incident Service in the Emergency Response Demo namespace.
 * Create the resource in the Service Mesh controlplane namespace:
 +
 ----
@@ -1982,18 +1979,18 @@ $ curl -v -k https://$INCIDENT_SERVICE_URL/incidents
 > Host: incident-service.erd.apps.cluster-a3c6.a3c6.example.opentlc.com
 > User-Agent: curl/7.65.3
 > Accept: */*
-> 
+>
 * TLSv1.3 (IN), TLS handshake, Newsession Ticket (4):
 * TLSv1.3 (IN), TLS handshake, Newsession Ticket (4):
 * old SSL session ID is stale, removing
 * Connection state changed (MAX_CONCURRENT_STREAMS == 4294967295)!
-< HTTP/2 403 
+< HTTP/2 403
 < content-length: 19
 < content-type: text/plain
 < date: Wed, 30 Oct 2019 20:09:18 GMT
 < server: istio-envoy
 < x-envoy-upstream-service-time: 7
-< 
+<
 * Connection #0 to host incident-service.erd.apps.cluster-a3c6.a3c6.example.opentlc.com left intact
 RBAC: access denied
 ----
@@ -2024,7 +2021,7 @@ spec:
 * Create the ServiceRole resource in the Emergency Response Demo namespace:
 +
 ----
-$ oc create -f sr-incident-service-internal.yml -n $ERDEMO_NS 
+$ oc create -f sr-incident-service-internal.yml -n $ERDEMO_NS
 ----
 
 . Create a _ServiceRoleBinding_ referencing the ServiceRole you just created and bind it to all services in the Emergency Response Demo namespace.
@@ -2048,7 +2045,7 @@ spec:
 * Create the ServiceRoleBinding resource in the Emergency Response Demo namespace:
 +
 ----
-$ oc create -f srb-incident-service-internal.yml -n $ERDEMO_NS 
+$ oc create -f srb-incident-service-internal.yml -n $ERDEMO_NS
 ----
 . Check that the Incident Service can now be called from other services in the Emergency Response Demo namespace, but not from the outside.
 * Click on the _Clear Incidents_ button of the Disaster Simulator home page. Check the logs of the Disaster Simulator pod. Expect to see something like:
@@ -2078,7 +2075,7 @@ spec:
 * Create the ServiceRole resource in the Emergency Response Demo namespace:
 +
 ----
-$ oc create -f sr-incident-service-ingress.yml -n $ERDEMO_NS 
+$ oc create -f sr-incident-service-ingress.yml -n $ERDEMO_NS
 ----
 
 . Create a _ServiceRoleBinding_ referencing the ServiceRole you just created and bind it to the SPIFFE identity of the Istio Ingress Gateway service.
@@ -2101,7 +2098,7 @@ spec:
 * Create the ServiceRoleBinding resource in the Emergency Response Demo namespace:
 +
 ----
-$ oc create -f srb-incident-service-ingress.yml -n $ERDEMO_NS 
+$ oc create -f srb-incident-service-ingress.yml -n $ERDEMO_NS
 ----
 . Check that the Incident Service can now be called from outside of the cluster, but only for HTTP GET endpoints.
 * A curl request to the `/incidents` endpoint of the Incident Service returns a HTTP 200 code.
@@ -2148,19 +2145,19 @@ Note: Unnecessary use of -X or --request, POST is already inferred.
 > Accept: */*
 > Content-type: application/json
 > Content-Length: 141
-> 
+>
 * We are completely uploaded and fine
 * TLSv1.3 (IN), TLS handshake, Newsession Ticket (4):
 * TLSv1.3 (IN), TLS handshake, Newsession Ticket (4):
 * old SSL session ID is stale, removing
 * Connection state changed (MAX_CONCURRENT_STREAMS == 4294967295)!
-< HTTP/2 403 
+< HTTP/2 403
 < content-length: 19
 < content-type: text/plain
 < date: Wed, 30 Oct 2019 21:52:32 GMT
 < server: istio-envoy
 < x-envoy-upstream-service-time: 1
-< 
+<
 * Connection #0 to host incident-service.erd.apps.cluster-a3c6.a3c6.example.opentlc.com left intact
 RBAC: access denied
 ----
@@ -2183,7 +2180,7 @@ You are directed to the administration section of your realm.
 * Open the _Clients_ tab and click _Create_ to create a new client.
 * Enter `curl` as the Client ID and click _Save_:
 +
-image::images/sso-client-create.png[]  
+image::images/sso-client-create.png[]
 * In the _Settings_ tab, disable _Standard Flow_ and enable _Direct Access Grants_, then click _Save_:
 +
 image::images/sso-client-settings.png[]
@@ -2239,7 +2236,7 @@ spec:
 * Create the Policy resource in the Control Plane namespace:
 +
 ----
-$ oc create -f ingressgateway-origin.yml -n $SM_CP_NS 
+$ oc create -f ingressgateway-origin.yml -n $SM_CP_NS
 ----
 
 . With the Policy in place, all requests through the Ingress Gateway will require a valid token.
@@ -2284,17 +2281,17 @@ $ curl -v -k https://$INCIDENT_SERVICE_URL/incidents
 > Host: incident-service.erd.apps.cluster-a3c6.a3c6.example.opentlc.com
 > User-Agent: curl/7.65.3
 > Accept: */*
-> 
+>
 * TLSv1.3 (IN), TLS handshake, Newsession Ticket (4):
 * TLSv1.3 (IN), TLS handshake, Newsession Ticket (4):
 * old SSL session ID is stale, removing
 * Connection state changed (MAX_CONCURRENT_STREAMS == 4294967295)!
-< HTTP/2 401 
+< HTTP/2 401
 < content-length: 29
 < content-type: text/plain
 < date: Thu, 31 Oct 2019 22:58:37 GMT
 < server: istio-envoy
-< 
+<
 * Connection #0 to host incident-service.erd.apps.cluster-a3c6.a3c6.example.opentlc.com left intact
 Origin authentication failed.
 ----
@@ -2353,17 +2350,17 @@ VyLXNzby5hcHBzLmNsdXN0ZXItYTNjNi5hM2M2LmV4YW1wbGUub3BlbnRsYy5jb20vYXV0aC9yZWFsbX
 LTRiOWItYWEyNi02OWNlY2UxNmFiNWQiLCJhY3IiOiIxIiwicmVhbG1fYWNjZXNzIjp7InJvbGVzIjpbIm9mZmxpbmVfYWNjZXNzIiwidW1hX2F1dGhvcml6YXRpb24iXX0sInJlc291cmNlX2FjY2VzcyI6eyJhY2NvdW50Ijp7InJvbGVzIjpbIm1hbmFnZS1hY2NvdW50IiwibWFuYWdlLWFjY291bnQtbGlua3MiLCJ2aWV3LXByb2ZpbGUiXX19LCJzY29wZSI6ImVtYWlsIH
 Byb2ZpbGUiLCJlbWFpbF92ZXJpZmllZCI6ZmFsc2UsIm5hbWUiOiJCZXJuYXJkIFRpc29uIiwicHJlZmVycmVkX3VzZXJuYW1lIjoiYnRpc29uIiwiZ2l2ZW5fbmFtZSI6IkJlcm5hcmQiLCJmYW1pbHlfbmFtZSI6IlRpc29uIiwiZW1haWwiOiJidGlzb25AcmVkaGF0LmNvbSJ9.NvT75pNsT3PdQMbYFtbsPeNx9_bdZwDYdfBOO4BU5GPvgB6z3RTIBfKJCnGpBZmpZw46PgJ
 8eLljOZ3eDmZzPGStSMSBvgDndNv7AhdscmXVisGGR-WCLzDYtkYrZXjGVLIzhpLP_lTfapFflXlQWNZk1DkPsY_xuJ7dIX-vMQPurn0fyBhFcNtl0F6uHd7s02bCMqsX5EoOa0mV5lkI-RIqNjb94h12lBRVza9Go7aQ7q6NWP5LRr3RkKmdaLtz4E--L3pK4fVGCuhFAJfmQk7LndIQESs4DZvdtYYvQuT6RQEaLvm_0dh77xsKkIuPI7jXCugyAl_8ODeXEqsQcg
-> 
+>
 * TLSv1.3 (IN), TLS handshake, Newsession Ticket (4):
 * TLSv1.3 (IN), TLS handshake, Newsession Ticket (4):
 * old SSL session ID is stale, removing
 * Connection state changed (MAX_CONCURRENT_STREAMS == 4294967295)!
-< HTTP/2 200 
+< HTTP/2 200
 < content-type: application/json;charset=UTF-8
 < date: Thu, 31 Oct 2019 23:06:09 GMT
 < x-envoy-upstream-service-time: 17
 < server: istio-envoy
-< 
+<
 * Connection #0 to host incident-service.erd.apps.cluster-a3c6.a3c6.example.opentlc.com left intact
 []
 ----
@@ -2379,5 +2376,5 @@ NOTE: The Service Mesh only propagates the JWT token one hop. The service proxy 
 Before continuing with the remainder of the labs, delete the end-user authentication policy:
 
 ----
-$ oc delete policy ingressgateway-origin -n $SM_CP_NS 
+$ oc delete policy ingressgateway-origin -n $SM_CP_NS
 ----
