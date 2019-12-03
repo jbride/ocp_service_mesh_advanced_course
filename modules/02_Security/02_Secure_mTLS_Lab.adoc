@@ -2226,8 +2226,8 @@ spec:
     - name: istio-ingressgateway
   origins:
     - jwt:
-        issuer: https://sso-user-sso.$SUBDOMAIN_BASE/auth/realms/$ERDEMO_USER-emergency-realm
-        jwksUri: https://sso-user-sso.$SUBDOMAIN_BASE/auth/realms/$ERDEMO_USER-emergency-realm/protocol/openid-connect/certs
+        issuer: https://sso-user-sso.apps.$SUBDOMAIN_BASE/auth/realms/$ERDEMO_USER-emergency-realm
+        jwksUri: https://sso-user-sso.apps.$SUBDOMAIN_BASE/auth/realms/$ERDEMO_USER-emergency-realm/protocol/openid-connect/certs
   principalBinding: USE_ORIGIN
 " > ingressgateway-origin.yml
 ----
@@ -2236,7 +2236,7 @@ spec:
 ** Make sure that the value of the `jwksUri` element corresponds to the `issuer` url followed by `/protocol/openid-connect/certs`
 * Create the Policy resource in the Control Plane namespace:
 +
-----
+----$SM
 $ oc create -f ingressgateway-origin.yml -n $SM_CP_NS
 ----
 
