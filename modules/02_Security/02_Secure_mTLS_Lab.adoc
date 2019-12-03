@@ -2236,7 +2236,7 @@ spec:
 ** Make sure that the value of the `jwksUri` element corresponds to the `issuer` url followed by `/protocol/openid-connect/certs`
 * Create the Policy resource in the Control Plane namespace:
 +
-----$SM
+----
 $ oc create -f ingressgateway-origin.yml -n $SM_CP_NS
 ----
 
