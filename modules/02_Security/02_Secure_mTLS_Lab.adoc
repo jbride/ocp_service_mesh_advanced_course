@@ -1923,7 +1923,7 @@ spec:
   mode: ON_WITH_INCLUSION
   inclusion:
     services:
-      - incident-service.$ERDEMO_NS.svc.cluster.local
+      - $ERDEMO_USER-incident-service.$ERDEMO_NS.svc.cluster.local
 " > servicemesh-rbac.yml
 ----
 +
