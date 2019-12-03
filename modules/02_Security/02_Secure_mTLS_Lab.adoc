@@ -2090,7 +2090,7 @@ metadata:
   name: incident-service-ingress
 spec:
   subjects:
-    - user: \"cluster.local/ns/$ERDEMO_NS/sa/istio-ingressgateway-service-account\"
+    - user: \"cluster.local/ns/$SM_CP_NS/sa/istio-ingressgateway-service-account\"
   roleRef:
     kind: ServiceRole
     name: \"incident-service-internal\"
