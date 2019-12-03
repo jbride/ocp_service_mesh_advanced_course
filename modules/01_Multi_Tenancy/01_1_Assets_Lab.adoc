@@ -164,7 +164,7 @@ oc login -u $SM_CP_ADMIN -p $OCP_PASSWD
 -----
 oc get deploy istio-operator -n istio-operator
 
-istio-operator-7fdc886f-t4vw2   1/1     Running   0          15h
+istio-operator   1/1     1            1           15h
 -----
 +
 .. This operator is global (to the OpenShift cluster) in scope.
