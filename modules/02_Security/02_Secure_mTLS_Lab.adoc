@@ -209,7 +209,7 @@ The Ingress Gateway also ensures end-to-end encryption for incoming traffic: TLS
 
 NOTE: There is a limitation when combining certificates, Gateway and VirtualService resources to route traffic into the mesh with end-to-end transport security. +
 Only one certificate/key pair can be mounted into the Istio Ingress Gateway. This (wildcard) certificate will be used by the different Gateway resources. However, configuring more than one Gateway using the same TLS certificate will cause browsers that leverage HTTP/2 connection reuse (i.e., most browsers) to produce 404 errors when accessing a second host after a connection to another host has already been established. +
-For a description of the problem, see https://istio.io/docs/ops/traffic-management/deploy-guidelines/#browser-problem-when-multiple-gateways-configured-with-same-tls-certificate +
+For a description of the problem, see https://istio.io/docs/ops/common-problems/network-issues/#404-errors-occur-when-multiple-gateways-configured-with-same-tls-certificate +
 The workaround for this problem is to configure a single wildcard Gateway and bind the different VirtualServices to this single Gateway.
 An another alternative consists of having several Istio Ingress Gateway services, each handling their own internal service and managing their own (non-wildcard) certificate. This means however that a public certificate has to be provided for every service exposed outside of the mesh.
 
