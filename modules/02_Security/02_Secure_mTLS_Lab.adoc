@@ -1854,7 +1854,7 @@ kind: DestinationRule
 metadata:
   name: process-service-postgresql-client-mtls
 spec:
-  host: process-service-postgresql.$ERDEMO_NS.svc.cluster.local
+  host: $ERDEMO_USER-process-service-postgresql.$ERDEMO_NS.svc.cluster.local
   trafficPolicy:
     tls:
       mode: ISTIO_MUTUAL
