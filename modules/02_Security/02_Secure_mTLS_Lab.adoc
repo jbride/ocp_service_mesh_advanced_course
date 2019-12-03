@@ -2041,7 +2041,7 @@ spec:
   roleRef:
     kind: ServiceRole
     name: \"incident-service-internal\"
-" > rb-incident-service-internal.yml
+" > srb-incident-service-internal.yml
 ----
 * Create the ServiceRoleBinding resource in the Emergency Response Demo namespace:
 +
@@ -2070,7 +2070,7 @@ spec:
   rules:
     - services: [\"$ERDEMO_USER-incident-service.$ERDEMO_NS.svc.cluster.local\"]
       methods: [\"GET\"]
-" > srb-incident-service-ingress.yml
+" > sr-incident-service-ingress.yml
 ----
 ** This policy allows to call the Incident Service service using HTTP GET, but disallows other HTTP methods.
 * Create the ServiceRole resource in the Emergency Response Demo namespace:
