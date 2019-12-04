@@ -359,7 +359,7 @@ Shortest transaction:           0.11
 +
 * Note that all calls succeed, but roughly 30% of the calls take 2 seconds.
 * No handling of timeouts is the default behaviour of the Service Mesh.
-. Timeouts can be defined in the _VirtualService_ resouvre for the target service. +
+. Timeouts can be defined in the _VirtualService_ resource for the target service. +
 For example, to add a 500ms timeout to the VirtualService configuration. 
 +
 ----
