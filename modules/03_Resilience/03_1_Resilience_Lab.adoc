@@ -629,6 +629,7 @@ $ siege -r 100 -c 4 -d0 -v https://incident-priority-service.$ERDEMO_USER.apps.$
 ----
 +
 In the example above we make use of 4 concurrent users. Depending on the lab conditions this settings might generate quite some 503 responses. In that case lower the number of concurrent users until you get only 200 responses.
+
 . While the _siege_ load test is still running, log into one of the pods of the Incident Priority Service, and inject a delay of 2000ms
 . Go back to the siege load test, and observe that you have a fair amount of 503 responses. +
 Once the limits in the `connectionPool` are met, the circuit breaker functionality of the Envoy proxy will short-circuit the call to the service and immediately return a 503 response.
