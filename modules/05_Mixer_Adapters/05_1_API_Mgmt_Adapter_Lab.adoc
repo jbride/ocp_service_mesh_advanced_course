@@ -24,12 +24,12 @@ image::images/3scale_mixer_adapter.png[]
 
 In the above diagram, [blue]#notice the replacement of an API Gateway with the service mesh 3scale Mixer Adapter#.
 
-== Disable Existing API Gateways
+== Disable Existing API Production Gateway
 
 Your 3scale API gateways (utilized briefly in the first module of this course) will no longer be needed.
 Instead, inbound traffic to your Emergency Response application will flow through the _Istio ingress gateway_ directly.
 
-Subsequently, the API gateways disabled.
+Subsequently, your API production gateway can be disabled.
 
 . Switch to the owner of your pre-existing API Gateways:
 +
@@ -37,10 +37,10 @@ Subsequently, the API gateways disabled.
 oc login -u $ERDEMO_USER -p $OCP_PASSWD
 -----
 
-. Scale down the existing API gateways:
+. Scale down the existing API production gateway:
 +
 -----
-$ oc scale deploy/prod-apicast deploy/stage-apicast --replicas=0 -n $GW_PROJECT
+$ oc scale deploy/prod-apicast --replicas=0 -n $GW_PROJECT
 -----
 
 == New Virtual Service to Incident Service
@@ -197,36 +197,96 @@ In this section of the lab, you enable it.
 . Update the _ServiceMeshControlPlane_ resource with the _threeScale_ component:
 +
 -----
-echo "apiVersion: maistra.io/v1
-kind: ServiceMeshControlPlane
-metadata:
-  name: full-install
-spec:
-  threeScale:
-    enabled: true
-    image: 3scale-istio-adapter-rhel8
-    tag: 1.0.0
-    PARAM_THREESCALE_LISTEN_ADDR: 3333
-    PARAM_THREESCALE_LOG_LEVEL: debug
-    PARAM_THREESCALE_LOG_JSON: true
-    PARAM_THREESCALE_LOG_GRPC: false
-    PARAM_THREESCALE_REPORT_METRICS: true
-    PARAM_THREESCALE_METRICS_PORT: 8080
-    PARAM_THREESCALE_CACHE_TTL_SECONDS: 300
-    PARAM_THREESCALE_CACHE_REFRESH_SECONDS: 180
-    PARAM_THREESCALE_CACHE_ENTRIES_MAX: 1000
-    PARAM_THREESCALE_CACHE_REFRESH_RETRIES: 1
-    PARAM_THREESCALE_ALLOW_INSECURE_CONN: false
-    PARAM_THREESCALE_CLIENT_TIMEOUT_SECONDS: 10
-    PARAM_THREESCALE_GRPC_CONN_MAX_SECONDS: 60" \
-    | oc apply -n $SM_CP_NS -f -
+oc patch smcp/full-install -n $SM_CP_NS --type=json -p \
+'[
+    {
+        "op": "replace",
+        "path": "/spec/threeScale/enabled",
+        "value": true
+    },
+    {
+        "op": "add",
+        "path": "/spec/threeScale/image",
+        "value": "3scale-istio-adapter-rhel8"
+    },
+    {
+        "op": "add",
+        "path": "/spec/threeScale/tag",
+        "value": "1.0.0"
+    },
+    {
+        "op": "add",
+        "path": "/spec/threeScale/PARAM_THREESCALE_LISTEN_ADDR",
+        "value": 3333
+    },
+    {
+        "op": "add",
+        "path": "/spec/threeScale/PARAM_THREESCALE_LOG_LEVEL",
+        "value": "debug"
+    },
+    {
+        "op": "add",
+        "path": "/spec/threeScale/PARAM_THREESCALE_LOG_JSON",
+        "value": true
+    },
+    {
+        "op": "add",
+        "path": "/spec/threeScale/PARAM_THREESCALE_LOG_GRPC",
+        "value": false
+    },
+    {
+        "op": "add",
+        "path": "/spec/threeScale/PARAM_THREESCALE_REPORT_METRICS",
+        "value": true
+    },
+    {
+        "op": "add",
+        "path": "/spec/threeScale/PARAM_THREESCALE_METRICS_PORT",
+        "value": 8080
+    },
+    {
+        "op": "add",
+        "path": "/spec/threeScale/PARAM_THREESCALE_CACHE_TTL_SECONDS",
+        "value": 300
+    },
+    {
+        "op": "add",
+        "path": "/spec/threeScale/PARAM_THREESCALE_CACHE_REFRESH_SECONDS",
+        "value": 180
+    },
+    {
+        "op": "add",
+        "path": "/spec/threeScale/PARAM_THREESCALE_CACHE_ENTRIES_MAX",
+        "value": 1000
+    },
+    {
+        "op": "add",
+        "path": "/spec/threeScale/PARAM_THREESCALE_CACHE_REFRESH_RETRIES",
+        "value": 1
+    },
+    {
+        "op": "add",
+        "path": "/spec/threeScale/PARAM_THREESCALE_ALLOW_INSECURE_CONN",
+        "value": false
+    },
+    {
+        "op": "add",
+        "path": "/spec/threeScale/PARAM_THREESCALE_CLIENT_TIMEOUT_SECONDS",
+        "value": 10
+    },
+    {
+        "op": "add",
+        "path": "/spec/threeScale/PARAM_THREESCALE_GRPC_CONN_MAX_SECONDS",
+        "value": 60
+    }
+]'
 -----
 +
 Notice that the above configuration enables the _threeScale_ mixer plugin and also specifies the exact tag of the _3scale-istio-adapter_ link:https://access.redhat.com/containers/?tab=tags#/registry.access.redhat.com/openshift-service-mesh/3scale-istio-adapter-rhel8[image to pull] (from registery.redhat.io).
 
 . Because a change was made to the _ServiceMeshControlPlane_, expect the Red Hat Service Mesh operator to detect this change.
-It will eventually refresh the pods of your service mesh and automatically start a _3scale-istio-adapter_ deployment.
-Monitor the pods of your service mesh control plane as they all bounce.
+It will eventually automatically start a _3scale-istio-adapter_ deployment.
+Monitor the pods of your service mesh control plane to view the new _3scale-istio-adapter_ pod.
 
 . Review 3scale Istio Adapter components in your service mesh control plane namespace:
 +
@@ -384,6 +444,43 @@ items:
 
 -----
 
+== 3scale _incident-service_ Production Base URL
+
+. Point your browser to the Admin Console of your 3scale tenant which is available at the following URL:
++
+-----
+echo -en "\n\nhttps://$(oc get routes -n $API_MANAGER_NS | grep admin | grep $ERDEMO_USER | awk '{print $2}')\n"
+-----
+
+. Authenticate using the values of the following environment variables:
+.. *Username*:  $API_TENANT_USERNAME
+.. *Password*:  $API_TENANT_PASSWORD
+
+. Navigate to the `APIcast configuration` page of the _incident_service_.
++
+image::images/edit_apicast.png[]
+
+. Change the value of the _Production Base URL_ to the value of the following:
++
+-----
+$ echo -en "\nhttp://`oc get route istio-ingressgateway -n $SM_CP_NS -o template --template {{.spec.host}}:80`\n\n"
+-----
++
+image::images/istioingress_public_url.png[]
+
+. Save the configuration change by scrolling down to the bottom of the page and clicking: `Update & test in Staging Environment`
++
+image::images/back_to_integration.png[]
+
+
+. Promote the change to production
+.. Click the link: `Back to Integration & Configuration`
+.. Click the link: `Promote to Production`
++
+image::images/promote.png[]
+
+
+
 == Smoke Test 3scale Istio Mixer Adapter
 
 . From the terminal, execute the following to invoke your incident service directly via the Istio ingress:
@@ -488,6 +585,8 @@ The conditions of the rule are as follows:
 .. The HTTP verb is of type: `POST`.
 .. The target is the `/incidents/` endpoint.
 
+
+ifdef::showscript[]
 .. View the log file of the _istio-policy_ pod:
 +
 -----
@@ -512,6 +611,8 @@ info    ControlZ available at 172.17.0.10:9876
 -----
 +
 In particular, notice that the new policies were put into effect with no error messages logged.
+endif::showscript[]
+
 
 
 === Test
@@ -575,6 +676,7 @@ As an additional exercise, configure the service mesh such that API Policies are
 
 Which configurations need to be modified or added?
 
+ifdef::showscript[]
 == Questions
 
 . Which of the following libraries is embedded in the community API gateway to support distributed tracing?
@@ -613,12 +715,14 @@ c) Billing
 d) A and C
 -----
 
-ifdef::showscript[]
+
 1)  answer D
 2)  answer C
 3)  answer D
 4)  answer D
 endif::showscript[]
+
+ifdef::showscript[]
 
 == Conclusion
 
@@ -631,7 +735,7 @@ In this lab we covered the following topics:
 * Review of the analytics dashboard provided by Red Hat 3scale API Management
 * Introduction to the Red Hat 3scale API Management Mixer Adapter
 
-ifdef::showscript[]
+
 
 -----
 "{" +
@@ -645,3 +749,5 @@ ifdef::showscript[]
 -----
 
 endif::showscript[]
+
+
