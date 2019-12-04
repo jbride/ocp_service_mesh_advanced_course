@@ -135,7 +135,7 @@ This is a result of the automatic retry feature of the Service Mesh. Whenever a 
 Verify that the faulty container has indeed been called:
 +
 ----
-$ oc logs -f $INCIDENT_PRIORITY_SERVICE_POD -n $ERDEMO_NS
+$ oc logs -f $INCIDENT_PRIORITY_SERVICE_POD -c $ERDEMO_USER-incident-priority-service -n $ERDEMO_NS
 ----
 +
 .Sample output
@@ -526,7 +526,7 @@ $ while :; do curl -k -s -w %{http_code} --output /dev/null https://incident-pri
 . In the logs of the faulty pod, verify that the service is still being called:
 +
 ----
-$ oc logs -f $INCIDENT_PRIORITY_SERVICE_POD -n $ERDEMO_NS
+$ oc logs -f $INCIDENT_PRIORITY_SERVICE_POD -c $ERDEMO_USER-incident-priority-service -n $ERDEMO_NS
 ----
 +
 .Sample output
