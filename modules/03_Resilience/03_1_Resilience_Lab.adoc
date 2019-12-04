@@ -129,6 +129,7 @@ Shortest transaction:           0.11
 ----
 +
 NOTE: On Fedora you can install siege with `# dnf install siege`.
+
 . Notice that all the calls succeed, even though 33% of the requests return a 503 return code. +
 This is a result of the automatic retry feature of the Service Mesh. Whenever a call returns a 503, the Envoy proxy will execute a retry targeting one of the other pods of the target service. +
 Verify that the faulty container has indeed been called:
