@@ -35,6 +35,8 @@ In particular, please refer to the first lab of the link:https://learning.redhat
 
 BookRetail Inc. has made available the Linux containers and corresponding OpenShift configurations for  its _BookInfo_ application.
 
+Execute the following once your OCP 4 lab environment has been provisioned.
+
 . Create a new OpenShift project for the _BookInfo_ application:
 +
 -----
@@ -49,7 +51,7 @@ oc apply -f https://raw.githubusercontent.com/istio/istio/1.4.0/samples/bookinfo
 
 . A description and architecture overview of the _BookInfo_ application can be found in the first section of its link:https://istio.io/docs/examples/bookinfo/[documentation].
 +
-NOTE: You do not need to execute any tasks in any of the sections in this documentation (ie: _Before you begin_ nor  _Deploying the application_, etc ).
+NOTE: You do not need to execute any tasks in any of the sections (ie: _Before you begin_ nor  _Deploying the application_, etc ) in this documentation.
 
 . Expose the _productpage_ service as an OpenShift route:
 +
@@ -73,12 +75,12 @@ image::images/bookinfo_normal_user.png[]
 image::images/bookinfo_info.png[]
 
 == Red Hat Service Mesh Operator and Control Plane
-The POC for BookRetail Inc. requires the _BookInfo_ application be managed by Red Hat Service Mesh.
+The proof of concept for BookRetail Inc. requires the _BookInfo_ application be managed by Red Hat Service Mesh.
 
 . In the same OCP 4 cluster where you have installed the _BookInfo_ application, you will need to install the Red Hat Service Mesh _operator_.
 +
 Refer to the product documentation for instructions for installing the operator.
-Otherwise, repeat the steps for installing the operator you previously executed when enrolled in the link:https://learning.redhat.com/enrol/index.php?id=1627[Red Hat OpenShift Service Mesh Foundations] course.
+Otherwise, repeat the steps for installing the Red Hat Service Mesh operator found in the link:https://learning.redhat.com/enrol/index.php?id=1627[Red Hat OpenShift Service Mesh Foundations] course.
 
 . Install a Service Mesh _control plane_ with the following requirements:
 .. The name of the OpenShift project where the service mesh control plane should reside should be:  _bookretail-istio-system_.
@@ -91,7 +93,7 @@ You will enable mtls later in a more fine-grain manner.
 
 == ServiceMeshMemberRoll
 
-All of the following configurations should be executed as part of an automation script written in ansible or bash.
+[blue]#All of the following configurations should be executed as part of an automation script written in ansible or bash.#
 
 . Install a _ServiceMeshMemberRoll_ with a single member:  _bookinfo_ 
 +
@@ -104,7 +106,7 @@ Ensure that your _bookinfo_ project now includes the appropriate service mesh re
 == mTLS Security
 The POC requires mTLS traffic between all services of the _bookinfo_ application.
 
-All of the following configurations should be executed as part of an automation script written in ansible or bash.
+[blue]#All of the following configurations should be executed as part of an automation script written in ansible or bash.#
 
 . If the _bookinfo_ deployments include liveness and readiness probes, then customize them to use equivalent _command based_ probes.
 . Create a link:https://istio.io/docs/reference/config/security/istio.authentication.v1alpha1/#Policy[Policy]  object for the deployments of the _bookinfo_ namespace.
@@ -123,15 +125,6 @@ All of the following configurations should be executed as part of an automation 
 ** 50%: Strict mTLS network traffic between _bookinfo_ services (configured via an ansible or bash script)
 
 * *Deliverables*
-+
-You submit your homework via one of the following:
-
-** *Red Hat employees*: link:https://docs.google.com/document/d/1nxlvAOlSdNs3-y8AkmDjnc8vtCH9rJdI5zbN9deCK50/edit[Red Hat LMS]
-** *Red Hat partners*: link:https://partner.redhat.com[Red Hat Connect]
-
-* *Homework Submittal*
-+
-To submit the assignment for grading, please upload the following:
 
 ** A README file with the URL to OCP master API along with userId / password of the service mesh control plane and bookinfo administrators.
 +
@@ -140,6 +133,14 @@ NOTE: Make sure that the lab environment is accessible for 2 days after submissi
 ** Automation script written in ansible or bash.
 +
 This automation script should provision the tasks described in the previous sections.
+
+* *Homework Submittal*
++
+You will need to submit your homework via one of the following:
+
+** *Red Hat employees*: link:https://docs.google.com/document/d/1nxlvAOlSdNs3-y8AkmDjnc8vtCH9rJdI5zbN9deCK50/edit[Red Hat LMS]
+** *Red Hat partners*: link:https://partner.redhat.com[Red Hat Connect]
+
 
 
 ifdef::showscript[]
