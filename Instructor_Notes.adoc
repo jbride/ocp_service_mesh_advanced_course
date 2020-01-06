@@ -22,9 +22,49 @@ This ansible does the following:
 
 
 == Emergency Response Demo 
+. Instructor layers 1 _integr8ly_ installation per class
+.. git clone https://github.com/btison/integr8ly-installation.git
+.. git checkout ocp4
+.. cp inventories/hosts.template inventories/hosts
+.. Modify inventories/hosts with values similar to the following:
++
+-----
+[local:vars]
+ansible_connection=local
+
+run_master_tasks=false
+eval_app_host=apps.cluster-e222.e222.example.opentlc.com
+openshift_master_url=https://api.cluster-e222.e222.example.opentlc.com:6443
+
+[local]
+127.0.0.1
+
+[OSEv3:children]
+master
+
+[OSEv3:vars]
+ansible_user=ec2-user
+
+[master]
+api.cluster-e222.e222.example.opentlc.com:6443
+
+[master:vars]
+run_master_tasks=false
+-----
+
 . Instructor layers 1 Emergency Response Demo per student
 .. git clone https://github.com/btison/emergency-response-demo-install.git
 .. git checkout ocp4-int-1.5.1
+.. cd ansible
+.. cp inventories/inventory.template inventories/inventory
+.. Add the value of your link:[mapbox token] to the _map_token_ variable in _inventories/inventory_ file. ie;
++
+-----
+[all:vars]
+# MapBox API token, see https://docs.mapbox.com/help/how-mapbox-works/access-tokens/
+map_token=pk.eyJ1KJoiamjyaWRlIiwiGSI6ImNqeGNjamxqYjAxcXczdXBrcW5mbmguamkifQ.iBEb0APX1Vmo_VtsDj-Y3f
+-----
+
 .. execute:
 +
 -----
