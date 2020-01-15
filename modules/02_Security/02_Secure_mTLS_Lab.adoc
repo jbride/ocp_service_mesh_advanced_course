@@ -301,9 +301,172 @@ Enabling mTLS for the Incident Service involves the following tasks:
 * Create a _DestinationRule_ and _Policy_ to enforce mTLS when calling the Incident Service.
 * Create a _VirtualService_ and a _Route_ for external access to the Incident Service through the Istio Ingress Gateway.
 
+* Ensure that the health checks are still working when using strict mTLS.
+** When enforcing strict mTLS when calling the incident service, the HTTP based healthcheck will fail, as it is executed from the kubelet, and is not able to present a suitable certificate. The command based health checks are executed in the container itself, so they are not impacted.
+** The Service Mesh sidecar injector service can be configured to rewrite HTTP probes at sidecar injection time, so that the requests will be sent to the _Pilot Agent_ in the Envoy sidecar, which will then redirect to the application. This global configuration is set in the ServiceMeshControlPlane CR and will be applied to all pods in the Service Mesh data plane which have the Envoy sidecar injected.
+** The latest versions of upstream Istio also allow to have HTTP probe rewrite per service, by setting an annotation (`sidecar.istio.io/rewriteAppHTTPProbers: "true"`) on the pods. The Red Hat Service Mesh does not yet support this functionality.
+
 {empty} +
 
-. Replace the health checks in the Incident Service DeploymentConfig to use a command based health check with curl rather than a HTTP based health check.
+. Annotate the Incident Service pods with the `sidecar.istio.io/inject: "true"` annotation. Skip this step if the service has been annotated in a previous lab.
++
+----
+oc edit dc incident-service -o yaml -n $ERDEMO_NS
+----
++
+In the `.spec.template.metadata` section, add the annotation:
++
+----
+[...]]
+  template:
+    metadata:
+      annotations:
+        sidecar.istio.io/inject: "true"
+      labels:
+[...]
+----
++
+Alternatively, run the following `oc patch` command:
++
+----
+$ oc patch dc $ERDEMO_USER-incident-service --type='json' -p "[{\"op\": \"add\", \"path\": \"/spec/template/metadata\", \"value\": {\"annotations\":{\"sidecar.istio.io/inject\": \"true\"}, \"labels\":{\"app\":\"$ERDEMO_USER-incident-service\",\"group\":\"erd-services\"}}}]" -n $ERDEMO_NS
+----
++
+This forces a redeployment of the Incident Service. Verify that the Envoy proxy sidecar has been injected sucessfully: the new pod consists of two containers, `incident-service` and `istio-proxy`.
++
+image::images/incident-service-pod-sidecar.png[]
+
+. Configure the HTTP based health checks to be rewritten and handled by the pilot agent in the sidecar container. 
+* Open the ServiceMeshControlPlane resource in the Service Mesh control plane for editing:
++
+---- 
+$ oc edit servicemeshcontrolplane full-install -o yaml -n $SM_CP_NS 
+----
+* Add the configuration to allow rewriting of HTTP probes:
++
+----
+apiVersion: maistra.io/v1
+kind: ServiceMeshControlPlane
+metadata:
+  [...]
+  name: full-install
+  [...]
+spec:
+  istio:
+    [...]
+    tracing:
+      enabled: true    
+    sidecarInjectorWebhook:
+      rewriteAppHTTPProbe: true
+  [...]
+----
+** Save the ServiceMeshControlPlane resource.
+* Verify that the `rewriteAppHTTPProbe` directive has been added to the `istio-sidecar-injector` ConfigMap:
++
+----
+Name:         istio-sidecar-injector              
+Namespace:    admin1-istio-system                 
+Labels:       [...]
+Annotations:  [...]
+Data
+====
+config:
+---
+policy: disabled
+template: |-
+  annotations:
+    k8s.v1.cni.cncf.io/networks: istio-cni
+  rewriteAppHTTPProbe: true
+  containers:
+  [...]
+----
+* Redeploy the Incident Service:
++
+----
+$ oc rollout latest dc/$ERDEMO_USER-incident-service -n $ERDEMO_NS
+----
+* Once the new pod is up and running, verify the liveness and readiness probes:
++
+----
+$ oc get pod <incident service pod name> -o yaml -n $ERDEMO_NS
+----
++
+----
+apiVersion: v1
+kind: Pod
+metadata:
+  [..]
+spec:
+  containers:
+  - env:
+    - name: KUBERNETES_NAMESPACE
+      valueFrom:
+        fieldRef:
+          apiVersion: v1
+          fieldPath: metadata.namespace
+    image: quay.io/emergencyresponsedemo/incident-service@sha256:6a25a3eb7ede1fb5ec23f506d3e5e3fb8b8aef783353bff63f438be784ecc6f4
+    imagePullPolicy: IfNotPresent
+    livenessProbe:
+      failureThreshold: 3
+      httpGet:
+        path: /app-health/user1-incident-service/livez
+        port: 15020
+        scheme: HTTP
+      initialDelaySeconds: 30
+      periodSeconds: 30
+      successThreshold: 1
+      timeoutSeconds: 3
+    name: user1-incident-service
+    ports:
+    - containerPort: 8080
+      name: http
+      protocol: TCP
+    readinessProbe:
+      failureThreshold: 3
+      httpGet:
+        path: /app-health/user1-incident-service/readyz
+        port: 15020
+        scheme: HTTP
+      initialDelaySeconds: 30
+      periodSeconds: 30
+      successThreshold: 1
+      timeoutSeconds: 3
+    resources:
+      limits:
+        cpu: 500m
+        memory: 500Mi
+      requests:
+        cpu: 100m
+        memory: 200Mi
+    securityContext:
+      capabilities:
+        drop:
+        - KILL
+        - MKNOD
+        - SETGID
+        - SETUID
+      privileged: false
+      procMount: Default
+      runAsUser: 1000670000
+    terminationMessagePath: /dev/termination-log
+    terminationMessagePolicy: File
+    volumeMounts:
+    - mountPath: /app/logging
+      name: logging
+    - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+      name: incident-service-token-qfx22
+      readOnly: true
+  - [...]
+  volumes:
+  [...]
+status:
+  [...]
+----
+** Note that the HTTP probes point to port 15020 instead of 8080.
+** In the sidecar container the _pilot agent_ is listening on port 15020. This is the process that bootstraps the Envoy proxy.
+** The pilot agent redirects the call to the application, strips the response body and returns the response code 
+
+* As an alternative, replace the health checks in the DeploymentConfig to use a command based health check with curl rather than a HTTP based health check.
 +
 ----
 $ oc edit dc $ERDEMO_USER-incident-service -o yaml -n $ERDEMO_NS
@@ -340,37 +503,6 @@ Alternatively you can use the following `oc patch` command to patch the Deployme
 ----
 $ oc patch dc $ERDEMO_USER-incident-service --type='json' -p '[{"op": "remove", "path": "/spec/template/spec/containers/0/livenessProbe/httpGet"}, {"op": "add", "path": "/spec/template/spec/containers/0/livenessProbe", "value": { "exec": { "command" : ["curl", "http://127.0.0.1:8080/actuator/health"]}, "initialDelaySeconds": 30, "timeoutSeconds": 3, "periodSeconds": 30, "successThreshold": 1, "failureThreshold": 3}}, {"op": "remove", "path": "/spec/template/spec/containers/0/readinessProbe/httpGet"}, {"op": "add", "path": "/spec/template/spec/containers/0/readinessProbe", "value": { "exec": { "command" : ["curl", "http://127.0.0.1:8080/actuator/health"]}, "initialDelaySeconds": 30, "timeoutSeconds": 3, "periodSeconds": 30, "successThreshold": 1, "failureThreshold": 3}}]' -n $ERDEMO_NS
 ----
-* When enforcing strict mTLS when calling the incident service, the HTTP based healthcheck will fail, as it is executed from the kubelet, and is not able to present a suitable certificate. The command based health checks are executed in the container itself, so they are not impacted.
-* The Service Mesh sidecar injector service can be configured to rewrite HTTP probes at sidecar injection time, so that the requests will be sent to Pilot, which will then redirect to the application. This global configuration is set in the `istio-sidecar-injector` configmap. However, the Service Mesh operator does not allow edits to the configmap (the operator reverts changes to the original configmap), and there is no way in the current version to configure this setting in the ServiceMeshControlPlane CR.
-* The latest versions of upstream Istio also allow to have HTTP probe rewrite per service, by setting an annotation (`sidecar.istio.io/rewriteAppHTTPProbers: "true"`) on the pods. The Red Hat Service Mesh does not yet support this functionality.
-
-. Annotate the Incident Service pods with the `sidecar.istio.io/inject: "true"` annotation. Skip this step if the service has been annotated in a previous lab.
-+
-----
-oc edit dc incident-service -o yaml -n $ERDEMO_NS
-----
-+
-In the `.spec.template.metadata` section, add the annotation:
-+
-----
-[...]]
-  template:
-    metadata:
-      annotations:
-        sidecar.istio.io/inject: "true"
-      labels:
-[...]
-----
-+
-Alternatively, run the following `oc patch` command:
-+
-----
-$ oc patch dc $ERDEMO_USER-incident-service --type='json' -p "[{\"op\": \"add\", \"path\": \"/spec/template/metadata\", \"value\": {\"annotations\":{\"sidecar.istio.io/inject\": \"true\"}, \"labels\":{\"app\":\"$ERDEMO_USER-incident-service\",\"group\":\"erd-services\"}}}]" -n $ERDEMO_NS
-----
-+
-This forces a redeployment of the Incident Service. Verify that the Envoy proxy sidecar has been injected sucessfully: the new pod consists of two containers, `incident-service` and `istio-proxy`.
-+
-image::images/incident-service-pod-sidecar.png[]
 
 . Create a _Policy_ for the Incident Service service.
 .. Create a file called `incident-service-policy.yml` with the following command:
@@ -568,7 +700,7 @@ image::images/istio-grafana-workload-inbound.png[]
 
 The procedure for enabling mTLS communication for the Responder Service and other services in the Emergency Response Demo application is very similar to the Incident Service. Only some differences will be highlighted in the next section.
 
-. Replace the health checks in the Responder Service DeploymentConfig to use a command based health check with curl rather than a HTTP based health check.
+. Replace the health checks in the Responder Service DeploymentConfig to use a command based health check with curl rather than a HTTP based health check. You can skip this step if you enabled HTTP probe rewriting in the Service Mesh.
 +
 ----
 $ oc edit dc responder-service -o yaml -n $ERDEMO_NS
@@ -725,7 +857,7 @@ $ curl -v -k https://responder-service.$ERDEMO_USER.apps.$SUBDOMAIN_BASE/respond
 
 === Disaster Simulator
 
-. Replace the health checks in the Disaster Simulator DeploymentConfig to use a command based health check with curl rather than a HTTP based health check.
+. Replace the health checks in the Disaster Simulator DeploymentConfig to use a command based health check with curl rather than a HTTP based health check. You can skip this step if you enabled HTTP probe rewriting in the Service Mesh.
 +
 ----
 $ oc edit dc disaster-simulator -o yaml -n $ERDEMO_NS
@@ -881,7 +1013,7 @@ $ curl -v -k https://disaster-simulator.$ERDEMO_USER.apps.$SUBDOMAIN_BASE
 
 === Incident Priority Service
 
-. Replace the health checks in the Incident Priority Service DeploymentConfig to use a command based health check with curl rather than a HTTP based health check.
+. Replace the health checks in the Incident Priority Service DeploymentConfig to use a command based health check with curl rather than a HTTP based health check. You can skip this step if you enabled HTTP probe rewriting in the Service Mesh.
 +
 ----
 $ oc edit dc $ERDEMO_USER-incident-priority-service -o yaml -n $ERDEMO_NS
@@ -1040,7 +1172,7 @@ $ curl -v -k https://incident-priority-service.$ERDEMO_USER.apps.$SUBDOMAIN_BASE
 
 The process service is not exposed outside of the cluster, so there is no need for a VirtualService and Route.
 
-. Replace the health checks in the Process Service DeploymentConfig to use a command based health check with curl rather than a HTTP based health check.
+. Replace the health checks in the Process Service DeploymentConfig to use a command based health check with curl rather than a HTTP based health check. You can skip this step if you enabled HTTP probe rewriting in the Service Mesh.
 +
 ----
 $ oc edit dc process-service -o yaml -n $ERDEMO_NS
@@ -1125,7 +1257,7 @@ $ oc create -f process-service-mtls-destinationrule.yml -n $ERDEMO_NS
 
 === Mission Service
 
-. Replace the health checks in the Mission Service DeploymentConfig to use a command based health check with curl rather than a HTTP based health check.
+. Replace the health checks in the Mission Service DeploymentConfig to use a command based health check with curl rather than a HTTP based health check. You can skip this step if you enabled HTTP probe rewriting in the Service Mesh.
 +
 ----
 $ oc edit dc mission-service -o yaml -n $ERDEMO_NS
@@ -1281,7 +1413,7 @@ $ curl -v -k https://mission-service.$ERDEMO_USER.apps.$SUBDOMAIN_BASE/api/missi
 
 === Responder Simulator
 
-. Replace the health checks in the Responder Simulator DeploymentConfig to use a command based health check with curl rather than a HTTP based health check.
+. Replace the health checks in the Responder Simulator DeploymentConfig to use a command based health check with curl rather than a HTTP based health check. You can skip this step if you enabled HTTP probe rewriting in the Service Mesh.
 +
 ----
 $ oc edit dc responder-simulator -o yaml -n $ERDEMO_NS
@@ -1439,7 +1571,7 @@ $ curl -v -k https://responder-simulator.$ERDEMO_USER.apps.$SUBDOMAIN_BASE/stats
 
 === Process Viewer
 
-. Replace the health checks in the Process Viewer DeploymentConfig to use a command based health check with curl rather than a HTTP based health check.
+. Replace the health checks in the Process Viewer DeploymentConfig to use a command based health check with curl rather than a HTTP based health check. You can skip this step if you enabled HTTP probe rewriting in the Service Mesh.
 +
 ----
 $ oc edit dc process-viewer -o yaml -n $ERDEMO_NS
@@ -1599,7 +1731,7 @@ $ curl -v -k https://process-viewer.$ERDEMO_USER.apps.$SUBDOMAIN_BASE/image/proc
 
 === Emergency Console
 
-. Replace the health checks in the Emergency Console DeploymentConfig to use a command based health check with curl rather than a HTTP based health check.
+. Replace the health checks in the Emergency Console DeploymentConfig to use a command based health check with curl rather than a HTTP based health check. You can skip this step if you enabled HTTP probe rewriting in the Service Mesh.
 +
 ----
 $ oc edit dc emergency-console -o yaml -n $ERDEMO_NS
@@ -1768,7 +1900,7 @@ https://emergency-console.$ERDEMO_USER.apps.$SUBDOMAIN_BASE/*
 
 === PostgreSQL
 
-Service Mesh mTLS can also be enabled for TCP traffic. The Incident Service, Responder Service and Process Service use a PostgreSQL database. With Service Mesh we can secure the communication beween the service and the database.
+Service Mesh mTLS can also be enabled for TCP traffic. The Incident Service, Responder Service and Process Service use a PostgreSQL database. With Service Mesh we can secure the communication beween the service and the database. 
 
 . Scale down the Incident Service and Responder Service pods to 0 pods
 . Annotate the PostgreSQL pod with the `sidecar.istio.io/inject: "true"` annotation.
