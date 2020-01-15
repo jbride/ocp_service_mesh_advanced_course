@@ -393,13 +393,206 @@ oc rsh `oc get pod -n $ERDEMO_NS | grep "responder-service" | awk '{print $1}'` 
          | jq ".configs | last | .dynamic_route_configs"
 -----
 
+== Network Policies
+
+In multi-tenancy mode, Red Hat Service Mesh creates an isolated network for each mesh instance using _NetworkPolicy_ resources. Pods within the mesh can communicate with each other and with pods in the data plane. Communication between pods in different meshes is not allowed. +
+Note that during the Service Mesh installation existing NetworkPolicy objects will not be touched or deleted.
+
+. Review the NetworkPolicy resources created by the Service Mesh. 
+* Log into OpenShift as the owner of the Emergency Response application:
++
+-----
+$ oc login -u $ERDEMO_USER -p $OCP_PASSWD
+-----
+* List the _NetworkPolicy_ resources in the Emergency Response namespace:
++
+----
+$ oc get networkpolicy -n $ERDEMO_NS
+----
++
+.Sample Output
+----
+allow-from-all-namespaces                <none>                                    17h
+allow-from-ingress-namespace             <none>                                    17h
+istio-expose-route                       maistra.io/expose-route=true              19h
+istio-mesh                               <none>                                    19h
+kafka-cluster-network-policy-kafka       strimzi.io/name=kafka-cluster-kafka       32h
+kafka-cluster-network-policy-zookeeper   strimzi.io/name=kafka-cluster-zookeeper   32h
+----
+** NetworkPolicies `allow-from-all-namespaces` and `allow-from-ingress-namespace` are installed by default in every namespace when using _NetworkPolicy_ Openshift SDN mode. The policies allows traffic between all pods in all namespaces, as well as ingress to pods through the router.
+** NetworkPolicies `kafka-cluster-network-policy-kafka` and `kafka-cluster-network-policy-zookeeper` are created when installing the Kafka cluster, and define ingress rules for the Kafka and Zookeeper pods.
+** NetworkPolicies `istio-mesh` and `istio-expose-route` are created when adding the namespace to the Service Mesh.
+* Review the `istio-mesh` network policy:
++
+----
+$ oc get networkpolicy istio-mesh -n $ERDEMO_NS 
+----
++
+----
+kind: NetworkPolicy
+apiVersion: networking.k8s.io/v1
+metadata:
+  annotations:
+    [...]
+  name: istio-mesh
+  [...]
+  namespace: user1-er-demo
+  labels:
+    [...]
+spec:
+  podSelector: {}
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              maistra.io/member-of: admin1-istio-system
+  egress:
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              maistra.io/member-of: admin1-istio-system
+  policyTypes:
+    - Ingress
+    - Egress
+----
+** The policy allows all traffic (_Ingress_ and _Egress_) between namespaces that are labeled with `maistra.io/member-of: $SM_CP_ADMIN-istio-system`. This includes the Service Mesh data plane namespace as well as the mesh member namespaces as defined in the _ServiceMeshMemberRoll_.
+
+* Review the `istio-expose-route` network policy:
++
+----
+$ oc get networkpolicy istio-expose-route -n $ERDEMO_NS 
+----
++
+----
+kind: NetworkPolicy
+apiVersion: networking.k8s.io/v1
+metadata:
+  annotations:
+  [...]
+  name: istio-expose-route
+  [...]
+  namespace: user1-er-demo
+  labels:
+    [...]
+spec:
+  podSelector:
+    matchLabels:
+      maistra.io/expose-route: 'true'
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              network.openshift.io/policy-group: ingress
+  policyTypes:
+    - Ingress
+----
+** The policy allows ingress traffic between namespaces that are labeled with `network.openshift.io/policy-group: ingress` and pods that have the label `maistra.io/expose-route: 'true'`. The `openshift-ingress` namespace - in which the OpenShift router pods run - has the label `network.openshift.io/policy-group: ingress`, so annotated pods can be reached through a route.
+
+. Check if pods in the Emergency Response demo are reachable from outside the service mesh.
+* Obtain a remote shell into the _prometheus application_monitoring_ pod in the metrics namespace
++
+----
+$ oc rsh -c prometheus -n $ERMETRICS_NS prometheus-application-monitoring-0
+----
+* In the remote shell, curl the Incident Service through its service name:
++
+----
+sh-4.2$ curl http://$ERDEMO_USER-incident-service/$ERDEMO_NS.svc:8080/incidents
+----
++
+Exit the remote shell.
+* In a normal shell, call the Incident Service through its exposed URL:
++
+----
+$ curl http://user2-incident-service.apps.$SUBDOMAIN_BASE/incidents
+----
+* Expect both curl requests to succeed.
++
+This seems to be in contradiction to the concept of an isolated service mesh network. Can you explain?
+
+3. Delete the `allow-from-all-namespaces` and `allow-from-ingress-namespace` NetworkPolicy objects from the Emergency Response namespace.
++
+----
+$ oc delete networkpolicy allow-from-all-namespaces -n $ERDEMO_NS
+$ oc delete networkpolicy allow-from-ingress -n $ERDEMO_NS
+----
+
+. Try to reach the incident service from within another namespace otr from the outside of the cluster using _curl_
++
+What do you observe?
+
+4. Add the `maistra.io/expose-route: 'true'` label to the template section of the deploymentconfig of the Incident Service:
++
+----
+kind: DeploymentConfig
+apiVersion: apps.openshift.io/v1
+metadata:
+ [...]
+spec:
+  [...]
+  template:
+    metadata:
+      labels:
+        app: user1-incident-service
+        group: erd-services
+        maistra.io/expose-route: 'true'
+      annotations:
+        sidecar.istio.io/inject: 'true'
+    spec:
+    [...]
+----
+*
+Save the DeploymentConfig. Once the Incident Service pod is redeployed, try again to call the Incident Service from outside of the cluster.
++
+What do you observe?
+
+[NOTE]
+====
+Execute the following commands you want to restore the networkpolicies to their original state:
+
+----
+$ echo "---
+kind: NetworkPolicy
+apiVersion: networking.k8s.io/v1
+metadata:
+  name: allow-from-all-namespaces
+spec:
+  podSelector: {}
+  ingress:
+    - from:
+        - namespaceSelector: {}
+  policyTypes:
+    - Ingress
+" | oc create -f - -n $ERDEMO_NS
+----
+
+----
+$ echo "---
+kind: NetworkPolicy
+apiVersion: networking.k8s.io/v1
+metadata:
+  name: allow-from-ingress-namespace
+spec:
+  podSelector: {}
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              network-policy: global
+  policyTypes:
+    - Ingress
+" | oc create -f - -n $ERDEMO_NS
+----
+
+====
+
 == Appendix
 
 === Reference
 
 * link:https://docs.google.com/document/d/1eMnLBpcJNMahoE6cYKcECp_Jcy4Haj3qc36RBAO9J-U/edit#[Operator-Based Soft Multi-Tenancy]
 * link:https://maistra.io/docs/comparison-with-istio/#_cluster_scoped_custom_resources[Comparison between Red Hat Service Mesh and community Istio]
-. link:https://istio.io/blog/2019/data-plane-setup/[Demystifying Istio's Sidecar Injection Model]
+* link:https://istio.io/blog/2019/data-plane-setup/[Demystifying Istio's Sidecar Injection Model]
 
 
 ifdef::showscript[]
