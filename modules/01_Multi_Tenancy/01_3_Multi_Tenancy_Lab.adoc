@@ -548,7 +548,7 @@ What do you observe?
 
 [NOTE]
 ====
-Execute the following commands you want to restore the networkpolicies to their original state:
+Execute the following commands if you want to restore the networkpolicies to their original state:
 
 ----
 $ echo "---
