@@ -584,7 +584,7 @@ groups:
           quantile: \"0.99\"
 " > ingress.rules
 ----
-.. Create another file `ingress-alert.rules` to define an alert based on the histogram calculated by the recording rule.+
+.. Create another file `ingress-alert.rules` to define an alert based on the histogram calculated by the recording rule. +
 As an example, let's say you want to fire an alert whenever 90% of the requests to the Incident Service have a response time higher than 1 second, for more than 30 seconds.
 +
 ----
