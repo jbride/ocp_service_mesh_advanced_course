@@ -492,12 +492,12 @@ spec:
 +
 ----
 $ echo "---
-apiVersion: "config.istio.io/v1alpha2"
+apiVersion: \"config.istio.io/v1alpha2\"
 kind: rule
 metadata:
   name: version-count-prometheus
 spec:
-  match: (context.protocol == "http") && (destination.service.host == "user50-incident-service.user50-er-demo.svc.cluster.local")
+  match: (context.protocol == \"http\") && (destination.service.host == \"$ERDEMO_USER-incident-service.$ERDEMO_NS.svc.cluster.local\")
   actions:
   - handler: version-count-handler
     instances:
