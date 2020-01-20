@@ -175,7 +175,7 @@ You can view state of this setting that disables service mesh policies as follow
 oc login -u $SM_CP_ADMIN -p $OCP_PASSWD
 -----
 +
-NOTE: The remaining tasks in this lab need to be executed by the administrator of your serive mesh control plane.
+NOTE: The remaining tasks in this lab need to be executed by the administrator of your service mesh control plane.
 
 . View the value of the _disablePolicyChecks_ variable:
 +
