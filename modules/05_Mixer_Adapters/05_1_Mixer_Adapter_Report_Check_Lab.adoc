@@ -132,7 +132,7 @@ Check the logs of the `istio-telemetry` pod:
 === Mixer Adapter Check: Memquota mixer adapter
 
 The Service Mesh built-in adapters `memquota` and `redisquota` can be used to support the Service Mesh quota management system and rate-limit traffic to services based on e.g. the origining IP address. +
-The `memquota` adapter stores the quota values in memory in the Mixer pod, and as such is not suitable for prodyuction usage. The `redisquota` adapter relies on a Redis server to store the quota values. In this lab you will use the `memquota` adapter. 
+The `memquota` adapter stores the quota values in memory in the Mixer pod, and as such is not suitable for production usage. The `redisquota` adapter relies on a Redis server to store the quota values. In this lab you will use the `memquota` adapter. 
 
 Rate limit configuration is split into 2 parts:
 
@@ -141,7 +141,7 @@ Rate limit configuration is split into 2 parts:
 ** _QuotaSpecBinding_: associates QuotaSpec with one or more services.
 * Mixer Side: combination of _Instance_, _Handler_ and _Rule_ resources.
 
-In this lab you will introduce a rate limit for callsa to the Incident Service coming from outside of the OpenShift cluster.
+In this lab you will introduce a rate limit for calls to the Incident Service coming from outside of the OpenShift cluster.
 
 . By default, policy checks are disabled in the Srvice Mesh. To enable policy checks, use the _oc_ client to edit the ServiceMeshControlPlane resource in the control plane namespace:
 +
@@ -203,7 +203,7 @@ spec:
 " | oc create -f - -n $SM_CP_NS
 ----
 * The handler references the built-in `memquota` adapter.
-* The handler defines 2 different rate limit schemes. The default, if no overrides match, is 500 requests per one second. One override is defined: if the request has the the Service Mesh Ingress Gateway as source, and the Incident Service as target, the request rate is limited to 1 request every 5 seconds. + 
+* The handler defines 2 different rate limit schemes. The default, if no overrides match, is 500 requests per one second. One override is defined: if the request has the Service Mesh Ingress Gateway as source, and the Incident Service as target, the request rate is limited to 1 request every 5 seconds. + 
 When a request is processed, the first matching override is picked (reading from top to bottom).
 
 . Create the Rule CR in the control plane namespace.
@@ -238,7 +238,7 @@ spec:
       quota: requestcountquota
 " | oc create -f - -n $SM_CP_NS
 ----
-* The QuotaSpec references the `requestcountquota` instance, and stes a charge of 1 per instance.
+* The QuotaSpec references the `requestcountquota` instance, and sets a charge of 1 per instance.
 
 . Create the client side QuotaSpecBinding CR:
 +
@@ -275,7 +275,7 @@ Verify using _curl -v_ that the response code is equal to `429 Too Many Requests
 
 === Mixer Adapter Check: denier mixer adapter
 
-The Service Mesh built-in adapters `denier`, `whitelist` and `blackkist`allow to control access to a service using simple denials, attribute-based white or black listing, or IP-based white or black listing.
+The Service Mesh built-in adapters `denier`, `whitelist` and `blackkist` allow to control access to a service using simple denials, attribute-based white or black listing, or IP-based white or black listing.
 
 In this lab you will use the denier adapter to prevent access to the Incident Service when using _curl_ from outside of the mesh.
 
@@ -309,7 +309,7 @@ spec:
       message: not allowed
 " | oc create -f - -n $SM_CP_NS
 ----
-* The handler references the `denier` adapter. The `status` parameter of the adater allows to specify the return code and error message returned in case of denial.
+* The handler references the `denier` adapter. The `status` parameter of the adapter allows to specify the return code and error message returned in case of denial.
 
 . Create the Rule CR
 +
@@ -327,7 +327,7 @@ spec:
      - deny-curl
 " | oc create -f - -n $SM_CP_NS
 ----
-* The rule matches requests to the Incident Service originating from the Ingress Gateway, and which have a user-agent header with a valus that starts with `curl`.
+* The rule matches requests to the Incident Service originating from the Ingress Gateway, and which have a user-agent header with a value that starts with `curl`.
 
 . Using _curl_, execute a call to the Incident Service. Note that the call fails, with return code `403 Forbidden` and message `not allowed`:
 +
@@ -358,7 +358,7 @@ $ curl -k -v https://incident-service.$ERDEMO_USER.apps.$SUBDOMAIN_BASE/incident
 PERMISSION_DENIED:deny-curl-handler.admin1-istio-system:not allowed
 ----
 
-. Obtain a remote shell (_oc rsh_) in the the disatster Simulator pod, and verify that a curl to the Incident Service succeeds.  
+. Obtain a remote shell (_oc rsh_) in the the Disaster Simulator pod, and verify that a curl to the Incident Service succeeds.  
 
 === References
 
