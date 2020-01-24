@@ -489,10 +489,10 @@ spec:
 ** The policy allows ingress traffic between namespaces that are labeled with `network.openshift.io/policy-group: ingress` and pods that have the label `maistra.io/expose-route: 'true'`. The `openshift-ingress` namespace - in which the OpenShift router pods run - has the label `network.openshift.io/policy-group: ingress`, so annotated pods can be reached through a route.
 
 . Check if pods in the Emergency Response demo are reachable from outside the service mesh.
-* Obtain a remote shell into the _prometheus application_monitoring_ pod in the metrics namespace
+* Obtain a remote shell into the _stage-apicast_ pod in the apicast namespace
 +
 ----
-$ oc rsh -c prometheus -n $ERMETRICS_NS prometheus-application-monitoring-0
+$ oc rsh -n $GW_PROJECT stage-apicast-1-xxxxx
 ----
 * In the remote shell, curl the Incident Service through its service name:
 +
