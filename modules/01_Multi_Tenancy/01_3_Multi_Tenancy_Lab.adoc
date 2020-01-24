@@ -517,7 +517,7 @@ $ oc delete networkpolicy allow-from-all-namespaces -n $ERDEMO_NS
 $ oc delete networkpolicy allow-from-ingress -n $ERDEMO_NS
 ----
 
-. Try to reach the incident service from within another namespace otr from the outside of the cluster using _curl_
+. Try to reach the incident service from within another namespace or from the outside of the cluster using _curl_
 +
 What do you observe?
 
