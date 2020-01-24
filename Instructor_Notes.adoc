@@ -45,7 +45,9 @@ end_id=20
 for x in $(seq $start_id $end_id); do
    ansible-playbook -i inventories/inventory playbooks/install.yml \
       -e project_admin=user$x \
-      -e set_realm_admin_as_default=True
+      -e set_realm_admin_as_default=True \
+      -e install_monitoring=False \
+      -e install_tools=False
 done
 -----
 
