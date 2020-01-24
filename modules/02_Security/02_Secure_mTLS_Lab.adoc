@@ -1574,7 +1574,7 @@ $ curl -v -k https://responder-simulator.$ERDEMO_USER.apps.$SUBDOMAIN_BASE/stats
 . Replace the health checks in the Process Viewer DeploymentConfig to use a command based health check with curl rather than a HTTP based health check. You can skip this step if you enabled HTTP probe rewriting in the Service Mesh.
 +
 ----
-$ oc edit dc process-viewer -o yaml -n $ERDEMO_NS
+$ oc edit dc $ERDEMO_USER-process-viewer -o yaml -n $ERDEMO_NS
 ----
 +
 Replace the existing liveness and readiness probes with command based probes:
@@ -2008,8 +2008,8 @@ $ oc patch policy incident-service-mtls --type='json' -p '[{"op":"replace","path
 . Repeat for the other policy resources.
 . Test the application again. Everything should still be working as expected.
 
-With strict mTLS enforced, the Prometheus pod in the `emergency-response-monitoring` namespace cannot longer scrape metric data from the pods in the `emergency-response-demo` namespace. +
-Adding the `emergency-response-monitoring` namespace to the service mesh and injecting the Envoy proxy in the prometheus pod does not work: scraping targets for Prometheus are pod IPs, not service names. The Envoy proxy does not process the traffic properly when directed to a pod IP instead of a service URL. +
+With strict mTLS enforced, the Prometheus pod in the `$ERDEMO_USER-er-metrics` namespace cannot longer scrape metric data from the pods in the `$ERDEMO_USER-er-demo` namespace. +
+Adding the `$ERDEMO_USER-er-metrics` namespace to the service mesh and injecting the Envoy proxy in the prometheus pod does not work: scraping targets for Prometheus are pod IPs, not service names. The Envoy proxy does not process the traffic properly when directed to a pod IP instead of a service URL. +
 Possible solutions: +
 - Applications expose Prometheus metrics on a separate port, and TLS is disabled for that port in the DestinationRule. +
 - Applications expose Prometheus metrics on a separate port,  and that port is configured for pass-through in the Service Mesh proxy init container (which sets up the networking in the pod so that all traffic is intercepted by the proxy side-car). This is a mesh-wide setting, so all application services must use the same port. Also it seems not possible to configure the init-container settings using the Service Mesh CR.
