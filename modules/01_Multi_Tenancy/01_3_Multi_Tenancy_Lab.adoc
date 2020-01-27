@@ -383,8 +383,7 @@ istioctl proxy-config cluster -n <POD NAMESPACE> <PODNAME> -o json
 -----
 +
 If you search for the destination service name you will see an embedded metadata JSON element that names the specific DestinationRule that pod is currently using to communicate with the external service.
-
-
++
 -----
 oc rsh `oc get pod -n $ERDEMO_NS | grep "responder-service" | awk '{print $1}'` \
          curl http://localhost:15000/config_dump \
