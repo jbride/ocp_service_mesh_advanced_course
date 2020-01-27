@@ -92,7 +92,7 @@ spec:
 +
 Notice that a match is made for all context paths exposed by the incident service:  `/incidents`.
 
-. Create the gateway and virtual service in your $MSA_PROJECT :
+. Create the gateway and virtual service in your Emergency Response Demo project :
 +
 -----
 oc create -f $HOME/lab/incident-service-gw-vs.yml -n $ERDEMO_NS
