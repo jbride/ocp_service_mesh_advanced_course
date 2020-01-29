@@ -703,7 +703,7 @@ The procedure for enabling mTLS communication for the Responder Service and othe
 . Replace the health checks in the Responder Service DeploymentConfig to use a command based health check with curl rather than a HTTP based health check. You can skip this step if you enabled HTTP probe rewriting in the Service Mesh.
 +
 ----
-$ oc edit dc responder-service -o yaml -n $ERDEMO_NS
+$ oc edit dc $ERDEMO_USER-responder-service -o yaml -n $ERDEMO_NS
 ----
 +
 Replace the existing liveness and readiness probes with command based probes:
