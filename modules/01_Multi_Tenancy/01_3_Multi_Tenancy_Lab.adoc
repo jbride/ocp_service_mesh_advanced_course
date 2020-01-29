@@ -496,7 +496,7 @@ $ oc rsh -n $GW_PROJECT stage-apicast-1-xxxxx
 * In the remote shell, curl the Incident Service through its service name:
 +
 ----
-sh-4.2$ curl http://$ERDEMO_USER-incident-service/$ERDEMO_NS.svc:8080/incidents
+sh-4.2$ curl http://$ERDEMO_USER-incident-service.$ERDEMO_NS.svc:8080/incidents
 ----
 +
 Exit the remote shell.
@@ -513,7 +513,7 @@ This seems to be in contradiction to the concept of an isolated service mesh net
 +
 ----
 $ oc delete networkpolicy allow-from-all-namespaces -n $ERDEMO_NS
-$ oc delete networkpolicy allow-from-ingress -n $ERDEMO_NS
+$ oc delete networkpolicy allow-from-ingress-namespace -n $ERDEMO_NS
 ----
 
 . Try to reach the incident service from within another namespace or from the outside of the cluster using _curl_
