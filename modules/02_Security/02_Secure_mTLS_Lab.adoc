@@ -311,7 +311,7 @@ Enabling mTLS for the Incident Service involves the following tasks:
 . Annotate the Incident Service pods with the `sidecar.istio.io/inject: "true"` annotation. Skip this step if the service has been annotated in a previous lab.
 +
 ----
-oc edit dc incident-service -o yaml -n $ERDEMO_NS
+oc edit dc $ERDEMO_USER-incident-service -o yaml -n $ERDEMO_NS
 ----
 +
 In the `.spec.template.metadata` section, add the annotation:
@@ -1974,8 +1974,12 @@ spec:
   - mtls:
       mode: PERMISSIVE
   targets:
-  - name: postgresql
+  - name: process-service-postgresql
 " > process-postgresql-policy.yml
+----
++
+----
+$ oc create -f process-postgresql-policy.yml -n $ERDEMO_NS
 ----
 
 . _DestinationRule_ for PostgreSQL:
@@ -1992,6 +1996,10 @@ spec:
     tls:
       mode: ISTIO_MUTUAL
 " > process-postgresql-mtls-destinationrule.yml
+----
++
+----
+$ oc create -f process-postgresql-mtls-destinationrule.yml -n $ERDEMO_NS
 ----
 
 . After successful redeployment of the PostgreSQL pod, scale up the Process Service.
