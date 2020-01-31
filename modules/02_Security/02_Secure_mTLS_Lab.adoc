@@ -1896,7 +1896,7 @@ You are directed to the administration section of your realm.
 https://emergency-console.$ERDEMO_USER.apps.$SUBDOMAIN_BASE/*
 ----
 
-. Test access to the Emergency Console in a browser window. Use the URL `https:emergency-console.$ERDEMO_USER.apps.$SUBDOMAIN_BASE`.
+. Test access to the Emergency Console in a browser window. Use the URL `https://emergency-console.$ERDEMO_USER.apps.$SUBDOMAIN_BASE`.
 
 === PostgreSQL
 
@@ -1958,7 +1958,7 @@ $ oc create -f postgresql-mtls-destinationrule.yml -n $ERDEMO_NS
 . Annotate the Process Service PostgreSQL pod with the `sidecar.istio.io/inject: "true"` annotation.
 +
 ----
-$ oc patch dc $ERDEMO_USER-process-service-postgresql --type='json' -p "[{\"op\": \"add\", \"path\": \"/spec/template/metadata\", \"value\": {\"annotations\":{\"sidecar.istio.io/inject\": \"true\"}, \"labels\":{\"app\":\"$ERDEMO_USER-process-service\", \"name\":\"$ERDEMO_USER-process-service-postgresql\"}}}]" -n $ERDEMO_NS
+$ oc patch dc process-service-postgresql --type='json' -p "[{\"op\": \"add\", \"path\": \"/spec/template/metadata\", \"value\": {\"annotations\":{\"sidecar.istio.io/inject\": \"true\"}, \"labels\":{\"app\":\"$ERDEMO_USER-process-service\", \"name\":\"$ERDEMO_USER-process-service-postgresql\"}}}]" -n $ERDEMO_NS
 ----
 
 . _Policy_ for the Process Service PostgresQL service.
