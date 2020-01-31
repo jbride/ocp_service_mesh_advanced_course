@@ -130,7 +130,7 @@ Longest transaction:            0.13
 Shortest transaction:           0.11
 ----
 +
-NOTE: On Fedora you can install siege with `# dnf install siege`.
+NOTE: On Fedora you can install siege with `# dnf install siege`. Mac users can use `$ brew install siege`.
 
 . Notice that all the calls succeed, even though 33% of the requests return a 503 return code. +
 This is a result of the automatic retry feature of the Service Mesh. Whenever a call returns a 503, the Envoy proxy will execute a retry targeting one of the other pods of the target service. +
@@ -227,9 +227,9 @@ apiVersion: networking.istio.io/v1alpha3
 spec:
   hosts:
     - >-
-      incident-priority-service.user50.apps.cluster-ee8d.ee8d.example.opentlc.com
+      incident-priority-service.$ERDEMO_USER.apps.$SUBDOMAIN_BASE
   gateways:
-    - erd-wildcard-gateway.admin50-istio-system.svc.cluster.local
+    - erd-wildcard-gateway.$SM_CP_ADMIN-istio-system.svc.cluster.local
   http:
     - match:
         - uri:
@@ -238,7 +238,7 @@ spec:
             exact: /reset
       route:
         - destination:
-            host: user50-incident-priority-service.user50-er-demo.svc.cluster.local
+            host: $ERDEMO_USER-incident-priority-service.$ERDEMO_USER-er-demo.svc.cluster.local
             port:
               number: 8080
       retries:
@@ -377,9 +377,9 @@ apiVersion: networking.istio.io/v1alpha3
 spec:
   hosts:
     - >-
-      incident-priority-service.user50.apps.cluster-ee8d.ee8d.example.opentlc.com
+      incident-priority-service.$ERDEMO_USER.apps.$SUBDOMAIN_BASE
   gateways:
-    - erd-wildcard-gateway.admin50-istio-system.svc.cluster.local
+    - erd-wildcard-gateway.$SM_CP_ADMIN-istio-system.svc.cluster.local
   http:
     - match:
         - uri:
@@ -388,7 +388,7 @@ spec:
             exact: /reset
       route:
         - destination:
-            host: user50-incident-priority-service.user50-er-demo.svc.cluster.local
+            host: $ERDEMO_USER-incident-priority-service.$ERDEMO_USER-er-demo.svc.cluster.local
             port:
               number: 8080
       timeout: 500ms
@@ -473,9 +473,9 @@ apiVersion: networking.istio.io/v1alpha3
 spec:
   hosts:
     - >-
-      incident-priority-service.user50.apps.cluster-ee8d.ee8d.example.opentlc.com
+      incident-priority-service.$ERDEMO_USER.apps.$SUBDOMAIN_BASE
   gateways:
-    - erd-wildcard-gateway.admin50-istio-system.svc.cluster.local
+    - erd-wildcard-gateway.$SM_CP_ADMIN-istio-system.svc.cluster.local
   http:
     - match:
         - uri:
@@ -484,7 +484,7 @@ spec:
             exact: /reset
       route:
         - destination:
-            host: user50-incident-priority-service.user50-er-demo.svc.cluster.local
+            host: $ERDEMO_USER-incident-priority-service.$ERDEMO_USER-er-demo.svc.cluster.local
             port:
               number: 8080
       retries:
@@ -560,7 +560,7 @@ kind: DestinationRule
 metadata:
   [...]
 spec:
-  host: user50-incident-priority-service.user50-er-demo.svc.cluster.local
+  host: $ERDEMO_USER-incident-priority-service.$ERDEMO_USER-er-demo.svc.cluster.local
   trafficPolicy:
     tls:
       mode: ISTIO_MUTUAL
@@ -589,7 +589,7 @@ $ while :; do curl -k -s -w %{http_code} --output /dev/null https://incident-pri
 +
 * Note that after the first call which returns a 503, the pod does not get requests anymore, for approximately 2 minutes. If after that period  the pod still returns errors, it is ejected again from the pool.
 * Service Mesh circuit breaking functionality only works for error codes 503.
-. At this point, reset the Incident Priority Service pods to not respond with delays.  
+. At this point, reset the Incident Priority Service pods to not linger respond with an error code.  
 
 . Another use case for circuit breakers is avoiding that a service gets flooded with requests. In the _DestinationRule_ resource, the service mesh administrator can configure the number of concurrent HTTP requests that are allowed to the target service pod before requests are being short-circuited. +
 Add connection pool settings to the _DestinationRule_ resource of the Incident Priority Service:
@@ -606,7 +606,7 @@ kind: DestinationRule
 metadata:
   [...]
 spec:
-  host: user50-incident-priority-service.user50-er-demo.svc.cluster.local
+  host: $ERDEMO_USER-incident-priority-service.$ERDEMO_USER-er-demo.svc.cluster.local
   trafficPolicy:
     tls:
       mode: ISTIO_MUTUAL
