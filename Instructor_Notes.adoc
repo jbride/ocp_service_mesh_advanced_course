@@ -10,6 +10,7 @@
 . Provisioned from labs.opentlc.com -> OCP4 Workshop Deployer
 . Instructor uses _MachineSet API_ to scale to appropriately sized cluster
 .. Emergency Response (16GB RAM) + Istio Control Plane (6GB RAM) = 22GB RAM per student
+.. Provision 1 worker node per 2 students.
 
 == 3scale Control Plane
 . link:https://github.com/gpe-mw-ansible-org/3scale_multitenant[3scale_multitenant] ansible is recommended (for the time being).
@@ -25,7 +26,7 @@ This ansible does the following:
 
 . Instructor layers 1 Emergency Response Demo per student
 .. git clone https://github.com/btison/emergency-response-demo-install.git
-.. git checkout ocp4-integreatly-multiuser
+.. git checkout service-mesh-advanced-ilt
 .. cd ansible
 .. cp inventories/inventory.template inventories/inventory
 .. Add the value of your link:[mapbox token] to the _map_token_ variable in _inventories/inventory_ file. ie;
