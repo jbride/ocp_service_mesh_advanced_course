@@ -2258,6 +2258,59 @@ abc123 Inventory 2018-09-03T15:53:02+02:00 Preparing order manifest</code></pre>
 <p><span style="font-size:0.7em">Source: www.jaegertracing.io/docs/architecture/</span></p>
 </div>
 </div></section><section data-id="602bf4cb209912f3205674e4a2410d09"><div class="sl-block" data-block-type="text" style="height: auto; width: 1280px; left: 0px; top: 0px;" data-block-id="f08c6bde468cfedf3259a424cfe5a1f0"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10; padding: 15px;" dir="ui">
+<h2>Service Mesh and Distributed Tracing</h2>
+
+<ul>
+	<li>
+	<p><span style="font-size:1.4em">Jaeger is optionally installed as part of Service Mesh.</span></p>
+
+	<ul>
+		<li>
+		<p><span style="font-size:1.4em">all-in-one</span></p>
+		</li>
+		<li>
+		<p><span style="font-size:1.4em">​production-elasticsearch</span></p>
+		</li>
+	</ul>
+	</li>
+</ul>
+
+<ul>
+	<li>
+	<p><span style="font-size:1.4em">Envoy proxy is responsible for generating the initial trace headers.</span></p>
+
+	<ul>
+		<li>
+		<p><span style="font-size:1.4em">Uses Zipkin format headers.</span></p>
+		</li>
+		<li>
+		<p><span style="font-size:1.4em">Default sampling rate = 1%</span></p>
+		</li>
+	</ul>
+	</li>
+	<li>
+	<p><span style="font-size:1.4em">Envoy proxy sends tracing information directly to tracing backends</span></p>
+	</li>
+	<li>
+	<p><span style="font-size:1.4em">Application is responsible to propagate trace context to upstream services.</span></p>
+
+	<ul>
+		<li>
+		<p><span style="font-size:1.4em">Envoy proxy is not compatible with Jaeger agent sidecar.</span></p>
+		</li>
+		<li>
+		<p><span style="font-size:1.4em">Applications must send the traces directly to the Jaeger collector.</span></p>
+		</li>
+	</ul>
+	</li>
+	<li>
+	<p><span style="font-size:1.4em">Integration with other tracers (e.g. StackDriver) is possible through Mixer adapters.</span></p>
+	</li>
+</ul>
+
+<p style="color:rgb(53, 64, 69)"> </p>
+</div></div>
+</section><section data-id="498a2cc3f059ab3132af35285fc9c90d"><div class="sl-block" data-block-type="text" style="height: auto; width: 1280px; left: 0px; top: 0px;" data-block-id="0b606a04327d94fb5fade1b87c9442ff"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10; padding: 15px;" dir="ui">
 <h2>Monitoring</h2>
 
 <ul>
@@ -2503,7 +2556,7 @@ abc123 Inventory 2018-09-03T15:53:02+02:00 Preparing order manifest</code></pre>
 		</div>
 
 		<script>
-			var SLConfig = {"deck": {"id":1696324,"slug":"service_mesh_advanced_04_observability","title":"Service_Mesh_Advanced_04_Observability","description":"","width":1280,"height":720,"margin":0.05,"visibility":"self","published_at":null,"sanitize_messages":null,"thumbnail_url":"https://s3.amazonaws.com/media-p.slid.es/thumbnails/1456b17c8f4ab7fbe10ee21395ebff0e/thumb.jpg?1579537047","view_count":0,"user":{"id":349930,"username":"btison","name":"Bernard Tison","description":null,"thumbnail_url":"https://www.gravatar.com/avatar/e2e3cdd3ce9e08ca385892a22816db22?s=140\u0026d=https%3A%2F%2Fstatic.slid.es%2Fimages%2Fdefault-profile-picture.png","paid":true,"pro":true,"lite":false,"team_id":32,"settings":{"id":183077,"present_controls":true,"present_upsizing":true,"present_pointer":false,"present_notes":true,"default_deck_tag_id":null},"enterprise":true,"membership":{"role":"member","manager":false,"activated":true}},"background_transition":"none","transition":"none","theme_id":176,"theme_font":"overpass2","theme_color":"no-color","auto_slide_interval":0,"comments_enabled":true,"forking_enabled":false,"rolling_links":false,"center":false,"shuffle":false,"should_loop":false,"share_notes":false,"slide_number":true,"slide_count":25,"rtl":false,"version":2,"collaborative":false,"deck_user_editor_limit":null,"data_updated_at":1579542205496,"font_typekit":null,"font_google":null,"time_limit":null,"upsizing_enabled":true,"notes":{"bedc0457df23e02319c4a5f2fb1e220f":"","14aee4ce6e77efac398800a568d4b75b":"","00c8743aad41872b1490fa1b34350a1b":"","57eadeb0bee99829e929666d4957b001":"","a0a8f62b4e04f627b163a856dfb59a4f":"","2ffc9af43b0e6f78c72fde3a1e0165f3":"","0d01f8dbe2b1c338949e507a3e9bb5ec":"","48dfbc8c76713fecc916f6ab82c26831":"","620d650e6e3ab7ea1fae9af7fc848890":"","4adbb56d9ccb48b44aac2c7cfa67cd26":"","a0567e5825addcdbc8496f3779b14e51":"","ffdb9b6bcf5f9b3b1412d9a6bd31eac5":"","407ed17b3f536db0b8d6f0fec7dc1da1":"","05baa377921dfc24bc2f976dfdeba3ac":"","4cd9c824a4d86a7211f8100e5794b5c4":"","503b95ca3245a464ab20828c58f29060":"","0c7a65c2ec6743d876e0f8a52019d607":"","883ab49bf404a9dcb67d33a2fb0299a1":"","0ea0feca0cfde165ad868afc2c554e79":"","00896e2961203a8b4eca7fafc7f957ee":"","d43265aed24508d5c80c5863b4a869e8":"","acdb0f554bba724e4bea7b4c88c6ae8d":"","e56c3cd4bd06f102c94d95a6b9f22cae":"","c94edad64a41b18e4e276e9914ca9f6f":""}}};
+			var SLConfig = {"deck": {"id":1696324,"slug":"service_mesh_advanced_04_observability","title":"Service_Mesh_Advanced_04_Observability","description":"","width":1280,"height":720,"margin":0.05,"visibility":"self","published_at":null,"sanitize_messages":null,"thumbnail_url":"https://s3.amazonaws.com/media-p.slid.es/thumbnails/1456b17c8f4ab7fbe10ee21395ebff0e/thumb.jpg?1579537047","view_count":0,"user":{"id":349930,"username":"btison","name":"Bernard Tison","description":null,"thumbnail_url":"https://www.gravatar.com/avatar/e2e3cdd3ce9e08ca385892a22816db22?s=140\u0026d=https%3A%2F%2Fstatic.slid.es%2Fimages%2Fdefault-profile-picture.png","paid":true,"pro":true,"lite":false,"team_id":32,"settings":{"id":183077,"present_controls":true,"present_upsizing":true,"present_pointer":false,"present_notes":true,"default_deck_tag_id":null},"enterprise":true,"membership":{"role":"member","manager":false,"activated":true}},"background_transition":"none","transition":"none","theme_id":176,"theme_font":"overpass2","theme_color":"no-color","auto_slide_interval":0,"comments_enabled":true,"forking_enabled":false,"rolling_links":false,"center":false,"shuffle":false,"should_loop":false,"share_notes":false,"slide_number":true,"slide_count":26,"rtl":false,"version":2,"collaborative":false,"deck_user_editor_limit":null,"data_updated_at":1580556774021,"font_typekit":null,"font_google":null,"time_limit":null,"upsizing_enabled":true,"notes":{"bedc0457df23e02319c4a5f2fb1e220f":"","14aee4ce6e77efac398800a568d4b75b":"","00c8743aad41872b1490fa1b34350a1b":"","57eadeb0bee99829e929666d4957b001":"","a0a8f62b4e04f627b163a856dfb59a4f":"","2ffc9af43b0e6f78c72fde3a1e0165f3":"","0d01f8dbe2b1c338949e507a3e9bb5ec":"","48dfbc8c76713fecc916f6ab82c26831":"","620d650e6e3ab7ea1fae9af7fc848890":"","4adbb56d9ccb48b44aac2c7cfa67cd26":"","a0567e5825addcdbc8496f3779b14e51":"","ffdb9b6bcf5f9b3b1412d9a6bd31eac5":"","407ed17b3f536db0b8d6f0fec7dc1da1":"","05baa377921dfc24bc2f976dfdeba3ac":"","4cd9c824a4d86a7211f8100e5794b5c4":"","503b95ca3245a464ab20828c58f29060":"","0c7a65c2ec6743d876e0f8a52019d607":"","883ab49bf404a9dcb67d33a2fb0299a1":"","0ea0feca0cfde165ad868afc2c554e79":"","00896e2961203a8b4eca7fafc7f957ee":"","d43265aed24508d5c80c5863b4a869e8":"","acdb0f554bba724e4bea7b4c88c6ae8d":"","e56c3cd4bd06f102c94d95a6b9f22cae":"","c94edad64a41b18e4e276e9914ca9f6f":""}}};
 
 				SLConfig.theme = {"id":176,"created_at":"2014-05-27T12:38:16.183Z","updated_at":"2019-10-17T00:32:59.630Z","name":"Red Hat Corporate (Archived)","thumbnail_url":"https://s3.amazonaws.com/media-p.slid.es/thumbnails/66755080be2b0c8c0146bfa70069ef16/thumb.jpg?1571272377","sanitize_messages":null,"slide_template_ids":[28642,36442,26765,26762,56704,16857,16856,16853,16855,16854,16852,16863,16862,16861,16860,16859,16858,56721,185268,185425],"font_typekit":"","font_google":"","width":960,"height":700};
 
