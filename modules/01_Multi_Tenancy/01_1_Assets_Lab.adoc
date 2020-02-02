@@ -32,7 +32,11 @@ Fedora: `dnf install jq`
 After installing the `oc` client, please ensure its on your $PATH and that its version is in the OpenShift 4.2 family:
 +
 -----
-oc version
+$ oc version
+-----
++
+.Output
+-----
 Client Version: v4.2.0
 -----
 
@@ -52,10 +56,9 @@ image::images/lab_details_spreadsheet.png[]
 
 +
 -----
-mkdir -p $HOME/lab
+$ mkdir -p $HOME/lab
 
-
-curl https://raw.githubusercontent.com/gpe-mw-training/ocp_service_mesh_advanced/master/utils/set_env_vars.sh \
+$ curl https://raw.githubusercontent.com/gpe-mw-training/ocp_service_mesh_advanced/master/utils/set_env_vars.sh \
     -o $HOME/lab/set_env_vars.sh && \
     chmod 775 $HOME/lab/set_env_vars.sh
 -----
@@ -67,7 +70,7 @@ Refer to the lab details spreadsheet shared by your instructor.
 . Execute the shell script so that the environment variables are applied to your existing shell:
 +
 -----
-$HOME/lab/set_env_vars.sh
+$ $HOME/lab/set_env_vars.sh
 -----
 
 == OpenShift
@@ -86,13 +89,13 @@ In addition, this user has view access to a variety of other namespaces.
 ... At the terminal, authenticate into OpenShift using the user: $ERDEMO_USER
 +
 -----
-oc login $LAB_MASTER_API -u $ERDEMO_USER -p $OCP_PASSWD
+$ oc login $LAB_MASTER_API -u $ERDEMO_USER -p $OCP_PASSWD
 -----
 
 ... View a listing of OpenShift projects that you have access to:
 +
 -----
-oc get projects
+$ oc get projects
 -----
 
 .... You should see a listing similar to the following:
@@ -116,13 +119,13 @@ In addition to be the admin of your Red Hat Service Mesh _control plane_, this u
 ... At the terminal, authenticate into OpenShift using the user: $SM_CP_ADMIN
 +
 -----
-oc login $LAB_MASTER_API -u $SM_CP_ADMIN -p $OCP_PASSWD
+$ oc login $LAB_MASTER_API -u $SM_CP_ADMIN -p $OCP_PASSWD
 -----
 
 ... View a listing of OpenShift projects that you have access to:
 +
 -----
-oc get projects
+$ oc get projects
 -----
 
 .... You should see a listing similar to the following:
@@ -139,7 +142,7 @@ user50-er-demo                                       Active
 .. At the terminal, determine the URL of the OpenShift Console:
 +
 -----
-oc whoami --show-console
+$ oc whoami --show-console
 -----
 
 .. Open a browser tab and navigate to the URL determined in the previous step.
@@ -156,14 +159,17 @@ In this section of the lab, you are oriented to the Red Hat Service Mesh resourc
 . Switch to the administrator of your Service Mesh _control plane_ ( who has also been given view access to the _istio-operator_ namespace)
 +
 -----
-oc login -u $SM_CP_ADMIN -p $OCP_PASSWD
+$ oc login -u $SM_CP_ADMIN -p $OCP_PASSWD
 -----
 
 . View the previously installed Service Mesh operator found in the _istio-operator_ namespace:
 +
 -----
-oc get deploy istio-operator -n istio-operator
-
+$ oc get deploy istio-operator -n istio-operator
+-----
++
+.Sample output
+-----
 istio-operator   1/1     1            1           15h
 -----
 +
@@ -202,9 +208,11 @@ As a _DaemonSet_, a Istio _CNI_ pod runs on every node of the OpenShift cluster.
 . Notice the use of the Red Hat supported _istio-cni_ Linux container image:
 +
 -----
-oc describe daemonset istio-node -n istio-operator | grep Image
-
-
+$ oc describe daemonset istio-node -n istio-operator | grep Image
+-----
++
+.Output
+-----
 registry.redhat.io/openshift-service-mesh/istio-cni-rhel8:1.0.1
 -----
 
@@ -217,7 +225,7 @@ Red Hat Service Mesh defines several CRDs to faciliate the provisioning and life
 . View the Service Mesh related _custom resource definitions_ that extend the OpenShift master API:
 +
 -----
-oc get crd --as=system:admin | grep 'maistra\|istio'
+$ oc get crd --as=system:admin | grep 'maistra\|istio'
 -----
 
 .. You'll have to impersonate an OpenShift Cluster Admin to do so.  
@@ -277,9 +285,12 @@ With mutating admission Webhooks, you may change requests to enforce custom defa
 . Impersonate cluster-admin and get a list of _mutatingwebhookconfiguration_ resources on the OpenShift cluster:
 +
 -----
-oc get mutatingwebhookconfiguration --as=system:admin | grep $SM_CP_NS
-
-...
+$ oc get mutatingwebhookconfiguration --as=system:admin | grep $SM_CP_NS
+-----
++
+.Sample Output
+-----
+[...]
 
 istio-sidecar-injector-admin25-istio-system   2019-11-12T15:15:18Z
 -----
@@ -287,7 +298,7 @@ istio-sidecar-injector-admin25-istio-system   2019-11-12T15:15:18Z
 . Extract the details of your _mutatingwebhookconfiguration_ specific to your Red Hat Service Mesh installation:
 +
 -----
-oc get mutatingwebhookconfiguration istio-sidecar-injector-$SM_CP_NS \
+$ oc get mutatingwebhookconfiguration istio-sidecar-injector-$SM_CP_NS \
        -o yaml \
        --as=system:admin \
        > $HOME/lab/$SM_CP_NS-mutatingwebhookconfiguration.yaml
@@ -329,15 +340,17 @@ The lifecycle of your service mesh _control plane_ is managed by the cluster sco
 . Ensure you are still authenticated into OpenShift as the _mesh-admin_ user:
 +
 -----
-oc login -u $SM_CP_ADMIN -p $OCP_PASSWD
+$ oc login -u $SM_CP_ADMIN -p $OCP_PASSWD
 -----
 
 . Determine version of Red Hat Service Mesh being used in your lab environment:
 +
 -----
-istioctl version --remote=true -i $SM_CP_ADMIN-istio-system
-
-
+$ istioctl version --remote=true -i $SM_CP_ADMIN-istio-system
+-----
++
+.Output
+-----
 client version: 1.3.5
 control plane version: 1.0.1-1
 -----
@@ -347,8 +360,11 @@ NOTE: Red Hat Service Mesh 1.1 is expected to release Jan 29, 2020 and is expect
 . Notice the existence of the Service Mesh _control plane_ deployments:
 +
 -----
-oc get deployments -n $SM_CP_NS
-
+$ oc get deployments -n $SM_CP_NS
+-----
++
+.Sample output
+-----
 NAME                     READY   UP-TO-DATE   AVAILABLE   AGE
 grafana                  1/1     1            1           24h
 istio-citadel            1/1     1            1           24h
@@ -367,8 +383,11 @@ prometheus               1/1     1            1           24h
 . Notice the existence of a _ServiceMeshControlPlane_ custom resource:
 +
 -----
-oc get ServiceMeshControlPlane -n $SM_CP_NS
-
+$ oc get ServiceMeshControlPlane -n $SM_CP_NS
+-----
++
+.Sample Output
+-----
 NAME           READY
 full-install   True
 -----
@@ -376,23 +395,32 @@ full-install   True
 During installation of your lab environment, the $SM_CP_NS namespace was created and this _ServiceMeshControlPlane_ link:https://github.com/gpe-mw-training/ocp_service_mesh_advanced/blob/master/ansible/roles/maistra_control_plane/tasks/main.yml#L3-L5[was applied to it].
 +
 The Red Hat Service Mesh operator detected the presence of this new _ServiceMeshControlPlane_ custom resource and subsequently provisioned the service mesh control plane.
++
+[NOTE]
+If the status in the _READY_ column is not `True`, this means that the Service Mesh control plane was not correctly installed. In that case, examine the status of the _ServiceMeshControlPlane_ custom resource, to find out what the issue is.
 
-. Notice the existance of a _ServiceMeshPolicy_:
+. Notice the existence of a _ServiceMeshPolicy_:
 +
 -----
-oc get ServiceMeshPolicies -n $SM_CP_NS
+$ oc get ServiceMeshPolicies -n $SM_CP_NS
+-----
++
+.Sample Output
+-----
 NAME      AGE
 default   24h
 -----
 +
 NOTE: This Red Hat Service Mesh specific resource replaces the upstream community Istio _MeshPolicy_ (which is cluster scoped and not compatible with multi-tenancy).  As you will see in a later lab, this resource is used to configure mutual TLS (mTLS) security within a single service mesh.
 
-. Notice the existance of various namespace scoped _RoleBinding_ resources in the service mesh control plane:
+. Notice the existence of various namespace scoped _RoleBinding_ resources in the service mesh control plane:
 +
 -----
-oc get RoleBinding -n $SM_CP_NS
-
-
+$ oc get RoleBinding -n $SM_CP_NS
+-----
++
+.Sample Output
+-----
 istio-citadel-admin50-istio-system                               24h
 istio-citadel-admin50-istio-system                               24h
 istio-egressgateway-admin50-istio-system                         24h
@@ -408,11 +436,14 @@ prometheus-admin50-istio-system                                  24h
 +
 The use of a project scoped _RoleBinding_ rather than a cluster-scoped _ClusterRoleBinding_ is a key enabler of _multi-tenant_ capabilities of the Red Hat Service Mesh product.
 
-. Notice the existance of an empty _ServiceMeshMemberRoll_ called _default_ :
+. Notice the existence of an empty _ServiceMeshMemberRoll_ called _default_ :
 +
 -----
-oc get ServiceMeshMemberRoll default -o template --template='{{"\n"}}{{.spec}}{{"\n\n"}}' -n $SM_CP_NS
-
+$ oc get ServiceMeshMemberRoll default -o template --template='{{"\n"}}{{.spec}}{{"\n\n"}}' -n $SM_CP_NS
+-----
++
+.Output
+-----
 map[]
 -----
 +
@@ -425,7 +456,7 @@ For the purpose of this course, your service mesh control plane will manage your
 
 The intent of the Emergency Resonse demo is to showcase the breadth of the Red Hat middleware portfolio running on Red Hat OpenShift.
 
-The services of the Emergency Response demo use a mix of both HTTP based synchroneous communication and AMQ Streams based asynchroneous communication.
+The services of the Emergency Response demo use a mix of both HTTP based synchronous communication and AMQ Streams based asynchronous communication.
 As such, the Emergency Response demo is an excellent application to highlight the existing capabilities and limitations of a service mesh.
 
 === Resources
@@ -435,7 +466,7 @@ As such, the Emergency Response demo is an excellent application to highlight th
 Switch to this user as follows:
 +
 -----
-oc login -u $ERDEMO_USER -p $OCP_PASSWD
+$ oc login -u $ERDEMO_USER -p $OCP_PASSWD
 -----
 
 
@@ -443,7 +474,10 @@ oc login -u $ERDEMO_USER -p $OCP_PASSWD
 +
 -----
 $ oc get dc -n $ERDEMO_NS
-
+-----
++
+.Sample Output
+-----
 NAME                                REVISION   DESIRED   CURRENT  
 postgresql                          1          1         0        
 user50-disaster-simulator           1          1         0        
@@ -465,15 +499,21 @@ In the next lab of this course, you will resume all of these DeploymentConfigs a
 . Notice the Emergency Response demo also makes use of Red Hat AMQ Streams for event-driven, streams-based communication between many of its services:
 +
 -----
-oc get deploy -n $ERDEMO_NS
-
+$ oc get deploy -n $ERDEMO_NS
+-----
++
+.Sample Output
+-----
 NAME                            READY   UP-TO-DATE   AVAILABLE   AGE
 kafka-cluster-entity-operator   1/1     1            1           3d5h
 -----
 +
 -----
-oc get statefulset -l strimzi.io/kind=Kafka -n $ERDEMO_NS
-
+$ oc get statefulset -l strimzi.io/kind=Kafka -n $ERDEMO_NS
+-----
++
+.Sample Output
+-----
 kafka-cluster-kafka       3/3     3d5h
 kafka-cluster-zookeeper   0/3     3d5h
 -----
@@ -481,8 +521,11 @@ kafka-cluster-zookeeper   0/3     3d5h
 . Also, notice the Emergency Response demo also makes use of Red Hat JBoss _Data Grid_:
 +
 -----
-oc get statefulset -l application=datagrid-service -n $ERDEMO_NS
-
+$ oc get statefulset -l application=datagrid-service -n $ERDEMO_NS
+-----
++
+.Sample Output
+-----
 datagrid-service   3/3     3d5h
 -----
 
