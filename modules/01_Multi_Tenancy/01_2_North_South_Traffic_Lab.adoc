@@ -25,7 +25,7 @@ As you'll experience in later labs of this course, API policy management (via Re
 
 In this lab, you will quickly ease your customer into the management of their _north / south_ API traffic by applying API policies using Red Hat 3scale API Management.
 
-[blue]#In later labs of this course, this traffic will eventually be routed through the _ingress-gateway_ of Red Hat Service Mesh such that *both* service mesh network policies and api management policies are applied#.
+In later labs of this course, this traffic will eventually be routed through the _ingress-gateway_ of Red Hat Service Mesh such that *both* service mesh network policies and api management policies are applied.
 
 == Access Multi-Tenant 3scale API Management
 
@@ -36,14 +36,14 @@ For the purposes of this lab, you serve as the administrator of your own 3scale 
 . At the command line, log into your OpenShift environment as the owner of the Emergency Response application:
 +
 -----
-oc login -u $ERDEMO_USER -p $OCP_PASSWD
+$ oc login -u $ERDEMO_USER -p $OCP_PASSWD
 -----
 
 . Access your 3scale by Red Hat Admin Portal by pointing your browser to the output of the following:
 +
 [source,texinfo]
 -----
-echo -en "\n\nhttps://$(oc get routes -n $API_MANAGER_NS | grep admin | grep $ERDEMO_USER | awk '{print $2}')\n"
+$ echo -en "\n\nhttps://$(oc get routes -n $API_MANAGER_NS | grep admin | grep $ERDEMO_USER | awk '{print $2}')\n"
 -----
 +
 image::images/3scale_login.png[]
@@ -61,9 +61,11 @@ These are the API gateways that you initially use to apply API policies to your 
 +
 [source,sh]
 -----
-oc get deploy -n $GW_PROJECT
-
-
+$ oc get deploy -n $GW_PROJECT
+-----
++
+.Sample output
+-----
 NAME            DESIRED   CURRENT   UP-TO-DATE   AVAILABLE   AGE
 user50-prod-apicast    1         0         0            0           7h
 user50-stage-apicast   1         0         0            0           7h
@@ -71,11 +73,13 @@ user50-stage-apicast   1         0         0            0           7h
 
 . Note that the value of `$THREESCALE_PORTAL_ENDPOINT` is already set for you in `prod-apicast` and `stage-apicast` gateways:
 +
-[source,sh]
 -----
-oc describe deploy prod-apicast -n $GW_PROJECT | grep THREESCALE_PORTAL_ENDPOINT
-
-...
+$ oc describe deploy prod-apicast -n $GW_PROJECT | grep THREESCALE_PORTAL_ENDPOINT
+-----
++
+.Sample Output
+-----
+[...]
 
       THREESCALE_PORTAL_ENDPOINT:    https://b753490aa7586f8e0663f5d5ec62b63cf9e71540d9138e4869eede4446e8e871@user1-3scale-mt-amp0-admin.apps.3295.openshift.opentlc.com
 -----
@@ -84,9 +88,8 @@ oc describe deploy prod-apicast -n $GW_PROJECT | grep THREESCALE_PORTAL_ENDPOINT
 
 . Resume the paused deploy objects:
 +
-[source,sh]
 -----
-oc rollout resume deploy stage-apicast prod-apicast -n $GW_PROJECT
+$ oc rollout resume deploy stage-apicast prod-apicast -n $GW_PROJECT
 -----
 
 == Secure _incident_ service
@@ -111,7 +114,7 @@ image::images/3scale_navigate_app.png[]
 . Set the value of this `User Key` as a shell environment variable:
 +
 -----
-echo "export INCIDENT_SERVICE_API_KEY=<change me>" >> $HOME/.bashrc
+$ echo "export INCIDENT_SERVICE_API_KEY=<change me>" >> $HOME/.bashrc
 -----
 
 . Set a couple of other environment variables to be used in a later lab of this course:
@@ -124,13 +127,13 @@ image::images/incident_service_id.png[]
 ... Using this value, set an environment variable as follows:
 +
 -----
-echo "export INCIDENT_SERVICE_ID=<change me>" >> $HOME/.bashrc
+$ echo "export INCIDENT_SERVICE_ID=<change me>" >> $HOME/.bashrc
 -----
 
 .. *SYSTEM_PROVIDER_URL*
 +
 -----
-echo "export SYSTEM_PROVIDER_URL=$(oc get routes -n $API_MANAGER_NS | grep admin | grep $ERDEMO_USER | awk '{print $2}')" >> $HOME/.bashrc
+$ echo "export SYSTEM_PROVIDER_URL=$(oc get routes -n $API_MANAGER_NS | grep admin | grep $ERDEMO_USER | awk '{print $2}')" >> $HOME/.bashrc
 -----
 +
 This is the URL to the API Manager _system-provider_ specific to your tenant that all API gateways use to pull information about APIs.
@@ -138,7 +141,7 @@ This is the URL to the API Manager _system-provider_ specific to your tenant tha
 .. *API_ADMIN_ACCESS_TOKEN*
 +
 -----
-echo "export API_ADMIN_ACCESS_TOKEN=$(oc describe  deploy prod-apicast -n $ERDEMO_USER-gw | grep THREESCALE_PORTAL_ENDPOINT | cut -d'@' -f1 | cut -d'/' -f3)" >> $HOME/.bashrc
+$ echo "export API_ADMIN_ACCESS_TOKEN=$(oc describe  deploy prod-apicast -n $ERDEMO_USER-gw | grep THREESCALE_PORTAL_ENDPOINT | cut -d'@' -f1 | cut -d'/' -f3)" >> $HOME/.bashrc
 -----
 +
 This access token is specific to your API _tenant_ and is used by API gateways to invoke the _System Management API_ of 3scale.
@@ -146,16 +149,16 @@ This access token is specific to your API _tenant_ and is used by API gateways t
 . Source your local shell configuration file:
 +
 -----
-source $HOME/.bashrc
+$ source $HOME/.bashrc
 -----
 
 == Test
 
 -----
-curl -v -X GET https://$(oc get route -n $GW_PROJECT | grep prod | awk '{print $2}')/incidents?user_key=$INCIDENT_SERVICE_API_KEY
+$ curl -v -X GET https://$(oc get route -n $GW_PROJECT | grep prod | awk '{print $2}')/incidents?user_key=$INCIDENT_SERVICE_API_KEY
 -----
 
-[blue]#Congratulations! You have successfully secured _north / south_ traffic into your micro-service architected Emergency Response application using the API Gateways of Red Hat's 3scale API Manager product.#
+Congratulations! You have successfully secured _north / south_ traffic into your micro-service architected Emergency Response application using the API Gateways of Red Hat's 3scale API Manager product.
 
 API Management is a complementary technology to Service Mesh.
 In subsequent labs of this course, you apply service mesh policies to _east / west_ traffic within your Emergency Response application.
