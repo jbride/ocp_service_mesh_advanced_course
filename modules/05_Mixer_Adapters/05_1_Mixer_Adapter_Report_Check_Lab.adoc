@@ -143,7 +143,7 @@ Rate limit configuration is split into 2 parts:
 
 In this lab you will introduce a rate limit for calls to the Incident Service coming from outside of the OpenShift cluster.
 
-. By default, policy checks are disabled in the Srvice Mesh. To enable policy checks, use the _oc_ client to edit the ServiceMeshControlPlane resource in the control plane namespace:
+. By default, policy checks are disabled in the Service Mesh. To enable policy checks, use the _oc_ client to edit the ServiceMeshControlPlane resource in the control plane namespace:
 +
 ----
 $ oc edit servicemeshcontrolplane full-install -n $SM_CP_NS
