@@ -23,13 +23,13 @@ This means that control plane components and service accounts have to be locked 
 . Switch to your service mesh control plane administrator user:
 +
 -----
-oc login -u $SM_CP_ADMIN -p $OCP_PASSWD
+$ oc login -u $SM_CP_ADMIN -p $OCP_PASSWD
 -----
 
 . Register the $ERDEMO_NS namespace as namespace _member_ to be monitored and manged by your service mesh control plane.
 +
 -----
-echo "apiVersion: maistra.io/v1
+$ echo "apiVersion: maistra.io/v1
 kind: ServiceMeshMemberRoll
 metadata:
   name: default
@@ -43,17 +43,22 @@ Recall that the _ServiceMeshMemberRoll_ exists in the service mesh control plane
 . Notice that your $ERDEMO_NS namespace now includes _kiali_ and _maistra_ annotations:
 +
 -----
-echo -en "\n\n$(oc get project $ERDEMO_NS -o template --template='{{.metadata.labels}}')\n\n"
-
-
+$ echo -en "\n\n$(oc get project $ERDEMO_NS -o template --template='{{.metadata.labels}}')\n\n"
+----
++
+.Sample Output
+-----
 map[kiali.io/member-of:admin50-istio-system maistra.io/member-of:admin50-istio-system]
 -----
 
 . Notice also that your $ERDEMO_NS namespace now includes namespace scoped _RoleBindings_ associated with the Istio related service accounts from your specific service mesh control plane:
 +
 -----
-oc get RoleBinding  -n $ERDEMO_NS -l release=istio
-
+$ oc get RoleBinding  -n $ERDEMO_NS -l release=istio
+-----
++
+.Sample Output
+-----
 istio-citadel-admin50-istio-system                               24s
 istio-egressgateway-admin50-istio-system                         24s
 istio-galley-admin-role-binding-admin50-istio-system             24s
@@ -71,8 +76,11 @@ The use of a project scoped _RoleBinding_ rather than a cluster-scoped _ClusterR
 Notice that your $ERDEMO_NS namespace now also includes a _NetworkPolicy_ called: _istio-mesh_
 +
 -----
-oc get NetworkPolicy istio-mesh -n $ERDEMO_NS
-
+$ oc get NetworkPolicy istio-mesh -n $ERDEMO_NS
+-----
++
+.Sample Output
+-----
 istio-mesh   <none>         26m
 -----
 +
@@ -81,11 +89,13 @@ This _NetworkPolicy_ allows ingress to all pods specific to this namespace from 
 . Notice also that your $ERDEMO_NS namespace now includes _istio_ related secrets:
 +
 -----
-oc get secrets -n $ERDEMO_NS | grep istio
-
-...
-
-stio.builder                                    istio.io/key-and-cert                 3      9m58s
+$ oc get secrets -n $ERDEMO_NS | grep istio
+-----
++
+.Sample Output
+-----
+[...]
+istio.builder                                    istio.io/key-and-cert                 3      9m58s
 istio.default                                   istio.io/key-and-cert                 3      9m55s
 istio.deployer                                  istio.io/key-and-cert                 3      9m57s
 istio.disaster-simulator-service                istio.io/key-and-cert                 3      9m58s
@@ -118,7 +128,7 @@ In this section of this lab you (as the owner of the Emergency Response applicat
 . Switch to the $ERDEMO_USER:
 +
 -----
-oc login -u $ERDEMO_USER
+$ oc login -u $ERDEMO_USER
 -----
 +
 The $ERDEMO_USER is the admin of the $ERDEMO_NS namespace where your Emergency Response application resides.
@@ -131,7 +141,7 @@ The $ERDEMO_USER is the admin of the $ERDEMO_NS namespace where your Emergency R
 . Execute the shell script that adds Envoy auto-injection annotations to Emergency Response deployments:
 +
 -----
-curl https://raw.githubusercontent.com/gpe-mw-training/ocp_service_mesh_advanced/master/utils/inject_istio_annotation.sh \
+$ curl https://raw.githubusercontent.com/gpe-mw-training/ocp_service_mesh_advanced/master/utils/inject_istio_annotation.sh \
     -o $HOME/lab/inject_istio_annotation.sh && \
     chmod 775 $HOME/lab/inject_istio_annotation.sh && \
     $HOME/lab/inject_istio_annotation.sh
@@ -140,8 +150,11 @@ curl https://raw.githubusercontent.com/gpe-mw-training/ocp_service_mesh_advanced
 . After completion of the script, review the list Emergency Response related pods:
 +
 -----
-oc get pods -l group=erd-services -n $ERDEMO_NS
-
+$ oc get pods -l group=erd-services -n $ERDEMO_NS
+-----
++
+.Sample Output
+-----
 user50-disaster-simulator-1-p9gfl          2/2     Running   7          9h
 user50-incident-priority-service-1-hgmdn   2/2     Running   4          9h
 user50-incident-service-1-sz4dk            2/2     Running   3          9h
@@ -156,15 +169,15 @@ Notice that each of these pods indicates that two containers have started.
 . You could use a script such as the following to identify a list of container names for each of the pods:
 +
 -----
-
-for POD_NAME in $(oc get pods -n $ERDEMO_NS -l group=erd-services -o jsonpath='{range .items[*]}{.metadata.name}{"\n"}')
+$ for POD_NAME in $(oc get pods -n $ERDEMO_NS -l group=erd-services -o jsonpath='{range .items[*]}{.metadata.name}{"\n"}')
 do
     oc get pod $POD_NAME  -n $ERDEMO_NS -o jsonpath='{.metadata.name}{"    :\t\t"}{.spec.containers[*].name}{"\n"}'
 done
-
-
-...
-
+-----
++
+.Sample output
+-----
+[...]
 user50-disaster-simulator-1-p9gfl    :          user50-disaster-simulator        istio-proxy
 user50-incident-priority-service-1-hgmdn    :   user50-incident-priority-service istio-proxy
 user50-incident-service-1-sz4dk    :            user50-incident-service          istio-proxy
@@ -216,7 +229,7 @@ image::images/envoy_architecture.png[]
 . Delete _deploy_ pods that are in a _completed_ status and have not yet been deleted:
 +
 -----
-curl https://raw.githubusercontent.com/gpe-mw-training/ocp_service_mesh_advanced/master/utils/delete_pod_deploys.sh \
+$ curl https://raw.githubusercontent.com/gpe-mw-training/ocp_service_mesh_advanced/master/utils/delete_pod_deploys.sh \
     -o $HOME/lab/delete_pod_deploys.sh && \
     chmod 775 $HOME/lab/delete_pod_deploys.sh
 
@@ -226,7 +239,7 @@ $HOME/lab/delete_pod_deploys.sh
 . Capture the details of the _istio-proxy_ container configuration from the _responder-service_ pod of the Emergency Response demo :
 +
 -----
-oc get pod -n $ERDEMO_NS \
+$ oc get pod -n $ERDEMO_NS \
        $(oc get pod -n $ERDEMO_NS | grep "^$ERDEMO_USER-responder-service" | awk '{print $1}') \
        -o json \
        | jq .spec.containers[1] \
@@ -236,7 +249,7 @@ oc get pod -n $ERDEMO_NS \
 . Study the details of the _istio-proxy_ container:
 +
 -----
-less $HOME/lab/responder_envoy.json
+$ less $HOME/lab/responder_envoy.json
 -----
 
 . Answer the following questions pertaining to this _istio-proxy_ container:
@@ -263,15 +276,17 @@ In particular, the _istio-cni_ resource creates iptable rules such that all ingr
 The Envoy service proxy has its listener bound to port 15001.
 
 
-[blue]#Have your instructor demonstrate these modified iptable rules in a manner similar to the following:#
+Have your instructor demonstrate these modified iptable rules in a manner similar to the following:
 
 . Identify the OCP worker node that one of the Emergency Response application pods is running on:
 +
 -----
-oc get pod user50-responder-service-6-5xr86 -o json | jq .spec.nodeName
-
-...
-
+$ oc get pod user50-responder-service-6-5xr86 -o json | jq .spec.nodeName
+-----
++
+.Sample Output
+-----
+[...]
 ip-10-0-136-113.eu-central-1.compute.internal
 -----
 
@@ -279,10 +294,12 @@ ip-10-0-136-113.eu-central-1.compute.internal
 . Identify the id of either container (application container or _envoy-proxy)  in that pod:
 +
 -----
-oc describe pod user50-responder-service-6-5xr86 | grep cri-o
-
-...
-
+$ oc describe pod user50-responder-service-6-5xr86 | grep cri-o
+-----
++
+.Sample Output
+-----
+[...]
 Container ID:  cri-o://397fea50eb8ecd03db9fe8c9a7657c7980f23c8462e9cf2554e9a4493308e651
 Container ID:  cri-o://90260d3d7ece810bb4c44a8aee3e23ebe50fd6b1225d48e6e103da070194c53a
 -----
@@ -291,28 +308,34 @@ Container ID:  cri-o://90260d3d7ece810bb4c44a8aee3e23ebe50fd6b1225d48e6e103da070
 . Set up a debug session into the node where the target Emergency Response pod runs:
 +
 -----
-oc debug node/ip-10-0-136-113.eu-central-1.compute.internal
+$ oc debug node/ip-10-0-136-113.eu-central-1.compute.internal
 -----
 
 . On that OCP node, switch to the host operating system shell that can run host operating system binaries:
 +
 -----
-chroot /host
+sh-4.4# chroot /host
 -----
 
 . Using the previously determined containerId, determine the operating system process id of the container on the OpenShift node:
 +
 -----
-crictl inspect --output json  90260d3d7ece810bb4c44a8aee3e23ebe50fd6b1225d48e6e103da070194c53a | grep pid
-
+sh-4.4# crictl inspect --output json  90260d3d7ece810bb4c44a8aee3e23ebe50fd6b1225d48e6e103da070194c53a | grep pid
+-----
++
+.Sample Output
+-----
 45315
 -----
-
 
 . Using the process Id of the container, view the iptable rules on that host machine:
 +
 -----
 sh-4.4# nsenter -t 45315 -n iptables -t nat -S
+-----
++
+.Sample Output
+-----
 -P PREROUTING ACCEPT
 -P INPUT ACCEPT
 -P POSTROUTING ACCEPT
@@ -349,20 +372,20 @@ The admin API of each envoy container is available by using the _curl_ utility f
 . Log into OpenShift as the owner of the Emergency Response application:
 +
 -----
-oc login -u $ERDEMO_USER -p $OCP_PASSWD
+$ oc login -u $ERDEMO_USER -p $OCP_PASSWD
 -----
 
 . Retrieve the help documentation provided by the Envoy admin API: 
 +
 -----
-oc rsh `oc get pod -n $ERDEMO_NS | grep "responder-service" | grep "Running" | awk '{print $1}'` \
+$ oc rsh `oc get pod -n $ERDEMO_NS | grep "responder-service" | grep "Running" | awk '{print $1}'` \
     curl http://localhost:15000/help
 -----
 
 . Retrieve the status of all of the _clusters_ that are visible to this Envoy service proxy:
 +
 -----
-oc rsh `oc get pod -n $ERDEMO_NS | grep "responder-service" | grep "Running" | awk '{print $1}'` \
+$ oc rsh `oc get pod -n $ERDEMO_NS | grep "responder-service" | grep "Running" | awk '{print $1}'` \
    curl http://localhost:15000/clusters?format=json \
    > $HOME/lab/responder-service-clusters.json
 -----
@@ -374,18 +397,18 @@ oc rsh `oc get pod -n $ERDEMO_NS | grep "responder-service" | grep "Running" | a
 +
 Under no circumstances do any of your Envoy proxies have visibility to services that you do not own.
 +
-[blue]#This is critical from performance, scalability and security perspectives.#
+This is critical from performance, scalability and security perspectives.
 
 . Inspect the configuration sent by Pilot to your pod's sidecar using _istioctl_:
 +
 -----
-istioctl proxy-config cluster -n <POD NAMESPACE> <PODNAME> -o json
+$ istioctl proxy-config cluster -n <POD NAMESPACE> <PODNAME> -o json
 -----
 +
 If you search for the destination service name you will see an embedded metadata JSON element that names the specific DestinationRule that pod is currently using to communicate with the external service.
 +
 -----
-oc rsh `oc get pod -n $ERDEMO_NS | grep "responder-service" | awk '{print $1}'` \
+$ oc rsh `oc get pod -n $ERDEMO_NS | grep "responder-service" | awk '{print $1}'` \
          curl http://localhost:15000/config_dump \
          > $HOME/lab/config_dump \
          && less $HOME/lab/config_dump \
