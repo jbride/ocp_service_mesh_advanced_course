@@ -464,7 +464,7 @@ status:
 ----
 ** Note that the HTTP probes point to port 15020 instead of 8080.
 ** In the sidecar container the _pilot agent_ is listening on port 15020. This is the process that bootstraps the Envoy proxy.
-** The pilot agent redirects the call to the application, strips the response body and returns the response code 
+** The pilot agent redirects the call to the application, strips the response body and returns the response code to the kubelet. 
 
 * As an alternative, replace the health checks in the DeploymentConfig to use a command based health check with curl rather than a HTTP based health check.
 +
