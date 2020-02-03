@@ -53,7 +53,6 @@ However, for the purpose of this course, this version of _istioctl_ works well.
 image::images/lab_details_spreadsheet.png[]
 
 . Open a terminal window on your local machine and download the script that sets needed environment variables for the labs in this course:
-
 +
 -----
 $ mkdir -p $HOME/lab
