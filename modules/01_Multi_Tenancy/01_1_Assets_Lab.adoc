@@ -96,11 +96,10 @@ $ oc login $LAB_MASTER_API -u $ERDEMO_USER -p $OCP_PASSWD
 -----
 $ oc get projects
 -----
-
-.... You should see a listing similar to the following:
++
+You should see a listing similar to the following:
 +
 -----
-
 istio-operator       Service Mesh Operator         Active
 kafka-operator-erd                                 Active
 tools-erd                                          Active
@@ -126,11 +125,10 @@ $ oc login $LAB_MASTER_API -u $SM_CP_ADMIN -p $OCP_PASSWD
 -----
 $ oc get projects
 -----
-
-.... You should see a listing similar to the following:
++
+You should see a listing similar to the following:
 +
 -----
-
 3scale-mt-api0         3scale-mt-api0                Active
 admin50-istio-system   admin50 Service Mesh System   Active
 istio-operator         Service Mesh Operator         Active
@@ -172,8 +170,8 @@ $ oc get deploy istio-operator -n istio-operator
 istio-operator   1/1     1            1           15h
 -----
 +
-.. This operator is global (to the OpenShift cluster) in scope.
-.. The administrator of the _istio-operator_ namespace is the OpenShift cluster-admin .
+** This operator is global (to the OpenShift cluster) in scope.
+** The administrator of the _istio-operator_ namespace is the OpenShift cluster-admin .
 
 
 === Istio CNI plugin
