@@ -41,7 +41,6 @@ $ oc login -u $ERDEMO_USER -p $OCP_PASSWD
 
 . Access your 3scale by Red Hat Admin Portal by pointing your browser to the output of the following:
 +
-[source,texinfo]
 -----
 $ echo -en "\n\nhttps://$(oc get routes -n $API_MANAGER_NS | grep admin | grep $ERDEMO_USER | awk '{print $2}')\n"
 -----
