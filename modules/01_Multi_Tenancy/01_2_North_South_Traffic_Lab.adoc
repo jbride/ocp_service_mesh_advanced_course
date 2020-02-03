@@ -100,7 +100,7 @@ Click `Create Application`.
 
 . From the resultant page, copy the `User Key`
 +
-image::images/3scale_navigate_app.png[]
+image::images/3scale_user_key.png[]
 
 . Set the value of this `User Key` as a shell environment variable:
 +
