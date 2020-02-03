@@ -58,38 +58,30 @@ These are the API gateways that you initially use to apply API policies to your 
 
 . Get a list of these API gateways by executing the following command:
 +
-[source,sh]
 -----
-$ oc get deploy -n $GW_PROJECT
+$ oc get dc -n $GW_PROJECT
 -----
 +
 .Sample output
 -----
-NAME            DESIRED   CURRENT   UP-TO-DATE   AVAILABLE   AGE
-user50-prod-apicast    1         0         0            0           7h
-user50-stage-apicast   1         0         0            0           7h
+NAME            REVISION   DESIRED   CURRENT   TRIGGERED BY
+prod-apicast    1          1         1         config
+stage-apicast   1          1         1         config
 -----
 
-. Note that the value of `$THREESCALE_PORTAL_ENDPOINT` is already set for you in `prod-apicast` and `stage-apicast` gateways:
+. The value of `$THREESCALE_PORTAL_ENDPOINT` is set in the `apicast-configuration-url-secret` secret in the $GW_PROJECT namespace:
 +
------
-$ oc describe deploy prod-apicast -n $GW_PROJECT | grep THREESCALE_PORTAL_ENDPOINT
------
+----
+$ echo $(oc get secret apicast-configuration-url-secret -o yaml -n $GW_PROJECT | grep password | awk '{print $2}' | base64 -d)
+----
 +
 .Sample Output
------
-[...]
+----
+https://95d1c0a311ba965cd23562164db2126516344b6ff5985b49a4282662181e68ae@user25-3scale-mt-api0-admin.apps.cluster-094b.094b.example.opentlc.com
+----
 
-      THREESCALE_PORTAL_ENDPOINT:    https://b753490aa7586f8e0663f5d5ec62b63cf9e71540d9138e4869eede4446e8e871@user1-3scale-mt-amp0-admin.apps.3295.openshift.opentlc.com
------
 
 * The API Gateways use the value of `THREESCALE_PORTAL_ENDPOINT` to invoke the _system-provider_ of your API Manager _tenant_ and retrieve details of your APIs (aka: _policy_config_).
-
-. Resume the paused deploy objects:
-+
------
-$ oc rollout resume deploy stage-apicast prod-apicast -n $GW_PROJECT
------
 
 == Secure _incident_ service
 
@@ -140,7 +132,7 @@ This is the URL to the API Manager _system-provider_ specific to your tenant tha
 .. *API_ADMIN_ACCESS_TOKEN*
 +
 -----
-$ echo "export API_ADMIN_ACCESS_TOKEN=$(oc describe  deploy prod-apicast -n $ERDEMO_USER-gw | grep THREESCALE_PORTAL_ENDPOINT | cut -d'@' -f1 | cut -d'/' -f3)" >> $HOME/.bashrc
+$ echo "export API_ADMIN_ACCESS_TOKEN=$(oc get secret apicast-configuration-url-secret -o yaml -n $GW_PROJECT | grep password | awk '{print $2}' | base64 -d | cut -d'@' -f1 | cut -d'/' -f3)" >> $HOME/.bashrc
 -----
 +
 This access token is specific to your API _tenant_ and is used by API gateways to invoke the _System Management API_ of 3scale.
@@ -154,7 +146,7 @@ $ source $HOME/.bashrc
 == Test
 
 -----
-$ curl -v -X GET https://$(oc get route -n $GW_PROJECT | grep prod | awk '{print $2}')/incidents?user_key=$INCIDENT_SERVICE_API_KEY
+$ curl -v -X GET https://$(oc get route -n $API_MANAGER_NS | grep $ERDEMO_USER | grep prod | awk '{print $2}')/incidents?user_key=$INCIDENT_SERVICE_API_KEY
 -----
 
 Congratulations! You have successfully secured _north / south_ traffic into your micro-service architected Emergency Response application using the API Gateways of Red Hat's 3scale API Manager product.
