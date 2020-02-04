@@ -44,7 +44,7 @@ Recall that the _ServiceMeshMemberRoll_ exists in the service mesh control plane
 +
 -----
 $ echo -en "\n\n$(oc get project $ERDEMO_NS -o template --template='{{.metadata.labels}}')\n\n"
-----
+-----
 +
 .Sample Output
 -----
