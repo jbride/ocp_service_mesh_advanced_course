@@ -860,7 +860,7 @@ $ curl -v -k https://responder-service.$ERDEMO_USER.apps.$SUBDOMAIN_BASE/respond
 . Replace the health checks in the Disaster Simulator DeploymentConfig to use a command based health check with curl rather than a HTTP based health check. You can skip this step if you enabled HTTP probe rewriting in the Service Mesh.
 +
 ----
-$ oc edit dc disaster-simulator -o yaml -n $ERDEMO_NS
+$ oc edit dc $ERDEMO_USER-disaster-simulator -o yaml -n $ERDEMO_NS
 ----
 +
 Replace the existing liveness and readiness probes with command based probes:
