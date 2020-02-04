@@ -429,7 +429,7 @@ $ oc login -u $ERDEMO_USER -p $OCP_PASSWD
 * List the _NetworkPolicy_ resources in the Emergency Response namespace:
 +
 ----
-$ oc get networkpolicy -n $ERDEMO_NS
+$ oc get networkpolicy -n $ERDEMO_NS -o yaml
 ----
 +
 .Sample Output
