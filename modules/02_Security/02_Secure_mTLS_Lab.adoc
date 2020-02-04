@@ -109,7 +109,7 @@ status:
 [...]
 ----
 +
-* Note that `mTLS` is set to `disabled`. This means that mTLs is not enforced, and services will be able to communicate over plain HTTP.
+* Note that `mTLS` is set to `false`. This means that mTLs is not enforced, and services will be able to communicate over plain HTTP.
 * Setting the mTLS as globally disabled is the recommended starting point when migrating an existing set of applications to use Istio and mTLS.
 . As part of the Service Mesh installation, a global _ServiceMeshPolicy_ is created in the Service Mesh control plane namespace. +
 The scope of the ServiceMeshPolicy is the Service Mesh. It can be overridden by namespace-scoped and service-scoped policies.
