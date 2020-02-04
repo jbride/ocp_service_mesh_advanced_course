@@ -940,7 +940,7 @@ spec:
 $ oc create -f disaster-simulator-mtls-destinationrule.yml -n $ERDEMO_NS
 ----
 
-. _VirtualService_ for the Responder Service:
+. _VirtualService_ for the Disaster Simulator Service:
 +
 ----
 $ echo "---
