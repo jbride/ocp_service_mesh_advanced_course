@@ -250,7 +250,7 @@ $ oc create secret tls istio-ingressgateway-certs --cert tls.crt --key tls.key -
 . Restart the Istio Ingress Gateway pod:
 +
 ----
-$ oc patch deployment istio-ingressgateway -p '{"spec":{"template":{"metadata":{"annotations":{"kubectl.kubernetes.io/restartedAt": "'`date -Iseconds`'"}}}}}' -n $SM_CP_NS
+$ oc patch deployment istio-ingressgateway -p '{"spec":{"template":{"metadata":{"annotations":{"kubectl.kubernetes.io/restartedAt": "'`date +%FT%T%z`'"}}}}}' -n $SM_CP_NS
 ----
 
 
