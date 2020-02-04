@@ -219,7 +219,7 @@ In this lab we will use a self-signed certificate.
 * Create a configuration file for openSSL:
 +
 ----
-$ cat <<EOF | sudo tee ./cert.cfg
+$ cat <<EOF | tee ./cert.cfg
 [ req ]
 req_extensions     = req_ext
 distinguished_name = req_distinguished_name
