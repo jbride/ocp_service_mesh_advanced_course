@@ -34,13 +34,13 @@ Subsequently, your API production gateway can be disabled.
 . Switch to the owner of your pre-existing API Gateways:
 +
 -----
-oc login -u $ERDEMO_USER -p $OCP_PASSWD
+$ oc login -u $ERDEMO_USER -p $OCP_PASSWD
 -----
 
 . Scale down the existing API production gateway:
 +
 -----
-$ oc scale deploy/prod-apicast --replicas=0 -n $GW_PROJECT
+$ oc scale dc/prod-apicast --replicas=0 -n $GW_PROJECT
 -----
 
 == New Virtual Service to Incident Service
