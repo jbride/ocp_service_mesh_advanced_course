@@ -106,3 +106,6 @@ Each course module listed below will consist of a slide presentation and one or 
 
 . link:https://docs.google.com/document/d/1y1EYWVl6UdJiaz1p-dHjtEg-GyisokQDc7dl1wXDBDc/edit#heading=h.et0u47hb6ot1[Service Mesh Technical Competency Model]
 
+== Versions
+0.0.1 - Feb 05, 2020 - Pilot release
+
