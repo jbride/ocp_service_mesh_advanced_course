@@ -90,7 +90,7 @@ image::images/jaeger-ui.png[]
 You might see services and traces in the Jaeger UI belonging to previous interactions with the Emergency Response Demo application. If you want to reset the Jaeger storage, you can force a redeploy of the Jaeger pod - the Jaeger all-in-one image uses in-memory storage, which is cleared when restarting the pod.
 
 ----
-$ oc patch deployment jaeger -p '{"spec":{"template":{"metadata":{"annotations":{"kubectl.kubernetes.io/restartedAt": "'`date -Iseconds`'"}}}}}' -n $SM_CP_NS
+$ oc patch deployment jaeger -p '{"spec":{"template":{"metadata":{"annotations":{"kubectl.kubernetes.io/restartedAt": "'`date +%FT%T%z`'"}}}}}' -n $SM_CP_NS
 ----
 ====
 
