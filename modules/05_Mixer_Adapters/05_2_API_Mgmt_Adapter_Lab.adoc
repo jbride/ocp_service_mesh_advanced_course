@@ -11,7 +11,8 @@
 ** Apply _API Policies_ to network traffic within microservice application using Red Hat 3scale API Management _Mixer Adapter_
 
 .Pre-requisites
-** Completion of the _North South Traffic Lab_
+** Completion of the _North South Traffic Lab_ (module 1)
+** Completion of the _Secure mTLS Lab_ (module 2)
 
 :numbered:
 
@@ -22,7 +23,7 @@ This service mesh mixer adapter will allow Red Hat 3scale API Management policie
 
 image::images/3scale_mixer_adapter.png[]
 
-In the above diagram, [blue]#notice the replacement of an API Gateway with the service mesh 3scale Mixer Adapter#.
+In the above diagram, notice the replacement of an API Gateway with the service mesh 3scale Mixer Adapter.
 
 == Disable Existing API Production Gateway
 
@@ -43,111 +44,9 @@ $ oc login -u $ERDEMO_USER -p $OCP_PASSWD
 $ oc scale dc/prod-apicast --replicas=0 -n $GW_PROJECT
 -----
 
-== New Virtual Service to Incident Service
+== Virtual Service to Incident Service
 
-In this section of the lab, you will create a routing rule to invoke the backend incident service directly via the Istio _ingress_ gateway.
-
-Later, more complex routing rules will modify the flow to also apply API policies via the Red Hat 3scale API Management Istio Mixer adapter.
-
-. Define a gateway that allows inbound traffic from the _ingressgateway_ on port 80:
-+
------
-$ echo \
-    "apiVersion: networking.istio.io/v1alpha3
-kind: Gateway
-metadata:
-  name: erd-wildcard-gateway-insecure
-spec:
-  selector:
-    istio: ingressgateway
-  servers:
-  - port:
-      number: 80
-      name: http
-      protocol: HTTP
-    hosts:
-    - \"istio-ingressgateway-$SM_CP_NS.apps.$SUBDOMAIN_BASE\"
-
----
-apiVersion: networking.istio.io/v1alpha3
-kind: VirtualService
-metadata:
-  name: incident-direct-vs
-spec:
-  hosts:
-  - \"*\"
-  gateways:
-  - erd-wildcard-gateway-insecure
-  http:
-  - match:
-    - uri:
-        prefix: /incidents
-    route:
-    - destination:
-        host: $ERDEMO_USER-incident-service
-        port:
-          number: 8080" \
- > $HOME/lab/incident-service-gw-vs.yml
------
-+
-Notice that a match is made for all context paths exposed by the incident service:  `/incidents`.
-
-. Create the gateway and virtual service in your Emergency Response Demo project :
-+
------
-oc create -f $HOME/lab/incident-service-gw-vs.yml -n $ERDEMO_NS
------
-
-. As the administrator of your service mesh control plane, check the routes registered with the istio-ingressgateway:
-+
------
-oc login -u $SM_CP_ADMIN -p $OCP_PASSWD
-
-oc project $SM_CP_NS && \
-         oc rsh `oc get pod | grep "istio-ingressgateway" | awk '{print $1}'` \
-         curl http://localhost:15000/config_dump \
-         > /tmp/config_dump \
-         && less /tmp/config_dump \
-         | jq ".configs | last | .dynamic_route_configs"
-
-oc login -u $ERDEMO_USER -p $OCP_PASSWD
------
-
-. From the terminal, conduct a smoke test to validate traffic to the incident service directly from the Istio ingress gateway.
-.. For the next few smoke tests, notice that the API _user_key_ is not being specified.
-It is not needed in these smoke tests because this inbound traffic is no longer flowing through your API gateway.
-Later in the lab, you'll re-introduce the use of the API _user_key_ .
-
-.. GET a listing of Emergency Response incidents:
-+
------
-$ curl -v -X GET -H "Content-Type: application/json" `echo "http://"$(oc get route istio-ingressgateway -n $SM_CP_NS -o template --template {{.spec.host}})""`/incidents/ | jq .
-
-...
-
-< HTTP/1.1 200 OK
-
-... 
-
-  {
-    "id": "31c8170e-81be-43b0-8bf5-c1023d9f54e5",
-    "lat": "34.22222",
-    "lon": "-77.88435",
-    "numberOfPeople": 5,
-    "medicalNeeded": true,
-    "victimName": "Hudson James",
-    "victimPhoneNumber": "(984) 555-8130",
-    "timestamp": 1574204506538,
-    "status": "PICKEDUP"
-  }
------
-+
-The reponse status back should be an HTTP 201 .
-
-
-[blue]#You have successully routed traffic through the _istio-ingressgateway_ directly to your backend business service#.
-Next step is to inject the _3scale Istio Mixer_ into this request path and subsequently begin to apply API Management policies.
-
+In the lab of module 2, you created a wildcard _Gateway_ as well as a _VirtualService_ to route inbound traffic to the Incident Service through the Service Mesh _ingress gateway_. If you have not yet done so, please refer to the lab of module 2 and finish the lab exercise before continuing with this lab.
 
 == 3scale Istio Mixer Adapter
 
@@ -161,33 +60,25 @@ General information about Istio's plug-in architecture to apply policies and cap
 image::images/mixer_architecture.png[]
 
 === Ensure Policy Checks are not disabled
-Red Hat Service Mesh allows for disablement of policy evaluation through the _mixer_ component of your service mesh control plane.
 
-In order for API Management policies to be applied to service mesh traffic, policy evaluation in _mixer_ needs to be enabled.
-The setting for this behavior is in the _istio_ configmap found in the namespace of your service mesh control plane.
-This configmap is read by the Envoy proxy upon start-up of a service mesh enabled pod.
+Red Hat Service Mesh allows for enablement or disablement of policy evaluation through the _mixer_ component of your service mesh control plane.
 
-You can view state of this setting that disables service mesh policies as follows:
+In order for API Management policies to be applied to service mesh traffic, policy evaluation in _mixer_ needs to be enabled. 
 
-. Switch to the owner of your service mesh control plane:
+. By default, policy checks are disabled in the Service Mesh. To enable policy checks, use the _oc_ client to edit the ServiceMeshControlPlane resource in the control plane namespace:
 +
------
-oc login -u $SM_CP_ADMIN -p $OCP_PASSWD
------
+----
+$ oc edit servicemeshcontrolplane full-install -n $SM_CP_NS
+----
 +
-NOTE: The remaining tasks in this lab need to be executed by the administrator of your service mesh control plane.
-
-. View the value of the _disablePolicyChecks_ variable:
+Check the value of the `disablePolicyChecks` in the `global` section. Make sure the value is set to `false`: 
 +
------
-oc describe cm istio -n $SM_CP_NS | grep disablePolicyChecks
-
-disablePolicyChecks: false
------
-
-.. The value of this variable is true, then you will need to manually edit this configmap.
-.. You can do so as the $SM_CP_ADMIN user either at the command line (ie:  oc edit .... ) or via the OpenShift web console.
-.. The change to this configmap will take affect without having to restart any pods in your service mesh control plane or your Emergency Response application.
+----
+    global:
+      disablePolicyChecks: false
+----
++
+Save the modified resource.
 
 === 3scale Istio Adapter components
 
@@ -315,16 +206,20 @@ Much of these files consist of the adapter's configuration link:https://develope
 .. Adapters:
 +
 -----
-oc get adapters.config.istio.io -n $SM_CP_NS
-
+$ oc get adapters.config.istio.io -n $SM_CP_NS
+-----
++
+-----
 threescale   3h26m
 -----
 
 .. Template:
 +
 -----
-oc get templates.config.istio.io -n $SM_CP_NS
-
+$ oc get templates.config.istio.io -n $SM_CP_NS
+-----
++
+-----
 threescale-authorization   3h26m
 -----
 
@@ -349,7 +244,7 @@ From this previous lab, you should have set the following environment variables:
 Execute:
 +
 -----
-git clone \
+$ git clone \
       --branch v1.0.0 \
       https://github.com/3scale/istio-integration \
       $HOME/lab/istio-integration
@@ -358,27 +253,27 @@ git clone \
 . Review the `threescale-adapter-config.yaml` file :
 +
 -----
-less $HOME/lab/istio-integration/istio/threescale-adapter-config.yaml | more
+$ less $HOME/lab/istio-integration/istio/threescale-adapter-config.yaml | more
 -----
 
 . Modify the `threescale-adapter-config.yaml` file with the ID of your incident API service:
 +
 -----
-sed -i "s/service_id: .*/service_id: \"$INCIDENT_SERVICE_ID\"/" \
+$ sed -i "s/service_id: .*/service_id: \"$INCIDENT_SERVICE_ID\"/" \
       $HOME/lab/istio-integration/istio/threescale-adapter-config.yaml
 -----
 
 . Modify the `threescale-adapter-config.yaml` file with the URL to your Red Hat 3scale API Management manager tenant:
 +
 -----
-sed -i "s/system_url: .*/system_url: \"https:\/\/$SYSTEM_PROVIDER_URL\"/" \
+$ sed -i "s/system_url: .*/system_url: \"https:\/\/$SYSTEM_PROVIDER_URL\"/" \
       $HOME/lab/istio-integration/istio/threescale-adapter-config.yaml
 -----
 
 . Modify the `threescale-adapter-config.yaml` file with the administrative access token of your Red Hat 3scale API Management manager administration account:
 +
 -----
-sed -i "s/access_token: .*/access_token: \"$API_ADMIN_ACCESS_TOKEN\"/" \
+$ sed -i "s/access_token: .*/access_token: \"$API_ADMIN_ACCESS_TOKEN\"/" \
       $HOME/lab/istio-integration/istio/threescale-adapter-config.yaml
 -----
 
@@ -392,10 +287,10 @@ match: destination.labels["service-mesh.3scale.net"] == "true"
 +
 This rule specifies that API Management policies should be applied to the request when the target Deployment includes a label of:  `service-mesh.3scale.net`.
 
-.. Update the `threescale-adapter-config.yaml` file with a modified rule that specifies that API Management policies should be applied when the target is the _incident-service_:
+.. Update the `threescale-adapter-config.yaml` file with a modified rule that specifies that API Management policies should be applied when the target is the Incident Service:
 +
 -----
-sed -i "s/match: .*/match: destination.service.name == \"$ERDEMO_USER-incident-service\"/" \
+$ sed -i "s/match: .*/match: destination.service.name == \"$ERDEMO_USER-incident-service\"/" \
       $HOME/lab/istio-integration/istio/threescale-adapter-config.yaml
 -----
 
@@ -403,35 +298,41 @@ sed -i "s/match: .*/match: destination.service.name == \"$ERDEMO_USER-incident-s
 
 . Load the Red Hat 3scale API Management Istio Handler configurations:
 +
------
-oc create -f $HOME/lab/istio-integration/istio/threescale-adapter-config.yaml -n $SM_CP_NS
-
-...
-
+----
+$ oc create -f $HOME/lab/istio-integration/istio/threescale-adapter-config.yaml -n $SM_CP_NS
+----
++
+----
 handler.config.istio.io/threescale created
 instance.config.istio.io "threescale-authorization" created
 rule.config.istio.io "threescale" created
------
-
-.. If for whatever reason you want to delete these 3scale Istio mixer adapter configurations, execute the following:
+----
 +
+[NOTE]
+====
+If for whatever reason you want to delete these 3scale Istio mixer adapter configurations, execute the following:
+
 -----
-oc delete rule.config.istio.io threescale -n $SM_CP_NS
-oc delete instance.config.istio.io threescale-authorization -n $SM_CP_NS
-oc delete handler.config.istio.io threescale -n $SM_CP_NS
+$ oc delete rule.config.istio.io threescale -n $SM_CP_NS
+$ oc delete instance.config.istio.io threescale-authorization -n $SM_CP_NS
+$ oc delete handler.config.istio.io threescale -n $SM_CP_NS
 -----
+====
 
 . Verify that the Istio Handler configurations were created in the service mesh control plane namespace:
 +
 -----
-oc get handler threescale -n $SM_CP_NS -o yaml
-
+$ oc get handler threescale -n $SM_CP_NS -o yaml
+-----
++
+.Output
+-----
 apiVersion: v1
 items:
 - apiVersion: config.istio.io/v1alpha2
   kind: handler
 
-  ....
+  [...]
 
   spec:
     adapter: threescale
@@ -463,7 +364,7 @@ image::images/edit_apicast.png[]
 . Change the value of the _Production Base URL_ to the value of the following:
 +
 -----
-$ echo -en "\nhttp://`oc get route istio-ingressgateway -n $SM_CP_NS -o template --template {{.spec.host}}:80`\n\n"
+$ echo -en "\nhttps://`oc get route incident-service-gateway -n $SM_CP_NS -o template --template {{.spec.host}}:443`\n\n"
 -----
 +
 image::images/istioingress_public_url.png[]
@@ -486,13 +387,16 @@ image::images/promote.png[]
 . From the terminal, execute the following to invoke your incident service directly via the Istio ingress:
 +
 -----
-curl -v \
-       `echo "http://"$(oc get route istio-ingressgateway -n $SM_CP_NS -o template --template {{.spec.host}})"/incidents"`
-
-...
+$ curl -v -k \
+       `echo "https://"$(oc get route incident-service-gateway -n $SM_CP_NS -o template --template {{.spec.host}})"/incidents"`
+-----
++
+.Sample Output
+-----
+[...]
 
 < HTTP/1.1 403 Forbidden
-...
+[...]
 
 * Connection #0 to host istio-ingressgateway-istio-system.apps.clientvm.b902.rhte.opentlc.com left intact
 
@@ -507,10 +411,13 @@ In the above request however, the API _user_key_ associated with your incident s
 .. View the log file of the 3scale adapter:
 +
 -----
-oc logs -f `oc get pod -n $SM_CP_NS | grep "3scale-istio-adapter" | awk '{print $1}'` \
+$ oc logs -f `oc get pod -n $SM_CP_NS | grep "3scale-istio-adapter" | awk '{print $1}'` \
           -n $SM_CP_NS \
           -c 3scale-istio-adapter
-
+-----
++
+.Sample Output
+-----
 
 "Got instance &InstanceMsg{Subject:&SubjectMsg{User:,Groups:,Properties:map[string]*istio_policy_v1beta11.Value{app_id: &Value{Value:&Value_StringValue{StringValue:,},},app_key: &Value{Value:&Value_StringValue{StringValue:,},},},},Action:&ActionMsg{Namespace:,Service:,Method:GET,Path:/products,Properties:map[string]*istio_policy_v1beta11.Value{},},Name:threescale-authorization.instance.istio-system,}"
 
@@ -520,11 +427,11 @@ oc logs -f `oc get pod -n $SM_CP_NS | grep "3scale-istio-adapter" | awk '{print 
 . Try again to invoke your incident-service using the incident-service _user_key_:
 +
 -----
-curl -v \
-       `echo "http://"$(oc get route istio-ingressgateway -n $SM_CP_NS -o template --template {{.spec.host}})"/incidents?user_key=$INCIDENT_SERVICE_API_KEY"`
+$ curl -v -k \
+       `echo "https://"$(oc get route incident-service-gateway -n $SM_CP_NS -o template --template {{.spec.host}})"/incidents?user_key=$INCIDENT_SERVICE_API_KEY"`
 -----
 
-[blue]#Congratulations! The incident-service is again being managed and secured by the Red Hat 3scale API Management manager.#
+Congratulations! The incident-service is again being managed and secured by the Red Hat 3scale API Management manager.
 This time however, the 3scale Istio Mixer adapter is being utilized rather than the API gateway.
 
 == Fine-tune 3scale Istio Mixer Adapter Rules
@@ -535,6 +442,16 @@ Your use case may require more fine-grained routing rules.
 In this last section of the lab, you specify that GET requests to the incident-service `/incidents` endpoint can bypass the 3scale Istio Mixer adapter and invoke the incident-service without API policies having been applied.
 Instead, all POST requests to the `/incidents` endpoint will continue to have API policies applied via the 3scale Istio Mixer adapter.
 
+[NOTE]
+====
+For this section of the lab to work as expected, you will need to delete the _ServiceRole_ and _ServiceRoleBinding_ resources created in the _Secure mTLS_ lab.
+
+----
+$ oc delete servicerole incident-service-ingress -n $ERDEMO_NS
+$ oc delete servicerolebinding incident-service-ingress -n $ERDEMO_NS
+----
+====
+
 === HTTP POST
 
 In the admin console of the 3scale tenant, you need to configure a _mapping rule_ for your _incident-service_ API service.
@@ -543,7 +460,7 @@ This mapping rule will allow for HTTP POST requests to the incident service (so 
 . Access your 3scale by Red Hat Admin Portal by pointing your browser to the output of the following:
 +
 -----
-echo -en "\n\nhttps://$(oc get routes -n $API_MANAGER_NS | grep admin | grep $ERDEMO_USER | awk '{print $2}')\n"
+$ echo -en "\n\nhttps://$(oc get routes -n $API_MANAGER_NS | grep admin | grep $ERDEMO_USER | awk '{print $2}')\n"
 -----
 
 . Authenticate using the following values:
@@ -569,7 +486,7 @@ image::images/promote.png[]
 . At the command line, modify the existing `usethreescale` rule in the $SM_CP_NS:
 +
 -----
-oc patch rule.config.istio.io threescale \
+$ oc patch rule.config.istio.io threescale \
        --type=json \
        --patch '[{"op": "add", "path": "/spec/match", "value":"destination.service.name == \"'$ERDEMO_USER'-incident-service\" && source.namespace != \"'$ERDEMO_NS'\" && request.method == \"POST\" && request.path.startsWith(\"/incidents\")"  }]' \
        -n $SM_CP_NS 
@@ -580,19 +497,21 @@ Only when all of the conditions are met, will the inbound traffic be routed to t
 +
 The conditions of the rule are as follows:
 
-.. The destination service needs to be your incident service.
+.. The destination service needs to be the Incident Service.
 .. The inbound request needs to originate from outside the $ERDEMO_NS (that is, from the istio-ingress of the $SM_CP_NS namespace).
 .. The HTTP verb is of type: `POST`.
 .. The target is the `/incidents/` endpoint.
 
 
-ifdef::showscript[]
-.. View the log file of the _istio-policy_ pod:
+. View the log file of the _istio-policy_ pod:
 +
 -----
-oc logs -f `oc get pod -n $SM_CP_NS | grep "istio-policy" | awk '{print $1}'` -c mixer -n $SM_CP_NS
-
-....
+$ oc logs -f `oc get pod -n $SM_CP_NS | grep "istio-policy" | awk '{print $1}'` -c mixer -n $SM_CP_NS
+-----
++
+.Sample Output
+-----
+[...]
 
 IntrospectionOptions: ctrlz.Options{Port:0x2694, Address:"127.0.0.1"}
 warn    Neither --kubeconfig nor --master was specified.  Using the inClusterConfig.  This might not work.
@@ -611,16 +530,14 @@ info    ControlZ available at 172.17.0.10:9876
 -----
 +
 In particular, notice that the new policies were put into effect with no error messages logged.
-endif::showscript[]
-
 
 
 === Test
 . Try again to invoke your incidents-service *without* the incident service _user_key_:
 +
 -----
-curl -v \
-       `echo "http://"$(oc get route istio-ingressgateway -n $SM_CP_NS -o template --template {{.spec.host}})"/incidents"`
+$ curl -v -k \
+       `echo "https://"$(oc get route incident-service-gateway -n $SM_CP_NS -o template --template {{.spec.host}})"/incidents"`
 -----
 +
 This request should have now been routed directly to your backend incident-service.
@@ -630,10 +547,10 @@ Subsequently, the API _user_key_ is not needed.
 . Try to POST a new incident service *without* the incident service _user_key_:
 +
 -----
-curl -v \
+$ curl -v -k \
        -X POST \
        -H "Content-Type: application/json" \
-       `echo "http://"$(oc get route istio-ingressgateway -n $SM_CP_NS -o template --template {{.spec.host}})"/incidents"` \
+       `echo "https://"$(oc get route incident-service-gateway -n $SM_CP_NS -o template --template {{.spec.host}})"/incidents"` \
        -d '{
   "lat": "34.14338",
   "lon": "-77.86569",
@@ -651,10 +568,10 @@ Subsequently, because the API _user_key_ was not applied, the response should be
 . Try again using an HTTP POST to create a new incident and using _user_key_:
 +
 -----
-curl -v \
+$ curl -v -k \
        -X POST \
        -H "Content-Type: application/json" \
-       `echo "http://"$(oc get route istio-ingressgateway -n $SM_CP_NS -o template --template {{.spec.host}})"/incidents?user_key=$INCIDENT_SERVICE_API_KEY"` \
+       `echo "https://"$(oc get route incident-service-gateway -n $SM_CP_NS -o template --template {{.spec.host}})"/incidents?user_key=$INCIDENT_SERVICE_API_KEY"` \
        -d '{
   "lat": "34.14338",
   "lon": "-77.86569",
@@ -676,51 +593,7 @@ As an additional exercise, configure the service mesh such that API Policies are
 
 Which configurations need to be modified or added?
 
-ifdef::showscript[]
-== Questions
 
-. Which of the following libraries is embedded in the community API gateway to support distributed tracing?
-+
------
-a) ngx_http_opentracing_module.so
-b) libjaegertracing.so.0
-c) libzipkintracing.so.0
-d) A and B
------
-
-. What is the name of the CustomResourceDefinition introduced by Istio's v1alpha3 routing API that allows for configuration of an egress route?
-+
------
-a) EgressRule
-b) DestinationRule
-c) ServiceEntry
-d) EgressRoute
------
-
-. The Jaeger Java client library provides which of the following features?
-+
------
-a) Propogation of traces to the jaeger-agent via UDP on port 6831
-b) Propogation of traces to the jaeger-collector via TCP by specifying the environment variable: JAEGER_ENDPOINT
-c) Setting of the trace sampler type via the environment variable: JAEGER_SAMPLER_TYPE
-d) All of the above
------
-
-. Which of the following are features of the Red Hat 3scale API Management product that are not found in Istio?
-+
------
-a) Developer portal
-b) Rate limiting
-c) Billing
-d) A and C
------
-
-
-1)  answer D
-2)  answer C
-3)  answer D
-4)  answer D
-endif::showscript[]
 
 ifdef::showscript[]
 
@@ -734,19 +607,6 @@ In this lab we covered the following topics:
 * End-to-end distributed tracing of an MSA application using the Jaeger implementation of the _OpenTracing_ specification
 * Review of the analytics dashboard provided by Red Hat 3scale API Management
 * Introduction to the Red Hat 3scale API Management Mixer Adapter
-
-
-
------
-"{" +
-                "\"lat\": \"34.14338\"," +
-                "\"lon\": \"-77.86569\"," +
-                "\"numberOfPeople\": 3," +
-                "\"medicalNeeded\": true," +
-                "\"victimName\": \"victim\"," +
-                "\"victimPhoneNumber\": \"111-111-111\"" +
-                "}";
------
 
 endif::showscript[]
 
