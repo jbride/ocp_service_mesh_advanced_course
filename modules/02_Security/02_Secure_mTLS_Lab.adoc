@@ -940,7 +940,7 @@ spec:
 $ oc create -f disaster-simulator-mtls-destinationrule.yml -n $ERDEMO_NS
 ----
 
-. _VirtualService_ for the Responder Service:
+. _VirtualService_ for the Disaster Simulator Service:
 +
 ----
 $ echo "---
@@ -1175,7 +1175,7 @@ The process service is not exposed outside of the cluster, so there is no need f
 . Replace the health checks in the Process Service DeploymentConfig to use a command based health check with curl rather than a HTTP based health check. You can skip this step if you enabled HTTP probe rewriting in the Service Mesh.
 +
 ----
-$ oc edit dc process-service -o yaml -n $ERDEMO_NS
+$ oc edit dc $ERDEMO_USER-process-service -o yaml -n $ERDEMO_NS
 ----
 +
 Replace the existing liveness and readiness probes with command based probes:
@@ -1260,7 +1260,7 @@ $ oc create -f process-service-mtls-destinationrule.yml -n $ERDEMO_NS
 . Replace the health checks in the Mission Service DeploymentConfig to use a command based health check with curl rather than a HTTP based health check. You can skip this step if you enabled HTTP probe rewriting in the Service Mesh.
 +
 ----
-$ oc edit dc mission-service -o yaml -n $ERDEMO_NS
+$ oc edit dc $ERDEMO_USER-mission-service -o yaml -n $ERDEMO_NS
 ----
 +
 Replace the existing liveness and readiness probes with command based probes:
@@ -1416,7 +1416,7 @@ $ curl -v -k https://mission-service.$ERDEMO_USER.apps.$SUBDOMAIN_BASE/api/missi
 . Replace the health checks in the Responder Simulator DeploymentConfig to use a command based health check with curl rather than a HTTP based health check. You can skip this step if you enabled HTTP probe rewriting in the Service Mesh.
 +
 ----
-$ oc edit dc responder-simulator -o yaml -n $ERDEMO_NS
+$ oc edit dc $ERDEMO_USER-responder-simulator -o yaml -n $ERDEMO_NS
 ----
 +
 Replace the existing liveness and readiness probes with command based probes:
