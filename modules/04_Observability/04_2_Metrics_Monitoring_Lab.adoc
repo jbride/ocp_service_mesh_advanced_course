@@ -346,8 +346,7 @@ spec:
 * Note that both deployments are bound to the same service. The _Selector_ of the service matches the labels `app=$ERDEMO_USER-incident-service` and `group=erd-services`:
 +
 ----
-$ oc get service $ERDEMO_USER-incident-service -o custom-columns=NAME:.metadata.name,SELECTOR:.spec.se
-lector
+$ oc get service $ERDEMO_USER-incident-service -o custom-columns=NAME:.metadata.name,SELECTOR:.spec.selector -n $ERDEMO_NS
 ----
 +
 .Sample Output
