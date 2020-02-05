@@ -19,7 +19,7 @@ One of the core features of the Red Hat Service Mesh is the observability of net
 
 The Mixer component of the Control Plane is responsible for telemetry collection (In fact, Mixer is two different deployments in Openshift. One is called _istio-policy_, the other is called _istio-telemetry_. The _istio-policy_ component is responsible for providing policy controls, _istio-telemetry_ handles metric collection).
 
-The Envoy sidecars from the application pods call _istio-policy_ before each request to perform precondition policy checks, and after each request they call _istio-policy_ to report telemetry. Note that the sidecar has local caching such that a large percentage of precondition checks can be performed from cache. Additionally, the sidecar buffers outgoing telemetry such that it only calls Mixer infrequently.
+The Envoy sidecars from the application pods call _istio-policy_ before each request to perform precondition policy checks, and after each request they call _istio-telemetry_ to report telemetry. Note that the sidecar has local caching such that a large percentage of precondition checks can be performed from cache. Additionally, the sidecar buffers outgoing telemetry such that it only calls Mixer infrequently.
 
 Mixer comes standard with a mixer adapter for Prometheus, allowing a Prometheus instance to scrape metrics from Mixer.
 
@@ -358,7 +358,7 @@ user50-incident-service   map[app:user50-incident-service group:erd-services]
 . Verify that the Incident Service service has two endpoints:
 +
 ----
-$ oc describe service $ERDEMO_USER-incident-service | grep Endpoints
+$ oc describe service $ERDEMO_USER-incident-service -n $ERDEMO_NS | grep Endpoints
 ----
 +
 .Sample output
@@ -667,7 +667,7 @@ spec:
           fixedDelay: 2s
           percentage:
             value: 30 
-" | oc apply -f - $ERDEMO_NS
+" | oc apply -f - -n $ERDEMO_NS
 ----
 +
 * In this case a delay of 2 seconds will be injected in 30% of the requests to the Incident Service.
