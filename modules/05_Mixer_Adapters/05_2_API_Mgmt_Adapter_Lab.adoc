@@ -88,7 +88,7 @@ In this section of the lab, you enable it.
 . Update the _ServiceMeshControlPlane_ resource with the _threeScale_ component:
 +
 -----
-oc patch smcp/full-install -n $SM_CP_NS --type=json -p \
+$ oc patch smcp/full-install -n $SM_CP_NS --type=json -p \
 '[
     {
         "op": "replace",
@@ -182,7 +182,7 @@ Monitor the pods of your service mesh control plane to view the new _3scale-isti
 . Review 3scale Istio Adapter components in your service mesh control plane namespace:
 +
 -----
-oc get all -l app=3scale-istio-adapter -n $SM_CP_NS
+$ oc get all -l app=3scale-istio-adapter -n $SM_CP_NS
 -----
 
 .. The response should list the _3scale-istio-adapter_ related deployment, replicaset and pod.
@@ -350,7 +350,7 @@ items:
 . Point your browser to the Admin Console of your 3scale tenant which is available at the following URL:
 +
 -----
-echo -en "\n\nhttps://$(oc get routes -n $API_MANAGER_NS | grep admin | grep $ERDEMO_USER | awk '{print $2}')\n"
+$ echo -en "\n\nhttps://$(oc get routes -n $API_MANAGER_NS | grep admin | grep $ERDEMO_USER | awk '{print $2}')\n"
 -----
 
 . Authenticate using the values of the following environment variables:
@@ -384,7 +384,7 @@ image::images/promote.png[]
 
 == Smoke Test 3scale Istio Mixer Adapter
 
-. From the terminal, execute the following to invoke your incident service directly via the Istio ingress:
+. From the terminal, execute the following _curl_ command to invoke your incident service directly via the Istio ingress:
 +
 -----
 $ curl -v -k \
@@ -402,13 +402,13 @@ $ curl -v -k \
 
 PERMISSION_DENIED:threescalehandler.handler.istio-system:no auth credentials provided or provided in invalid location
 -----
-
-.. Notice a 403 error response of `PERMISSION_DENIED:threescalehandler.handler.istio-system:`. This is to be expected.
+* Notice a 403 error response of `PERMISSION_DENIED:threescalehandler.handler.istio-system:`. This is to be expected.
 +
 Inbound requests through the Istio ingress are now correctly flowing through the mixer to the 3scale adapter.
 +
 In the above request however, the API _user_key_ associated with your incident service _application_ has been omitted.
-.. View the log file of the 3scale adapter:
+
+* View the log file of the 3scale adapter:
 +
 -----
 $ oc logs -f `oc get pod -n $SM_CP_NS | grep "3scale-istio-adapter" | awk '{print $1}'` \
