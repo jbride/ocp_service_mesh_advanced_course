@@ -317,7 +317,7 @@ oc edit dc $ERDEMO_USER-incident-service -o yaml -n $ERDEMO_NS
 In the `.spec.template.metadata` section, add the annotation:
 +
 ----
-[...]]
+[...]
   template:
     metadata:
       annotations:
