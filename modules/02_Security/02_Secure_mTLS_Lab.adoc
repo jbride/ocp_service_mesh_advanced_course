@@ -219,7 +219,7 @@ In this lab we will use a self-signed certificate.
 * Create a configuration file for openSSL:
 +
 ----
-$ cat <<EOF | tee ./cert.cfg
+$ echo "
 [ req ]
 req_extensions     = req_ext
 distinguished_name = req_distinguished_name
@@ -234,7 +234,7 @@ subjectAltName   = @alt_names
 [alt_names]
 DNS.1  = $ERDEMO_USER.apps.$SUBDOMAIN_BASE
 DNS.2  = *.$ERDEMO_USER.apps.$SUBDOMAIN_BASE
-EOF
+" > cert.cfg
 ----
 * Create a self-signed certificate and private key:
 +
