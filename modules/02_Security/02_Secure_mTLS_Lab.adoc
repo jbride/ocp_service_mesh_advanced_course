@@ -14,6 +14,8 @@
 .Goals
 * Enable transport security (mTLS) for inter-service communication in Emergency Response Demo app
 * Set authorization policies for inter-service communication in Emergency Response Demo
+* Configure Service Mesh Origin authentication
+* Configure Citadel to use certificates issued by an external CA. 
 
 :numbered:
 
@@ -2519,3 +2521,361 @@ Before continuing with the remainder of the labs, delete the end-user authentica
 ----
 $ oc delete policy ingressgateway-origin -n $SM_CP_NS
 ----
+
+== Citadel with External CA Certificates and Keys
+
+By default, Citadel uses self-signed certificates for mTLS transport security. Citadel can also be configured to use a certificate and key from an external Certificate Authority (CA). In this lab you will create your own CA, and configure Citadel to use intermediate certificates issued and signed by the external CA.
+
+. Create a CA root certificate and key.
+.. Set the following environment variables:
++
+----
+$ export ROOTCA_ORG=Istio
+$ export ROOTCA_CN="Root CA"
+$ export ROOTCA_DAYS=3650
+----
+.. Create an _openssl_ configuration file:
++
+----
+$ echo "
+[ req ]
+encrypt_key = no
+prompt = no
+utf8 = yes
+default_md = sha256
+default_bits = 4096
+req_extensions = req_ext
+x509_extensions = req_ext
+distinguished_name = req_dn
+[ req_ext ]
+subjectKeyIdentifier = hash
+basicConstraints = critical, CA:true
+keyUsage = critical, digitalSignature, nonRepudiation, keyEncipherment, keyCertSign
+[ req_dn ]
+O = ${ROOTCA_ORG}
+CN = ${ROOTCA_CN}
+" > root-ca.conf
+----
+.. Generate a private key for the root CA:
++ 
+----
+$ openssl genrsa -out root-ca.key 4096
+----
++
+.Sample Output
+----
+Generating RSA private key, 4096 bit long modulus (2 primes)
+...................................................................................................................
+...................................................................................................................
+.....++++
+............++++
+e is 65537 (0x010001)
+----
+.. Create a certificate signing request for the root CA:
++
+----
+$ openssl req -new -key root-ca.key -config root-ca.conf -out root-ca.csr
+----
+.. Generate the root CA certificate:
++
+----
+$ openssl x509 -req -days ${ROOTCA_DAYS} -signkey root-ca.key -extensions req_ext -extfile root-ca.conf -in root-ca.csr -out root-ca.crt
+----
+
+. Create an intermediate certificate for Citadel.
+.. Create a directory for the certificate, and set the following environment variables:
++
+----
+$ mkdir $SM_CP_ADMIN
+$ export CITADEL_ORG=Istio
+$ export CITADEL_CN="Intermediate CA"
+$ export CITADEL_DAYS=365
+$ export CITADEL_SERIAL=$RANDOM
+----
+.. Create an _openssl_ configuration file for the intermediate certificate:
++
+----
+echo "
+[ req ]
+encrypt_key = no
+prompt = no
+utf8 = yes
+default_md = sha256
+default_bits = 4096
+req_extensions = req_ext
+x509_extensions = req_ext
+distinguished_name = req_dn
+[ req_ext ]
+subjectKeyIdentifier = hash
+basicConstraints = critical, CA:true, pathlen:0
+keyUsage = critical, digitalSignature, nonRepudiation, keyEncipherment, keyCertSign
+subjectAltName=@san
+[ san ]
+URI.1 = spiffe://cluster.local/ns/${SM_CP_NS}/sa/citadel
+DNS.1 = localhost
+[ req_dn ]
+O = ${CITADEL_ORG}
+CN = ${CITADEL_CN}
+L = cluster.local
+" > $SM_CP_ADMIN/intermediate.conf
+----
+.. Generate a private key for the intermediate certificate:
++
+----
+$ openssl genrsa -out $SM_CP_ADMIN/citadel-ca.key 4096
+----
+.. Generate a certificate signing request for the intermediate certificate:
++
+----
+$ openssl req -new -config $SM_CP_ADMIN/intermediate.conf -key $SM_CP_ADMIN/citadel-ca.key -out $SM_CP_ADMIN/citadel-ca.csr
+----
+.. Generate the intermediate certificate:
++
+----
+$ openssl x509 -req -days $CITADEL_DAYS -CA root-ca.crt -CAkey root-ca.key -set_serial $CITADEL_SERIAL -extensions req_ext -extfile $SM_CP_ADMIN/intermediate.conf -in $SM_CP_ADMIN/citadel-ca.csr -out $SM_CP_ADMIN/citadel-ca.crt
+----
+.. Create a certificate chain containing the intermediate certificate and the root certificate:
++
+----
+$ cat $SM_CP_ADMIN/citadel-ca.crt root-ca.crt > $SM_CP_ADMIN/citadel-ca-chain.crt
+----
+
+. Create a secret for the CA certificates in the Service Mesh control plane. The secret must be named `cacerts`. The secret contains the intermediate certificate and key, the root certificate and the certificate chain. Note the specific names used for the certificates and keys within the secret:
++
+----
+$ oc create secret generic cacerts -n $SM_CP_NS --from-file=ca-cert.pem=$SM_CP_ADMIN/citadel-ca.crt --from-file=ca-key.pem=$SM_CP_ADMIN/citadel-ca.key --from-file=root-cert.pem=root-ca.crt --from-file=cert-chain.pem=$SM_CP_ADMIN/citadel-ca-chain.crt
+----
+. Configure Citadel to use the CA certificates rather than self-signed certificates. This is done by setting the `.spec.istio.security.selfSigned` element in the _ServiceMeshControlPlane_ CR to `false`:
++
+----
+$ oc edit servicemeshcontrolplane full-install -n $SM_CP_NS
+----
++
+Add the `.spec.istio.security.selfSigned` element to the CR:
++
+----
+apiVersion: maistra.io/v1
+kind: ServiceMeshControlPlane
+metadata:
+  [...]
+spec:
+  istio:
+    [...]
+    pilot:
+      autoscaleEnabled: false
+      traceSampling: 100
+    security:
+      selfSigned: false
+    tracing:
+      enabled: true
+  threeScale:
+    enabled: false
+----
++
+Save the CR.
+
+. As a result of the modification of the ServiceMeshControlPlane, the Citadel pod in the control plane is redeployed. The `cacerts` secret is mounted in the Citadel pod. Verify that the Citadel deployment now includes the `cacerts` secret and references the CA certificates and key in the startup arguments of the pod:
++
+----
+$ oc get deployment istio-citadel -o yaml -n $SM_CP_NS
+----
++
+.Output
+----
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  [...]
+spec:
+  [...]
+  template:
+    metadata:
+      [...]
+    spec:
+      [...]
+      containers:
+        - [...]
+          volumeMounts:
+            - name: cacerts
+              readOnly: true
+              mountPath: /etc/cacerts
+          [...]
+          args:
+            - '--append-dns-names=true'
+            - '--grpc-port=8060'
+            - '--grpc-hostname=citadel'
+            - '--citadel-storage-namespace=admin1-istio-system'
+            - >-
+              --custom-dns-names=istio-pilot-service-account.admin1-istio-system:istio-pilot.admin1-istio-system
+            - '--monitoring-port=15014'
+            - '--self-signed-ca=false'
+            - '--signing-cert=/etc/cacerts/ca-cert.pem'
+            - '--signing-key=/etc/cacerts/ca-key.pem'
+            - '--root-cert=/etc/cacerts/root-cert.pem'
+            - '--cert-chain=/etc/cacerts/cert-chain.pem'
+            - '--member-roll-name=default'
+      [...]
+      volumes:
+        - name: cacerts
+          secret:
+            secretName: cacerts
+            defaultMode: 420
+            optional: true
+      [...]
+----
+
+. Delete all the secrets created by Citadel in the Service Mesh data plane. This will force Citadel to recreate the secrets, but this time using the external CA certificates:
++
+----
+$ oc get secret -n $ERDEMO_NS | grep "istio." | awk '{print $1}' | xargs -I istio-secret oc delete secret istio-secret -n $ERDEMO_NS
+----
++
+.Output
+----
+secret "istio.builder" deleted
+secret "istio.default" deleted
+secret "istio.deployer" deleted
+secret "istio.disaster-simulator-service" deleted
+secret "istio.emergency-console" deleted
+secret "istio.incident-priority-service" deleted
+secret "istio.incident-service" deleted
+secret "istio.kafka-cluster-entity-operator" deleted
+secret "istio.kafka-cluster-kafka" deleted
+secret "istio.kafka-cluster-zookeeper" deleted
+secret "istio.mission-service" deleted
+secret "istio.postgresql" deleted
+secret "istio.process-service" deleted
+secret "istio.process-viewer" deleted
+secret "istio.responder-client-app" deleted
+secret "istio.responder-service" deleted
+secret "istio.responder-simulator-service" deleted
+----
+
+. Visualize the contents of the certificate chain in `istio.incident-service` secret. Note that the certificate chain contains three certificates.
++
+----
+$ oc get secret istio.incident-service -o jsonpath={.data.cert-chain\\.pem} -n $ERDEMO_NS | base64 --decode
+----
++
+.Sample Output
+----
+-----BEGIN CERTIFICATE-----
+MIIEdjCCAl6gAwIBAgIQG86HyV61A25wA4z6fmUceDANBgkqhkiG9w0BAQsFADBC
+MQ4wDAYDVQQKDAVJc3RpbzEYMBYGA1UEAwwPSW50ZXJtZWRpYXRlIENBMRYwFAYD
+VQQHDA1jbHVzdGVyLmxvY2FsMB4XDTIwMDIwOTA5NTU1NVoXDTIwMDUwOTA5NTU1
+NVowADCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAKHQKOTArOM+Am8f
+Pqmv5n73GHsnrfF3AYeBIGSTBTQ2UkaGk9iENFZSkiTM5XXhmdQID9eJ5Qm4irgy
+TefLYQRx+82lqTENg1DEzjL9tA4rUSAdfKyTFoF477XkN2uVTxwGxEKwF62ZmOvK
+pCVZHi+JHBmIqjrnnNXzR1nwjp3kduGsquwV5ZbSmjIArZ8co2VJyyCPmYkH1lri
+F5UQou5sNxIaq67ZePj9Zz14RjrSqxr4EayafLrtch9gVatRl5Fj9gCHV81S5p0H
+Q0m94slJZx+hyRjLhIUWcgkUjCDMa+wmSTjdZAeHBPK2rCE8ebQkb3qcXLOnt/c0
+s+Xi9MUCAwEAAaOBqTCBpjAOBgNVHQ8BAf8EBAMCBaAwHQYDVR0lBBYwFAYIKwYB
+BQUHAwEGCCsGAQUFBwMCMAwGA1UdEwEB/wQCMAAwHwYDVR0jBBgwFoAUd4Fzy4u4
+6BK1at1GyGKV6+g4zzAwRgYDVR0RBD8wPYY7c3BpZmZlOi8vY2x1c3Rlci5sb2Nh
+bC9ucy91c2VyMS1lci1kZW1vL3NhL2luY2lkZW50LXNlcnZpY2UwDQYJKoZIhvcN
+AQELBQADggIBABqrOsEcIB9kgbEsx0xEKAp8d/EQaExMruCk21VOk2JulGAt9cub
+boA8/GoT81wRGhtsZLn0HnP68S/wshrlehG4in9y2PspAyXF8/hq3xFBj7jwOQnf
+hFJfvjgcQI5IenThqJeLAy40qrg8NJL8yjSjo4yKY58E/0/4c8F9YpBdVsL189/p
+fkDHBFF9wvWixZUVMKLXjzCj7+uoKKZq17OeyLArrITO/PcUyVP88xI1nvKD+5Gv
+Ep10goeeZCk5V2GDjMO37s5Xzw01vQZ5eohg9EymWI0jcCblRjHxq8p1tsB7J9zM
+bEAuTCqetiaDxOMmX+LErWZfRLSh/S6N8Rha+YhtVQXU0DhvyT5thxwe62xrviDb
+3GWmOMf3xhW5PjIGqBMCCUXFKYT1IygwFzksrNZm7GwpKjejCT6r6h0/zWcJi+zU
+o7YdYC5lopcw7JKrswlK7O5tS2cVhq87YKp0eWzSqLFoorV9ywm/C8B1Mip8Uzyd
+7VnmZLtU0mx1vqD7Ji6yCxFX5uEbs5e2+GyJr4VKZ5P9mTWJeQjhnK8rMnsvJscd
+TogDY/LEMz1VjkfUbwCxmxGp30wQbb4fEvCbbiRn/JKvKVwRYzRhZxHA5au8GZAu
+rKndtwyvIVKOPWPZzMQUpipn5nE1pH/Tl7H0E4twdGB0CHoDqf1CW+Dm
+-----END CERTIFICATE-----
+-----BEGIN CERTIFICATE-----
+MIIFdzCCA1+gAwIBAgICNCIwDQYJKoZIhvcNAQELBQAwIjEOMAwGA1UECgwFSXN0
+aW8xEDAOBgNVBAMMB1Jvb3QgQ0EwHhcNMjAwMjA5MDkxMDE2WhcNMjEwMjA4MDkx
+MDE2WjBCMQ4wDAYDVQQKDAVJc3RpbzEYMBYGA1UEAwwPSW50ZXJtZWRpYXRlIENB
+MRYwFAYDVQQHDA1jbHVzdGVyLmxvY2FsMIICIjANBgkqhkiG9w0BAQEFAAOCAg8A
+MIICCgKCAgEA7X8da7kNMU3p/XEcVhgSoggBg8MkTvk2B3KF5ZvV5z2ibRkx47Kk
+F8Hm2ghfObERrXaWLdTooIWs/V24y9DKLqymqVTPzU9y5kei3QEK2EvV7QiXHIxF
+DxOxWn6LeH2XGAUCwoKe8cZcDd+GZFaG4PHgaA6SfIYIssDXAEaDHmeHSfVR1xs4
+RgEdJQu9EfOOgXONRMIN2DSElVyUF09TpQgZbBkh8+d+6R65nMBTZhO3t77xBtDF
+rMojoUM1m3KF8xdYZglm2wZ7FD81Jj68J34pKDmeMEb5I7qYJV/vMXNDSxah/4GS
+x6JQBx8tqh5qlI8XULCG5q5gY26/HLSuyoa3SOyMPJ2hiUJ+zu7cI2MhLdkYLsxp
+m7H0w7iqOE9rKxRtFl5b1pVCaFgktGc/kK30DyL+GE7fKRQ4CQiwmc1JULGHr9Bh
+CT9W44OB8YOenI95jAir1fPaE9/Skhd7daDogp1i0WTTZ7QYJFuyoPCL97qyYLnA
+NfzWiA8MQZ7LcVtFVCqEebzjHZwPxfWheu+DceZrd0DEWYISjfZWUpRyA87tvcVt
+kfnvv0QLEZEzZ6hjNYl98w8JdVYo8QqLbCDdovZcPHfwcVaFgOxTLCjoowA7KyKF
+v9phmH2mDZuVrMRPWsGYn3m/GoPIPYugpqLMpnm2ULxK2tp2LX7hWjUCAwEAAaOB
+ljCBkzAdBgNVHQ4EFgQUd4Fzy4u46BK1at1GyGKV6+g4zzAwEgYDVR0TAQH/BAgw
+BgEB/wIBADAOBgNVHQ8BAf8EBAMCAuQwTgYDVR0RBEcwRYY4c3BpZmZlOi8vY2x1
+c3Rlci5sb2NhbC9ucy9hZG1pbjEtaXN0aW8tc3lzdGVtL3NhL2NpdGFkZWyCCWxv
+Y2FsaG9zdDANBgkqhkiG9w0BAQsFAAOCAgEA37EZr5BZYCA0KcYd9d0bFzvgle5m
+Fjdvnl2HcBsJkXQm0mdOJBQDDbreaRJ+37EQVJYzsR4zRBAoICfy1kkkSH8xef5B
+qg6/pGMGDeDFpl7bVfhxniPlutgl2tr6XTYPQfzVCvcHuZa62fdOqW5EMx5ju1vh
+hLYTEIES4H/h6BoCgJEtDTthG1eraspCxg7anzIog5NYRMFvhArrwsCjrlTl4LMe
+CNaBR2UNiClVTtRvzcOjwCMzoIFzTCaHg9XnGyDRRtjSMyJU6m7V1wxePhbwjqt6
+/ObhCY1npsaoMQDtGIlqL798ud8oM2rd2BDVKlOnN30/C7f5V07mnl6tPtdjtcAj
+UYJJb3BARn1YKsc/Dl48Y9tKGgh5taOxfTLAFbBhV51fXwdP0rFEQk1pSUVxJjaz
+1TzDpM7sXVSRWySLnn7cbXZMMjl9jFDflaiOJw89us/YQro3QUNr5gUL28R7I7Ot
+20Owq0aBemtFwsVPELN/rC2PxInBtCbaX/xKCvxE/dYLRQltlILtXYA5UdBb8XP3
+lV7DZzYVeMLsNVpoBGanxAeu87xs0ixLU8jeNpsr8tFuOgrtGoaCP7q3HJ8neVb8
+PxyTK4ian1qJnOLEuPB99/paUd8xWkKcaBW3ZQqHbTSaHccbOHWQU0e/TLbbrO6q
+ZWhWOwjsLJXXhR4=
+-----END CERTIFICATE-----
+-----BEGIN CERTIFICATE-----
+MIIFFDCCAvygAwIBAgIUCh89enz4qJiAzNs6MwukFhuLOawwDQYJKoZIhvcNAQEL
+BQAwIjEOMAwGA1UECgwFSXN0aW8xEDAOBgNVBAMMB1Jvb3QgQ0EwHhcNMjAwMjA5
+MDc1NTAxWhcNMzAwMjA2MDc1NTAxWjAiMQ4wDAYDVQQKDAVJc3RpbzEQMA4GA1UE
+AwwHUm9vdCBDQTCCAiIwDQYJKoZIhvcNAQEBBQADggIPADCCAgoCggIBAOYZH5zb
+FLN4hYFcSFYmcTAin8xHmg9btBc8GL+G6CPwH8O/ove5T+q41pmhsKdYGunKXMQv
+sH1ZCJW2ugvVmHnV+62gmaD2HpdE/T6Do9BljRSWPyRwAuHanbCws421NkHTKFqz
+Mim1o5fpnZkKxxoYjRhvlt/4hdHuOExrZmoOMAARjBGZlpY4nuE9mY9HvQim0CuP
+0b+9A+oVoL2jK/QxKbUze+5HygFAI7SWsKajg1IM4P74/SJEt5ndYXyO1zDaObZe
+AEz2qqoNwNs+WfHWnSAVdiKabWGEdOt6FcgpnDMN6ru7qFcdtnTAobPjjS3irRnU
+5x6qxD0WidWsHaj+CTb44PTpOmkfusilkWyiDqeNmbI3ElGT+YMRqNuGpqf0Jd9K
+DsW7v6QS/FRTW7LHwUx/CKR0Lqzoa23fELbkdgOBngWoGRz09FcIHUcKxmVX+g2e
+6TH1mZi/QB968PVuuoBNogIW6HoMG1o1vDDqEZ/DfkqVOVy0jg5SWqG2npXxb+4h
+UwdSf1JmxR+0VCA4C6aTduKZo+Kn7u3aa/omjnidMoC1hQwl8UOskFde5ZiToOEz
+0tIiHFvXXUrqChdkMUM732ZQ33VjtjmbqTZb68kIqTRleH0JG58gKDgT7QNYPZJp
+FlgiBz/Z0YiyWExbXlw2DrnwBLTnQklx8fhdAgMBAAGjQjBAMB0GA1UdDgQWBBRw
+jOUwD4FkI8BkhgboB3PVCvYGkzAPBgNVHRMBAf8EBTADAQH/MA4GA1UdDwEB/wQE
+AwIC5DANBgkqhkiG9w0BAQsFAAOCAgEAi5su11TX4bYcTEPMZy1mqckTEZeDBEE4
+hFvlYBYeVztgvR9pzRlyawdKX0OtJ5hLJ4xjgyTXpKT2tsepas3AHQ+NfoKrUAQ/
+Qt9oqj4z+Q5I+sHXs2Jo6blyJwLh9mUUSEhim5oIPBOAjqcS3zpkpZ8zApwPB34P
+iiMYCzvJJOIOa2bgV600mvflDSKK2/nUxWmbzSKQcankxijhjmOJnDjS/9duZFrx
+A6II5P5uZQyUOJ3p84dGlXh06shzszFs1sg0Wq7fs61Pj7zKK6rOknDpTV3pKdHu
+fpSeORAf0Gv6HcdmgActbHHeBC3yV9EgoixqZSCV+KLZLZGab2DwTOSOOQZth3R2
+qCXSDvbM1UI/qGwR+zwM7tCxTsaOWVblf6Nyn3bifXgm3wbWrsdIKYYoYn9TFOzF
+NeC2G3KI/LyKrvryzm/YRiQFUgFvbXl0J9SyegBzhJJCu5eNZYteaKb8pN7ZsP5t
+s8LbXg87fIyR4rT8WLqCu5LbrWsxkdFOV2LPQOXZ4saD/PWpiin5hABg90zInf7e
+B5My/7w/QLJVLb9/oNYf6aCaunNJbfk0CKALGZatwppjcIyEF0ravVrfRajr7wgE
+U4Cj+LEL3RcJb/s2OGk6nDPEa2LbrpDx/T6/TOIY6PjK69bQRT7Ym3QVM20a/bOl
+zRPoVL83I3Q=
+-----END CERTIFICATE-----
+----
+. Copy the text output of the first certificate. In a browser window, navigate to https://www.sslshopper.com/certificate-decoder.html, and paste the certificate text into the text box:
++
+image::images/istio-citadel-ca-certificate.png[]
++
+* Note the issuer of the certificate, which corresponds to the intermediate and root CA.
+
+. The application services in the data plane need to be restarted to have the Envoy proxies mount the new secrets.
++
+----
+$ for dc in disaster-simulator emergency-console incident-priority-service incident-service mission-service process-service process-viewer responder-service responder-simulator
+do
+  oc rollout latest dc/$ERDEMO_USER-$dc -n $ERDEMO_NS 
+done
+----
++
+.Sample Output
+----
+deploymentconfig.apps.openshift.io/user1-disaster-simulator rolled out
+deploymentconfig.apps.openshift.io/user1-emergency-console rolled out
+deploymentconfig.apps.openshift.io/user1-incident-priority-service rolled out
+deploymentconfig.apps.openshift.io/user1-incident-service rolled out
+deploymentconfig.apps.openshift.io/user1-mission-service rolled out
+deploymentconfig.apps.openshift.io/user1-process-service rolled out
+deploymentconfig.apps.openshift.io/user1-process-viewer rolled out
+deploymentconfig.apps.openshift.io/user1-responder-service rolled out
+deploymentconfig.apps.openshift.io/user1-responder-simulator rolled out
+----
++
+If you injected the PostgreSQL pods with the Envoy proxy, make sure to restart these too.
+
+. Test the Emergency Response application to make sure the application is working as expected.
