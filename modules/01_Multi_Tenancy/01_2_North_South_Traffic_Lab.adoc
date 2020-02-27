@@ -145,9 +145,87 @@ $ source $HOME/.bashrc
 
 == Test
 
+. Verify that you can get a list of incidents using your user key.
++
 -----
-$ curl -v -X GET https://$(oc get route -n $API_MANAGER_NS | grep $ERDEMO_USER | grep prod | awk '{print $2}')/incidents?user_key=$INCIDENT_SERVICE_API_KEY
+$ curl -v https://$(oc get route -n $API_MANAGER_NS | grep $ERDEMO_USER | grep prod | awk '{print $2}')/incidents?user_key=$INCIDENT_SERVICE_API_KEY
 -----
++
+.Sample output
+-----
+*   Trying 18.213.15.135...
+* TCP_NODELAY set
+* Connected to user1-3scale-mt-api0-mt-prod-generic.apps.cluster-a991.a991.example.opentlc.com (18.213.15.135) port 443 (#0)
+* ALPN, offering h2
+* ALPN, offering http/1.1
+* Cipher selection: ALL:!EXPORT:!EXPORT40:!EXPORT56:!aNULL:!LOW:!RC4:@STRENGTH
+* successfully set certificate verify locations:
+*   CAfile: /etc/ssl/cert.pem
+  CApath: none
+* TLSv1.2 (OUT), TLS handshake, Client hello (1):
+* TLSv1.2 (IN), TLS handshake, Server hello (2):
+* TLSv1.2 (IN), TLS handshake, Certificate (11):
+* TLSv1.2 (IN), TLS handshake, Server key exchange (12):
+* TLSv1.2 (IN), TLS handshake, Server finished (14):
+* TLSv1.2 (OUT), TLS handshake, Client key exchange (16):
+* TLSv1.2 (OUT), TLS change cipher, Client hello (1):
+* TLSv1.2 (OUT), TLS handshake, Finished (20):
+* TLSv1.2 (IN), TLS change cipher, Client hello (1):
+* TLSv1.2 (IN), TLS handshake, Finished (20):
+* SSL connection using TLSv1.2 / ECDHE-RSA-AES128-GCM-SHA256
+* ALPN, server did not agree to a protocol
+* Server certificate:
+*  subject: CN=api.cluster-a991.a991.example.opentlc.com
+*  start date: Feb 26 19:41:59 2020 GMT
+*  expire date: May 26 19:41:59 2020 GMT
+*  subjectAltName: host "user1-3scale-mt-api0-mt-prod-generic.apps.cluster-a991.a991.example.opentlc.com" matched cert's "*.apps.cluster-a991.a991.example.opentlc.com"
+*  issuer: C=US; O=Let's Encrypt; CN=Let's Encrypt Authority X3
+*  SSL certificate verify ok.
+> GET /incidents?user_key=75f5539befcdbc2281cda4865ff6e92f HTTP/1.1
+> Host: user1-3scale-mt-api0-mt-prod-generic.apps.cluster-a991.a991.example.opentlc.com
+> User-Agent: curl/7.54.0
+> Accept: */*
+>
+< HTTP/1.1 200
+< Server: openresty
+< Date: Thu, 27 Feb 2020 17:19:27 GMT
+< Content-Type: application/json;charset=UTF-8
+< Transfer-Encoding: chunked
+< Set-Cookie: 189c4bf6c04f39ccf32de656e034b6ab=a9d96e5c07b1aa2ddbf64381a78dd170; path=/; HttpOnly; Secure
+< Cache-control: private
+<
+[{"id":"2a309c3e-5055-4133-95ef-d002eb3d8aea","lat":"34.22076","lon":"-77.85233","numberOfPeople":2,"medicalNeeded":true,"victimName":"Jacob Nelson","victimPhoneNumber":"(336) 555-6772","timestamp":1582823045447,"status":"RESCUED"},{"id":"38314372-20fb-4848-9d94-aa36d67daa8c","lat":"34.17201","lon":"-77.94345","numberOfPeople":5,"medicalNeeded":true,"victimName":"Sadie Butler","victimPhoneNumber":"(252) 555-6380","timestamp":1582823008949,"status":"RESCUED"},{"id":"dfed1977-ed9c-492e-adca-5548a80998a2","lat":"34.2273","lon":"-77.80078","numberOfPeople":4,"medicalNeeded":false,"victimName":"Henry Johnson","victimPhoneNumber":"(651) 555-8751","timestamp":1582823026442,"status":"RESCUED"},{"id":"5efdb5f8-d6f6-4e2a-b5ee-f62dd498a2dc","lat":"34.22182","lon":"-77.87534","numberOfPeople":8,"medicalNeeded":true,"victimName":"Madeline Kelly","victimPhoneNumber":"(252) 555-6330","timestamp":1582823046448,"status":"RESCUED"},{"id":"ef3f50fc-272f-418a-a98a-b67c4d61ec8c","lat":"34.08027","lon":"-77.88782","numberOfPeople":1,"medicalNeeded":false,"victimName":"Owen Tyrrell","victimPhoneNumber":"(984) 555-3310","timestamp":1582823012437,"status":"RESCUED"},{"id":"5014f1b4-2312-4ae7-a903-158b93eef060","lat":"34.18605","lon":"-77.94954","numberOfPeople":6,"medicalNeeded":false,"victimName":"Maya Russell","victimPhoneNumber":"(704)
+...
+-----
+
+* Make note of the follwing:
+
+** The lines referring to TLS and the use of server certificate. This confirms secure communication to the API.
+
+** The 200 status code for a successful request.
+
+** The JSON message body that is an array of incidents. Each incident describes the id, lat/long, number of people etc ...Note that if you haven't run the ER Demo before, the message body can be an empty array.
+
+. Now confirm that the service is truly secured. Attempt to access the service with an invalid user key.
++
+-----
+$ curl -v https://$(oc get route -n $API_MANAGER_NS | grep $ERDEMO_USER | grep prod | awk '{print $2}')/incidents?user_key=FAKEKEY
+-----
++
+.Sample output
+-----
+...
+< HTTP/1.1 403 Forbidden
+< Server: openresty
+< Date: Thu, 27 Feb 2020 17:14:12 GMT
+< Content-Type: text/plain; charset=us-ascii
+< Transfer-Encoding: chunked
+< Set-Cookie: 189c4bf6c04f39ccf32de656e034b6ab=a9d96e5c07b1aa2ddbf64381a78dd170; path=/; HttpOnly; Secure
+<
+...
+-----
+
+* Make note that status code is 403 Forbidden. When using an invalid user key, the user does not have access. Our API is secured.
 
 Congratulations! You have successfully secured _north / south_ traffic into your micro-service architected Emergency Response application using the API Gateways of Red Hat's 3scale API Manager product.
 
