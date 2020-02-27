@@ -429,7 +429,7 @@ $ oc login -u $ERDEMO_USER -p $OCP_PASSWD
 * List the _NetworkPolicy_ resources in the Emergency Response namespace:
 +
 ----
-$ oc get networkpolicy -n $ERDEMO_NS -o yaml
+$ oc get networkpolicy -n $ERDEMO_NS
 ----
 +
 .Sample Output
@@ -447,9 +447,10 @@ kafka-cluster-network-policy-zookeeper   strimzi.io/name=kafka-cluster-zookeeper
 * Review the `istio-mesh` network policy:
 +
 ----
-$ oc get networkpolicy istio-mesh -n $ERDEMO_NS 
+$ oc get networkpolicy istio-mesh -n $ERDEMO_NS -o yaml
 ----
 +
+.Sample Output
 ----
 kind: NetworkPolicy
 apiVersion: networking.k8s.io/v1
@@ -482,9 +483,10 @@ spec:
 * Review the `istio-expose-route` network policy:
 +
 ----
-$ oc get networkpolicy istio-expose-route -n $ERDEMO_NS 
+$ oc get networkpolicy istio-expose-route -n $ERDEMO_NS -o yaml 
 ----
 +
+.Sample Output
 ----
 kind: NetworkPolicy
 apiVersion: networking.k8s.io/v1
@@ -526,7 +528,7 @@ Exit the remote shell.
 * In a normal shell, call the Incident Service through its exposed URL:
 +
 ----
-$ curl http://user2-incident-service.apps.$SUBDOMAIN_BASE/incidents
+$ curl http://$ERDEMO_USER-incident-service.apps.$SUBDOMAIN_BASE/incidents
 ----
 * Expect both curl requests to succeed.
 +
@@ -563,10 +565,8 @@ spec:
     spec:
     [...]
 ----
-*
-Save the DeploymentConfig. Once the Incident Service pod is redeployed, try again to call the Incident Service from outside of the cluster.
-+
-What do you observe?
+5. Save the DeploymentConfig. Once the Incident Service pod is redeployed, try again to call the Incident Service from outside of the cluster.
+* What do you observe?
 
 [NOTE]
 ====
