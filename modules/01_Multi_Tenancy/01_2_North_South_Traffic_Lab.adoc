@@ -204,7 +204,7 @@ $ curl -v https://$(oc get route -n $API_MANAGER_NS | grep $ERDEMO_USER | grep p
 
 ** The 200 status code for a successful request.
 
-** The JSON message body that is a list of incidents. Each incident describes the id, lat/long, number of people etc ...
+** The JSON message body that is an array of incidents. Each incident describes the id, lat/long, number of people etc ...Note that if you haven't run the ER Demo before, the message body can be an empty array.
 
 . Now confirm that the service is truly secured. Attempt to access the service with an invalid user key.
 +
