@@ -528,7 +528,7 @@ Exit the remote shell.
 * In a normal shell, call the Incident Service through its exposed URL:
 +
 ----
-$ curl curl http://$ERDEMO_USER-incident-service.apps.$SUBDOMAIN_BASE/incidents
+$ curl http://$ERDEMO_USER-incident-service.apps.$SUBDOMAIN_BASE/incidents
 ----
 * Expect both curl requests to succeed.
 +
