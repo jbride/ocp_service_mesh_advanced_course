@@ -474,22 +474,18 @@ $ oc get dc -n $ERDEMO_NS
 .Sample Output
 -----
 NAME                                REVISION   DESIRED   CURRENT  
-postgresql                          1          1         0        
-user50-disaster-simulator           1          1         0        
-user50-emergency-console            1          1         0        
-user50-incident-priority-service    1          1         0        
-user50-incident-service             1          1         0        
-user50-mission-service              1          1         0        
-user50-process-service              1          1         0        
-user50-process-service-postgresql   1          1         0        
-user50-process-viewer               1          1         0        
-user50-responder-service            1          1         0        
-user50-responder-simulator          1          1         0         
+postgresql                          1          1         1        
+user50-disaster-simulator           1          1         1        
+user50-emergency-console            1          1         1        
+user50-incident-priority-service    1          1         1        
+user50-incident-service             1          1         1        
+user50-mission-service              1          1         1        
+user50-process-service              1          1         1        
+user50-process-service-postgresql   1          1         1        
+user50-process-viewer               1          1         1        
+user50-responder-service            1          1         1        
+user50-responder-simulator          1          1         1         
 -----
-
-. The DeploymentConfigs of your Emergency Response demo are intially placed in a paused state.
-+
-In the next lab of this course, you will resume all of these DeploymentConfigs after you have registered your _$ERDEMO_USER-er-demo_ namespace in the _ServiceMeshMemberRoll_ of your service mesh control plane.
 
 . Notice the Emergency Response demo also makes use of Red Hat AMQ Streams for event-driven, streams-based communication between many of its services:
 +
