@@ -159,7 +159,35 @@ For every service account in the namespaces which are managed by the Service Mes
 These certificates have a lifespan of 3 months and will be rotated automatically by Citadel. +
 The _Subject Alternative Name_ field on the certificate corresponds to the _SPIFFE_ identity name of the service account. +
 As part of client-side verification when using mTLS, this identity is verified against the _secure naming information_ maintained by the service mesh. The secure naming information contains N-to-N mappings from the server identities, which are encoded in certificates, to the service names.
-. In the Emergency Response Demo project, verify that the following secrets have been created: `istio-disaster-simulator-service`, `istio.emergency-console`, `istio.incident-piority-service`, `istio.incident-service`, `istio.mission-service`, `istio.process-service`, `istio.process-viewer`, `istio.responder-service`, `istio.responder-simulator-service`
+. In the Emergency Response Demo project, verify the istio secrets for key-and-cert have been created:
++
+----
+oc get secrets --field-selector=type=istio.io/key-and-cert -n $ERDEMO_NS
+----
++
+.Sample Output
+----
+NAME                                  TYPE                    DATA   AGE
+istio.builder                         istio.io/key-and-cert   3      29h
+istio.default                         istio.io/key-and-cert   3      29h
+istio.deployer                        istio.io/key-and-cert   3      29h
+istio.disaster-simulator-service      istio.io/key-and-cert   3      29h
+istio.emergency-console               istio.io/key-and-cert   3      29h
+istio.incident-priority-service       istio.io/key-and-cert   3      29h
+istio.incident-service                istio.io/key-and-cert   3      29h
+istio.kafka-cluster-entity-operator   istio.io/key-and-cert   3      29h
+istio.kafka-cluster-kafka             istio.io/key-and-cert   3      29h
+istio.kafka-cluster-zookeeper         istio.io/key-and-cert   3      29h
+istio.mission-service                 istio.io/key-and-cert   3      29h
+istio.postgresql                      istio.io/key-and-cert   3      29h
+istio.process-service                 istio.io/key-and-cert   3      29h
+istio.process-viewer                  istio.io/key-and-cert   3      29h
+istio.responder-client-app            istio.io/key-and-cert   3      29h
+istio.responder-service               istio.io/key-and-cert   3      29h
+istio.responder-simulator-service     istio.io/key-and-cert   3      29h
+----
+
+
 . Visualize the contents of the `istio.incident-service` secret.
 +
 ----
