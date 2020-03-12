@@ -221,7 +221,7 @@ You need to impersonate an OpenShift cluster admin to do this because a service 
 
 . Review some of the more prominent service mesh-related CRD extensions to the OpenShift master API including those in the following table:
 +
-[cols="2",options=header]
+[cols="2",options="header"]
 |======
 |CRD | Description
 | `adapters.config.istio.io`
