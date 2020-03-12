@@ -4,36 +4,33 @@
 :linkattrs:
 :data-uri:
 
-= North / South Traffic Lab
+== North/South Traffic Lab
 
 .Goals
-* Utilize a phased approach toward management of a micro-service architected application
-* Use API Gateway to apply policies to _north-south_ traffic into the  Emergency Response application
+* Use a phased approach toward management of a microservice-architected application
+* Use an API gateway to apply policies to _north/south_ traffic into the Emergency Response Demo application
 
 :numbered:
 
 == Overview
 
-Securing and managing a micro-service architected application is often going to be a phased endeavor driven by (among other variables) the sophistication of your customer.
+Securing and managing a microservice-architected application is often a phased endeavor driven by, among other variables, the sophistication of your customer.
 
-One potential strategy for onboarding customers on this journey could be to start by applying API policies to _north / south_ traffic into the application.
+One potential strategy for onboarding customers on this journey is to start by applying API policies to north/south traffic into the application. Red Hat^(R)^ 3scale API Management is well suited for this exact use case. Onboarding your new customer may potentially be as straightforward as leveraging the 3scale API Management link:https://www.3scale.net/[SaaS offering].
 
-Red Hat has a supported product that is well suited for exactly this use-case:  Red Hat 3scale API Management.
-On-boarding your new customer might potentially be as straight forward as leveraging the 3scale link:https://www.3scale.net/[SaaS offering].
+Later labs show you how API policy management (via 3scale API Management) and service mesh management (via OpenShift Service Mesh) are _complementary_ technologies.
 
-As you'll experience in later labs of this course, API policy management (via Red Hat 3scale) and service mesh management (via Red Hat Service Mesh) are *complementary* technologies.
+In this lab, you quickly ease your customer into the management of their north/south API traffic by applying API policies using Red Hat 3scale API Management.
 
-In this lab, you will quickly ease your customer into the management of their _north / south_ API traffic by applying API policies using Red Hat 3scale API Management.
+In later labs, this traffic is eventually routed through the _ingress-gateway_ of OpenShift Service Mesh so that _both_ service mesh network policies and API management policies are applied.
 
-In later labs of this course, this traffic will eventually be routed through the _ingress-gateway_ of Red Hat Service Mesh such that *both* service mesh network policies and api management policies are applied.
-
-== Access Multi-Tenant 3scale API Management
+== Access Multi-Tenant 3scale API Management Environment
 
 Your lab environment includes access to a _multi-tenant_ 3scale API Management installation.
 
 For the purposes of this lab, you serve as the administrator of your own 3scale API Management _tenant_ (domain).
 
-. At the command line, log into your OpenShift environment as the owner of the Emergency Response application:
+. At the command line, log in to your OpenShift Container Platform environment as the owner of the Emergency Response Demo application:
 +
 -----
 $ oc login -u $ERDEMO_USER -p $OCP_PASSWD
@@ -48,28 +45,28 @@ $ echo -en "\n\nhttps://$(oc get routes -n $API_MANAGER_NS | grep admin | grep $
 image::images/3scale_login.png[]
 
 . Authenticate using the values of the following environment variables:
-.. *Username*:  $API_TENANT_USERNAME
-.. *Password*:  $API_TENANT_PASSWORD
+.. *Username*:  `$API_TENANT_USERNAME`
+.. *Password*:  `$API_TENANT_PASSWORD`
 
-== API Gateways
-Your lab environment is provisioned with a set of API gateways that are specific to your _tenant_.
-You have full administrative access to your tenant-specific API gateways.
-These are the API gateways that you initially use to apply API policies to your back-end services.
+== Explore API Gateways
+Your lab environment is provisioned with a set of API gateways that are specific to your tenant.
+You have full administrative access to these API gateways.
+They are the API gateways that you initially use to apply API policies to your back-end services.
 
-. Get a list of these API gateways by executing the following command:
+. Get a list of these API gateways:
 +
 -----
 $ oc get dc -n $GW_PROJECT
 -----
 +
-.Sample output
+.Sample Output
 -----
 NAME            REVISION   DESIRED   CURRENT   TRIGGERED BY
 prod-apicast    1          1         1         config
 stage-apicast   1          1         1         config
 -----
 
-. The value of `$THREESCALE_PORTAL_ENDPOINT` is set in the `apicast-configuration-url-secret` secret in the $GW_PROJECT namespace:
+. Get the value of `$THREESCALE_PORTAL_ENDPOINT` from the `apicast-configuration-url-secret` secret in the `$GW_PROJECT` namespace:
 +
 ----
 $ echo $(oc get secret apicast-configuration-url-secret -o yaml -n $GW_PROJECT | grep password | awk '{print $2}' | base64 -d)
@@ -81,61 +78,60 @@ https://95d1c0a311ba965cd23562164db2126516344b6ff5985b49a4282662181e68ae@user25-
 ----
 
 
-* The API Gateways use the value of `THREESCALE_PORTAL_ENDPOINT` to invoke the _system-provider_ of your API Manager _tenant_ and retrieve details of your APIs (aka: _policy_config_).
+* The API gateways use the value of `$THREESCALE_PORTAL_ENDPOINT` to invoke the _system-provider_ of your API Manager tenant and retrieve details of your APIs, or _policy_config_.
 
-== Secure _incident_ service
+== Secure Incident Service
 
-. In the Admin Portal of your 3scale API Manager tenant, navigate to: `Audience -> Accounts -> Listing -> Developer`
+. In the Admin Portal, navigate to *Audience -> Accounts -> Listing -> Developer*:
 +
 image::images/3scale_navigate_app.png[]
 
-. In the `Apps` column, click the link indicating the number of existing _applications_ (most likely 0) associated with the _Developer_ account.
-. In the top right corner, click `Create Application`.
-. Populate the new form with the following:
-.. *Application plan:* incident-service_app_plan
-.. *Service plan:* Default
-.. *Name:* incident_service_app
-+
-Click `Create Application`.
+. In the *Apps* column, click the number of existing applications (most likely `0`) associated with the *Developer* account.
+. In the top right corner, click *Create Application*.
+. Populate the form with the following:
+.. *Application plan*: `incident-service_app_plan`
+.. *Service plan*: `Default`
+.. *Name*: `incident_service_app`
 
-. From the resultant page, copy the `User Key`
+. Click *Create Application*.
+
+. From the `incident_service_app` page that appears, copy the *User Key* value:
 +
 image::images/3scale_user_key.png[]
 
-. Set the value of this `User Key` as a shell environment variable:
+. Set the value of the user key as a shell environment variable:
 +
 -----
 $ echo "export INCIDENT_SERVICE_API_KEY=<change me>" >> $HOME/.bashrc
 -----
 
-. Set a couple of other environment variables to be used in a later lab of this course:
-.. *INCIDENT_SERVICE_ID*
-... From the top panel, navigate to: `API: incident-service -> Configuration, Methods and Settings`
-... Locate the value of your `ID for API calls` similar to the following:
+. Set an `INCIDENT_SERVICE_ID` environment variable to use later:
+.. From the top panel, navigate to *API: incident-service -> Configuration, Methods and Settings*.
+.. Locate the value of your `ID for API calls` similar to the following:
 +
 image::images/incident_service_id.png[]
 
-... Using this value, set an environment variable as follows:
+.. Using this value, set the environment variable:
 +
 -----
 $ echo "export INCIDENT_SERVICE_ID=<change me>" >> $HOME/.bashrc
 -----
 
-.. *SYSTEM_PROVIDER_URL*
+. Set a `SYSTEM_PROVIDER_URL` environment variable to use later:
 +
 -----
 $ echo "export SYSTEM_PROVIDER_URL=$(oc get routes -n $API_MANAGER_NS | grep admin | grep $ERDEMO_USER | awk '{print $2}')" >> $HOME/.bashrc
 -----
-+
-This is the URL to the API Manager _system-provider_ specific to your tenant that all API gateways use to pull information about APIs.
 
-.. *API_ADMIN_ACCESS_TOKEN*
+* This is the URL to the `system-provider` API manager specific to your tenant that all API gateways use to pull information about APIs.
+
+. Set an `API_ADMIN_ACCESS_TOKEN` environment variable to use later:
 +
 -----
 $ echo "export API_ADMIN_ACCESS_TOKEN=$(oc get secret apicast-configuration-url-secret -o yaml -n $GW_PROJECT | grep password | awk '{print $2}' | base64 -d | cut -d'@' -f1 | cut -d'/' -f3)" >> $HOME/.bashrc
 -----
-+
-This access token is specific to your API _tenant_ and is used by API gateways to invoke the _System Management API_ of 3scale.
+
+* This access token is specific to your API tenant and is used by API gateways to invoke the system management API of 3scale API Management.
 
 . Source your local shell configuration file:
 +
@@ -145,13 +141,13 @@ $ source $HOME/.bashrc
 
 == Test
 
-. Verify that you can get a list of incidents using your user key.
+. Verify that you can get a list of incidents using your user key:
 +
 -----
 $ curl -v https://$(oc get route -n $API_MANAGER_NS | grep $ERDEMO_USER | grep prod | awk '{print $2}')/incidents?user_key=$INCIDENT_SERVICE_API_KEY
 -----
 +
-.Sample output
+.Sample Output
 -----
 *   Trying 18.213.15.135...
 * TCP_NODELAY set
@@ -198,21 +194,21 @@ $ curl -v https://$(oc get route -n $API_MANAGER_NS | grep $ERDEMO_USER | grep p
 ...
 -----
 
-* Make note of the follwing:
+* Make note of the following:
 
-** The lines referring to TLS and the use of server certificate. This confirms secure communication to the API.
+** The lines referring to TLS and the use of a server certificate. This confirms secure communication to the API.
 
-** The 200 status code for a successful request.
+** The `200` status code for a successful request.
 
-** The JSON message body that is an array of incidents. Each incident describes the id, lat/long, number of people etc ...Note that if you haven't run the ER Demo before, the message body can be an empty array.
+** The JSON message body that is an array of incidents. Each incident describes the ID, latitude, longitude, number of people, and more. If this is your first time running the Emergency Response Demo application, the message body may be an empty array.
 
-. Now confirm that the service is truly secured. Attempt to access the service with an invalid user key.
+. Confirm that the service is truly secured. Attempt to access the service with an invalid user key:
 +
 -----
 $ curl -v https://$(oc get route -n $API_MANAGER_NS | grep $ERDEMO_USER | grep prod | awk '{print $2}')/incidents?user_key=FAKEKEY
 -----
 +
-.Sample output
+.Sample Output
 -----
 ...
 < HTTP/1.1 403 Forbidden
@@ -225,12 +221,12 @@ $ curl -v https://$(oc get route -n $API_MANAGER_NS | grep $ERDEMO_USER | grep p
 ...
 -----
 
-* Make note that status code is 403 Forbidden. When using an invalid user key, the user does not have access. Our API is secured.
+* Note that the status code is `403 Forbidden`. When using an invalid user key, the user does not have access. Your API is secured.
 
-Congratulations! You have successfully secured _north / south_ traffic into your micro-service architected Emergency Response application using the API Gateways of Red Hat's 3scale API Manager product.
+This concludes the lab. You have successfully secured north/south traffic into your microservice-architected Emergency Response Demo application using the API gateways of Red Hat 3scale API Management.
 
-API Management is a complementary technology to Service Mesh.
-In subsequent labs of this course, you apply service mesh policies to _east / west_ traffic within your Emergency Response application.
+API management is a complementary technology to service mesh.
+In subsequent labs, you apply service mesh policies to _east/west_ traffic within your Emergency Response Demo application.
 
 
 ifdef::showscript[]

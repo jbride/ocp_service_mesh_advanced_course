@@ -4,29 +4,29 @@
 :linkattrs:
 :data-uri:
 
-= Service Mesh Multi Tenancy Lab
+== Service Mesh Multi-Tenancy Lab
 
 .Goals
-** Understand importance of Service Mesh multi-tenancy
-** Understand ServiceMeshMemberRoll
-** Understand Envoy _Data Plane_
+** Understand the importance of service mesh multi-tenancy
+** Understand `ServiceMeshMemberRoll`
+** Understand Envoy _data plane_
 
 :numbered:
 
-== Multi-tenancy Overview
+== Review Multi-Tenancy
 
-Faulty or compromised control planes should not be able affect any other tenants on the cluster. 
-This means that control plane components and service accounts have to be locked down using appropriate Kubernetes Roles and network access limited by NetworkPolicies.
+It is important to prevent faulty or compromised control planes from affecting any other tenants on the cluster.
+This means control plane components and service accounts have to be locked down using appropriate Kubernetes roles and network access limited by NetworkPolicies.
 
-== ServiceMeshMemberRoll
+== Explore `ServiceMeshMemberRoll`
 
-. Switch to your service mesh control plane administrator user:
+. Switch to your service mesh control plane admin user:
 +
 -----
 $ oc login -u $SM_CP_ADMIN -p $OCP_PASSWD
 -----
 
-. Register the $ERDEMO_NS namespace as namespace _member_ to be monitored and manged by your service mesh control plane.
+. Register the `$ERDEMO_NS` namespace as a namespace member to be monitored and managed by your service mesh control plane:
 +
 -----
 $ echo "apiVersion: maistra.io/v1
@@ -37,10 +37,10 @@ spec:
   members:
   - $ERDEMO_NS" | oc apply -n $SM_CP_NS -f -
 -----
-+
-Recall that the _ServiceMeshMemberRoll_ exists in the service mesh control plane (which is owned by the admin: $SM_CP_ADMIN )
 
-. Notice that your $ERDEMO_NS namespace now includes _kiali_ and _maistra_ annotations:
+* Recall that the `ServiceMeshMemberRoll` resource exists in the service mesh control plane, which is owned by the `$SM_CP_ADMIN` admin.
+
+. Verify that your `$ERDEMO_NS` namespace now includes `kiali` and `maistra` annotations:
 +
 -----
 $ echo -en "\n\n$(oc get project $ERDEMO_NS -o template --template='{{.metadata.labels}}')\n\n"
@@ -51,7 +51,7 @@ $ echo -en "\n\n$(oc get project $ERDEMO_NS -o template --template='{{.metadata.
 map[kiali.io/member-of:admin50-istio-system maistra.io/member-of:admin50-istio-system]
 -----
 
-. Notice also that your $ERDEMO_NS namespace now includes namespace scoped _RoleBindings_ associated with the Istio related service accounts from your specific service mesh control plane:
+. Verify that your `$ERDEMO_NS` namespace now includes namespace-scoped `RoleBinding` resources associated with the Istio-related service accounts from your specific service mesh control plane:
 +
 -----
 $ oc get RoleBinding  -n $ERDEMO_NS -l release=istio
@@ -68,12 +68,11 @@ istio-pilot-admin50-istio-system                                 24s
 istio-sidecar-injector-admin-role-binding-admin50-istio-system   24s
 prometheus-admin50-istio-system                                  24s
 -----
-+
-The use of a project scoped _RoleBinding_ rather than a cluster-scoped _ClusterRoleBinding_ is a key enabler of _multi-tenant_ capabilities of the Red Hat Service Mesh product.
+* The use of a project-scoped `RoleBinding` resource, rather than a cluster-scoped `ClusterRoleBinding` resource, is a key enabler of the _multi-tenant_ capabilities of Red Hat^(R)^ OpenShift^(R)^ Service Mesh.
 
-. Red Hat OpenShift Service Mesh configures each member project to ensure network access between itself, the control plane, and other member projects.
-+
-Notice that your $ERDEMO_NS namespace now also includes a _NetworkPolicy_ called: _istio-mesh_
+* OpenShift Service Mesh configures each member project to ensure network access between itself, the control plane, and other member projects.
+
+. Verify that your `$ERDEMO_NS` namespace now also includes a `NetworkPolicy` resource called `istio-mesh`:
 +
 -----
 $ oc get NetworkPolicy istio-mesh -n $ERDEMO_NS
@@ -83,10 +82,9 @@ $ oc get NetworkPolicy istio-mesh -n $ERDEMO_NS
 -----
 istio-mesh   <none>         26m
 -----
-+
-This _NetworkPolicy_ allows ingress to all pods specific to this namespace from all other registered _members_ of the same Red Hat Service Mesh control plane.
+* This `NetworkPolicy` resource allows ingress to all pods specific to this namespace from all other registered members of the same OpenShift Service Mesh control plane.
 
-. Notice also that your $ERDEMO_NS namespace now includes _istio_ related secrets:
+. Verify that your `$ERDEMO_NS` namespace now includes `istio` related secrets:
 +
 -----
 $ oc get secrets -n $ERDEMO_NS | grep istio
@@ -112,33 +110,35 @@ istio.process-viewer                            istio.io/key-and-cert           
 istio.responder-service                         istio.io/key-and-cert                 3      9m54s
 istio.responder-simulator-service               istio.io/key-and-cert                 3      9m53s
 -----
-+
-These secrets support mutual TLS functionality provided by the Red Hat Service Mesh.
-More information about these secrets is provided in the next module of this course pertaining to mTLS.
+* These secrets support mutual TLS functionality provided by OpenShift Service Mesh.
+You learn more about these secrets in the next module, which pertains to mTLS.
 
-== Opt-in Auto-Injection Annotations
+== Opt In Auto-Injection Annotations
 
-When deploying an application into the Red Hat OpenShift Service Mesh you must opt in to injection of the Envoy _data-plane_ for each deployment.
-You do so by specifying the following annotation in your deployment: _sidecar.istio.io/inject=true_ . 
+When deploying an application into Red Hat OpenShift Service Mesh, you must opt in to injection of the Envoy _data plane_ for each deployment.
+You do so by specifying the `sidecar.istio.io/inject=true` annotation in your deployment.
 
 Opting in ensures that the sidecar injection does not interfere with other OpenShift capabilities (such as S2I builder pods) that likely do not need to be managed by the service mesh.
 
-In this section of this lab you (as the owner of the Emergency Response application) opt in a selective list of deployments for auto injection of a sidecar.
+In this section of the lab, you, as the owner of the Emergency Response Demo application, opt in a selective list of deployments for auto injection of a sidecar.
 
-. Switch to the $ERDEMO_USER:
+. Switch to the `$ERDEMO_USER` user:
 +
 -----
 $ oc login -u $ERDEMO_USER
 -----
+* `$ERDEMO_USER` is the admin of the `$ERDEMO_NS` namespace where your Emergency Response Demo application resides.
+
+. Review the contents of link:https://github.com/gpe-mw-training/ocp_service_mesh_advanced/blob/master/utils/inject_istio_annotation.sh[this script], which iterates through the DeploymentConfig of your Emergency Response Demo application and adds the `sidecar.istio/inject=true` annotation.
 +
-The $ERDEMO_USER is the admin of the $ERDEMO_NS namespace where your Emergency Response application resides.
+****
+*Questions*:
 
-. Review the contents of link:https://github.com/gpe-mw-training/ocp_service_mesh_advanced/blob/master/utils/inject_istio_annotation.sh[this script] (which will iterate through your Emergency Response Deployment Configs and add the _sidecar.istio/inject=true_ annotation) and answer the following questions:
+* Which DeploymentConfig resources of the Emergency Response Demo application are to be opted into your service mesh?
+* Which resources of the Emergency Response Demo application will not be managed by your service mesh?
+****
 
-.. Which Deployment Configs resources of the Emergency Response demo are to be opted into your service mesh ?
-.. Which resources of the Emergency Response demo will not be managed by your service mesh ?
-
-. Execute the shell script that adds Envoy auto-injection annotations to Emergency Response deployments:
+. Execute the shell script that adds Envoy auto-injection annotations to Emergency Response Demo deployments:
 +
 -----
 $ curl https://raw.githubusercontent.com/gpe-mw-training/ocp_service_mesh_advanced/master/utils/inject_istio_annotation.sh \
@@ -147,7 +147,7 @@ $ curl https://raw.githubusercontent.com/gpe-mw-training/ocp_service_mesh_advanc
     $HOME/lab/inject_istio_annotation.sh
 -----
 
-. After completion of the script, review the list Emergency Response related pods:
+. After completion of the script, review the list of Emergency Response-related pods:
 +
 -----
 $ oc get pods -l group=erd-services -n $ERDEMO_NS
@@ -163,10 +163,9 @@ user50-process-service-4-cz5sz             2/2     Running   5          7h17m
 user50-responder-service-1-qm5gn           2/2     Running   3          7h14m
 user50-responder-simulator-1-tdrz2         2/2     Running   6          7h13m
 -----
-+
-Notice that each of these pods indicates that two containers have started.
+* Note that each of these pods indicates that two containers have started.
 
-. You could use a script such as the following to identify a list of container names for each of the pods:
+. Use a script similar to this to identify a list of container names for each of the pods:
 +
 -----
 $ for POD_NAME in $(oc get pods -n $ERDEMO_NS -l group=erd-services -o jsonpath='{range .items[*]}{.metadata.name}{"\n"}')
@@ -175,7 +174,7 @@ do
 done
 -----
 +
-.Sample output
+.Sample Output
 -----
 [...]
 user50-disaster-simulator-1-p9gfl    :          user50-disaster-simulator        istio-proxy
@@ -187,36 +186,27 @@ user50-responder-service-1-qm5gn    :           user50-responder-service        
 user50-responder-simulator-1-tdrz2    :         user50-responder-simulator       istio-proxy
 -----
 
-.. Notice that each pod now contains an additional _istio-proxy_ container co-located with the primary business service container.
-.. Recall from a previous lab that Red Hat Service Mesh uses a Kubernetes' link:https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/#mutatingadmissionwebhook[MutatingAdmissionWebhook] for automatically injecting the sidecar proxy into user pods.
+* Note that each pod now contains an additional `istio-proxy` container colocated with the primary business service container.
+* Recall from a previous lab that OpenShift Service Mesh uses a Kubernetes link:https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/#mutatingadmissionwebhook[`MutatingAdmissionWebhook`] for automatically injecting the sidecar proxy into user pods.
 
 
 
-== Envoy _Data Plane_
+== Explore Envoy Data Plane
 
-=== Architecture
+=== Review Architecture
 Envoy has many features useful for inter-service communication.
-To help understand Envoy's features and capabilities, you should be familiar with the following terminology:
+To help understand Envoy's features and capabilities, you need to be familiar with the following terminology:
 
-* *listeners*
-+
-Listeners expose a port to the outside world into which an application can connect.
-ie: a listener on port 8080 would accept traffic and apply any configured behavior to that traffic.
+* *Listeners*: Listeners expose a port to the outside world into which an application can connect--for example, a listener on port 8080 accepts traffic and applies any configured behavior to that traffic.
 
-* *routes*
-+
-Routes are rules for how to handle traffic that came in on listeners;
-ie: if a request comes in and matches /incident, then the route will direct that traffic to the incident _cluster_.
+* *Routes*: Routes are rules for how to handle traffic that comes in on listeners--for example, if a request comes in and matches `/incident`, the route directs that traffic to the incident _cluster_.
 
-* *clusters*
-+
-Clusters are specific upstream services to which Envoy can direct traffic.
-ie:  incident-v1 and incident-v2 can be separate clusters and _routes_ can specify rules about how traffic can be directed to either v1 or v2 of the incident service.
+* *Clusters*: Clusters are specific upstream services to which Envoy can direct traffic--for example, if `incident-v1` and `incident-v2` are separate clusters, _routes_ can specify rules about how traffic is directed to either `v1` or `v2` of the incident service.
 
 
-Traffic coming into Envoy comes into a _listener_ and is coming from a _downstream_ system.
-This traffic gets routes to one of Envoy's _clusters_ which is responsible for sending that traffic to an _upstream_ system.
-_Downstream_ to _upstream_ is how traffic always flows through Envoy.
+Traffic comes from a downstream system into Envoy via a listener.
+This traffic is routed to one of Envoy's clusters, which is responsible for sending that traffic to an upstream system.
+Downstream to upstream is how traffic always flows through Envoy.
 
 {nbsp}
 {nbsp}
@@ -224,9 +214,9 @@ _Downstream_ to _upstream_ is how traffic always flows through Envoy.
 image::images/envoy_architecture.png[]
 
 
-=== Service proxy container configuration
+=== Configure Service Proxy Container
 
-. Delete _deploy_ pods that are in a _completed_ status and have not yet been deleted:
+. Delete any `deploy` pods that are in a `completed` status and have not yet been deleted:
 +
 -----
 $ curl https://raw.githubusercontent.com/gpe-mw-training/ocp_service_mesh_advanced/master/utils/delete_pod_deploys.sh \
@@ -236,7 +226,7 @@ $ curl https://raw.githubusercontent.com/gpe-mw-training/ocp_service_mesh_advanc
 $HOME/lab/delete_pod_deploys.sh
 -----
 
-. Capture the details of the _istio-proxy_ container configuration from the _responder-service_ pod of the Emergency Response demo :
+. Capture the details of the `istio-proxy` container configuration from the `responder-service` pod of the Emergency Response Demo application:
 +
 -----
 $ oc get pod -n $ERDEMO_NS \
@@ -246,39 +236,44 @@ $ oc get pod -n $ERDEMO_NS \
         > $HOME/lab/responder_envoy.json
 -----
 
-. Study the details of the _istio-proxy_ container:
+. Study the details of the `istio-proxy` container:
 +
 -----
 $ less $HOME/lab/responder_envoy.json
 -----
 
-. Answer the following questions pertaining to this _istio-proxy_ container:
+. Answer the following questions pertaining to this `istio-proxy` container:
++
+****
+*Questions*:
 
-.. What URL does OpenShift use to pull the remote Envoy proxy image that serves as the basis of this Envoy proxy sidecar?
-.. What is the maximum amount of RAM and CPU dedicated to this Envoy proxy sidecar container ?
-.. What is the URL that the Envoy proxy sidecar uses to communicate with _Pilot_ component of Red Hat Service Mesh ?
-
+* What URL does OpenShift use to pull the remote Envoy proxy image that serves as the basis of this Envoy proxy sidecar?
+* What is the maximum amount of RAM and CPU dedicated to this Envoy proxy sidecar container?
+* What is the URL that the Envoy proxy sidecar uses to communicate with the Pilot component of OpenShift Service Mesh?
+****
 
 ifdef::showscript[]
 
-1) registry.redhat.io/openshift-service-mesh/proxyv2-rhel8:1.0.1
-2) cpu: 500m,  memory: 128Mi
-3) istio-pilot.admin50-istio-system:15010
+*Answers*:
+
+. `registry.redhat.io/openshift-service-mesh/proxyv2-rhel8:1.0.1`
+. CPU: 500m,  memory: 128Mi
+. `istio-pilot.admin50-istio-system:15010`
 
 endif::showscript[]
 
-=== Modified iptables 
+=== Demonstrate Modified iptables
 
-When an Envoy service proxy is injected into an application pod, the _istio-cni_ resource modifies iptables on the node that the pod lands on.
-Recall from a previous lab that the _istio-cni_ resource is deployed as a _daemonset_ and subsequently runs one pod per all nodes in an OpenShift cluster.
+When an Envoy service proxy is injected into an application pod, the `istio-cni` resource modifies iptables on the node that the pod lands on.
+Recall from a previous lab that the `istio-cni` resource is deployed as a DaemonSet and subsequently runs one pod for all of the nodes in an OpenShift cluster.
 
-In particular, the _istio-cni_ resource creates iptable rules such that all ingress to and egress out of the application container is redirected to port 15001 of the pod.
+In particular, the `istio-cni` resource creates iptable rules so that all ingress to and egress from the application container is redirected to port 15001 of the pod.
 The Envoy service proxy has its listener bound to port 15001.
 
 
 Have your instructor demonstrate these modified iptable rules in a manner similar to the following:
 
-. Identify the OCP worker node that one of the Emergency Response application pods is running on:
+. Identify the OpenShift Container Platform worker node that one of the Emergency Response Demo application pods is running on:
 +
 -----
 $ oc get pod user50-responder-service-6-5xr86 -o json | jq .spec.nodeName
@@ -291,7 +286,7 @@ ip-10-0-136-113.eu-central-1.compute.internal
 -----
 
 
-. Identify the id of either container (application container or _envoy-proxy)  in that pod:
+. Identify the ID of either container (application container or `envoy-proxy`) in that pod:
 +
 -----
 $ oc describe pod user50-responder-service-6-5xr86 | grep cri-o
@@ -311,13 +306,13 @@ Container ID:  cri-o://90260d3d7ece810bb4c44a8aee3e23ebe50fd6b1225d48e6e103da070
 $ oc debug node/ip-10-0-136-113.eu-central-1.compute.internal
 -----
 
-. On that OCP node, switch to the host operating system shell that can run host operating system binaries:
+. On that OpenShift node, switch to the host operating system shell that runs host operating system binaries:
 +
 -----
 sh-4.4# chroot /host
 -----
 
-. Using the previously determined containerId, determine the operating system process id of the container on the OpenShift node:
+. Using the previously determined container ID, determine the operating system process ID of the container on the OpenShift node:
 +
 -----
 sh-4.4# crictl inspect --output json  90260d3d7ece810bb4c44a8aee3e23ebe50fd6b1225d48e6e103da070194c53a | grep pid
@@ -328,7 +323,7 @@ sh-4.4# crictl inspect --output json  90260d3d7ece810bb4c44a8aee3e23ebe50fd6b122
 45315
 -----
 
-. Using the process Id of the container, view the iptable rules on that host machine:
+. Using the process ID of the container, view the iptable rules on that host machine:
 +
 -----
 sh-4.4# nsenter -t 45315 -n iptables -t nat -S
@@ -357,32 +352,31 @@ sh-4.4# nsenter -t 45315 -n iptables -t nat -S
 -A ISTIO_OUTPUT -d 127.0.0.1/32 -j RETURN
 -A ISTIO_OUTPUT -j ISTIO_REDIRECT
 -----
-+
-The output above shows that all the incoming traffic for this operating system process to port 8080, 9779 and 8778 (which are the ports that the Emergency Response responser-service is listening on ), are being REDIRECTED to port 15001, which is the port that the _istio-proxy_ is listening. 
+* Note that all of the incoming traffic for this operating system process to port 8080, 9779, and 8778--the ports on which the Emergency Response `response-service` is listening--are being redirected to port 15001--the port on which the `istio-proxy` is listening.
 The same holds true for the outgoing traffic.
 
 
-=== Administration API
+=== Explore Administration API
 
 The Envoy data plane API provides an open standard for centralized management of a large fleet of Envoys.
-Instead of copying configuration files to the many Envoy proxies in a typical microservice architected application, a central point of control is available.
+Instead of copying configuration files to the many Envoy proxies in a typical microservice-architected application, a central point of control is available.
 
-The admin API of each envoy container is available by using the _curl_ utility from within any application pod enabled with envoy.
+The administration API of each envoy container is available using the `curl` utility from within any application pod enabled with Envoy.
 
-. Log into OpenShift as the owner of the Emergency Response application:
+. Log in to OpenShift as the owner of the Emergency Response Demo application:
 +
 -----
 $ oc login -u $ERDEMO_USER -p $OCP_PASSWD
 -----
 
-. Retrieve the help documentation provided by the Envoy admin API: 
+. Retrieve the help documentation provided by the Envoy administration API:
 +
 -----
 $ oc rsh `oc get pod -n $ERDEMO_NS | grep "responder-service" | grep "Running" | awk '{print $1}'` \
     curl http://localhost:15000/help
 -----
 
-. Retrieve the status of all of the _clusters_ that are visible to this Envoy service proxy:
+. Retrieve the status of all of the clusters visible to this Envoy service proxy:
 +
 -----
 $ oc rsh `oc get pod -n $ERDEMO_NS | grep "responder-service" | grep "Running" | awk '{print $1}'` \
@@ -390,22 +384,19 @@ $ oc rsh `oc get pod -n $ERDEMO_NS | grep "responder-service" | grep "Running" |
    > $HOME/lab/responder-service-clusters.json
 -----
 
-.. Skim through the contents of `$HOME/lab/responder-service-clusters.json`
-
-.. Notice that this information includes all discovered upstream hosts in each cluster along with per host statistics. This is useful for debugging service discovery issues.
-.. Also notice that absolutely all _cluster_statuses_ reference services to your specific Emergency Response demo or your specific Service Mesh control plane.
+. Skim through the contents of `$HOME/lab/responder-service-clusters.json`.
+* Note that this information includes all discovered upstream hosts in each cluster along with per-host statistics. This is useful for debugging service discovery issues.
+* Also note that absolutely all `cluster_statuses` reference services to your specific Emergency Response Demo application or your specific service mesh control plane.
 +
-Under no circumstances do any of your Envoy proxies have visibility to services that you do not own.
-+
-This is critical from performance, scalability and security perspectives.
+IMPORTANT: Under no circumstances do any of your Envoy proxies have visibility to services that you do not own. This is critical from performance, scalability, and security perspectives.
 
-. Inspect the configuration sent by Pilot to your pod's sidecar using _istioctl_:
+. Inspect the configuration sent by Pilot to your pod's sidecar using `istioctl`:
 +
 -----
 $ istioctl proxy-config cluster -n <POD NAMESPACE> <PODNAME> -o json
 -----
-+
-If you search for the destination service name you will see an embedded metadata JSON element that names the specific DestinationRule that pod is currently using to communicate with the external service.
+
+. Search for the destination service name to see an embedded metadata JSON element that names the specific DestinationRule that pod is currently using to communicate with the external service:
 +
 -----
 $ oc rsh `oc get pod -n $ERDEMO_NS | grep "responder-service" | awk '{print $1}'` \
@@ -415,18 +406,18 @@ $ oc rsh `oc get pod -n $ERDEMO_NS | grep "responder-service" | awk '{print $1}'
          | jq ".configs | last | .dynamic_route_configs"
 -----
 
-== Network Policies
+== Explore Network Policies
 
-In multi-tenancy mode, Red Hat Service Mesh creates an isolated network for each mesh instance using _NetworkPolicy_ resources. Pods within the mesh can communicate with each other and with pods in the data plane. Communication between pods in different meshes is not allowed. +
-Note that during the Service Mesh installation existing NetworkPolicy objects will not be touched or deleted.
+In multi-tenancy mode, OpenShift Service Mesh creates an isolated network for each mesh instance using `NetworkPolicy` resources. Pods within the mesh can communicate with each other and with pods in the data plane. Communication between pods in different meshes is not allowed.
+Note that during service mesh installation, existing `NetworkPolicy` objects are not touched or deleted.
 
-. Review the NetworkPolicy resources created by the Service Mesh. 
-* Log into OpenShift as the owner of the Emergency Response application:
+. Review the `NetworkPolicy` resources created by the service mesh:
+.. Log in to OpenShift as the owner of the Emergency Response Demo application:
 +
 -----
 $ oc login -u $ERDEMO_USER -p $OCP_PASSWD
 -----
-* List the _NetworkPolicy_ resources in the Emergency Response namespace:
+.. List the `NetworkPolicy` resources in the Emergency Response namespace:
 +
 ----
 $ oc get networkpolicy -n $ERDEMO_NS
@@ -441,10 +432,10 @@ istio-mesh                               <none>                                 
 kafka-cluster-network-policy-kafka       strimzi.io/name=kafka-cluster-kafka       32h
 kafka-cluster-network-policy-zookeeper   strimzi.io/name=kafka-cluster-zookeeper   32h
 ----
-** NetworkPolicies `allow-from-all-namespaces` and `allow-from-ingress-namespace` are installed by default in every namespace when using _NetworkPolicy_ Openshift SDN mode. The policies allows traffic between all pods in all namespaces, as well as ingress to pods through the router.
-** NetworkPolicies `kafka-cluster-network-policy-kafka` and `kafka-cluster-network-policy-zookeeper` are created when installing the Kafka cluster, and define ingress rules for the Kafka and Zookeeper pods.
-** NetworkPolicies `istio-mesh` and `istio-expose-route` are created when adding the namespace to the Service Mesh.
-* Review the `istio-mesh` network policy:
+** `allow-from-all-namespaces` and `allow-from-ingress-namespace` are installed by default in every namespace when using OpenShift SDN mode. The policies allow traffic between all pods in all namespaces, as well as ingress to pods through the router.
+** `kafka-cluster-network-policy-kafka` and `kafka-cluster-network-policy-zookeeper` are created when installing the Kafka cluster, and define ingress rules for the Kafka and Zookeeper pods.
+** `istio-mesh` and `istio-expose-route` are created when adding the namespace to the service mesh.
+.. Review the `istio-mesh` network policy:
 +
 ----
 $ oc get networkpolicy istio-mesh -n $ERDEMO_NS -o yaml
@@ -478,12 +469,12 @@ spec:
     - Ingress
     - Egress
 ----
-** The policy allows all traffic (_Ingress_ and _Egress_) between namespaces that are labeled with `maistra.io/member-of: $SM_CP_ADMIN-istio-system`. This includes the Service Mesh data plane namespace as well as the mesh member namespaces as defined in the _ServiceMeshMemberRoll_.
+** This policy allows all traffic--ingress and egress--between namespaces that are labeled with `maistra.io/member-of: $SM_CP_ADMIN-istio-system`. This includes the service mesh data plane namespace as well as the mesh member namespaces as defined in `ServiceMeshMemberRoll`.
 
-* Review the `istio-expose-route` network policy:
+.. Review the `istio-expose-route` network policy:
 +
 ----
-$ oc get networkpolicy istio-expose-route -n $ERDEMO_NS -o yaml 
+$ oc get networkpolicy istio-expose-route -n $ERDEMO_NS -o yaml
 ----
 +
 .Sample Output
@@ -510,42 +501,48 @@ spec:
   policyTypes:
     - Ingress
 ----
-** The policy allows ingress traffic between namespaces that are labeled with `network.openshift.io/policy-group: ingress` and pods that have the label `maistra.io/expose-route: 'true'`. The `openshift-ingress` namespace - in which the OpenShift router pods run - has the label `network.openshift.io/policy-group: ingress`, so annotated pods can be reached through a route.
+** This policy allows ingress traffic between namespaces that are labeled with `network.openshift.io/policy-group: ingress` and pods with the `maistra.io/expose-route: 'true'` label. The `openshift-ingress` namespace--in which the OpenShift router pods run--has the `network.openshift.io/policy-group: ingress` label so annotated pods can be reached through a route.
 
-. Check if pods in the Emergency Response demo are reachable from outside the service mesh.
-* Obtain a remote shell into the _stage-apicast_ pod in the apicast namespace
+. Check if pods in the Emergency Response Demo application are reachable from outside the service mesh:
+.. Obtain a remote shell into the `stage-apicast` pod in the `apicast` namespace:
 +
 ----
 $ oc rsh -n $GW_PROJECT stage-apicast-1-xxxxx
 ----
-* In the remote shell, curl the Incident Service through its service name:
+.. In the remote shell, `curl` the incident service through its service name:
 +
 ----
 sh-4.2$ curl http://$ERDEMO_USER-incident-service.$ERDEMO_NS.svc:8080/incidents
 ----
-+
-Exit the remote shell.
-* In a normal shell, call the Incident Service through its exposed URL:
+
+.. Exit the remote shell.
+.. In a normal shell, call the incident service through its exposed URL:
 +
 ----
 $ curl http://$ERDEMO_USER-incident-service.apps.$SUBDOMAIN_BASE/incidents
 ----
-* Expect both curl requests to succeed.
+** Expect both `curl` requests to succeed.
 +
-This seems to be in contradiction to the concept of an isolated service mesh network. Can you explain?
+****
+*Question*:
 
-3. Delete the `allow-from-all-namespaces` and `allow-from-ingress-namespace` NetworkPolicy objects from the Emergency Response namespace.
+* This seems to violate the concept of an isolated service mesh network. Can you explain?
+****
+. Delete the `allow-from-all-namespaces` and `allow-from-ingress-namespace` `NetworkPolicy` objects from the Emergency Response namespace:
 +
 ----
 $ oc delete networkpolicy allow-from-all-namespaces -n $ERDEMO_NS
 $ oc delete networkpolicy allow-from-ingress-namespace -n $ERDEMO_NS
 ----
 
-. Try to reach the incident service from within another namespace or from the outside of the cluster using _curl_
+. Try to reach the incident service from within another namespace or from outside the cluster using `curl`.
 +
-What do you observe?
+****
+*Question*:
 
-4. Add the `maistra.io/expose-route: 'true'` label to the template section of the deploymentconfig of the Incident Service:
+* What do you observe?
+****
+. Add the `maistra.io/expose-route: 'true'` label to the template section of the DeploymentConfig of the incident service:
 +
 ----
 kind: DeploymentConfig
@@ -565,13 +562,17 @@ spec:
     spec:
     [...]
 ----
-5. Save the DeploymentConfig. Once the Incident Service pod is redeployed, try again to call the Incident Service from outside of the cluster.
+. Save the DeploymentConfig.
+. Once the incident service pod is redeployed, try to call the incident service from outside the cluster again.
++
+****
+*Question*:
+
 * What do you observe?
+****
 
-[NOTE]
-====
-Execute the following commands if you want to restore the networkpolicies to their original state:
-
+. (Optional) Execute the following commands to restore the network policies to their original state:
++
 ----
 $ echo "---
 kind: NetworkPolicy
@@ -587,7 +588,7 @@ spec:
     - Ingress
 " | oc create -f - -n $ERDEMO_NS
 ----
-
++
 ----
 $ echo "---
 kind: NetworkPolicy
@@ -606,32 +607,31 @@ spec:
 " | oc create -f - -n $ERDEMO_NS
 ----
 
-====
 
 == Appendix
 
-=== Reference
+.References
 
 * link:https://docs.google.com/document/d/1eMnLBpcJNMahoE6cYKcECp_Jcy4Haj3qc36RBAO9J-U/edit#[Operator-Based Soft Multi-Tenancy]
-* link:https://maistra.io/docs/comparison-with-istio/#_cluster_scoped_custom_resources[Comparison between Red Hat Service Mesh and community Istio]
+* link:https://maistra.io/docs/comparison-with-istio/#_cluster_scoped_custom_resources[Comparison between Red Hat OpenShift Service Mesh and Istio]
 * link:https://istio.io/blog/2019/data-plane-setup/[Demystifying Istio's Sidecar Injection Model]
 
 
 ifdef::showscript[]
+== Instructor Notes
 
-. The two databases leveraged by the Emergency Response demo ( _postgresql_ and _$ERDEMO_USER-process-service-postgresql_ ) are also now injected with an Envoy proxy.
-+
-Verify that this is infact the case either through the OpenShift web console or the oc utility.
+. The two databases leveraged by the Emergency Response Demo application (`postgresql` and `$ERDEMO_USER-process-service-postgresql`) are also now injected with an Envoy proxy.
+.. Verify that this is in fact the case either through the OpenShift Container Platform web console or the `oc` utility.
 
 === Envoy Access Log File
 
 .TO-DO:
 * https://aspenmesh.io/how-to-debug-istio-mutual-tls-mtls-policy-issues-using-aspen-mesh/
 * global.proxy.accessLogFile
-* Is this log file any different than what is already being logged from Envoy in Red Hat Service Mesh ?
-* What is a good example of using it to debug Istio configuration and policy issues ?
+* Is this log file any different than what is already being logged from Envoy in OpenShift Service Mesh?
+* What is a good example of using it to debug Istio configuration and policy issues?
 
-=== Debugging Envoy and Pilot
+=== Debug Envoy and Pilot
 
 The source of truth for a given moment is always found in your pod’s Envoy sidecar configuration.
 In this section of the lab, you link:https://istio.io/docs/ops/troubleshooting/proxy-cmd/[debug Envoy and Pilot].
