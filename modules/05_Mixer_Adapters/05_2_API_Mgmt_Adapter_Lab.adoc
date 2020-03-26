@@ -4,35 +4,33 @@
 :linkattrs:
 :data-uri:
 
-= API Mgmt Mixer Plugin Lab
+== 3scale Istio Adapter Lab
 
 .Goals
-** Review 3scale API Management _Mixer Adapter_ components
-** Apply _API Policies_ to network traffic within microservice application using Red Hat 3scale API Management _Mixer Adapter_
+** Review 3scale Istio adapter components
+** Apply _API policies_ to network traffic within microservices applications using the 3scale Istio adapter
 
-.Pre-requisites
-** Completion of the _North South Traffic Lab_ (module 1)
-** Completion of the _Secure mTLS Lab_ (module 2)
+.Prerequisites
+** Completion of previous labs in this course--specifically the second lab in module 1 on north/south API traffic and the lab in module 2 on secure mTLS.
+
 
 :numbered:
-
 == Overview
 
-The Red Hat 3scale API Management engineering team, in collaboration with the Red Hat Service Mesh team, has created a service mesh _mixer_ adapter for API Management.
-This service mesh mixer adapter will allow Red Hat 3scale API Management policies to be applied directly to communication that occurs between services in the _service mesh_.
+The 3scale API Management engineering team, in collaboration with the Red Hat^(R)^ OpenShift^(R)^ Service Mesh team, have created a service mesh Mixer adapter for API management called _3scale Istio adapter_.
+This adapter allows 3scale API Management policies to be applied directly to communication that occurs between services in the service mesh.
 
 image::images/3scale_mixer_adapter.png[]
 
-In the above diagram, notice the replacement of an API Gateway with the service mesh 3scale Mixer Adapter.
+In this diagram, note that the API gateway has been replaced with the 3scale Istio adapter.
+
 
 == Disable Existing API Production Gateway
 
-Your 3scale API gateways (utilized briefly in the first module of this course) will no longer be needed.
-Instead, inbound traffic to your Emergency Response application will flow through the _Istio ingress gateway_ directly.
+Your 3scale API gateways (utilized briefly in the first module of this course) are no longer needed.
+Instead, inbound traffic to your Emergency Response Demo application flows directly through the _Istio ingress gateway_. Subsequently, your API production gateway can be disabled.
 
-Subsequently, your API production gateway can be disabled.
-
-. Switch to the owner of your pre-existing API Gateways:
+. Switch to the owner of your existing API gateways:
 +
 -----
 $ oc login -u $ERDEMO_USER -p $OCP_PASSWD
@@ -44,48 +42,46 @@ $ oc login -u $ERDEMO_USER -p $OCP_PASSWD
 $ oc scale dc/prod-apicast --replicas=0 -n $GW_PROJECT
 -----
 
-== Virtual Service to Incident Service
+== Set Up VirtualService
 
-In the lab of module 2, you created a wildcard _Gateway_ as well as a _VirtualService_ to route inbound traffic to the Incident Service through the Service Mesh _ingress gateway_. If you have not yet done so, please refer to the lab of module 2 and finish the lab exercise before continuing with this lab.
+In the lab for module 2, you created a wildcard gateway as well as a VirtualService to route inbound traffic to the incident service through the service mesh _ingress gateway_. If you have not yet done so, complete the lab exercises in module 2 before continuing with this lab.
 
-== 3scale Istio Mixer Adapter
+== Review 3scale Istio Adapter
 
-Red Hat Service Mesh provides a component called the _3scale Istio Mixer Adapter_.
+OpenShift Service Mesh provides a Mixer adapter called the _3scale Istio adapter_.
+In this section of the lab, you review the various components of the adapter and then configure it so that it applies API management policies to inbound requests.
 
-In this section of the lab, you review the various components of the _3scale Istio Adapter_ .
-You then configure it so that it applies API Management policies to inbound requests.
-
-General information about Istio's plug-in architecture to apply policies and capture telemetry can be found link:https://istio.io/docs/concepts/policies-and-telemetry/[here].
+General information about Istio's plug-in architecture for applying policies and capturing telemetry can be found link:https://istio.io/docs/concepts/policies-and-telemetry/[here].
 
 image::images/mixer_architecture.png[]
 
-=== Ensure Policy Checks are not disabled
+=== Enable Policy Checks
 
-Red Hat Service Mesh allows for enablement or disablement of policy evaluation through the _mixer_ component of your service mesh control plane.
+OpenShift Service Mesh allows for enabling or disabling policy evaluation through the `mixer` component of your service mesh control plane.
 
-In order for API Management policies to be applied to service mesh traffic, policy evaluation in _mixer_ needs to be enabled. 
+In order for API management policies to be applied to service mesh traffic, policy evaluation in `mixer` needs to be enabled. By default, policy checks are disabled in the service mesh.
 
-. By default, policy checks are disabled in the Service Mesh. To enable policy checks, use the _oc_ client to edit the ServiceMeshControlPlane resource in the control plane namespace:
+. Use the `oc` client to edit the `ServiceMeshControlPlane` resource in the control plane namespace:
 +
 ----
 $ oc edit servicemeshcontrolplane full-install -n $SM_CP_NS
 ----
-+
-Check the value of the `disablePolicyChecks` in the `global` section. Make sure the value is set to `false`: 
+
+. In the `global` section, set the value of `disablePolicyChecks` to `false`:
 +
 ----
     global:
       disablePolicyChecks: false
 ----
-+
-Save the modified resource.
 
-=== 3scale Istio Adapter components
+. Save the modified resource.
 
-Your service mesh _control plane_ was initially installed without the 3scale mixer adapter.
+=== Explore 3scale Istio Adapter Components
+
+Your service mesh control plane was initially installed without the 3scale Istio adapter.
 In this section of the lab, you enable it.
 
-. Update the _ServiceMeshControlPlane_ resource with the _threeScale_ component:
+. Update the `ServiceMeshControlPlane` resource with the `threeScale` component:
 +
 -----
 $ oc patch smcp/full-install -n $SM_CP_NS --type=json -p \
@@ -172,76 +168,71 @@ $ oc patch smcp/full-install -n $SM_CP_NS --type=json -p \
     }
 ]'
 -----
-+
-Notice that the above configuration enables the _threeScale_ mixer plugin and also specifies the exact tag of the _3scale-istio-adapter_ link:https://access.redhat.com/containers/?tab=tags#/registry.access.redhat.com/openshift-service-mesh/3scale-istio-adapter-rhel8[image to pull] (from registery.redhat.io).
+* Note that the above configuration enables the `threeScale` Mixer plug-in and also specifies the exact tag of the `3scale-istio-adapter` link:https://access.redhat.com/containers/?tab=tags#/registry.access.redhat.com/openshift-service-mesh/3scale-istio-adapter-rhel8[image to pull] from registry.redhat.io.
 
-. Because a change was made to the _ServiceMeshControlPlane_, expect the Red Hat Service Mesh operator to detect this change.
-It will eventually automatically start a _3scale-istio-adapter_ deployment.
-Monitor the pods of your service mesh control plane to view the new _3scale-istio-adapter_ pod.
+* Because a change was made to `ServiceMeshControlPlane`, expect the OpenShift Service Mesh operator to detect this change.
+Eventually, it automatically starts a `3scale-istio-adapter` deployment.
+. Monitor the pods of your service mesh control plane to view the new `3scale-istio-adapter` pod.
 
-. Review 3scale Istio Adapter components in your service mesh control plane namespace:
+. Review the 3scale Istio adapter components in your service mesh control plane namespace:
 +
 -----
 $ oc get all -l app=3scale-istio-adapter -n $SM_CP_NS
 -----
 
-.. The response should list the _3scale-istio-adapter_ related deployment, replicaset and pod.
+* Expect the response to list the `3scale-istio-adapter` deployment, ReplicaSet, and pod.
 
-.. As per the diagram above, the _3scale-istio-adapter_ Linux container includes the following two components:
+* Per the diagram above, the `3scale-istio-adapter` Linux container includes the following two components:
+** `3scale-istio-adapter`: Accepts gRPC invocations from the Istio ingress gateway and routes them to the other sidecar in the pod, `3scale-istio-httpclient`.
 
-... *3scale-istio-adapter*
+** `3scale-istio-httpclient`: Accepts invocations from `3scale-istio-adapter` and invokes the `system-provider` and `backend-listener` endpoints of the remote Red Hat 3scale API Management system.
+
+. View listings of configurations that support the 3scale Istio adapter:
 +
-Accepts gRPC invocations from Istio ingress and routes to the other side car in the pod:  _3scale-istio-httpclient_
+[NOTE]
+====
+Embedded in the following YAML files is the 3scale `handler` resource that is injected into the Istio Mixer.
+This `handler` resource is written in Golang by the 3scale engineering team per the link:https://github.com/istio/istio/wiki/Mixer-Out-Of-Process-Adapter-Dev-Guide[Mixer Out of Process Adapter Dev Guide].
+Many of these files consist of the adapter's configuration link:https://developers.google.com/protocol-buffers/docs/proto3[proto].
+====
 
-... *3scale-istio-httpclient*
-+
-Accepts invocations from _3scale-istio-adapter_ and invokes the _system-provider_ and _backend-listener_ endpoints of the remote Red Hat 3scale API Management manager.
-
-. View listing of configs that support the 3scale Mixer Adapter:
-+
-Embedded in the following YAML files is the 3scale _handler_ that is injected into the Istio Mixer.
-This _handler_ is written in Golang by the 3scale engineering team as per the link:https://github.com/istio/istio/wiki/Mixer-Out-Of-Process-Adapter-Dev-Guide[Mixer Out of Process Adapter Dev Guide].
-Much of these files consist of the adapter's configuration link:https://developers.google.com/protocol-buffers/docs/proto3[proto].
-
-.. Adapters:
+.. View adapters:
 +
 -----
 $ oc get adapters.config.istio.io -n $SM_CP_NS
 -----
 +
+.Sample Output
 -----
 threescale   3h26m
 -----
 
-.. Template:
+.. View templates:
 +
 -----
 $ oc get templates.config.istio.io -n $SM_CP_NS
 -----
 +
+.Sample Output
 -----
 threescale-authorization   3h26m
 -----
 
-== Red Hat 3scale Mixer Adapter Configurations
+== Configure 3scale Istio Adapter
 
-Now that 3scale Istio Adapter has been verified to exist, the adapter needs to be configured to apply API policies to traffic to the Emergency Response _incident service_.
+Now that you have verified that the 3scale Istio adapter exists, you need to configure the adapter to apply API policies to traffic to the Emergency Response Demo incident service.
 
-In particular, you will specify the URL of the _system-provider_ endpoint of your 3scale tenant along with the corresponding access token.
-This is needed so that the Istio Mixer can pull API proxy details from the 3scale API Manager (similar to what the 3scale API Gateway does).
+In particular, you specify the URL of the `system-provider` endpoint of your 3scale API Management tenant along with the corresponding access token.
+This is needed so that the Istio Mixer can pull API proxy details from the 3scale API Management system (similar to what the 3scale APIcast gateway does).
 
-. From a previous module of this course, you should have already completed the following lab:  _North / South Traffic Lab_.
-+
-From this previous lab, you should have set the following environment variables:
+. Confirm that you have the following environment variables (set during the north/south traffic lab):
 
-.. *INCIDENT_SERVICE_API_KEY*
-.. *INCIDENT_SERVICE_ID*
-.. *SYSTEM_PROVIDER_URL*
-.. *API_ADMIN_ACCESS_TOKEN*
+.. `INCIDENT_SERVICE_API_KEY`
+.. `INCIDENT_SERVICE_ID`
+.. `SYSTEM_PROVIDER_URL`
+.. `API_ADMIN_ACCESS_TOKEN`
 
-. Clone the source code of the 3scale Istio Mixer configurations.
-+
-Execute:
+. Clone the source code of the 3scale Istio adapter configurations:
 +
 -----
 $ git clone \
@@ -263,45 +254,47 @@ $ sed -i "s/service_id: .*/service_id: \"$INCIDENT_SERVICE_ID\"/" \
       $HOME/lab/istio-integration/istio/threescale-adapter-config.yaml
 -----
 
-. Modify the `threescale-adapter-config.yaml` file with the URL to your Red Hat 3scale API Management manager tenant:
+. Modify the `threescale-adapter-config.yaml` file with the URL to your 3scale API Management tenant:
 +
 -----
 $ sed -i "s/system_url: .*/system_url: \"https:\/\/$SYSTEM_PROVIDER_URL\"/" \
       $HOME/lab/istio-integration/istio/threescale-adapter-config.yaml
 -----
 
-. Modify the `threescale-adapter-config.yaml` file with the administrative access token of your Red Hat 3scale API Management manager administration account:
+. Modify the `threescale-adapter-config.yaml` file with the administrative access token of your 3scale API Management administration account:
 +
 -----
 $ sed -i "s/access_token: .*/access_token: \"$API_ADMIN_ACCESS_TOKEN\"/" \
       $HOME/lab/istio-integration/istio/threescale-adapter-config.yaml
 -----
 
-. The _rule_ in _threescale-adapter-config.yaml_ defines the conditions that API Management policies should be applied to a request.
-+
-The existing default rule is as follows:
+. Review the `rule` in `threescale-adapter-config.yaml` that defines the conditions for applying API management policies to a request.
+
+* The existing default rule is as follows:
 +
 -----
 match: destination.labels["service-mesh.3scale.net"] == "true"
------ 
-+
-This rule specifies that API Management policies should be applied to the request when the target Deployment includes a label of:  `service-mesh.3scale.net`.
+-----
 
-.. Update the `threescale-adapter-config.yaml` file with a modified rule that specifies that API Management policies should be applied when the target is the Incident Service:
+* This rule specifies that API management policies are applied to the request when the target deployment includes the `service-mesh.3scale.net` label.
+
+. Update the `threescale-adapter-config.yaml` file with a modified rule specifying that API management policies are to be applied when the target is the incident service:
 +
 -----
 $ sed -i "s/match: .*/match: destination.service.name == \"$ERDEMO_USER-incident-service\"/" \
       $HOME/lab/istio-integration/istio/threescale-adapter-config.yaml
 -----
++
+[NOTE]
+You can find more information about Istio's Policy Attribute Vocabulary (used in the creation of rules) link:https://istio.io/docs/reference/config/policy-and-telemetry/attribute-vocabulary/[here].
 
-.. More information about Istio's Policy Attribute Vocabulary (used in the creation of rules) can be found link:https://istio.io/docs/reference/config/policy-and-telemetry/attribute-vocabulary/[here].
-
-. Load the Red Hat 3scale API Management Istio Handler configurations:
+. Load the 3scale Istio adapter configurations:
 +
 ----
 $ oc create -f $HOME/lab/istio-integration/istio/threescale-adapter-config.yaml -n $SM_CP_NS
 ----
 +
+.Sample Output
 ----
 handler.config.istio.io/threescale created
 instance.config.istio.io "threescale-authorization" created
@@ -310,7 +303,7 @@ rule.config.istio.io "threescale" created
 +
 [NOTE]
 ====
-If for whatever reason you want to delete these 3scale Istio mixer adapter configurations, execute the following:
+If you need to delete these 3scale Istio adapter configurations, execute the following commands:
 
 -----
 $ oc delete rule.config.istio.io threescale -n $SM_CP_NS
@@ -319,13 +312,13 @@ $ oc delete handler.config.istio.io threescale -n $SM_CP_NS
 -----
 ====
 
-. Verify that the Istio Handler configurations were created in the service mesh control plane namespace:
+. Verify that the 3scale Istio adapter `handler` configurations were created in the service mesh control plane namespace:
 +
 -----
 $ oc get handler threescale -n $SM_CP_NS -o yaml
 -----
 +
-.Output
+.Sample Output
 -----
 apiVersion: v1
 items:
@@ -345,23 +338,25 @@ items:
 
 -----
 
-== 3scale _incident-service_ Production Base URL
+== Update Production Base URL
 
-. Point your browser to the Admin Console of your 3scale tenant which is available at the following URL:
+In this section of the lab, you update your incident service's production base URL to the 3scale production base URL.
+
+. Point your browser to the Admin Portal of your 3scale API Management tenant, which is available at the following URL:
 +
 -----
 $ echo -en "\n\nhttps://$(oc get routes -n $API_MANAGER_NS | grep admin | grep $ERDEMO_USER | awk '{print $2}')\n"
 -----
 
 . Authenticate using the values of the following environment variables:
-.. *Username*:  $API_TENANT_USERNAME
-.. *Password*:  $API_TENANT_PASSWORD
+.. *Username*: `$API_TENANT_USERNAME`
+.. *Password*: `$API_TENANT_PASSWORD`
 
-. Navigate to the `APIcast configuration` page of the _incident_service_.
+. In your `incident-service` API, navigate to *Integration -> Configuration* and click *edit APIcast configuration*:
 +
 image::images/edit_apicast.png[]
 
-. Change the value of the _Production Base URL_ to the value of the following:
+. Change the value of *Production Public Base URL* to the value of the following:
 +
 -----
 $ echo -en "\nhttps://`oc get route incident-service-gateway -n $SM_CP_NS -o template --template {{.spec.host}}:443`\n\n"
@@ -369,22 +364,22 @@ $ echo -en "\nhttps://`oc get route incident-service-gateway -n $SM_CP_NS -o tem
 +
 image::images/istioingress_public_url.png[]
 
-. Save the configuration change by scrolling down to the bottom of the page and clicking: `Update & test in Staging Environment`
+. Save the configuration change by scrolling down to the bottom of the page and clicking *Update & test in Staging Environment*:
 +
 image::images/back_to_integration.png[]
 
 
-. Promote the change to production
-.. Click the link: `Back to Integration & Configuration`
-.. Click the link: `Promote to Production`
+. Promote the change to production:
+.. Click *Back to Integration & Configuration*.
+.. Click *Promote to Production*:
 +
 image::images/promote.png[]
 
 
 
-== Smoke Test 3scale Istio Mixer Adapter
+== Smoke Test 3scale Istio Adapter
 
-. From the terminal, execute the following _curl_ command to invoke your incident service directly via the Istio ingress:
+. From the terminal, execute the following `curl` command to invoke your incident service directly via the Istio ingress gateway:
 +
 -----
 $ curl -v -k \
@@ -402,13 +397,13 @@ $ curl -v -k \
 
 PERMISSION_DENIED:threescalehandler.handler.istio-system:no auth credentials provided or provided in invalid location
 -----
-* Notice a 403 error response of `PERMISSION_DENIED:threescalehandler.handler.istio-system:`. This is to be expected.
-+
-Inbound requests through the Istio ingress are now correctly flowing through the mixer to the 3scale adapter.
-+
-In the above request however, the API _user_key_ associated with your incident service _application_ has been omitted.
+* Expect to see a 403 error response with a "PERMISSION_DENIED:threescalehandler.handler.istio-system:..." message.
 
-* View the log file of the 3scale adapter:
+* Inbound requests through the Istio ingress gateway are now correctly flowing through the Mixer to the 3scale Istio adapter.
+
+* In the example above, the API `user_key` value associated with your incident service application was omitted.
+
+. View the log file of the 3scale Istio adapter:
 +
 -----
 $ oc logs -f `oc get pod -n $SM_CP_NS | grep "3scale-istio-adapter" | awk '{print $1}'` \
@@ -424,27 +419,27 @@ $ oc logs -f `oc get pod -n $SM_CP_NS | grep "3scale-istio-adapter" | awk '{prin
 "proxy config for service id 4 is being fetching from 3scale"
 -----
 
-. Try again to invoke your incident-service using the incident-service _user_key_:
+. Invoke your incident service again, this time using the incident service `user_key` value:
 +
 -----
 $ curl -v -k \
        `echo "https://"$(oc get route incident-service-gateway -n $SM_CP_NS -o template --template {{.spec.host}})"/incidents?user_key=$INCIDENT_SERVICE_API_KEY"`
 -----
 
-Congratulations! The incident-service is again being managed and secured by the Red Hat 3scale API Management manager.
-This time however, the 3scale Istio Mixer adapter is being utilized rather than the API gateway.
+* Expect to see that the incident service is again being managed and secured by Red Hat 3scale API Management.
+This time however, the 3scale Istio adapter is being utilized rather than the API gateway.
 
-== Fine-tune 3scale Istio Mixer Adapter Rules
+== Fine-Tune 3scale Istio Adapter Rules
 
-At this point, *all* traffic inbound through the Istio ingress is configured to route through the 3scale Istio Mixer adapter.
+At this point, _all_ traffic inbound through the Istio ingress gateway is configured to route through the 3scale Istio adapter.
 Your use case may require more fine-grained routing rules.
 
-In this last section of the lab, you specify that GET requests to the incident-service `/incidents` endpoint can bypass the 3scale Istio Mixer adapter and invoke the incident-service without API policies having been applied.
-Instead, all POST requests to the `/incidents` endpoint will continue to have API policies applied via the 3scale Istio Mixer adapter.
+In this section of the lab, you specify that GET requests to the incident service's `/incidents` endpoint can bypass the 3scale Istio adapter and invoke the incident service without applying API policies.
+However, all POST requests to the `/incidents` endpoint continue to have API policies applied via the 3scale Istio adapter.
 
 [NOTE]
 ====
-For this section of the lab to work as expected, you will need to delete the _ServiceRole_ and _ServiceRoleBinding_ resources created in the _Secure mTLS_ lab.
+For this section of the lab to work as expected, you need to delete the `ServiceRole` and `ServiceRoleBinding` resources you created in the Secure mTLS lab in module 2.
 
 ----
 $ oc delete servicerole incident-service-ingress -n $ERDEMO_NS
@@ -452,58 +447,57 @@ $ oc delete servicerolebinding incident-service-ingress -n $ERDEMO_NS
 ----
 ====
 
-=== HTTP POST
+=== Configure HTTP POST Mapping Rule
 
-In the admin console of the 3scale tenant, you need to configure a _mapping rule_ for your _incident-service_ API service.
-This mapping rule will allow for HTTP POST requests to the incident service (so as to create incidents).
+In the Admin Portal of the 3scale API Management tenant, you need to configure a _mapping rule_ for your `incident-service` API service.
+This mapping rule allows for HTTP POST requests to the incident service in order to create incidents.
 
-. Access your 3scale by Red Hat Admin Portal by pointing your browser to the output of the following:
+. Access your Admin Portal by pointing your browser to the output of the following:
 +
 -----
 $ echo -en "\n\nhttps://$(oc get routes -n $API_MANAGER_NS | grep admin | grep $ERDEMO_USER | awk '{print $2}')\n"
 -----
 
 . Authenticate using the following values:
-.. *Username*:  $API_TENANT_USERNAME
-.. *Password*:  $API_TENANT_PASSWORD
+.. *Username*: `$API_TENANT_USERNAME`
+.. *Password*: `$API_TENANT_PASSWORD`
 
-. In the Admin Portal of your 3scale API Manager tenant, navigate to: `API: Incident-service -> Integration -> Configuration -> edit APIcast configuration`
+. In your `incident-service` API, navigate to *Integration -> Configuration* and click *edit APIcast configuration*:
 +
-images/edit_apicast_configs.png[]
+image::images/edit_apicast_configs.png[]
 
-. Scroll down to the _MAPPING RULES_ section and add a new mapping rule with the following value:
-.. *Verb*: POST
-.. *Pattern*: /
+. Scroll down to the *MAPPING RULES* section and add a new mapping rule with the following values:
+.. *Verb*: `POST`
+.. *Pattern*: `/`
 +
 image::images/post_mapping.png[]
 
-. Scroll down to the bottom and click: `Update & test in Staging Environment`.
-. Afterwards, click the link the link in the left panel:  `Integration -> Configuration`.
-. Click the blue button to `Promote to Production`:
+. Scroll down to the bottom and click *Update & test in Staging Environment*.
+. Click *Back to Integration & Configuration*.
+. Click *Promote to Production*:
 +
 image::images/promote.png[]
- 
-. At the command line, modify the existing `usethreescale` rule in the $SM_CP_NS:
+
+. At the command line, modify the existing `usethreescale` rule in `$SM_CP_NS`:
 +
 -----
 $ oc patch rule.config.istio.io threescale \
        --type=json \
        --patch '[{"op": "add", "path": "/spec/match", "value":"destination.service.name == \"'$ERDEMO_USER'-incident-service\" && source.namespace != \"'$ERDEMO_NS'\" && request.method == \"POST\" && request.path.startsWith(\"/incidents\")"  }]' \
-       -n $SM_CP_NS 
+       -n $SM_CP_NS
 -----
-+
-This modification introduces a fine grained _match_ rule with several conditions. 
-Only when all of the conditions are met, will the inbound traffic be routed to the 3scale mixer adapter.
-+
-The conditions of the rule are as follows:
+* This modification introduces a fine-grained `match` rule with several conditions.
+When all of the conditions are met, the inbound traffic is routed to the 3scale Istio adapter.
 
-.. The destination service needs to be the Incident Service.
-.. The inbound request needs to originate from outside the $ERDEMO_NS (that is, from the istio-ingress of the $SM_CP_NS namespace).
-.. The HTTP verb is of type: `POST`.
-.. The target is the `/incidents/` endpoint.
+. Review the conditions of the rule:
+
+* The destination service needs to be the incident service.
+* The inbound request needs to originate from outside `$ERDEMO_NS` (that is, from the `istio-ingress` of the `$SM_CP_NS` namespace).
+* The HTTP verb is of type `POST`.
+* The target is the `/incidents/` endpoint.
 
 
-. View the log file of the _istio-policy_ pod:
+. View the `istio-policy` pod's log file:
 +
 -----
 $ oc logs -f `oc get pod -n $SM_CP_NS | grep "istio-policy" | awk '{print $1}'` -c mixer -n $SM_CP_NS
@@ -528,23 +522,21 @@ info    adapters        serving prometheus metrics on 42422     {"adapter": "han
 Starting gRPC server on port 9091
 info    ControlZ available at 172.17.0.10:9876
 -----
-+
-In particular, notice that the new policies were put into effect with no error messages logged.
+* In particular, note that the new policies were put into effect with no error messages logged.
 
 
 === Test
-. Try again to invoke your incidents-service *without* the incident service _user_key_:
+. Invoke your incident service again, this time _without_ the incident service `user_key` value:
 +
 -----
 $ curl -v -k \
        `echo "https://"$(oc get route incident-service-gateway -n $SM_CP_NS -o template --template {{.spec.host}})"/incidents"`
 -----
-+
-This request should have now been routed directly to your backend incident-service.
-This is because the an HTTP GET is being used in the request (which fails the third condition of the rule).
-Subsequently, the API _user_key_ is not needed.
+* Expect this request to be routed directly to your back-end incident service.
+This is because the request is using an HTTP GET, which causes the third condition of the rule to fail.
+Subsequently, the API `user_key` value is not needed.
 
-. Try to POST a new incident service *without* the incident service _user_key_:
+. Try to POST a new incident service _without_ the incident service `user_key` value:
 +
 -----
 $ curl -v -k \
@@ -557,15 +549,13 @@ $ curl -v -k \
   "numberOfPeople": 3,
   "medicalNeeded": "true",
   "victimName": "victim",
-  "victimPhoneNumber": "111-111-111" 
+  "victimPhoneNumber": "111-111-111"
 }'
 -----
-+
-This request should have been routed to the 3scale Istio Mixer adapter.
-This is because all three conditions of the routing rule have been met.
-Subsequently, because the API _user_key_ was not applied, the response should be "403 PERMISSION DENIED".
+* Expect this request to be routed to the 3scale Istio adapter because all three conditions of the routing rule have been met.
+* Also expect the response to be "403 PERMISSION DENIED" because the API `user_key` value was not applied.
 
-. Try again using an HTTP POST to create a new incident and using _user_key_:
+. Try again, this time using an HTTP POST to create a new incident and using the `user_key` value:
 +
 -----
 $ curl -v -k \
@@ -578,21 +568,24 @@ $ curl -v -k \
   "numberOfPeople": 3,
   "medicalNeeded": "true",
   "victimName": "victim",
-  "victimPhoneNumber": "111-111-111" 
+  "victimPhoneNumber": "111-111-111"
 }'
 -----
-+
-This request should have been routed to the 3scale Istio Mixer adapter.
-Subsequently, because the API _user_key_ was applied, the response should be "201 Created".
+* Expect this request to be routed to the 3scale Istio adapter and, because the API `user_key` value was applied, a "201 Created" response to the request.
 
 == Extra Credit
 
-Until now, specific endpoints of a single backend _incident_ service are being managed by the API Manager via the 3scale Istio Mixer adapter.
+Until now, specific endpoints of a single back-end incident service were being managed by the 3scale API Management via the 3scale Istio adapter.
 
-As an additional exercise, configure the service mesh such that API Policies are applied to requests to the Emergency Response _responder-service_ via the _ingress-gateway_.
+As an optional exercise, configure the service mesh so that API policies are applied to requests to the Emergency Response Demo `responder-service` via the `ingress-gateway`.
+
+****
+*Question*:
 
 Which configurations need to be modified or added?
+****
 
+This concludes the lab. You learned about the 3scale Istio adapter and its components and applied API policies to network traffic within a microservices application using it.
 
 
 ifdef::showscript[]
@@ -603,11 +596,9 @@ In this lab we covered the following topics:
 
 * Injecting Istio Envoy proxy configurations into an API gateway
 * Configuration of an Istio Egress Route to allow the API gateway to communicate to the remote API Manager
-* Invocation of your backend service via the Istio Ingress gateway and Red Hat 3scale API Management gateway
+* Invocation of your back-end service via the Istio Ingress gateway and Red Hat 3scale API Management gateway
 * End-to-end distributed tracing of an MSA application using the Jaeger implementation of the _OpenTracing_ specification
 * Review of the analytics dashboard provided by Red Hat 3scale API Management
 * Introduction to the Red Hat 3scale API Management Mixer Adapter
 
 endif::showscript[]
-
-

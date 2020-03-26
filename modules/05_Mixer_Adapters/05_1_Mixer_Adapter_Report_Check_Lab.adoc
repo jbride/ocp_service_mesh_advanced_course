@@ -7,29 +7,34 @@
 == Mixer Adapter Report and Check Lab
 
 .Goals
-* Understand Service Mesh Mixer Adapters.
-* Create and deploy custom resources to configure built-in Mixer Adapters
+* Understand service mesh Mixer adapters
+* Create and deploy custom resources to configure built-in Mixer adapters
 
-Mixer is the Service Mesh component responsible for policy checks and telemetry reporting. Mixer interfaces with infrastructure backends - access control systems, telemetry capturing systems, quota enforcement systems - through adapters. +
-Adapters fall in two categories - _check_ or _policy_ - depending whether they are involved in policy enforcement or telemetry reporting. Policy checks happens in the service proxy before a request is transmitted to the target service. Telemetry data is sent by the service proxy to Mixer after a request to the target service. +
-Mixer comes with a set of built-in adapters for a range of backend systems (e.g. Prometheus), as well as a number of adapters that are self-contained. +
-Configuring a Mixer adapter requires a combination of _instance_, _handler_ and _rule_ resources.
+.Overview
 
-In this lab, you will explore some of the built-in mixer adapters for telemetry and policy checks.
+Mixer is the Red Hat^(R)^ OpenShift^(R)^ Service Mesh component responsible for policy checks and telemetry reporting. Mixer interfaces with infrastructure back ends--access control systems, telemetry capturing systems, and quota enforcement systems--through adapters.
 
-=== Mixer Adapter Report: Stdio mixer adapter
+Adapters fall into two categories--check or report--depending on whether they are involved in policy enforcement or telemetry reporting. Policy checks happen in the service proxy before a request is transmitted to the target service. Telemetry data is sent by the service proxy to Mixer after a request to the target service.
 
-The _stdio_ adapter enables Istio to output logs and metrics to the local machine. Logs and metrics can be directed to Mixer’s standard output or error stream, standard error stream, or to any locally reachable file. When outputting to files, you can enable file rotation such that the adapter will automatically manage a set of file backups as data is generated. +
+Mixer comes with a set of built-in adapters for a range of back-end systems such as Prometheus, as well as a number of adapters that are self-contained.
+Configuring a Mixer adapter requires a combination of `instance`, `handler`, and `rule` resources.
+
+In this lab, you explore some of the built-in Mixer adapters for telemetry reporting and policy checks.
+
+:numbered:
+== Explore Stdio Mixer Adapter
+
+The `stdio` adapter enables Istio to output logs and metrics to the local machine. Logs and metrics can be directed to Mixer’s standard output or error stream or to any locally reachable file. When outputting to files, you can enable file rotation so that the adapter automatically manages a set of file backups as data is generated.
 The logs can also be captured by a FluentD daemon for log aggregation.
 
-This adapter supports the _logentry_ template and the _metric_ template.
+This adapter supports the `logentry` template and the `metric` template.
 
 [NOTE]
-Service Mesh also comes with a FluentD Mixer Adapter, which allows to deliver logs directly to a FluentD daemon.
+OpenShift Service Mesh also comes with a FluentD Mixer adapter, which allows you to deliver logs directly to a FluentD daemon.
 
-In this section of the lab, you will configure the stdio Mixer adapter to log HTTP requests to the services of the Emergency Response Demo.
+In this section of the lab, you configure the `stdio` Mixer adapter to log HTTP requests to the services of the Emergency Response Demo application.
 
-. Create an Instance CR in the Emergency Response Demo namespace.
+. Create an `instance` CR in the Emergency Response Demo namespace:
 +
 ----
 $ echo "---
@@ -59,13 +64,21 @@ spec:
     monitored_resource_type: '\"UNSPECIFIED\"'
 " | oc create -f - -n $ERDEMO_NS
 ----
-* The Instance resource uses the _logentry_ template,one of the templates supported by the stdio adapter.
-* The logentry template supports the following parameters - refer to the Istio upstream documentation for the complete list of supported parameters:
-** `severity`: Type `string`, indicates the importance of the log entry.
-** `timestamp`: Type `TimeStamp`, time value for the log value. Set to the attribute `request.time`, which represents the timestamp when the destination receives the request, as provided by Envoy.  
-** `variables`: Type `map<string, Value>`. Each element in the map becomes an entry in the produced log entry. The elements are typically populated with attributes provided by Envoy.
+* The `instance` resource uses the `logentry` template, which is one of the templates supported by the `stdio` adapter.
+* The `logentry` template supports the following parameters:
++
+[cols="1,1,3",options="header"]
+|====
+|Parameter  | Type  | Description
+| `severity` | `string` | Indicates the importance of the log entry.
+| `timestamp` | `TimeStamp` | Time value for the log value. Set to the `request.time` attribute, which represents the timestamp when the destination receives the request, as provided by Envoy.
+| `variables` |  `map<string, Value>` | Each element in the map becomes an entry in the produced log entry. The elements are typically populated with attributes provided by Envoy.
+|====
++
+[TIP]
+Refer to the Istio upstream documentation for the complete list of supported parameters.
 
-. Create a Handler CR in the Emergency Response Demo namespace.
+. Create a `handler` CR in the Emergency Response Demo namespace:
 +
 ----
 $ echo "---
@@ -82,12 +95,17 @@ spec:
 " | oc create -f - -n $ERDEMO_NS
 ----
 +
-* The handler references the built-in adapter `stdio`.
-* The stdio adapter is configured with the following parameters - refer to the Istio upstream documentation for the complete list of supported parameters:
-** `severity_levels`: Type `map<string, Level>`. In this example the _info_ level defined in the instance resource is mapped to the _INFO_ level supported by the adapter.	
-** `outputAsJson`: directs the adapter to generate JSON-formatted log lines.
+* The handler references the built-in `stdio` adapter.
+* The `stdio` adapter is configured with the following parameters:
++
+[cols="1,1,3",options="header"]
+|====
+|Parameter  | Type  | Description
+| `severity_levels` | `map<string, Level>` | In this example, the `info` level defined in the instance resource is mapped to the `INFO` level supported by the adapter.
+| `outputAsJson`| `bool` | Directs the adapter to generate JSON-formatted log lines.
+|====
 
-. Create a Rule CR in the Emergency Response Demo namespace.
+. Create a `rule` CR in the Emergency Response Demo namespace:
 +
 ----
 $ echo "---
@@ -103,11 +121,13 @@ spec:
      - access-log
 " | oc create -f - -n $ERDEMO_NS
 ----
-* The rule directs Mixer to send all `access-log` instances to the `access-log-handler` handler. 
-* The match parameter predicate evaluates to true if the protocol of the request is http, so the rule is executed for all http requests.
+* The rule directs Mixer to send all `access-log` instances to the `access-log-handler` handler.
+* The match parameter predicate evaluates to true if the protocol of the request is HTTP, so the rule is executed for all HTTP requests.
 
-. In a browser window, navigate to the disaster simulator application (https://disaster-simulator.$ERDEMO_USER.apps.$SUBDOMAIN_BASE). Click a couple of times on the `Clear Incidents` button. This causes a REST call to the Incident Service and the Incident Priority Service. +
-Check the logs of the `istio-telemetry` pod in the Service Mesh control plane. Expect to see some entries like:
+. In a browser window, navigate to the disaster simulator application at `https://disaster-simulator.$ERDEMO_USER.apps.$SUBDOMAIN_BASE`.
+. Click the *Clear Incidents* button a few times.
+* This causes a REST call to the incident service and the incident priority service.
+. View the logs of the `istio-telemetry` pod in the service mesh control plane and expect to see entries similar to this:
 +
 ----
 {"level":"info","time":"2020-01-24T11:46:01.266021Z","instance":"access-log.instance.user1-er-demo","destination":"user1-disaster-simulator","forwardedFor":"10.128.2.115","host":"disaster-simulator.user1.apps.cluster-44e5.44e5.example.opentlc.com","latency":"967.171µs","method":"GET","protocol":"http","responseCode":200,"responseSize":107,"source":"istio-ingressgateway","sourceIp":"10.131.0.167","url":"/c/incidents?clearIncidents=true","user":"cluster.local/ns/admin1-istio-system/sa/istio-ingressgateway-service-account","userAgent":"Mozilla/5.0 (X11; Fedora; Linux x86_64; rv:71.0) Gecko/20100101 Firefox/71.0"}
@@ -117,48 +137,46 @@ Check the logs of the `istio-telemetry` pod in the Service Mesh control plane. E
 {"level":"info","time":"2020-01-24T11:46:01.275598Z","instance":"access-log.instance.user1-er-demo","destination":"user1-incident-service","forwardedFor":"unknown","host":"user1-incident-service.user1-er-demo.svc:8080","latency":"5.8609ms","method":"POST","protocol":"http","responseCode":200,"responseSize":0,"source":"user1-disaster-simulator","sourceIp":"10.128.2.123","url":"/incidents/reset","user":"cluster.local/ns/user1-er-demo/sa/disaster-simulator-service","userAgent":"Vert.x-WebClient/3.7.0"}
 ----
 
-. To see log entries from requests coming from outside of the mesh, execute some _curl_ requests against the incident service:
+. To see log entries from requests coming from outside the mesh, execute some `curl` requests against the incident service:
 +
 ----
 $ curl -k incident-service.$ERDEMO_USER.apps.$SUBDOMAIN_BASE/incidents
 ----
-+
-Check the logs of the `istio-telemetry` pod:
+
+. View the logs of the `istio-telemetry` pod:
 +
 ----
 {"level":"info","time":"2020-01-24T11:48:13.715957Z","instance":"access-log.instance.user1-er-demo","destination":"user1-incident-service","forwardedFor":"10.131.0.172","host":"incident-service.user1.apps.cluster-44e5.44e5.example.opentlc.com","latency":"19.43911ms","method":"GET","protocol":"http","responseCode":200,"responseSize":2,"source":"istio-ingressgateway","sourceIp":"10.131.0.167","url":"/incidents","user":"cluster.local/ns/admin1-istio-system/sa/istio-ingressgateway-service-account","userAgent":"curl/7.66.0"}
 ----
 
-=== Mixer Adapter Check: Memquota mixer adapter
+== Explore Memquota Mixer Adapter
 
-The Service Mesh built-in adapters `memquota` and `redisquota` can be used to support the Service Mesh quota management system and rate-limit traffic to services based on e.g. the origining IP address. +
-The `memquota` adapter stores the quota values in memory in the Mixer pod, and as such is not suitable for production usage. The `redisquota` adapter relies on a Redis server to store the quota values. In this lab you will use the `memquota` adapter. 
+The OpenShift Service Mesh built-in `memquota` and `redisquota` adapters can be used to support the service mesh quota management system and to rate limit traffic to services based on, for example, the originating IP address.
+The `memquota` adapter stores the quota values in memory in the Mixer pod, and as such is not suitable for production usage. The `redisquota` adapter relies on a Redis server to store the quota values. In this exercise, you use the `memquota` adapter.
 
-Rate limit configuration is split into 2 parts:
+Rate limit configuration is split into two parts:
 
-* Client Side:
-** _QuotaSpec_:  defines quota name and amount that the client should request.
-** _QuotaSpecBinding_: associates QuotaSpec with one or more services.
-* Mixer Side: combination of _Instance_, _Handler_ and _Rule_ resources.
+* Client-side configuration:
+** `QuotaSpec`: Defines the quota name and the amount that the client should request.
+** `QuotaSpecBinding`: Associates `QuotaSpec` with one or more services.
+* Mixer-side configuration: A combination of `instance`, `handler`, and `rule` resources.
 
-In this lab you will introduce a rate limit for calls to the Incident Service coming from outside of the OpenShift cluster.
+In this exercise, you introduce a rate limit for calls to the incident service coming from outside the OpenShift Container Platform cluster.
 
-. By default, policy checks are disabled in the Service Mesh. To enable policy checks, use the _oc_ client to edit the ServiceMeshControlPlane resource in the control plane namespace:
+. By default, policy checks are disabled in the service mesh. Use the `oc` client to edit the `servicemeshcontrolplane` resource in the control plane namespace to enable policy checks:
 +
 ----
 $ oc edit servicemeshcontrolplane full-install -n $SM_CP_NS
 ----
-+
-Change the value of the `disablePolicyChecks` in the `global` section to true.
+
+. In the `global` section, change the value of `disablePolicyChecks` to `true`, and then save your changes:
 +
 ----
     global:
       disablePolicyChecks: false
 ----
-+
-Save the modified resource.
 
-. Create the instance CR in the Service Mesh Control Plane:
+. Create the `instance` CR in the service mesh control plane:
 +
 ----
 $ echo "---
@@ -178,7 +196,7 @@ spec:
 * The instance references the `quota` template.
 * The `dimensions` parameter defines a set of criteria against which quota can be defined.
 
-. Create the Handler CR in the control plane namespace:
+. Create the `handler` CR in the control plane namespace:
 +
 ----
 $ echo "---
@@ -203,10 +221,12 @@ spec:
 " | oc create -f - -n $SM_CP_NS
 ----
 * The handler references the built-in `memquota` adapter.
-* The handler defines 2 different rate limit schemes. The default, if no overrides match, is 500 requests per one second. One override is defined: if the request has the Service Mesh Ingress Gateway as source, and the Incident Service as target, the request rate is limited to 1 request every 5 seconds. + 
-When a request is processed, the first matching override is picked (reading from top to bottom).
+* The handler defines two rate-limit schemes.
+** The default, if no overrides match, is 500 requests per one second.
+** One override is defined: If the request has the service mesh ingress gateway as the source and the incident service as the target, the request rate is limited to one request every five seconds. 
+* When a request is processed, the first matching override is picked (reading from top to bottom).
 
-. Create the Rule CR in the control plane namespace.
+. Create the `rule` CR in the control plane namespace:
 +
 ----
 $ echo "---
@@ -221,9 +241,9 @@ spec:
     - requestcountquota
 " | oc create -f - -n $SM_CP_NS
 ----
-* The rule matches the handler with the instance. There is no match element in the rule, so it will match all requests.
+* The rule matches the handler with the instance. There is no match element in the rule, so it matches all requests.
 
-. Create the client side QuotaSpec CR:
+. Create the client-side `QuotaSpec` CR:
 +
 ----
 $ echo "---
@@ -238,9 +258,9 @@ spec:
       quota: requestcountquota
 " | oc create -f - -n $SM_CP_NS
 ----
-* The QuotaSpec references the `requestcountquota` instance, and sets a charge of 1 per instance.
+* The `QuotaSpec` CR references the `requestcountquota` instance, and sets a charge of one per instance.
 
-. Create the client side QuotaSpecBinding CR:
+. Create the client-side `QuotaSpecBinding` CR:
 +
 ----
 $ echo "---
@@ -257,12 +277,13 @@ spec:
     namespace: $ERDEMO_NS
 " | oc create -f - -n $SM_CP_NS
 ----
-* The QuotaSpecBinding binds the QuotaSpec to the Incident Service in the Emergency Response Demo namespace.
+* The `QuotaSpecBinding` CR binds the `QuotaSpec` CR to the incident service in the Emergency Response Demo namespace.
 
-. Using _curl_, execute a series of calls to the Incident Service. Note that after a couple of calls, the quota is exceeded and the service returns a error message:
+. Using `curl`, execute a series of calls to the incident service. Note that after a couple of calls, the quota is exceeded and the service returns an error message:
++
 ----
 $ curl -k https://incident-service.$ERDEMO_USER.apps.$SUBDOMAIN_BASE/incidents
-[] 
+[]
 $ curl -k https://incident-service.$ERDEMO_USER.apps.$SUBDOMAIN_BASE/incidents
 []
 $ curl -k https://incident-service.$ERDEMO_USER.apps.$SUBDOMAIN_BASE/incidents
@@ -270,16 +291,17 @@ RESOURCE_EXHAUSTED:Quota is exhausted for: requestcountquota
 $ curl -k https://incident-service.$ERDEMO_USER.apps.$SUBDOMAIN_BASE/incidents
 RESOURCE_EXHAUSTED:Quota is exhausted for: requestcountquota
 ----
+
+. Using `curl -v`, verify that the response code is equal to `429 Too Many Requests`.
+
+== Explore Denier Mixer Adapter
+
+The service mesh's built-in `denier`, `whitelist`, and `blacklist` adapters allow you to control access to a service using simple denials, attribute-based white or black listing, or IP-based white or black listing.
+
+In this exercise, you use the `denier` adapter to prevent access to the incident service when using `curl` from outside the mesh.
+
+. Create the `instance` CR:
 +
-Verify using _curl -v_ that the response code is equal to `429 Too Many Requests`.
-
-=== Mixer Adapter Check: denier mixer adapter
-
-The Service Mesh built-in adapters `denier`, `whitelist` and `blackkist` allow to control access to a service using simple denials, attribute-based white or black listing, or IP-based white or black listing.
-
-In this lab you will use the denier adapter to prevent access to the Incident Service when using _curl_ from outside of the mesh.
-
-. Create the Instance CR:
 ----
 $ echo "---
 apiVersion: "config.istio.io/v1alpha2"
@@ -290,10 +312,10 @@ spec:
   compiledTemplate: checknothing
 " | oc create -f - -n $SM_CP_NS
 ----
-* The instance references the `checknothing` template, one of the templates supported by the denier adapter.
-* CheckNothing represents an empty block of data that is used for policy checking adapters which don’t require any parameters.
+* The instance references the `checknothing` template, one of the templates supported by the `denier` adapter.
+* CheckNothing represents an empty block of data that is used for policy-checking adapters that do not require any parameters.
 
-. Create the Handler CR:
+. Create the `handler` CR:
 +
 ----
 $ echo "---
@@ -309,9 +331,9 @@ spec:
       message: not allowed
 " | oc create -f - -n $SM_CP_NS
 ----
-* The handler references the `denier` adapter. The `status` parameter of the adapter allows to specify the return code and error message returned in case of denial.
+* The handler references the `denier` adapter. The `status` parameter of the adapter allows you to specify the return code and error message returned in case of a denial.
 
-. Create the Rule CR
+. Create the `rule` CR:
 +
 ----
 $ echo "---
@@ -327,14 +349,15 @@ spec:
      - deny-curl
 " | oc create -f - -n $SM_CP_NS
 ----
-* The rule matches requests to the Incident Service originating from the Ingress Gateway, and which have a user-agent header with a value that starts with `curl`.
+* The rule matches requests to the incident service that originate from the ingress gateway and that have a `user-agent` header with a value that starts with `curl`.
 
-. Using _curl_, execute a call to the Incident Service. Note that the call fails, with return code `403 Forbidden` and message `not allowed`:
+. Using `curl`, execute a call to the incident service:
 +
 ----
 $ curl -k -v https://incident-service.$ERDEMO_USER.apps.$SUBDOMAIN_BASE/incidents
 ----
 +
+.Sample Output
 ----
 *   Trying 35.156.184.150:80...
 * TCP_NODELAY set
@@ -343,7 +366,7 @@ $ curl -k -v https://incident-service.$ERDEMO_USER.apps.$SUBDOMAIN_BASE/incident
 > Host: incident-service.user1.apps.cluster-44e5.44e5.example.opentlc.com
 > User-Agent: curl/7.66.0
 > Accept: */*
-> 
+>
 * Mark bundle as not supporting multiuse
 < HTTP/1.1 403 Forbidden
 < content-length: 67
@@ -353,13 +376,11 @@ $ curl -k -v https://incident-service.$ERDEMO_USER.apps.$SUBDOMAIN_BASE/incident
 < x-envoy-upstream-service-time: 2
 * Added cookie 61eaba591e4e09ee0032a9ddba4ed948="d0600b67ba8b55b0c485b915d38335c1" for domain incident-service.user1.apps.cluster-44e5.44e5.example.opentlc.com, path /, expire 0
 < Set-Cookie: 61eaba591e4e09ee0032a9ddba4ed948=d0600b67ba8b55b0c485b915d38335c1; path=/; HttpOnly
-< 
+<
 * Connection #0 to host incident-service.user1.apps.cluster-44e5.44e5.example.opentlc.com left intact
 PERMISSION_DENIED:deny-curl-handler.admin1-istio-system:not allowed
 ----
+* Note that the call fails with a `403 Forbidden` return code and a `not allowed` message.
+. Obtain a remote shell (`oc rsh`) in the the disaster simulator pod, and verify that a `curl` request to the incident service succeeds.
 
-. Obtain a remote shell (_oc rsh_) in the the Disaster Simulator pod, and verify that a curl to the Incident Service succeeds.  
-
-=== References
-
-* List of built-in Mixer Adapters: https://istio.io/docs/reference/config/policy-and-telemetry/adapters/
+This concludes the lab. You learned about a few of the built-in Mixer adapters and created and deployed custom resources to configure them. To learn more, see this list of link:https://istio.io/docs/reference/config/policy-and-telemetry/adapters/[built-in Mixer adapters].
