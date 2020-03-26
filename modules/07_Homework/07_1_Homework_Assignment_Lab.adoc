@@ -4,13 +4,13 @@
 :linkattrs:
 :data-uri:
 
-= Homework Assignment
+== Homework Assignment Lab
 
 .Goal
-* Assess hands-on proficiency with Red Hat Service Mesh product
+* Assess hands-on proficiency with Red Hat^(R)^ OpenShift^(R)^ Service Mesh
 
 .Expectations
-* Assignments take approximately 6 to 8 hours to complete.
+* Assignments take approximately six to eight hours to complete.
 * Assignments are an individual effort--you must complete the assignment without collaboration.
 * Assignments simulate a challenge typically encountered in a Red Hat consulting engagement.
 ** Assignment requirements are intentionally vague.
@@ -19,127 +19,125 @@
 
 == Business Use Case
 You are a consultant assigned to BookRetail Inc., an e-commerce hosting platform.
-BookRetail Inc. is developing a new online retail platform through which to sell their books.
+BookRetail Inc. is developing a new online retail platform to sell their books.
 
-BookRetail Inc. is architecting their new online retail platform as a microservice architected application.
-It has asked you to lead a proof-of-concept (POC) using Red Hat Service Mesh.
-The purpose of the POC is to determine the feasibility of using Red Hat Service Mesh to _connect_, _control_ and _secure_ the various services that comprise thier new retail platform application.
+BookRetail Inc. is architecting their new online retail platform as a microservices-architected application.
+They have asked you to lead a proof-of-concept (POC) using Red Hat OpenShift Service Mesh.
+The purpose of the POC is to determine the feasibility of using OpenShift Service Mesh to _connect_, _control_, and _secure_ the various services that comprise their new retail platform application.
 
-== POC Environment 
+== POC Environment
 
-You will need an OpenShift 4 cluster to complete this POC.
-You can order this OpenShift 4 environment in the same way you did for the pre-requisite training you attended prior to going on-site at BookRetail Inc.
-In particular, please refer to the first lab of the link:https://learning.redhat.com/enrol/index.php?id=1627[Red Hat OpenShift Service Mesh Foundations] course for ordering of a OpenShift 4 cluster.
+You need a Red Hat OpenShift Container Platform 4 cluster to complete this POC.
+You can order the OpenShift Container Platform 4 environment in the same way you did for the prerequisite training you attended prior to going on-site at BookRetail Inc.
+In particular, refer to the first lab of the link:https://learning.redhat.com/enrol/index.php?id=1627[Red Hat OpenShift Service Mesh Foundations] course for ordering an OpenShift 4 cluster.
 
 == Business Application
 
-BookRetail Inc. has made available the Linux containers and corresponding OpenShift configurations for  its _BookInfo_ application.
+BookRetail Inc. has made the Linux containers and corresponding OpenShift configurations available for their `bookinfo` application.
 
-Execute the following once your OCP 4 lab environment has been provisioned.
+Complete the following steps once your OpenShift Container Platform 4 lab environment has been provisioned.
 
-. Create a new OpenShift project for the _BookInfo_ application:
+. Create a new OpenShift project for the `bookinfo` application:
 +
 -----
 oc new-project bookinfo
 -----
 
-. Deploy the _bookinfo_ application in the new project:
+. Deploy the `bookinfo` application in the new project:
 +
 -----
 oc apply -f https://raw.githubusercontent.com/istio/istio/1.4.0/samples/bookinfo/platform/kube/bookinfo.yaml -n bookinfo
 -----
 
-. A description and architecture overview of the _BookInfo_ application can be found in the first section of its link:https://istio.io/docs/examples/bookinfo/[documentation].
+. Review a description and architectural overview of the `bookinfo` application in the first section of its link:https://istio.io/docs/examples/bookinfo/[documentation].
 +
-NOTE: You do not need to execute any tasks in any of the sections (ie: _Before you begin_ nor  _Deploying the application_, etc ) in this documentation.
+IMPORTANT: You do _NOT_ need to execute the tasks in any of the sections in this documentation.
 
-. Expose the _productpage_ service as an OpenShift route:
+. Expose the `productpage` service as an OpenShift route:
 +
 -----
 oc expose service productpage
 -----
 
-. In your browser, navigate to the _bookinfo_ productpage at the following URL:
+. In your browser, navigate to the `bookinfo` application's `productpage` service at the following URL:
 +
 -----
 echo -en "\n$(oc get route productpage --template '{{ .spec.host }}')\n"
 -----
 
-. Study the heirachy of network calls to the various services of the _bookinfo_ application.
-. To test the application, click the link at the bottom _Normal user_.
+. Study the hierarchy of network calls to the various services of the `bookinfo` application.
+. Test the application by clicking *Normal user* at the bottom of the page:
 +
 image::images/bookinfo_normal_user.png[]
 
-. Notice that ratings, reviews and details were retrieved for a book:
+. Note that ratings, reviews, and details were retrieved for a book:
 +
 image::images/bookinfo_info.png[]
 
-== Red Hat Service Mesh Operator and Control Plane
-The proof of concept for BookRetail Inc. requires the _BookInfo_ application be managed by Red Hat Service Mesh.
+== OpenShift Service Mesh Operator and Control Plane
+The POC for BookRetail Inc. requires the `bookinfo` application be managed by OpenShift Service Mesh.
 
-. In the same OCP 4 cluster where you have installed the _BookInfo_ application, you will need to install the Red Hat Service Mesh _operator_.
+. Install the OpenShift Service Mesh `operator` in the same OpenShift Container Platform 4 cluster where you installed the `bookinfo` application.
+
+* Refer to the product documentation for instructions for installing the operator.
+You can also repeat the steps for installing the OpenShift Service Mesh operator found in the link:https://learning.redhat.com/enrol/index.php?id=1627[Red Hat OpenShift Service Mesh Foundations] course.
+
+. Install a service mesh _control plane_ with the following requirements:
+* The name of the OpenShift project where the service mesh control plane must reside is `bookretail-istio-system`.
+* The 3scale Istio adapter is not needed.
+* Global mTLS is not needed.
 +
-Refer to the product documentation for instructions for installing the operator.
-Otherwise, repeat the steps for installing the Red Hat Service Mesh operator found in the link:https://learning.redhat.com/enrol/index.php?id=1627[Red Hat OpenShift Service Mesh Foundations] course.
+NOTE: You enable mTLS later in a more fine-grained manner.
 
-. Install a Service Mesh _control plane_ with the following requirements:
-.. The name of the OpenShift project where the service mesh control plane should reside should be:  _bookretail-istio-system_.
-.. _ThreeScale_ mixer adapter is not needed
-.. Global mtls is not needed.
-+
-You will enable mtls later in a more fine-grain manner.
-
-.. Ensure that all of the _observability_ components of Red Hat Service Mesh (ie: kiali and tracing via Jaeger)  are enabled .
+* Make sure that all of the _observability_ components of OpenShift Service Mesh--that is, Kiali and tracing via Jaeger--are enabled.
 
 == ServiceMeshMemberRoll
 
-[blue]#All of the following configurations should be executed as part of an automation script written in ansible or bash.#
+IMPORTANT: All of the following configurations need to be executed as part of an automation script written in `ansible` or `bash`.
 
-. Install a _ServiceMeshMemberRoll_ with a single member:  _bookinfo_ 
-+
-Ensure that your _bookinfo_ project now includes the appropriate service mesh related labels.
+. Install a `ServiceMeshMemberRoll` resource with `bookinfo` as its only member.
 
-. Add service mesh _data plane_ auto-injection annotation to your _bookinfo_ deployments.
-+
-.. Ensure that all of your _bookinfo_ deployments now include the _envoy_ sidecar proxy.
+.. Make sure that your `bookinfo` project now includes the appropriate service mesh-related labels.
+
+. Add a service mesh _data plane_ auto-injection annotation to your `bookinfo` deployments.
+
+.. Make sure that all of your `bookinfo` deployments now include the Envoy sidecar proxy.
 
 == mTLS Security
-The POC requires mTLS traffic between all services of the _bookinfo_ application.
+The POC requires mTLS traffic between all services of the `bookinfo` application.
 
-[blue]#All of the following configurations should be executed as part of an automation script written in ansible or bash.#
+IMPORTANT: All of the following configurations need to be executed as part of an automation script written in `ansible` or `bash`.
 
-. If the _bookinfo_ deployments include liveness and readiness probes, then customize them to use equivalent _command based_ probes.
-. Create a link:https://istio.io/docs/reference/config/security/istio.authentication.v1alpha1/#Policy[Policy]  object for the deployments of the _bookinfo_ namespace.
-.. [red]#Specify a mTLS mode of:  _STRICT_#.
-. Create appropriate TLS certs, _DestinationRules_,  _VirtualService_, etc for your _bookinfo_ application.
+. If the `bookinfo` deployments include liveness and readiness probes, customize them to use equivalent _command-based_ probes.
+. Create a link:https://istio.io/docs/reference/config/security/istio.authentication.v1alpha1/#Policy[policy]  object for the `bookinfo` namespace deployments.
+.. Specify an mTLS mode of `STRICT`.
+. Create appropriate TLS certificates, `DestinationRules`, `VirtualService`, and other resources for your `bookinfo` application.
 
 
 
 == Homework Submittal
 
-* *Grading:*  Minimum *75%* score needed to pass
+* *Grading*:  Minimum *75%* score needed to pass
 
-* *Criteria:*
-** 25%: Red Hat Service Mesh operator and mutli-tenant _ServiceMeshControlPlane_
-** 25%: ServiceMeshMemberRoll and auto-injected _bookinfo_ deployments (configured via an ansible or bash script)
-** 50%: Strict mTLS network traffic between _bookinfo_ services (configured via an ansible or bash script)
+* *Criteria*:
+** 25%: OpenShift Service Mesh operator and multi-tenant `ServiceMeshControlPlane`
+** 25%: `ServiceMeshMemberRoll` and auto-injected `bookinfo` deployments (configured via an `ansible` or `bash` script)
+** 50%: Strict mTLS network traffic between `bookinfo` services (configured via an `ansible` or `bash` script)
 
-* *Deliverables*
+* *Deliverables*:
 
-** A README file with the URL to OCP master API along with userId / password of the service mesh control plane and bookinfo administrators.
+** A README file with the URL to the OpenShift Container Platform master API along with the user IDs and passwords of the service mesh control plane and `bookinfo` administrators.
 +
-NOTE: Make sure that the lab environment is accessible for 2 days after submission, to enable the instructor to access the URLs for grading.
+IMPORTANT: Make sure that the lab environment is accessible for two days after submission to enable the instructor to access the URLs for grading.
 
-** Automation script written in ansible or bash.
-+
-This automation script should provision the tasks described in the previous sections.
+** Automation script written in `ansible` or `bash` that provisions the tasks described in the previous sections.
 
-* *Homework Submittal*
-+
-You will need to submit your homework via one of the following:
+* *Homework Submittal*:
 
-** *Red Hat employees*: link:https://docs.google.com/document/d/1nxlvAOlSdNs3-y8AkmDjnc8vtCH9rJdI5zbN9deCK50/edit[Red Hat LMS]
-** *Red Hat partners*: link:https://partner.redhat.com[Red Hat Connect]
+** Submit your homework via one of the following:
+
+*** *Red Hat employees*: link:https://docs.google.com/document/d/1nxlvAOlSdNs3-y8AkmDjnc8vtCH9rJdI5zbN9deCK50/edit[Red Hat LMS]
+*** *Red Hat partners*: link:https://partner.redhat.com[Red Hat Connect]
 
 
 
