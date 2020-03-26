@@ -1793,7 +1793,7 @@ html:not([data-mode="arrange"]) .reveal .future.in-3d-appear {
 		<div class="reveal">
 			<div class="slides">
 				<section data-background-color="rgb(144,12,18)" data-background-image="bxms_dm_foundational_m03/40cf27dd491393a1b2042f99486971a6.png" data-id="bedc0457df23e02319c4a5f2fb1e220f"><div class="sl-block" data-block-type="text" style="height: auto; width: 1065px; left: 160px; top: 288px;" data-block-id="22dfbc502d30872f61f60fafe62f4e42"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10; text-align: left;" data-has-custom-html="" dir="ui">
-<h1>Advanced Service Mesh</h1>
+<h1>Advanced Application Management Using Red Hat OpenShift Service Mesh</h1>
 
 <h2>Introduction</h2>
 </div></div>
@@ -1801,563 +1801,655 @@ html:not([data-mode="arrange"]) .reveal .future.in-3d-appear {
 
 <div class="sl-block" data-block-type="image" style="width: 360px; height: 122.4px; left: 0px; top: 0px; min-width: 1px; min-height: 1px;" data-block-id="c5ce7b97245def08c76fac2f2d539e9a"><div class="sl-block-content" style="z-index: 13;" data-inline-svg="true">
 <img data-natural-width="500" data-natural-height="170" data-lazy-loaded="" style="" data-src="service_mesh_advanced_01_service_mesh_introduction/bfa11a84cdd2fc0f50cb6fb54942bd62.svg"><svg xmlns="http://www.w3.org/2000/svg" viewbox="0 0 613 145" height="170" width="500" class="redhat-logo"><path class="logohat" style="fill:#fff;" d="M127.47,83.49c12.51,0,30.61-2.58,30.61-17.46a14,14,0,0,0-.31-3.42l-7.45-32.36c-1.72-7.12-3.23-10.35-15.73-16.6C124.89,8.69,103.76.5,97.51.5,91.69.5,90,8,83.06,8c-6.68,0-11.64-5.6-17.89-5.6-6,0-9.91,4.09-12.93,12.5,0,0-8.41,23.72-9.49,27.16A6.43,6.43,0,0,0,42.53,44c0,9.22,36.3,39.45,84.94,39.45M160,72.07c1.73,8.19,1.73,9.05,1.73,10.13,0,14-15.74,21.77-36.43,21.77C78.54,104,37.58,76.6,37.58,58.49a18.45,18.45,0,0,1,1.51-7.33C22.27,52,.5,55,.5,74.22c0,31.48,74.59,70.28,133.65,70.28,45.28,0,56.7-20.48,56.7-36.65,0-12.72-11-27.16-30.83-35.78"></path><path class="logotext" style="fill:#fff;" d="M579.74,92.8c0,11.89,7.15,17.67,20.19,17.67a52.11,52.11,0,0,0,11.89-1.68V95a24.84,24.84,0,0,1-7.68,1.16c-5.37,0-7.36-1.68-7.36-6.73V68.3h15.56V54.1H596.78v-18l-17,3.68V54.1H568.49V68.3h11.25Zm-53,.32c0-3.68,3.69-5.47,9.26-5.47a43.12,43.12,0,0,1,10.1,1.26v7.15a21.51,21.51,0,0,1-10.63,2.63c-5.46,0-8.73-2.1-8.73-5.57m5.2,17.56c6,0,10.84-1.26,15.36-4.31v3.37h16.82V74.08c0-13.56-9.14-21-24.39-21-8.52,0-16.94,2-26,6.1l6.1,12.52c6.52-2.74,12-4.42,16.83-4.42,7,0,10.62,2.73,10.62,8.31v2.73a49.53,49.53,0,0,0-12.62-1.58c-14.31,0-22.93,6-22.93,16.73,0,9.78,7.78,17.24,20.19,17.24m-92.44-.94h18.09V80.92h30.29v28.82H506V36.12H487.93V64.41H457.64V36.12H439.55ZM370.62,81.87c0-8,6.31-14.1,14.62-14.1A17.22,17.22,0,0,1,397,72.09V91.54A16.36,16.36,0,0,1,385.24,96c-8.2,0-14.62-6.1-14.62-14.09m26.61,27.87h16.83V32.44l-17,3.68V57.05a28.3,28.3,0,0,0-14.2-3.68c-16.19,0-28.92,12.51-28.92,28.5a28.25,28.25,0,0,0,28.4,28.6,25.12,25.12,0,0,0,14.93-4.83ZM320,67c5.36,0,9.88,3.47,11.67,8.83H308.47C310.15,70.3,314.36,67,320,67M291.33,82c0,16.2,13.25,28.82,30.28,28.82,9.36,0,16.2-2.53,23.25-8.42l-11.26-10c-2.63,2.74-6.52,4.21-11.14,4.21a14.39,14.39,0,0,1-13.68-8.83h39.65V83.55c0-17.67-11.88-30.39-28.08-30.39a28.57,28.57,0,0,0-29,28.81M262,51.58c6,0,9.36,3.78,9.36,8.31S268,68.2,262,68.2H244.11V51.58Zm-36,58.16h18.09V82.92h13.77l13.89,26.82H292l-16.2-29.45a22.27,22.27,0,0,0,13.88-20.72c0-13.25-10.41-23.45-26-23.45H226Z"></path></svg>
-</div></div></section><section data-id="c94edad64a41b18e4e276e9914ca9f6f"><div class="sl-block" data-block-type="text" style="height: auto; min-width: 30px; min-height: 30px; width: 600px; left: 0px; top: 0px;" data-block-id="ff81d8deec2506adcd7ee99bd117cb3f"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 11; padding: 15px;">
+</div></div></section><section data-background-color="#ffffff" data-id="0b2fe2e126f3e11d74ed966ec6305ddd"><div class="sl-block" data-block-type="text" style="height: auto; width: 880px; left: 0px; top: 0px;" data-block-id="9a7e35110d17467771711fc95ab2ce6c">
+    <div class="sl-block-content rh-ul" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10;" dir="ui" data-has-custom-html=""></div>
+</div>
+<div class="sl-block" data-block-type="text" style="height: auto; width: 960px; left: 0px; top: 0px;" data-block-id="0c5294a7f744275e6850eb9b03ad1fa3">
+    <div class="sl-block-content rh-ul" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 11;" dir="ui" data-has-custom-html="">
+<h2>Course Navigation Tips</h2>
+
+<ul>
+	<li>
+	<p>To receive credit for completing a module, you must click the <strong>Complete Module</strong> button on the Module Completion slide:<br>
+	<br>
+	<br>
+	<br>
+	<br>
+	<br>
+	 </p>
+
+	<ul>
+		<li>
+		<p>To confirm that you received credit for completing a module, look for a check mark next to the module name on the left side of the screen</p>
+		</li>
+	</ul>
+	</li>
+	<li>
+	<p> After exiting the course, close the course's tab in your browser</p>
+
+	<ul>
+		<li>
+		<p>If your course session expires before closing the course's browser tab, your progress in the course will be lost</p>
+		</li>
+	</ul>
+	</li>
+	<li style="color:rgb(53, 64, 69)">
+	<p>To display the audio transcript, press <strong>S</strong></p>
+
+	<ul>
+		<li style="color: rgb(53, 64, 69);">
+		<p>If the transcript does not display, click the slide and press <strong>S</strong> again</p>
+		</li>
+	</ul>
+	</li>
+</ul>
+</div>
+</div>
+<div class="sl-block" data-block-type="image" style="width: 400px; height: 133px; left: 36px; top: 161px; min-width: 1px; min-height: 1px;" data-block-id="642592031c19de520b146503f95c5f75">
+    <div class="sl-block-style" style="z-index: 12;">
+        <div class="sl-block-content" style="z-index: 12; border-style: solid; border-width: 1px;">
+            <img style="" data-natural-width="418" data-natural-height="139" data-lazy-loaded="" data-src="service_mesh_advanced_01_service_mesh_introduction/dcbee5530f1a813102960aa3d69e5c34.png">
+        </div>
+    </div>
+</div>
+<div class="sl-block" data-block-type="line" style="width: auto; height: auto; left: 182px; top: 272px;" data-block-id="bd93b0e7c172de86f344cd08ca030f67">
+    <div class="sl-block-content" data-line-x1="264" data-line-y1="8" data-line-x2="210" data-line-y2="-14" data-line-color="#cc0000" data-line-start-type="none" data-line-end-type="arrow" style="z-index: 13;" data-line-width="6px">
+        <svg xmlns="http://www.w3.org/2000/svg" version="1.1" preserveaspectratio="xMidYMid" width="54" height="22" viewbox="210 -14 54 22"><line stroke="rgba(0,0,0,0)" stroke-width="15" x1="264" y1="8" x2="218.33483123792593" y2="-10.604328014178325"></line><line class="line-element" stroke="#cc0000" stroke-width="6" x1="264" y1="8" x2="218.33483123792593" y2="-10.604328014178325"></line><polygon fill="#cc0000" transform="translate(218.33483123792593,-10.604328014178325) rotate(-67.834)" points="0,-9 9,9 -9,9"></polygon></svg>
+    </div>
+</div></section><section data-id="c94edad64a41b18e4e276e9914ca9f6f"><div class="sl-block" data-block-type="text" style="height: auto; min-width: 30px; min-height: 30px; width: 600px; left: 0px; top: 0px;" data-block-id="ff81d8deec2506adcd7ee99bd117cb3f"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 11;" data-has-custom-html="">
 <h2>Module Topics</h2>
 
 <ul>
 	<li>
-	<p><span style="font-size:1.2em">What is a Service Mesh</span></p>
+	<p>What Is a Service Mesh?</p>
 	</li>
 	<li>
-	<p><span style="font-size:1.2em">Complexity of Distributed Applications</span></p>
+	<p>Complexity of Distributed Applications</p>
 	</li>
 	<li>
-	<p><span style="font-size:1.2em">How to Address the Complexity?</span></p>
+	<p>How to Address the Complexity</p>
 	</li>
 	<li>
-	<p><span style="font-size:1.2em">Service Mesh Landscape</span></p>
+	<p>Evolution of Microservices</p>
 	</li>
 	<li>
-	<p><span style="font-size:1.2em"><span>Data Plane and Control Plane</span></span></p>
+	<p>Service Mesh Landscape</p>
 	</li>
 	<li>
-	<p><span style="font-size:1.2em">Istio Control Plane Components</span></p>
-	</li>
-	<li style="color:rgb(53, 64, 69)">
-	<p><span style="font-size:1.2em">Red Hat Service Mesh</span></p>
+	<p>Data Plane and Control Plane</p>
 	</li>
 	<li>
-	<p><span style="font-size:1.2em">Service Mesh and API Management</span></p>
+	<p>Istio Control Plane Components</p>
+	</li>
+	<li>
+	<p>Red Hat OpenShift Service Mesh</p>
+	</li>
+	<li>
+	<p>OpenShift Service Mesh and API Management</p>
 	</li>
 </ul>
-</div></div></section><section data-id="14aee4ce6e77efac398800a568d4b75b"><div class="sl-block" data-block-type="text" style="height: auto; width: 1280px; left: 0px; top: 0px;" data-block-id="c6044dfb82e3dd38b10ae5790e6053ca"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10; padding: 15px;">
-<h2><span style="font-size:1.0em">What is a Service Mesh</span></h2>
+</div></div></section><section data-id="14aee4ce6e77efac398800a568d4b75b"><div class="sl-block" data-block-type="text" style="height: auto; width: 1280px; left: 0px; top: 0px;" data-block-id="c6044dfb82e3dd38b10ae5790e6053ca"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10;" data-has-custom-html="">
+<h2><span style="font-size:1.0em">What Is a Service Mesh?</span></h2>
 
 <ul>
-	<li style="color:rgb(53, 64, 69)">
-	<p><span style="font-size:1.4em">Dedicated, policy-based network for service-to-service communication.</span></p>
+	<li>
+	<p>Dedicated, policy-based network for service-to-service communication</p>
 	</li>
-	<li style="color:rgb(53, 64, 69)">
-	<p><span style="font-size:1.4em">Connective tissue between services in a distributed application.</span></p>
+	<li>
+	<p>Connective tissue between services in distributed application</p>
 	</li>
-	<li style="color:rgb(53, 64, 69)">
-	<p><span style="font-size:1.4em">Adds additional capabilities to the network:</span></p>
+	<li>
+	<p>Adds additional capabilities to network:</p>
 
 	<ul>
-		<li style="color:rgb(53, 64, 69)">
-		<p><span style="font-size:1.4em">Traffic control, loadbalancing, resilience, observability, security…​</span></p>
+		<li>
+		<p>Traffic control, load balancing, resilience, observability, security, etc.</p>
 		</li>
 	</ul>
 	</li>
-	<li style="color:rgb(53, 64, 69)">
-	<p style="color:rgb(53, 64, 69)"><span style="font-size:1.4em">Offload capabilities from application-level libraries to infrastructure.</span></p>
+	<li>
+	<p>Offloads capabilities from application-level libraries to infrastructure</p>
 
 	<ul>
-		<li style="color:rgb(53, 64, 69)">
-		<p style="color:rgb(53, 64, 69)"><span style="font-size:1.4em">Free developers from building network concerns into the application.</span></p>
+		<li>
+		<p>Frees developers from needing to build network concerns into application</p>
 		</li>
-		<li style="color:rgb(53, 64, 69)">
-		<p style="color:rgb(53, 64, 69)"><span style="font-size:1.4em">Empowers operators to declaratively define network behavior.</span></p>
+		<li>
+		<p>Empowers operators to declaratively define network behavior</p>
 		</li>
 	</ul>
 	</li>
-	<li style="color:rgb(53, 64, 69)">
-	<p style="color:rgb(53, 64, 69)"><span style="font-size:1.4em">Enhances the capabilities of the underlying OpenShift/Kubernetes platform.</span></p>
+	<li>
+	<p>Enhances capabilities of underlying OpenShift/Kubernetes platform</p>
 	</li>
 </ul>
 </div></div>
-</section><section data-id="6db0835051fca62045645d155a051c6f"><div class="sl-block" data-block-type="text" style="height: auto; width: 1280px; left: 0px; top: 0px;" data-block-id="85c7ca0dce427200a2ec76175681c095"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10; padding: 15px;">
-<h2><span style="font-size:1.0em">What is a Service Mesh</span></h2>
+</section><section data-id="6db0835051fca62045645d155a051c6f"><div class="sl-block" data-block-type="text" style="height: auto; width: 1280px; left: 0px; top: 0px;" data-block-id="85c7ca0dce427200a2ec76175681c095"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10;" data-has-custom-html="">
+<h2>What Is a Service Mesh?</h2>
 
-<p><span style="font-size:1.6em">Use Cases:</span></p>
+<h3>Use Cases</h3>
 
 <ul>
-	<li style="color:rgb(53, 64, 69)">
-	<p><span style="font-size:1.4em">Connect</span></p>
+	<li>
+	<p>Connection</p>
 	</li>
-	<li style="color:rgb(53, 64, 69)">
-	<p><span style="font-size:1.4em">Control</span></p>
+	<li>
+	<p>Control</p>
 	</li>
-	<li style="color:rgb(53, 64, 69)">
-	<p><span style="font-size:1.4em">Security</span></p>
+	<li>
+	<p>Security</p>
 	</li>
-	<li style="color:rgb(53, 64, 69)">
-	<p><span style="font-size:1.4em">Observability</span></p>
+	<li>
+	<p>Observability</p>
 	</li>
 </ul>
 </div></div>
-</section><section data-id="1dc3058023bd3596a3f15a5dfcb4c049"><div class="sl-block" data-block-type="text" style="height: auto; width: 1280px; left: 0px; top: 0px;" data-block-id="81b9b27f85f3d859d0bc3cb49faeed40"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10; padding: 15px;">
-<h2><span style="font-size:1.0em">Distributed Architecture</span></h2>
-
-<p> </p>
+</section><section data-id="1dc3058023bd3596a3f15a5dfcb4c049"><div class="sl-block" data-block-type="text" style="height: auto; width: 1280px; left: 0px; top: 0px;" data-block-id="81b9b27f85f3d859d0bc3cb49faeed40"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10;" data-has-custom-html="">
+<h2>Complexity of Distributed Applications</h2>
+<h3>Distributed Architecture</h3>
 </div></div>
-<div class="sl-block" data-block-type="image" data-block-id="0f77e6e1bd63ea7f92491e7f5cbbe35c" style="width: 1202.46px; height: 432px; left: 38.78px; top: 144px; min-width: 1px; min-height: 1px;"><div class="sl-block-content" style="z-index: 11;"><img data-natural-width="1414" data-natural-height="508" style="" data-lazy-loaded="" data-src="service_mesh_advanced_01_service_mesh_introduction/8cac4d509fe5cfce9971f84eca0d2dbb.png"></div></div></section><section data-id="fef323298481b85d49dc2d72f83685b7"><div class="sl-block" data-block-type="text" style="height: auto; width: 1280px; left: 0px; top: 0px;" data-block-id="f70b109040c4439c1e25425ca80ae15e"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10; padding: 15px;">
-<h2><span style="font-size:1.0em">Distributed Architecture</span></h2>
+<div class="sl-block" data-block-type="image" data-block-id="0f77e6e1bd63ea7f92491e7f5cbbe35c" style="width: 1202.46px; height: 432px; left: 38.78px; top: 171px; min-width: 1px; min-height: 1px;"><div class="sl-block-content" style="z-index: 11;"><img data-natural-width="1414" data-natural-height="508" style="" data-lazy-loaded="" data-src="service_mesh_advanced_01_service_mesh_introduction/8cac4d509fe5cfce9971f84eca0d2dbb.png"></div></div></section><section data-id="fef323298481b85d49dc2d72f83685b7"><div class="sl-block" data-block-type="text" style="height: auto; width: 1280px; left: 0px; top: 0px;" data-block-id="f70b109040c4439c1e25425ca80ae15e"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10;" data-has-custom-html="">
+<h2>Complexity of Distributed Applications</h2>
 
-<p> </p>
+<h3>Distributed Architecture: Service Connections</h3>
 </div></div>
-<div class="sl-block" data-block-type="image" data-block-id="64624f423cca5a430d1e4287a6d6555c" style="width: 999.218px; height: 580.001px; left: 140.391px; top: 94.2567px; min-width: 1px; min-height: 1px;"><div class="sl-block-content" style="z-index: 12;"><img style="" data-natural-width="1187" data-natural-height="689" data-lazy-loaded="" data-src="service_mesh_advanced_01_service_mesh_introduction/bccf18d7f1468d19e524f7e1f16c27b1.png"></div></div></section><section data-id="1427ee14d9f3e29c711990dd68df2c27"><div class="sl-block" data-block-type="text" style="height: auto; width: 1280px; left: 0px; top: 0px;" data-block-id="c5f604a1bcf05c90ad158d00d220fef9"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10; padding: 15px;">
-<h2><span style="font-size:1.0em">Fallacies of Distributed Computing</span></h2>
+<div class="sl-block" data-block-type="image" data-block-id="64624f423cca5a430d1e4287a6d6555c" style="width: 953.254px; height: 553.321px; left: 143.286px; top: 166.679px; min-width: 1px; min-height: 1px;"><div class="sl-block-content" style="z-index: 12;"><img style="" data-natural-width="1187" data-natural-height="689" data-lazy-loaded="" data-src="service_mesh_advanced_01_service_mesh_introduction/bccf18d7f1468d19e524f7e1f16c27b1.png"></div></div></section><section data-id="1427ee14d9f3e29c711990dd68df2c27"><div class="sl-block" data-block-type="text" style="height: auto; width: 1280px; left: 0px; top: 0px;" data-block-id="c5f604a1bcf05c90ad158d00d220fef9"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10;" data-has-custom-html="">
+<h2>Complexity of Distributed Applications</h2>
 
-<p style="color:rgb(53, 64, 69)"> </p>
+<h3>Fallacies of Distributed Computing</h3>
 
 <ul>
-	<li style="color:rgb(53, 64, 69)">
-	<p><span style="font-size:1.4em">The network is reliable</span></p>
+	<li>
+	<p>Network is reliable</p>
 	</li>
-	<li style="color:rgb(53, 64, 69)">
-	<p><span style="font-size:1.4em">Latency is zero</span></p>
+	<li>
+	<p>Latency is zero</p>
 	</li>
-	<li style="color:rgb(53, 64, 69)">
-	<p><span style="font-size:1.4em">Bandwidth is infinite</span></p>
+	<li>
+	<p>Bandwidth is infinite</p>
 	</li>
-	<li style="color:rgb(53, 64, 69)">
-	<p><span style="font-size:1.4em">The network is secure</span></p>
+	<li>
+	<p>Network is secure</p>
 	</li>
-	<li style="color:rgb(53, 64, 69)">
-	<p><span style="font-size:1.4em">Topology doesn’t change</span></p>
+	<li>
+	<p>Topology does not change</p>
 	</li>
-	<li style="color:rgb(53, 64, 69)">
-	<p><span style="font-size:1.4em">There is one administrator</span></p>
+	<li>
+	<p>There is one administrator</p>
 	</li>
-	<li style="color:rgb(53, 64, 69)">
-	<p><span style="font-size:1.4em">Transport cost is zero</span></p>
+	<li>
+	<p>Transport cost is zero</p>
 	</li>
-	<li style="color:rgb(53, 64, 69)">
-	<p><span style="font-size:1.4em">The network is homogeneous</span></p>
+	<li>
+	<p>Network is homogeneous</p>
 	</li>
 </ul>
 
-<p style="color:rgb(53, 64, 69);"><span style="font-size:1.4em">​</span></p>
-
-<p>Source: https://en.wikipedia.org/wiki/Fallacies_of_distributed_computing</p>
+<p>Source: <a href="https://en.wikipedia.org/wiki/Fallacies_of_distributed_computing" target="_blank">Wikipedia: Fallacies of distributed computing</a></p>
 </div></div>
-</section><section data-id="b7a109e0306e66670b07ac2d876a16af"><div class="sl-block" data-block-type="text" style="height: auto; width: 1280px; left: 0px; top: 0px;" data-block-id="1a2b190f57a0c896c06da126fc671326"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10; padding: 15px;">
-<h2><span style="font-size:1.0em">How to deal with complexity?</span></h2>
+</section><section data-id="b7a109e0306e66670b07ac2d876a16af"><div class="sl-block" data-block-type="text" style="height: auto; width: 1280px; left: 0px; top: 0px;" data-block-id="1a2b190f57a0c896c06da126fc671326"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10;" data-has-custom-html="">
+<h2>How to Address the Complexity</h2>
 
-<h2><span style="font-size:1.0em">Deployment: containers</span></h2>
+<h3>Deployment: Containers</h3>
 </div></div>
-<div class="sl-block" data-block-type="image" data-block-id="1486166df40ec4caa8cb10b96798dd0d" style="width: 1154.97px; height: 351.218px; left: 62.515px; top: 198.359px; min-width: 1px; min-height: 1px;"><div class="sl-block-content" style="z-index: 11;"><img style="" data-natural-width="1197" data-natural-height="364" data-lazy-loaded="" data-src="service_mesh_advanced_01_service_mesh_introduction/be6ea590e71f9a8a546af341e6de3d5f.png"></div></div></section><section data-id="19a3da7d86a821472b5f9e00e6e1cbd4"><div class="sl-block" data-block-type="text" style="height: auto; width: 1280px; left: 0px; top: 0px;" data-block-id="0a0bf318542337f80220eb7f8dc7545d"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10; padding: 15px;">
-<h2><span style="font-size:1.0em">How to deal with complexity?</span></h2>
+<div class="sl-block" data-block-type="image" data-block-id="1486166df40ec4caa8cb10b96798dd0d" style="width: 1154.97px; height: 351.218px; left: 62.515px; top: 200.359px; min-width: 1px; min-height: 1px;"><div class="sl-block-content" style="z-index: 11;"><img style="" data-natural-width="1197" data-natural-height="364" data-lazy-loaded="" data-src="service_mesh_advanced_01_service_mesh_introduction/be6ea590e71f9a8a546af341e6de3d5f.png"></div></div></section><section data-id="19a3da7d86a821472b5f9e00e6e1cbd4"><div class="sl-block" data-block-type="text" style="height: auto; width: 1280px; left: 0px; top: 0px;" data-block-id="0a0bf318542337f80220eb7f8dc7545d"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10;" data-has-custom-html="">
+<h2>How to Address the Complexity</h2>
 
-<h2><span style="font-size:31.2px">Application portability</span></h2>
+<h3>Application Portability</h3>
 </div></div>
-<div class="sl-block" data-block-type="image" data-block-id="d0bb9a9720c9333e6cde19f3ca81a7c6" style="width: 1120px; height: 457.57px; left: 80px; top: 181.616px; min-width: 1px; min-height: 1px;"><div class="sl-block-content" style="z-index: 11;"><img data-natural-width="1498" data-natural-height="612" style="" data-lazy-loaded="" data-src="service_mesh_advanced_01_service_mesh_introduction/6fa10b24a6a0295f6fd691e65f94edca.png"></div></div></section><section data-id="bb243dc36662e4ed4826941bd8fda77f"><div class="sl-block" data-block-type="text" style="height: auto; width: 1280px; left: 0px; top: 0px;" data-block-id="78ec806d8b88ef0031e4547d8af446a9"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10; padding: 15px;">
-<h2><span style="font-size:1.0em">How to deal with complexity?</span></h2>
+<div class="sl-block" data-block-type="image" data-block-id="d0bb9a9720c9333e6cde19f3ca81a7c6" style="width: 1120px; height: 457.57px; left: 80px; top: 192.616px; min-width: 1px; min-height: 1px;"><div class="sl-block-content" style="z-index: 11;"><img data-natural-width="1498" data-natural-height="612" style="" data-lazy-loaded="" data-src="service_mesh_advanced_01_service_mesh_introduction/6fa10b24a6a0295f6fd691e65f94edca.png"></div></div></section><section data-id="bb243dc36662e4ed4826941bd8fda77f"><div class="sl-block" data-block-type="text" style="height: auto; width: 1280px; left: 0px; top: 0px;" data-block-id="78ec806d8b88ef0031e4547d8af446a9"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10;" data-has-custom-html="">
+<h2>How to Address the Complexity</h2>
 
-<h2><span style="font-size:31.2px">Configuration</span></h2>
+<h3>Configuration</h3>
 </div></div>
-<div class="sl-block" data-block-type="image" data-block-id="c677fcf295a0a554d837045f40bb83dd" style="width: 1091.09px; height: 504px; left: 94.455px; top: 144px; min-width: 1px; min-height: 1px;"><div class="sl-block-content" style="z-index: 11;"><img style="" data-natural-width="1195" data-natural-height="552" data-lazy-loaded="" data-src="service_mesh_advanced_01_service_mesh_introduction/7055b09c116830ce0344cb96bea00b27.png"></div></div></section><section data-id="288c9bf7b27021a41d7e92fb44f90278"><div class="sl-block" data-block-type="text" style="height: auto; width: 1280px; left: 0px; top: 0px;" data-block-id="ca5750b6e99e6fac9f7184a6f535828e"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10; padding: 15px;">
-<h2><span style="font-size:1.0em">How to deal with complexity?</span></h2>
+<div class="sl-block" data-block-type="image" data-block-id="c677fcf295a0a554d837045f40bb83dd" style="width: 1091.09px; height: 504px; left: 94.455px; top: 163px; min-width: 1px; min-height: 1px;"><div class="sl-block-content" style="z-index: 11;"><img style="" data-natural-width="1195" data-natural-height="552" data-lazy-loaded="" data-src="service_mesh_advanced_01_service_mesh_introduction/7055b09c116830ce0344cb96bea00b27.png"></div></div></section><section data-id="288c9bf7b27021a41d7e92fb44f90278"><div class="sl-block" data-block-type="text" style="height: auto; width: 1280px; left: 0px; top: 0px;" data-block-id="ca5750b6e99e6fac9f7184a6f535828e"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10;" data-has-custom-html="">
+<h2>How to Address the Complexity</h2>
 
-<h2><span style="font-size:31.2px">Service Discovery</span></h2>
+<h3>Service Discovery</h3>
 </div></div>
-<div class="sl-block" data-block-type="image" data-block-id="a5f69e4bbec3c5c6958cd95410072741" style="width: 1091.09px; height: 504px; left: 94.455px; top: 144px; min-width: 1px; min-height: 1px;"><div class="sl-block-content" style="z-index: 11;"><img style="" data-natural-width="1195" data-natural-height="552" data-lazy-loaded="" data-src="service_mesh_advanced_01_service_mesh_introduction/469730a27b6af2b17aa91e6383b4dd59.png"></div></div></section><section data-id="e9e58d890c9a9280e189ca32d976aee9"><div class="sl-block" data-block-type="text" style="height: auto; width: 1280px; left: 0px; top: 0px;" data-block-id="8cae563568323d79b2e35b45416aa177"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10; padding: 15px;">
-<h2><span style="font-size:1.0em">How to deal with complexity?</span></h2>
+<div class="sl-block" data-block-type="image" data-block-id="a5f69e4bbec3c5c6958cd95410072741" style="width: 1091.09px; height: 504px; left: 94.455px; top: 167px; min-width: 1px; min-height: 1px;"><div class="sl-block-content" style="z-index: 11;"><img style="" data-natural-width="1195" data-natural-height="552" data-lazy-loaded="" data-src="service_mesh_advanced_01_service_mesh_introduction/469730a27b6af2b17aa91e6383b4dd59.png"></div></div></section><section data-id="e9e58d890c9a9280e189ca32d976aee9"><div class="sl-block" data-block-type="text" style="height: auto; width: 1280px; left: 0px; top: 0px;" data-block-id="8cae563568323d79b2e35b45416aa177"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10;" data-has-custom-html="">
+<h2>How to Address the Complexity</h2>
 
-<h2><span style="font-size:31.2px">Dynamic Routing</span></h2>
+<h3>Dynamic Routing</h3>
 </div></div>
-<div class="sl-block" data-block-type="image" data-block-id="39aeeb057c4848a04d79a0c7f012f398" style="width: 1091.09px; height: 504px; left: 94.455px; top: 144px; min-width: 1px; min-height: 1px;"><div class="sl-block-content" style="z-index: 11;"><img style="" data-natural-width="1195" data-natural-height="552" data-lazy-loaded="" data-src="service_mesh_advanced_01_service_mesh_introduction/c65ca235a47b39ab10e999a2110e2c24.png"></div></div></section><section data-id="3980ce968d2e4483a241bf92fa10ff77"><div class="sl-block" data-block-type="text" style="height: auto; width: 1280px; left: 0px; top: 0px;" data-block-id="982c3100c23c913a17b6719a16a6a616"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10; padding: 15px;">
-<h2><span style="font-size:1.0em">How to deal with complexity?</span></h2>
+<div class="sl-block" data-block-type="image" data-block-id="39aeeb057c4848a04d79a0c7f012f398" style="width: 1091.09px; height: 504px; left: 94.455px; top: 179px; min-width: 1px; min-height: 1px;"><div class="sl-block-content" style="z-index: 11;"><img style="" data-natural-width="1195" data-natural-height="552" data-lazy-loaded="" data-src="service_mesh_advanced_01_service_mesh_introduction/c65ca235a47b39ab10e999a2110e2c24.png"></div></div></section><section data-id="3980ce968d2e4483a241bf92fa10ff77"><div class="sl-block" data-block-type="text" style="height: auto; width: 1280px; left: 0px; top: 0px;" data-block-id="982c3100c23c913a17b6719a16a6a616"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10;" data-has-custom-html="">
+<h2>How to Address the Complexity</h2>
 
-<h2><span style="font-size:31.2px">Resilience</span></h2>
+<h3>Resilience</h3>
 </div></div>
-<div class="sl-block" data-block-type="image" data-block-id="67baaf569f378450c94c9f5799f58476" style="width: 1091.09px; height: 504px; left: 94.455px; top: 144px; min-width: 1px; min-height: 1px;"><div class="sl-block-content" style="z-index: 11;"><img data-natural-width="1195" data-natural-height="552" style="" data-lazy-loaded="" data-src="service_mesh_advanced_01_service_mesh_introduction/d21d60b789982f0e265adad0f532f7d3.png"></div></div></section><section data-id="85255c5c89da95ad7419b701f6ce21fc"><div class="sl-block" data-block-type="text" style="height: auto; width: 1280px; left: 0px; top: 0px;" data-block-id="05111adcd8c7fb9071de6a585db4132a"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10; padding: 15px;">
-<h2><span style="font-size:1.0em">How to deal with complexity?</span></h2>
+<div class="sl-block" data-block-type="image" data-block-id="67baaf569f378450c94c9f5799f58476" style="width: 1091.09px; height: 504px; left: 94.455px; top: 167px; min-width: 1px; min-height: 1px;"><div class="sl-block-content" style="z-index: 11;"><img data-natural-width="1195" data-natural-height="552" style="" data-lazy-loaded="" data-src="service_mesh_advanced_01_service_mesh_introduction/d21d60b789982f0e265adad0f532f7d3.png"></div></div></section><section data-id="85255c5c89da95ad7419b701f6ce21fc"><div class="sl-block" data-block-type="text" style="height: auto; width: 1280px; left: 0px; top: 0px;" data-block-id="05111adcd8c7fb9071de6a585db4132a"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10;" data-has-custom-html="">
+<h2>How to Address the Complexity</h2>
 
-<h2><span style="font-size:31.2px">Observability</span></h2>
+<h3>Observability</h3>
 </div></div>
-<div class="sl-block" data-block-type="image" data-block-id="1a759ef1f1e22483cb08d3c124a2fc5d" style="width: 1091.09px; height: 504px; left: 94.455px; top: 144px; min-width: 1px; min-height: 1px;"><div class="sl-block-content" style="z-index: 11;"><img style="" data-natural-width="1195" data-natural-height="552" data-lazy-loaded="" data-src="service_mesh_advanced_01_service_mesh_introduction/01cdb2eb09dbf0022ff539e3a596298b.png"></div></div></section><section data-id="c905689d2acc1b72e328ada69e707913"><div class="sl-block" data-block-type="text" style="height: auto; width: 1280px; left: 0px; top: 0px;" data-block-id="ac0b8ff9dd9601467d368215fa47bdd1"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10; padding: 15px;" dir="ui">
-<h2><span style="font-size:1.0em">How to deal with complexity?</span></h2>
+<div class="sl-block" data-block-type="image" data-block-id="1a759ef1f1e22483cb08d3c124a2fc5d" style="width: 1091.09px; height: 504px; left: 94.455px; top: 180px; min-width: 1px; min-height: 1px;"><div class="sl-block-content" style="z-index: 11;"><img style="" data-natural-width="1195" data-natural-height="552" data-lazy-loaded="" data-src="service_mesh_advanced_01_service_mesh_introduction/01cdb2eb09dbf0022ff539e3a596298b.png"></div></div></section><section data-id="c905689d2acc1b72e328ada69e707913"><div class="sl-block" data-block-type="text" style="height: auto; width: 1280px; left: 0px; top: 0px;" data-block-id="ac0b8ff9dd9601467d368215fa47bdd1"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10;" dir="ui" data-has-custom-html="">
+<h2>How to Address the Complexity</h2>
 
-<h2><span style="font-size:31.2px">What about?</span></h2>
+<h3>Other Concerns</h3>
 
 <ul>
-	<li><span style="font-size:1.4em">​polyglot applications</span></li>
-	<li><span style="font-size:1.4em">existing applications</span></li>
+	<li><p>Polyglot applications</p></li>
+	<li><p>Existing applications</p></li>
 </ul>
 </div></div>
 </section><section data-id="fff8b65e1ab4af1104e7fe7b2e6c9139">
-<div class="sl-block" data-block-type="image" style="width: 1075.2px; height: 480.218px; left: 102.4px; top: 167.782px; min-width: 1px; min-height: 1px;" data-block-id="b6a01f716ed109db2ca644545dd587fd"><div class="sl-block-content" style="z-index: 10;"><img style="" data-natural-width="1321" data-natural-height="590" data-lazy-loaded="" data-src="service_mesh_advanced_01_service_mesh_introduction/21fe31a0a2b8ac9db68fcad4c7c26cc6.png"></div></div>
-<div class="sl-block" data-block-type="text" style="height: auto; width: 1280px; left: 0px; top: 0px;" data-block-id="2a9c26158098400b83f495a261fcfeab"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 11; padding: 15px;" dir="ui">
-<h2><span style="font-size:1.0em">Address the complexity in the infrastructure</span></h2>
+<div class="sl-block" data-block-type="image" style="width: 1075.2px; height: 480.218px; left: 102.4px; top: 189.782px; min-width: 1px; min-height: 1px;" data-block-id="b6a01f716ed109db2ca644545dd587fd"><div class="sl-block-content" style="z-index: 10;"><img style="" data-natural-width="1321" data-natural-height="590" data-lazy-loaded="" data-src="service_mesh_advanced_01_service_mesh_introduction/21fe31a0a2b8ac9db68fcad4c7c26cc6.png"></div></div>
+<div class="sl-block" data-block-type="text" style="height: auto; width: 1280px; left: 0px; top: 0px;" data-block-id="2a9c26158098400b83f495a261fcfeab"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 11;" dir="ui" data-has-custom-html="">
+<h2>How to Address the Complexity</h2>
 
-<h2><span style="font-size:0.9em">Container Orchestration Platform</span></h2>
-</div></div></section><section data-id="0dd1f391adbf14c0c4c049a7b7c3a19a"><div class="sl-block" data-block-type="text" style="height: auto; width: 1280px; left: 0px; top: 0px;" data-block-id="e16b8a8ca49d8a32468afcc304a7db5c"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10; padding: 15px;" dir="ui">
-<h2><span style="font-size:1.0em">Evolution of Microservices</span></h2>
-
-<h2> </h2>
+<h3>In the Infrastructure: Container Orchestration Platform</h3>
+</div></div></section><section data-id="0dd1f391adbf14c0c4c049a7b7c3a19a"><div class="sl-block" data-block-type="text" style="height: auto; width: 1280px; left: 0px; top: 0px;" data-block-id="e16b8a8ca49d8a32468afcc304a7db5c"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10;" dir="ui" data-has-custom-html="">
+<h2>Evolution of Microservices</h2>
 </div></div>
-<div class="sl-block" data-block-type="image" data-block-id="9c0d52dc62ab6f97c1db7a8f66e8d8e3" style="width: 1075.2px; height: 559.943px; left: 102.4px; top: 86.5px; min-width: 1px; min-height: 1px;"><div class="sl-block-content" style="z-index: 11;"><img data-natural-width="1179" data-natural-height="614" style="" data-lazy-loaded="" data-src="service_mesh_advanced_01_service_mesh_introduction/f088b7b72a944cf30219a93cf90f542b.png"></div></div></section><section data-id="059b6e8fdf78a1bfab5853b8042a24c6"><div class="sl-block" data-block-type="text" style="height: auto; width: 1280px; left: 0px; top: 0px;" data-block-id="b637361e58826e26a8b7ed256d663cb5"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10; padding: 15px;">
-<h2><span style="font-size:1.0em">Service Mesh Landscape</span></h2>
+<div class="sl-block" data-block-type="image" data-block-id="9c0d52dc62ab6f97c1db7a8f66e8d8e3" style="width: 1075.2px; height: 559.943px; left: 102.4px; top: 159.5px; min-width: 1px; min-height: 1px;"><div class="sl-block-content" style="z-index: 11;"><img data-natural-width="1179" data-natural-height="614" style="" data-lazy-loaded="" data-src="service_mesh_advanced_01_service_mesh_introduction/f088b7b72a944cf30219a93cf90f542b.png"></div></div></section><section data-id="059b6e8fdf78a1bfab5853b8042a24c6"><div class="sl-block" data-block-type="text" style="height: auto; width: 1280px; left: 0px; top: 0px;" data-block-id="b637361e58826e26a8b7ed256d663cb5">
+    <div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10;" data-has-custom-html="">
+        <h2>Service Mesh Landscape</h2>
 
-<p><span style="font-size:1.2em"><u>Open Source projects:</u></span></p>
-
-<ul>
-	<li style="color:rgb(53, 64, 69)">
-	<p><span style="font-size:1.2em">Linkerd (control and data plane)</span></p>
-	</li>
-	<li style="color:rgb(53, 64, 69)">
-	<p><span style="font-size:1.2em">Istio (control plane) - F</span><span style="color:rgb(53, 64, 69); font-size:25.6px">irst created by Google, IBM, and Lyft. Red Hat is a major contributor.</span></p>
-	</li>
-	<li style="color:rgb(53, 64, 69)">
-	<p><span style="font-size:1.2em">Envoy (data plane) - </span><span style="color:rgb(53, 64, 69); font-size:25.6px">Lyft</span></p>
-	</li>
-	<li style="color:rgb(53, 64, 69)">
-	<p><span style="font-size:1.2em">NGINX (data plane)</span></p>
-	</li>
-	<li style="color:rgb(53, 64, 69)">
-	<p><span style="font-size:1.2em">Consul (control and data plane)</span></p>
-	</li>
-	<li style="color:rgb(53, 64, 69)">
-	<p><span style="font-size:1.2em">SuperGloo (multimesh)</span></p>
-	</li>
-</ul>
-
-<p style="color:rgb(53, 64, 69)"> </p>
-
-<p style="color:rgb(53, 64, 69)"><span style="font-size:1.2em"><u>Vendors:</u></span></p>
-
-<ul>
-	<li style="color:rgb(53, 64, 69)">
-	<p><span style="font-size:1.2em">Red Hat</span></p>
-	</li>
-	<li style="color:rgb(53, 64, 69)">
-	<p><span style="font-size:1.2em">BanzaiCloud</span></p>
-	</li>
-	<li style="color:rgb(53, 64, 69)">
-	<p><span style="font-size:1.2em">Aspen Mesh (F5 networks)</span></p>
-	</li>
-	<li style="color:rgb(53, 64, 69)">
-	<p><span style="font-size:1.2em">Buoyant (Linkerd)</span></p>
-	</li>
-	<li style="color:rgb(53, 64, 69)">
-	<p><span style="font-size:1.2em">Cloud provider specific mesh offerings (Azure Service Fabric Mesh)​</span></p>
-	</li>
-</ul>
-</div></div>
-</section><section data-id="6d1b826a17e751ca136c39300660f24b"><div class="sl-block" data-block-type="text" style="height: auto; width: 1280px; left: 0px; top: 0px;" data-block-id="ec04c351b1cd3a6d165f6d008a9103ea"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10; padding: 15px;">
-<h2><span style="font-size:1.0em">Istio  Architecture</span></h2>
-</div></div>
-<div class="sl-block" data-block-type="image" data-block-id="d2a934820970e9afd8c16f25bf04c8da" style="width: 864px; height: 648px; left: 208px; top: 72px; min-width: 1px; min-height: 1px;"><div class="sl-block-content" style="z-index: 11;"><img data-natural-width="800" data-natural-height="600" style="" data-lazy-loaded="" data-src="service_mesh_advanced_01_service_mesh_introduction/c149cf19a7bb89d722ac4662ae673bdd.svg"></div></div></section><section data-id="42fa05b3db8dad751f387cd3c4ef2fd0"><div class="sl-block" data-block-type="text" style="height: auto; width: 1280px; left: 0px; top: 0px;" data-block-id="1877fe8acd6c1fdc5cfb464e53143cc0"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10; padding: 15px;">
+    </div>
+</div>
+<div class="sl-block" data-block-type="table" data-name="table-5c5605" data-block-id="f47746ef7e9b05cf694540338d6dbff5" style="height: auto; min-width: 120px; width: 800px; left: 160px; top: 169px;">
+    <div class="sl-block-content" style="z-index: 11;" data-table-has-header="true" data-table-cols="2" data-table-rows="2">
+        <table>
+            <tbody>
+                <tr>
+                    <th><strong>Open Source Projects</strong></th>
+                    <th><strong>Vendors</strong></th>
+                </tr>
+                <tr>
+                    <td>• Linkerd: Control and data plane<br>
+                        • Istio: Control plane<br>
+                          • First created by Google, IBM, Lyft<br>
+                          • Red Hat is major contributor<br>
+                        • Envoy: Data plane<br>
+                          •  Created by Lyft<br>
+                        • NGINX: Data plane<br>
+                        • Consul: Control and data plane<br>
+                        • SuperGloo: Multimesh</td>
+                    <td>• Red Hat<br>• Banzai Cloud<br>• Aspen Mesh: F5 networks<br>• Buoyant: Linkerd<br>• Cloud provider-specific mesh offerings—<br>   e.g., Azure Service Fabric Mesh</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div></section><section data-id="6d1b826a17e751ca136c39300660f24b"><div class="sl-block" data-block-type="text" style="height: auto; width: 1280px; left: 0px; top: 0px;" data-block-id="ec04c351b1cd3a6d165f6d008a9103ea"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10;" data-has-custom-html="">
 <h2>Control Plane and Data Plane</h2>
 
-<p><span style="font-size:1.4em"><u>Data Plane:</u></span></p>
-
-<ul>
-	<li style="color:rgb(53, 64, 69)">
-	<p><span style="font-size:1.2em">Collection of service proxies in the service mesh.</span></p>
-	</li>
-	<li style="color:rgb(53, 64, 69)">
-	<p><span style="font-size:1.2em">Intercept all inbound and outbound traffic.</span></p>
-	</li>
-	<li style="color:rgb(53, 64, 69)">
-	<p><span style="font-size:1.2em">Implements policies defined in and managed by the control plane.</span></p>
-	</li>
-	<li style="color:rgb(53, 64, 69)">
-	<p><span style="font-size:1.2em">Injected as a side-car in services that are part of the service mesh</span></p>
-	</li>
-	<li style="color:rgb(53, 64, 69)">
-	<p><span style="font-size:1.2em">Default service proxy for Istio: Envoy</span></p>
-
-	<ul>
-		<li style="color:rgb(53, 64, 69)">
-		<p><span style="font-size:1.2em">Highly performant, written in C++</span></p>
-		</li>
-		<li style="color:rgb(53, 64, 69)">
-		<p><span style="font-size:1.2em">First class support for HTTP/2 and gRPC</span></p>
-		</li>
-		<li style="color:rgb(53, 64, 69)">
-		<p><span style="font-size:1.2em">L7 observability and traffic control.</span></p>
-		</li>
-	</ul>
-	</li>
-</ul>
-
-<p style="color:rgb(53, 64, 69)"> </p>
+<h3>Istio Architecture</h3>
 </div></div>
-</section><section data-id="fd083a724644480b5c3d9a58c76d95d8"><div class="sl-block" data-block-type="text" style="height: auto; width: 1280px; left: 0px; top: 0px;" data-block-id="53bc35a193efc500748571f42bc50be5"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10; padding: 15px;">
+<div class="sl-block" data-block-type="image" data-block-id="d2a934820970e9afd8c16f25bf04c8da" style="width: 768px; height: 576px; left: 256px; top: 143px; min-width: 1px; min-height: 1px;"><div class="sl-block-content" style="z-index: 11;"><img data-natural-width="800" data-natural-height="600" style="" data-lazy-loaded="" data-src="service_mesh_advanced_01_service_mesh_introduction/c149cf19a7bb89d722ac4662ae673bdd.svg"></div></div></section><section data-id="42fa05b3db8dad751f387cd3c4ef2fd0"><div class="sl-block" data-block-type="text" style="height: auto; width: 1280px; left: 0px; top: 0px;" data-block-id="1877fe8acd6c1fdc5cfb464e53143cc0"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10;" data-has-custom-html="">
 <h2>Control Plane and Data Plane</h2>
 
-<p><span style="font-size:1.4em"><u>Control Plane:</u></span></p>
+<h3>Data Plane</h3>
 
 <ul>
 	<li>
-	<p><span style="font-size:1.2em">Single point of administration for service proxies.</span></p>
+	<p>Collection of service proxies in service mesh</p>
+	</li>
+	<li>
+	<p>Intercepts all inbound and outbound traffic</p>
+	</li>
+	<li>
+	<p>Implements policies defined in and managed by control plane</p>
+	</li>
+	<li>
+	<p>Injected as sidecar in services that are part of service mesh</p>
+	</li>
+	<li>
+	<p>Default service proxy for Istio: Envoy</p>
 
 	<ul>
 		<li>
-		<p><span style="font-size:1.2em">Service proxies need programmatic configuration to be efficiently managed.</span></p>
+		<p>Highly performant, written in C++</p>
 		</li>
 		<li>
-		<p><span style="font-size:1.2em">Service proxies must have their configuration updated in real-time as services are rescheduled across your environment.</span></p>
+		<p>First-class support for HTTP/2 and gRPC</p>
+		</li>
+		<li>
+		<p>L7 observability and traffic control</p>
+		</li>
+	</ul>
+	</li>
+</ul>
+</div></div>
+</section><section data-id="fd083a724644480b5c3d9a58c76d95d8"><div class="sl-block" data-block-type="text" style="height: auto; width: 1280px; left: 0px; top: 0px;" data-block-id="53bc35a193efc500748571f42bc50be5"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10;" data-has-custom-html="">
+<h2>Control Plane and Data Plane</h2>
+
+<h3>Control Plane</h3>
+
+<ul>
+	<li>
+	<p>Single point of administration for service proxies</p>
+
+	<ul>
+		<li>
+		<p>Service proxies need programmatic configuration to be efficiently managed</p>
+		</li>
+		<li>
+		<p>Service proxies must have their configuration updated in real-time as services are rescheduled across environment</p>
 		</li>
 	</ul>
 	</li>
 	<li>
-	<p><span style="font-size:1.2em">Provides policy and configuration for services in the mesh.</span></p>
+	<p>Provides policy and configuration for services in mesh</p>
 	</li>
 	<li>
-	<p><span style="font-size:1.2em">Combines a set of isolated stateless sidecar proxies into a service mesh.</span></p>
+	<p>Combines set of isolated stateless sidecar proxies into service mesh</p>
 	</li>
 	<li>
-	<p><span style="font-size:1.2em">Provides security via certificate issuance and rotation.</span></p>
+	<p>Provides security via certificate issuance and rotation</p>
 	</li>
 	<li>
-	<p><span style="font-size:1.2em">Unifies telemetry collection</span></p>
+	<p>Unifies telemetry collection</p>
 	</li>
 </ul>
-
-<p style="color:rgb(53, 64, 69)"> </p>
 </div></div>
-</section><section data-id="96205785d76ba1141481c4ac62246b5c"><div class="sl-block" data-block-type="text" style="height: auto; width: 1280px; left: 0px; top: 0px;" data-block-id="30eef35a70e58598a10ca9fb64c207b8"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10; padding: 15px;">
+</section><section data-id="96205785d76ba1141481c4ac62246b5c"><div class="sl-block" data-block-type="text" style="height: auto; width: 677.571px; left: 0px; top: 0px;" data-block-id="30eef35a70e58598a10ca9fb64c207b8"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10;" data-has-custom-html="">
 <h2>Istio Control Plane Components</h2>
 
-<p><span style="font-size:1.4em"><u>Pilot:</u></span></p>
+<h3>Pilot</h3>
 
 <ul>
 	<li>
-	<p><span style="font-size:1.2em">Produces configuration for the data plane service proxies</span></p>
+	<p>Produces configuration for data plane service proxies</p>
 	</li>
 	<li>
-	<p><span style="font-size:1.2em">Provides service discovery for the Envoy sidecars, traffic management capabilities for intelligent routing, and resiliency.</span></p>
+	<p>Provides:</p>
+	<ul>
+	<li>
+	<p>Service discovery for Envoy sidecars</p>
 	</li>
 	<li>
-	<p><span style="font-size:1.2em">Converts high level routing rules that control traffic behavior into Envoy-specific configurations, and propagates them to the sidecars at runtime.</span></p>
+	<p>Traffic management capabilities for intelligent routing</p>
+	</li>
+	<li>
+	<p>Resiliency</p>
+	</li>
+      </ul>
+  </li>
+	<li>
+	<p>Converts high-level routing rules that control traffic behavior into Envoy-specific configurations</p>
+	<ul>
+	<li>
+	<p>Propagates configurations to sidecars at runtime</p>
+	</li>
+</ul>
+  </li>
+</ul>
+</div></div>
+<div class="sl-block" data-block-type="image" data-block-id="4730f790064b5393a47f5f56c2eb924a" style="width: 549.894px; height: 367px; left: 720px; top: 166.136px; min-width: 1px; min-height: 1px;"><div class="sl-block-content" style="z-index: 11;"><img style="" data-natural-width="454" data-natural-height="303" data-lazy-loaded="" data-src="service_mesh_advanced_01_service_mesh_introduction/8f309a3f36a969b0997f55528e2d2afb.svg"></div></div></section><section data-id="58c3ee17f42b06454e8992fb1ba7e85f"><div class="sl-block" data-block-type="text" style="height: auto; width: 880px; left: 0px; top: 0px;" data-block-id="158d30e50bdf1f8be2a81b7b643c8391"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10;" data-has-custom-html="">
+<h2>Istio Control Plane Components</h2>
+
+<h3>Citadel</h3>
+
+<ul>
+	<li>
+	<p>Enables strong service-to-service and end-user authentication with built-in identity and credential management</p>
+	</li>
+	<li>
+	<p>Policies enforced based on service identity rather than on relatively unstable network identifiers</p>
+	</li>
+	<li>
+	<p>Provides access control to services using authorization policies</p>
 	</li>
 </ul>
 </div></div>
-<div class="sl-block" data-block-type="image" data-block-id="4730f790064b5393a47f5f56c2eb924a" style="width: 549.894px; height: 367px; left: 320px; top: 353px; min-width: 1px; min-height: 1px;"><div class="sl-block-content" style="z-index: 11;"><img style="" data-natural-width="454" data-natural-height="303" data-lazy-loaded="" data-src="service_mesh_advanced_01_service_mesh_introduction/8f309a3f36a969b0997f55528e2d2afb.svg"></div></div></section><section data-id="58c3ee17f42b06454e8992fb1ba7e85f"><div class="sl-block" data-block-type="text" style="height: auto; width: 1280px; left: 0px; top: 0px;" data-block-id="158d30e50bdf1f8be2a81b7b643c8391"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10; padding: 15px;">
+</section><section data-id="2d60c101956e99b91affeb24cc219daf"><div class="sl-block" data-block-type="text" style="height: auto; width: 880px; left: 0px; top: 0px;" data-block-id="1d8efed152aff400ad14ea871a352bad"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10;" data-has-custom-html="">
 <h2>Istio Control Plane Components</h2>
 
-<p><span style="font-size:1.4em"><u>Citadel:</u></span></p>
+<h3>Galley</h3>
 
 <ul>
 	<li>
-	<p><span style="font-size:1.2em">Enables strong service-to-service and end-user authentication with built-in identity and credential management.</span></p>
+	<p>Istio’s configuration validation, ingestion, processing, and distribution component</p>
 	</li>
 	<li>
-	<p><span style="font-size:1.2em">Policies enforced based on service identity rather than on relatively unstable network identifiers.</span></p>
-	</li>
-	<li>
-	<p><span style="font-size:1.2em">Provides access control to services using Authorization policies.</span></p>
+	<p>Insulates other Istio components from underlying platform and user-supplied configurations by ingesting and validating configurations</p>
 	</li>
 </ul>
 </div></div>
-</section><section data-id="2d60c101956e99b91affeb24cc219daf"><div class="sl-block" data-block-type="text" style="height: auto; width: 1280px; left: 0px; top: 0px;" data-block-id="1d8efed152aff400ad14ea871a352bad"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10; padding: 15px;">
+</section><section data-id="2d756a5b743bce65372776d1f60cd73c"><div class="sl-block" data-block-type="text" style="height: auto; width: 777.948px; left: 0px; top: 0px;" data-block-id="ba55ee40852d9a6289dbafff57640b53"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10;" data-has-custom-html="">
 <h2>Istio Control Plane Components</h2>
 
-<p><span style="font-size:1.4em"><u>Galley:</u></span></p>
+<h3>Mixer</h3>
 
 <ul>
 	<li>
-	<p><span style="font-size:25.6px">I</span><span style="font-size:1.2em">stio’s configuration validation, ingestion, processing and distribution component.</span></p>
+	<p>Bears responsibility for precondition checking, quota management, and telemetry reporting</p>
 	</li>
 	<li>
-	<p><span style="font-size:1.2em">Insulate the other Istio components from underlying platform and user-supplied configurations by ingesting and validating configurations.</span></p>
-	</li>
-</ul>
-</div></div>
-</section><section data-id="2d756a5b743bce65372776d1f60cd73c"><div class="sl-block" data-block-type="text" style="height: auto; width: 777.948px; left: 0px; top: 0px;" data-block-id="ba55ee40852d9a6289dbafff57640b53"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10; padding: 15px;">
-<h2>Istio Control Plane Components</h2>
-
-<p><span style="font-size:1.4em"><u>Mixer:</u></span></p>
-
-<ul>
-	<li>
-	<p><span style="font-size:1.2em">Bears responsibility for precondition checking, quota management, and telemetry reporting.</span></p>
+	<p>Abstracts infrastructure back ends (Prometheus, New Relic, StackDriver) from rest of Istio</p>
 	</li>
 	<li>
-	<p><span style="font-size:1.2em">Abstracts infrastructure backends from the rest of Istio.</span></p>
+	<p>Service proxies invoke Mixer to do precondition checks to:</p>
 
 	<ul>
 		<li>
-		<p><span style="font-size:1.2em">Prometheus, New Relic, StackDriver</span></p>
+		<p>Determine whether request is allowed to proceed (check)</p>
+		</li>
+		<li>
+		<p>Report telemetry after request has completed (report)</p>
 		</li>
 	</ul>
 	</li>
 	<li>
-	<p><span style="font-size:1.2em">Service proxies invoke Mixer to do precondition checks to</span></p>
+	<p>Mixer interfaces to infrastructure back ends through set of native and third-party adapters</p>
+	</li>
+	<li>
+	<p>Service mesh operators can use Mixer’s adapters as point of integration and intermediation with their infrastructure back ends</p>
+	</li>
+</ul>
+</div></div>
+<div class="sl-block" data-block-type="image" data-block-id="4eedf1d427eb6d4e5355bd3d0413f69e" style="width: 560px; height: 392px; left: 720px; top: 184px; min-width: 1px; min-height: 1px;"><div class="sl-block-content" style="z-index: 11;"><img style="" data-natural-width="480" data-natural-height="336" data-lazy-loaded="" data-src="service_mesh_advanced_01_service_mesh_introduction/dfdceac4b8c904d099766b41ebd4d0a3.svg"></div></div></section><section data-id="d1487907357924f635e2c937a765ee01"><div class="sl-block" data-block-type="text" style="height: auto; width: 1280px; left: 0px; top: 0px;" data-block-id="46c208e342b375e37bdb8f15649931e4"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10;" data-has-custom-html="">
+<h2>Red Hat OpenShift Service Mesh</h2>
+
+<ul>
+	<li>
+	<p>Current release: 1.0.2</p>
 
 	<ul>
 		<li>
-		<p><span style="font-size:1.2em">Determine whether a request should be allowed to proceed (check)</span></p>
+		<p>Based on upstream Istio 1.1.x</p>
+		</li>
+	</ul>
+	</li>
+	<li>
+	<p>Next minor release 1.1 based on Istio 1.4</p>
+	</li>
+	<li>
+	<p>Supported on Red Hat OpenShift Container Platform 4.x</p>
+	</li>
+	<li>
+	<p>Not supported on RHOCP 3.11</p>
+
+	<ul>
+		<li>
+		<p>Technically, runs with no issues</p>
 		</li>
 		<li>
-		<p><span style="font-size:1.2em">To report telemetry after a request has completed (report).</span></p>
+		<p>Envoy proxies require elevated privileges—e.g., <span class="mono">anyuid</span>, <span class="mono">privileged</span></p>
 		</li>
 	</ul>
 	</li>
 	<li>
-	<p><span style="font-size:1.2em">Mixer interfaces to infrastructure backends through a set of native and third-party adapters.</span></p>
+	<p>Main differences from upstream Istio:</p>
+
+	<ul>
+		<li>
+		<p>Multi-tenancy support</p>
+		</li>
+		<li>
+		<p>No <span class="mono">cluster-admin</span> privileges required for service mesh operator and application owner</p>
+		</li>
+	</ul>
+	</li>
+</ul>
+</div></div>
+</section><section data-id="8a0ef27e0d167f28f22c9c40b8e369c4"><div class="sl-block" data-block-type="text" style="height: auto; width: 1280px; left: 0px; top: 0px;" data-block-id="1f7ff6482f0dd201b3f0eacdaca177d9"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10;" data-has-custom-html="">
+<h2>Red Hat OpenShift Service Mesh</h2>
+
+<h3>Multi-Tenancy</h3>
+
+<ul>
+	<li>
+	<p>Support for soft multi-tenancy</p>
+
+	<ul>
+		<li>
+		<p>Several instances of system can run side-by-side in isolated manner</p>
+		</li>
+		<li>
+		<p>Each instance serves a tenant</p>
+		</li>
+	</ul>
 	</li>
 	<li>
-	<p><span style="font-size:1.2em">Service mesh operators can use Mixer’s adapters as point of integration and intermediation with their infrastructure backends.</span></p>
+	<p>Several Istio control planes can run on single Kubernetes cluster, forming multiple meshes</p>
+	</li>
+	<li>
+	<p>Cluster administrator has visibility over all meshes</p>
+	</li>
+	<li>
+	<p>Tenant's service mesh administrator has control only over specific Istio instance</p>
+	</li>
+	<li>
+	<p>Isolation between meshes provided by Kubernetes namespaces and RBAC</p>
+
+	<ul>
+		<li>
+		<p>Namespace can belong to only one mesh</p>
+		</li>
+	</ul>
+	</li>
+	<li>
+	<p>Specific CRDs:</p>
+
+	<ul>
+		<li>
+		<p><span class="mono">ServiceMeshControlPlane</span></p>
+		</li>
+		<li>
+		<p><span class="mono">ServiceMeshMemberRoll</span></p>
+		</li>
+	</ul>
 	</li>
 </ul>
 </div></div>
-<div class="sl-block" data-block-type="image" data-block-id="4eedf1d427eb6d4e5355bd3d0413f69e" style="width: 560px; height: 392px; left: 720px; top: 184px; min-width: 1px; min-height: 1px;"><div class="sl-block-content" style="z-index: 11;"><img style="" data-natural-width="480" data-natural-height="336" data-lazy-loaded="" data-src="service_mesh_advanced_01_service_mesh_introduction/dfdceac4b8c904d099766b41ebd4d0a3.svg"></div></div></section><section data-id="d1487907357924f635e2c937a765ee01"><div class="sl-block" data-block-type="text" style="height: auto; width: 1280px; left: 0px; top: 0px;" data-block-id="46c208e342b375e37bdb8f15649931e4"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10; padding: 15px;">
-<h2><span style="font-size:1.0em">Red Hat Service Mesh</span></h2>
+</section><section data-id="ee73cc8c96933abb0c37fa441bd8a612"><div class="sl-block" data-block-type="text" style="height: auto; width: 1280px; left: 0px; top: 0px;" data-block-id="058849fb93ef7980f242ef614e8e6f49"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10;" data-has-custom-html="">
+<h2>Red Hat OpenShift Service Mesh</h2>
+
+<h3><span class="mono">NetworkPolicy</span></h3>
 
 <ul>
-	<li style="color:rgb(53, 64, 69)">
-	<p><span style="font-size:1.2em">Current release: 1.0.2</span></p>
-	</li>
-	<li style="color:rgb(53, 64, 69)">
-	<p><span style="font-size:1.2em">Based on upstream Istio 1.1.x</span></p>
-	</li>
-	<li style="color:rgb(53, 64, 69)">
-	<p><span style="font-size:1.2em">Next minor release 1.1 will rebase on Istio 1.4</span></p>
-	</li>
-	<li style="color:rgb(53, 64, 69)">
-	<p><span style="font-size:1.2em">Supported on OCP 4.x.</span></p>
-	</li>
-	<li style="color:rgb(53, 64, 69)">
-	<p><span style="font-size:1.2em">Not supported on OCP 3.11</span></p>
+	<li>
+	<p><span class="mono">NetworkPolicy</span>: Default SDN isolation mode for pod network</p>
 
 	<ul>
-		<li style="color:rgb(53, 64, 69)">
-		<p><span style="font-size:1.2em">Technically it runs fine.</span></p>
+		<li>
+		<p>Default: All pods in project are accessible from other pods and network endpoints</p>
 		</li>
-		<li style="color:rgb(53, 64, 69)">
-		<p><span style="font-size:1.2em">Envoy proxies require elevated privileges (anyuid, privileged).</span></p>
+		<li>
+		<p><span class="mono">NetworkPolicy</span> resources used to isolate pods or projects from each other</p>
 		</li>
 	</ul>
 	</li>
-	<li style="color:rgb(53, 64, 69)">
-	<p style="color:rgb(53, 64, 69)"><span style="font-size:1.2em">Main differences with upstream Istio:</span></p>
+	<li>
+	<p>OpenShift Service Mesh creates <span class="mono">NetworkPolicy</span> resource in each member namespace of control plane</p>
+	</li>
+	<li>
+	<p>Each <span class="mono">NetworkPolicy</span> resource:</p>
 
 	<ul>
-		<li style="color:rgb(53, 64, 69)">
-		<p style="color:rgb(53, 64, 69)"><span style="font-size:1.2em">Support for multi-tenancy</span></p>
+		<li>
+		<p>Allows ingress to all pods from other members and control plane</p>
 		</li>
-		<li style="color:rgb(53, 64, 69)">
-		<p style="color:rgb(53, 64, 69)"><span style="font-size:1.2em">No cluster-admin privileges required for service mesh operator and application owner.​</span></p>
+		<li>
+		<p>Denies traffic from all other projects</p>
+		</li>
+	</ul>
+	</li>
+	<li>
+	<p>Multi-tenant isolation mode: All namespaces isolated from each other</p>
+
+	<ul>
+		<li>
+		<p>Namespace networks must be joined together explicitly</p>
+		</li>
+		<li>
+		<p>Command: <span class="mono">oc adm pod-network join-projects</span></p>
+		</li>
+		<li>
+		<p>OpenShift Service Mesh joins network for each member project to network of control plane project</p>
 		</li>
 	</ul>
 	</li>
 </ul>
 </div></div>
-</section><section data-id="8a0ef27e0d167f28f22c9c40b8e369c4"><div class="sl-block" data-block-type="text" style="height: auto; width: 1280px; left: 0px; top: 0px;" data-block-id="1f7ff6482f0dd201b3f0eacdaca177d9"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10; padding: 15px;">
-<h2><span style="font-size:1.0em">Red Hat Service Mesh Multi-Tenancy</span></h2>
+</section><section data-id="613b84dd9da5aa0c71adbc8d8c44760f"><div class="sl-block" data-block-type="text" style="height: auto; width: 1280px; left: 0px; top: 0px;" data-block-id="52efdfe020b796925dfbb72dd49e95d3"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10;" data-has-custom-html="">
+<h2>OpenShift Service Mesh and API Management</h2>
 
 <ul>
-	<li style="color:rgb(53, 64, 69)">
-	<p><span style="font-size:1.2em">Support for soft multi-tenancy.</span></p>
-
-	<ul>
-		<li style="color:rgb(53, 64, 69)">
-		<p><span style="font-size:1.2em">Several instances of a system can run side by side in a isolated manner. Each instance serves a tenant.</span></p>
-		</li>
-	</ul>
+	<li>
+	<p>Complementary technologies</p>
 	</li>
-	<li style="color:rgb(53, 64, 69)">
-	<p style="color:rgb(53, 64, 69)"><span style="font-size:1.2em">Several Istio control planes can run on a single Kubernetes cluster, forming multiple meshes.</span></p>
+	<li>
+	<p>API management layer mostly concerned with <em>north-south</em> traffic</p>
 	</li>
-	<li style="color:rgb(53, 64, 69)">
-	<p style="color:rgb(53, 64, 69)"><span style="font-size:1.2em">Cluster administrator has visibility over all the meshes.</span></p>
+	<li>
+	<p>OpenShift Service Mesh mostly concerned with <em>east-west</em> traffic</p>
 	</li>
-	<li style="color:rgb(53, 64, 69)">
-	<p style="color:rgb(53, 64, 69)"><span style="font-size:1.2em">Tenant service mesh administrator only gets control over a specific Istio instance.</span></p>
-	</li>
-	<li style="color:rgb(53, 64, 69)">
-	<p style="color:rgb(53, 64, 69)"><span style="font-size:1.2em">Isolation between meshes is provided by Kubernetes namespaces and RBAC.</span></p>
-	</li>
-	<li style="color:rgb(53, 64, 69)">
-	<p style="color:rgb(53, 64, 69)"><span style="font-size:1.2em">A namespace can belong to at most 1 mesh.</span></p>
-	</li>
-	<li style="color:rgb(53, 64, 69)">
-	<p style="color:rgb(53, 64, 69)"><span style="font-size:1.2em">Specific CRDs: </span></p>
-
-	<ul>
-		<li style="color:rgb(53, 64, 69)">
-		<pre style="color:rgb(53, 64, 69)"><span style="font-size:1.2em">ServiceMeshControlPlane</span></pre>
-		</li>
-		<li style="color:rgb(53, 64, 69)">
-		<pre style="color:rgb(53, 64, 69)"><span style="font-size:1.2em">ServiceMeshMemberRoll</span></pre>
-		</li>
-	</ul>
+	<li>
+	<p>Each provides distinct capabilities, with some overlap</p>
 	</li>
 </ul>
 </div></div>
-</section><section data-id="ee73cc8c96933abb0c37fa441bd8a612"><div class="sl-block" data-block-type="text" style="height: auto; width: 1280px; left: 0px; top: 0px;" data-block-id="058849fb93ef7980f242ef614e8e6f49"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10; padding: 15px;">
-<h2><span style="font-size:1.0em">Red Hat Service Mesh And NetworkPolicy</span></h2>
-
-<ul>
-	<li style="color:rgb(53, 64, 69)">
-	<p><span style="font-size:1.2em"><em>NetworkPolicy</em>: default SDN isolation mode for the Pod network.</span></p>
-
-	<ul>
-		<li style="color:rgb(53, 64, 69)">
-		<p><span style="font-size:1.2em">By default, all Pods in a project are accessible from other Pods and network endpoints.</span></p>
-		</li>
-		<li style="color:rgb(53, 64, 69)">
-		<p><span style="font-size:1.2em"><em>NetworkPolicy</em> resources are used to isolate pods or projects from each other.</span></p>
-		</li>
-	</ul>
-	</li>
-	<li style="color:rgb(53, 64, 69)">
-	<p style="color:rgb(53, 64, 69)"><span style="font-size:1.2em">Red Hat Service Mesh creates a NetworkPolicy resource in each member namespace of a Control Plane that:</span></p>
-
-	<ul>
-		<li style="color:rgb(53, 64, 69)">
-		<p style="color:rgb(53, 64, 69)"><span style="font-size:1.2em">Allows ingress to all pods from the other members and the control plane.</span></p>
-		</li>
-		<li style="color:rgb(53, 64, 69)">
-		<p style="color:rgb(53, 64, 69)"><span style="font-size:1.2em">Denies traffic from all other projects.</span></p>
-		</li>
-	</ul>
-	</li>
-	<li style="color:rgb(53, 64, 69)">
-	<p style="color:rgb(53, 64, 69)"><span style="font-size:1.2em"><em>Multitenant</em> isolation mode: all namespaces are isolated from each other.</span></p>
-
-	<ul>
-		<li style="color:rgb(53, 64, 69)">
-		<p style="color:rgb(53, 64, 69)"><span style="font-size:1.2em">Namespace networks need to be joined together explicitly</span></p>
-		</li>
-		<li style="color:rgb(53, 64, 69)">
-		<pre style="color:rgb(53, 64, 69)"><span style="font-size:1.2em">oc adm pod-network join-projects</span></pre>
-		</li>
-	</ul>
-	</li>
-	<li style="color:rgb(53, 64, 69)">
-	<p style="color:rgb(53, 64, 69)"><span style="font-size:1.2em">Red Hat Service Mesh joins the network for each member project to the network of the control plane project.</span></p>
-	</li>
-</ul>
-</div></div>
-</section><section data-id="613b84dd9da5aa0c71adbc8d8c44760f"><div class="sl-block" data-block-type="text" style="height: auto; width: 1280px; left: 0px; top: 0px;" data-block-id="52efdfe020b796925dfbb72dd49e95d3"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10; padding: 15px;">
-<h2><span style="font-size:1.0em">Service Mesh And API Management</span></h2>
-
-<ul>
-	<li style="color:rgb(53, 64, 69)">
-	<p><span style="font-size:1.2em">Complementary technologies.</span></p>
-	</li>
-	<li style="color:rgb(53, 64, 69)">
-	<p><span style="font-size:1.2em">API Management Layer mostly concerned with <em>North-South</em> traffic.</span></p>
-	</li>
-	<li style="color:rgb(53, 64, 69)">
-	<p><span style="font-size:1.2em">Service Mesh mostly concerned with <em>East-West</em> traffic.</span></p>
-	</li>
-	<li style="color:rgb(53, 64, 69)">
-	<p><span style="font-size:1.2em">Both provide distinct capabilities, with some overlap.</span></p>
-	</li>
-</ul>
-</div></div>
-<div class="sl-block" data-block-type="image" data-block-id="e3221c32d66416dce4943ff13025b1b5" style="width: 768px; height: 432px; left: 176px; top: 265.948px;"><div class="sl-block-content" style="z-index: 11;"><img data-natural-width="960" data-natural-height="540" style="" data-src="service_mesh_advanced_01_service_mesh_introduction/ecc2604b9edf68c6f02a20ef84f3d35c.png"></div></div>
-<div class="sl-block" data-block-type="text" data-block-id="a0bced366bc65e860a3a008ddeb7025c" style="height: auto; width: 768px; left: 176px; top: 694px;"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 14;">
+<div class="sl-block" data-block-type="image" data-block-id="e3221c32d66416dce4943ff13025b1b5" style="width: 768px; height: 432px; left: 256px; top: 262px; min-width: 1px; min-height: 1px;"><div class="sl-block-content" style="z-index: 11;"><img data-natural-width="960" data-natural-height="540" style="" data-lazy-loaded="" data-src="service_mesh_advanced_01_service_mesh_introduction/ecc2604b9edf68c6f02a20ef84f3d35c.png"></div></div>
+<div class="sl-block" data-block-type="text" data-block-id="a0bced366bc65e860a3a008ddeb7025c" style="height: auto; width: 768px; left: 256px; top: 694px;"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 14;">
 <p><span style="font-size:0.5em">Source: https://developers.redhat.com/blog/2019/03/12/distributed-microservices-architecture-enterprise-integration-istio-and-managed-api-gateways/</span></p>
-</div></div></section><section data-id="e8716a88b1b633dafd58eec7fb43e89f"><div class="sl-block" data-block-type="text" style="height: auto; width: 1280px; left: 0px; top: 0px;" data-block-id="389a8546bf70d8eee5f43612ebb35794"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10; padding: 15px;">
-<h2><span style="font-size:1.0em">Service Mesh And API Management</span></h2>
+</div></div></section><section data-id="e8716a88b1b633dafd58eec7fb43e89f"><div class="sl-block" data-block-type="text" style="height: auto; width: 1280px; left: 0px; top: 0px;" data-block-id="389a8546bf70d8eee5f43612ebb35794"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10;" data-has-custom-html="">
+<h2>OpenShift Service Mesh and API Management</h2>
+
+<h3>Consumers</h3>
 </div></div>
-<div class="sl-block" data-block-type="text" style="height: auto; width: 768px; left: 299px; top: 690.006px;" data-block-id="898d321ad17b04cbe9f04e4265f6fb19"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 11;">
+<div class="sl-block" data-block-type="text" style="height: auto; width: 768px; left: 346.461px; top: 690.006px;" data-block-id="898d321ad17b04cbe9f04e4265f6fb19"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 11;">
 <p><span style="font-size:0.5em">Source: https://developer.ibm.com/apiconnect/2018/11/13/service-mesh-vs-api-management/</span></p>
 </div></div>
-<div class="sl-block" data-block-type="image" data-block-id="69c46a3c1b588f98b4baea0553871250" style="width: 682px; height: 597.006px; left: 299px; top: 93px;"><div class="sl-block-content" style="z-index: 12;"><img style="" data-natural-width="666" data-natural-height="583" data-src="service_mesh_advanced_01_service_mesh_introduction/e09de2525743f6fb6e18072e5d35d3bb.png"></div></div></section>
+<div class="sl-block" data-block-type="image" data-block-id="69c46a3c1b588f98b4baea0553871250" style="width: 616.779px; height: 539.913px; left: 346.461px; top: 150.093px; min-width: 1px; min-height: 1px;"><div class="sl-block-content" style="z-index: 12;"><img style="" data-natural-width="666" data-natural-height="583" data-lazy-loaded="" data-src="service_mesh_advanced_01_service_mesh_introduction/e09de2525743f6fb6e18072e5d35d3bb.png"></div></div></section><section data-id="1e4f8bbf90d5d340e5af3cd6cc20519d"><div class="sl-block" data-block-type="text" style="height: auto; width: 600px; left: 0px; top: 0px;" data-block-id="fed975a93d0527caf1d6807f21560f49"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10;" data-has-custom-html="">
+<h2>Module Summary</h2>
+
+<ul>
+	<li>
+	<p>What Is a Service Mesh?</p>
+	</li>
+	<li>
+	<p>Complexity of Distributed Applications</p>
+	</li>
+	<li>
+	<p>How to Address the Complexity</p>
+	</li>
+	<li>
+	<p>Evolution of Microservices</p>
+	</li>
+	<li>
+	<p>Service Mesh Landscape</p>
+	</li>
+	<li>
+	<p>Data Plane and Control Plane</p>
+	</li>
+	<li>
+	<p>Istio Control Plane Components</p>
+	</li>
+	<li>
+	<p>Red Hat OpenShift Service Mesh</p>
+	</li>
+	<li>
+	<p>OpenShift Service Mesh and API Management</p>
+	</li>
+</ul>
+</div></div></section>
 			</div>
 		</div>
 
 		<script>
-			var SLConfig = {"deck": {"id":1693503,"slug":"service_mesh_advanced_01_service_mesh_introduction","title":"Service_Mesh_Advanced_01_Service_Mesh_Introduction","description":"","width":1280,"height":720,"margin":0.05,"visibility":"self","published_at":null,"sanitize_messages":null,"thumbnail_url":"https://s3.amazonaws.com/media-p.slid.es/thumbnails/811d7cb719ae732f6a0d93896bf0efa6/thumb.jpg?1579213431","view_count":0,"user":{"id":349930,"username":"btison","name":"Bernard Tison","description":null,"thumbnail_url":"https://www.gravatar.com/avatar/e2e3cdd3ce9e08ca385892a22816db22?s=140\u0026d=https%3A%2F%2Fstatic.slid.es%2Fimages%2Fdefault-profile-picture.png","paid":true,"pro":true,"lite":false,"team_id":32,"settings":{"id":183077,"present_controls":true,"present_upsizing":true,"present_pointer":false,"present_notes":true,"default_deck_tag_id":null},"enterprise":true,"membership":{"role":"member","manager":false,"activated":true}},"background_transition":"none","transition":"none","theme_id":176,"theme_font":"overpass2","theme_color":"no-color","auto_slide_interval":0,"comments_enabled":true,"forking_enabled":false,"rolling_links":false,"center":false,"shuffle":false,"should_loop":false,"share_notes":false,"slide_number":true,"slide_count":30,"rtl":false,"version":2,"collaborative":false,"deck_user_editor_limit":null,"data_updated_at":1579270828309,"font_typekit":null,"font_google":null,"time_limit":null,"upsizing_enabled":true,"notes":{"bedc0457df23e02319c4a5f2fb1e220f":"","14aee4ce6e77efac398800a568d4b75b":"","00c8743aad41872b1490fa1b34350a1b":"","57eadeb0bee99829e929666d4957b001":"","a0a8f62b4e04f627b163a856dfb59a4f":"","2ffc9af43b0e6f78c72fde3a1e0165f3":"","0d01f8dbe2b1c338949e507a3e9bb5ec":"","48dfbc8c76713fecc916f6ab82c26831":"","620d650e6e3ab7ea1fae9af7fc848890":"","4adbb56d9ccb48b44aac2c7cfa67cd26":"","a0567e5825addcdbc8496f3779b14e51":"","ffdb9b6bcf5f9b3b1412d9a6bd31eac5":"","407ed17b3f536db0b8d6f0fec7dc1da1":"","05baa377921dfc24bc2f976dfdeba3ac":"","4cd9c824a4d86a7211f8100e5794b5c4":"","503b95ca3245a464ab20828c58f29060":"","0c7a65c2ec6743d876e0f8a52019d607":"","883ab49bf404a9dcb67d33a2fb0299a1":"","0ea0feca0cfde165ad868afc2c554e79":"","00896e2961203a8b4eca7fafc7f957ee":"","d43265aed24508d5c80c5863b4a869e8":"","acdb0f554bba724e4bea7b4c88c6ae8d":"","e56c3cd4bd06f102c94d95a6b9f22cae":"","c94edad64a41b18e4e276e9914ca9f6f":""}}};
+			var SLConfig = {"deck": {"id":1693503,"slug":"service_mesh_advanced_01_service_mesh_introduction","title":"Service_Mesh_Advanced_01_Service_Mesh_Introduction","description":"","width":1280,"height":720,"margin":0.05,"visibility":"self","published_at":null,"sanitize_messages":null,"thumbnail_url":"https://s3.amazonaws.com/media-p.slid.es/thumbnails/811d7cb719ae732f6a0d93896bf0efa6/thumb.jpg?1583867415","view_count":0,"user":{"id":349930,"username":"btison","name":"Bernard Tison","description":null,"thumbnail_url":"https://www.gravatar.com/avatar/e2e3cdd3ce9e08ca385892a22816db22?s=140\u0026d=https%3A%2F%2Fstatic.slid.es%2Fimages%2Fdefault-profile-picture.png","paid":true,"pro":true,"lite":false,"team_id":32,"settings":{"id":183077,"present_controls":true,"present_upsizing":true,"present_pointer":false,"present_notes":true,"default_deck_tag_id":null},"enterprise":true,"membership":{"role":"member","manager":false,"activated":true}},"background_transition":"none","transition":"none","theme_id":176,"theme_font":"overpass2","theme_color":"no-color","auto_slide_interval":0,"comments_enabled":true,"forking_enabled":false,"rolling_links":false,"center":false,"shuffle":false,"should_loop":false,"share_notes":false,"slide_number":true,"slide_count":32,"rtl":false,"version":2,"collaborative":true,"deck_user_editor_limit":null,"data_updated_at":1583953496877,"font_typekit":null,"font_google":null,"time_limit":null,"upsizing_enabled":true,"notes":{"bedc0457df23e02319c4a5f2fb1e220f":"","14aee4ce6e77efac398800a568d4b75b":"","00c8743aad41872b1490fa1b34350a1b":"","57eadeb0bee99829e929666d4957b001":"","a0a8f62b4e04f627b163a856dfb59a4f":"","2ffc9af43b0e6f78c72fde3a1e0165f3":"","0d01f8dbe2b1c338949e507a3e9bb5ec":"","48dfbc8c76713fecc916f6ab82c26831":"","620d650e6e3ab7ea1fae9af7fc848890":"","4adbb56d9ccb48b44aac2c7cfa67cd26":"","a0567e5825addcdbc8496f3779b14e51":"","ffdb9b6bcf5f9b3b1412d9a6bd31eac5":"","407ed17b3f536db0b8d6f0fec7dc1da1":"","05baa377921dfc24bc2f976dfdeba3ac":"","4cd9c824a4d86a7211f8100e5794b5c4":"","503b95ca3245a464ab20828c58f29060":"","0c7a65c2ec6743d876e0f8a52019d607":"","883ab49bf404a9dcb67d33a2fb0299a1":"","0ea0feca0cfde165ad868afc2c554e79":"","00896e2961203a8b4eca7fafc7f957ee":"","d43265aed24508d5c80c5863b4a869e8":"","acdb0f554bba724e4bea7b4c88c6ae8d":"","e56c3cd4bd06f102c94d95a6b9f22cae":"","c94edad64a41b18e4e276e9914ca9f6f":""}}};
 
 				SLConfig.theme = {"id":176,"created_at":"2014-05-27T12:38:16.183Z","updated_at":"2019-10-17T00:32:59.630Z","name":"Red Hat Corporate (Archived)","thumbnail_url":"https://s3.amazonaws.com/media-p.slid.es/thumbnails/66755080be2b0c8c0146bfa70069ef16/thumb.jpg?1571272377","sanitize_messages":null,"slide_template_ids":[28642,36442,26765,26762,56704,16857,16856,16853,16855,16854,16852,16863,16862,16861,16860,16859,16858,56721,185268,185425],"font_typekit":"","font_google":"","width":960,"height":700};
 
@@ -2385,6 +2477,8 @@ html:not([data-mode="arrange"]) .reveal .future.in-3d-appear {
 
 				autoSlide: 0,
 				autoSlideStoppable: true,
+
+				autoAnimateMatcher: SL.deck.AutoAnimate.matcher,
 
 				center: false,
 				shuffle: false,
