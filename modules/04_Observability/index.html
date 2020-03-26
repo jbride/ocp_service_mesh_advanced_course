@@ -1793,143 +1793,142 @@ html:not([data-mode="arrange"]) .reveal .future.in-3d-appear {
 		<div class="reveal">
 			<div class="slides">
 				<section data-background-color="rgb(144,12,18)" data-background-image="bxms_dm_foundational_m03/40cf27dd491393a1b2042f99486971a6.png" data-id="bedc0457df23e02319c4a5f2fb1e220f"><div class="sl-block" data-block-type="text" style="height: auto; width: 1065px; left: 160px; top: 288px;" data-block-id="22dfbc502d30872f61f60fafe62f4e42"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10; text-align: left;" data-has-custom-html="" dir="ui">
-<h1>Advanced Service Mesh</h1>
-
+<h1>Advanced Application Management Using Red Hat OpenShift Service Mesh</h1>
 <h2>Observability</h2>
 </div></div>
 
 
 <div class="sl-block" data-block-type="image" style="width: 360px; height: 122.4px; left: 0px; top: 0px; min-width: 1px; min-height: 1px;" data-block-id="c5ce7b97245def08c76fac2f2d539e9a"><div class="sl-block-content" style="z-index: 13;" data-inline-svg="true">
 <img data-natural-width="500" data-natural-height="170" data-lazy-loaded="" style="" data-src="service_mesh_advanced_04_observability/bfa11a84cdd2fc0f50cb6fb54942bd62.svg"><svg xmlns="http://www.w3.org/2000/svg" viewbox="0 0 613 145" height="170" width="500" class="redhat-logo"><path class="logohat" style="fill:#fff;" d="M127.47,83.49c12.51,0,30.61-2.58,30.61-17.46a14,14,0,0,0-.31-3.42l-7.45-32.36c-1.72-7.12-3.23-10.35-15.73-16.6C124.89,8.69,103.76.5,97.51.5,91.69.5,90,8,83.06,8c-6.68,0-11.64-5.6-17.89-5.6-6,0-9.91,4.09-12.93,12.5,0,0-8.41,23.72-9.49,27.16A6.43,6.43,0,0,0,42.53,44c0,9.22,36.3,39.45,84.94,39.45M160,72.07c1.73,8.19,1.73,9.05,1.73,10.13,0,14-15.74,21.77-36.43,21.77C78.54,104,37.58,76.6,37.58,58.49a18.45,18.45,0,0,1,1.51-7.33C22.27,52,.5,55,.5,74.22c0,31.48,74.59,70.28,133.65,70.28,45.28,0,56.7-20.48,56.7-36.65,0-12.72-11-27.16-30.83-35.78"></path><path class="logotext" style="fill:#fff;" d="M579.74,92.8c0,11.89,7.15,17.67,20.19,17.67a52.11,52.11,0,0,0,11.89-1.68V95a24.84,24.84,0,0,1-7.68,1.16c-5.37,0-7.36-1.68-7.36-6.73V68.3h15.56V54.1H596.78v-18l-17,3.68V54.1H568.49V68.3h11.25Zm-53,.32c0-3.68,3.69-5.47,9.26-5.47a43.12,43.12,0,0,1,10.1,1.26v7.15a21.51,21.51,0,0,1-10.63,2.63c-5.46,0-8.73-2.1-8.73-5.57m5.2,17.56c6,0,10.84-1.26,15.36-4.31v3.37h16.82V74.08c0-13.56-9.14-21-24.39-21-8.52,0-16.94,2-26,6.1l6.1,12.52c6.52-2.74,12-4.42,16.83-4.42,7,0,10.62,2.73,10.62,8.31v2.73a49.53,49.53,0,0,0-12.62-1.58c-14.31,0-22.93,6-22.93,16.73,0,9.78,7.78,17.24,20.19,17.24m-92.44-.94h18.09V80.92h30.29v28.82H506V36.12H487.93V64.41H457.64V36.12H439.55ZM370.62,81.87c0-8,6.31-14.1,14.62-14.1A17.22,17.22,0,0,1,397,72.09V91.54A16.36,16.36,0,0,1,385.24,96c-8.2,0-14.62-6.1-14.62-14.09m26.61,27.87h16.83V32.44l-17,3.68V57.05a28.3,28.3,0,0,0-14.2-3.68c-16.19,0-28.92,12.51-28.92,28.5a28.25,28.25,0,0,0,28.4,28.6,25.12,25.12,0,0,0,14.93-4.83ZM320,67c5.36,0,9.88,3.47,11.67,8.83H308.47C310.15,70.3,314.36,67,320,67M291.33,82c0,16.2,13.25,28.82,30.28,28.82,9.36,0,16.2-2.53,23.25-8.42l-11.26-10c-2.63,2.74-6.52,4.21-11.14,4.21a14.39,14.39,0,0,1-13.68-8.83h39.65V83.55c0-17.67-11.88-30.39-28.08-30.39a28.57,28.57,0,0,0-29,28.81M262,51.58c6,0,9.36,3.78,9.36,8.31S268,68.2,262,68.2H244.11V51.58Zm-36,58.16h18.09V82.92h13.77l13.89,26.82H292l-16.2-29.45a22.27,22.27,0,0,0,13.88-20.72c0-13.25-10.41-23.45-26-23.45H226Z"></path></svg>
-</div></div></section><section data-id="c94edad64a41b18e4e276e9914ca9f6f"><div class="sl-block" data-block-type="text" style="height: auto; min-width: 30px; min-height: 30px; width: 1280px; left: 0px; top: 0px;" data-block-id="ff81d8deec2506adcd7ee99bd117cb3f"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 11; padding: 15px;">
+</div></div></section><section data-id="c94edad64a41b18e4e276e9914ca9f6f"><div class="sl-block" data-block-type="text" style="height: auto; min-width: 30px; min-height: 30px; width: 1280px; left: 0px; top: 0px;" data-block-id="ff81d8deec2506adcd7ee99bd117cb3f"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 11;">
 <h2>Module Topics</h2>
 
 <ul>
 	<li>
-	<p><span style="font-size:1.2em">Observability</span></p>
+	<p><span style="font-size:1.0em">Observability</span></p>
 	</li>
 	<li>
-	<p><span style="font-size:1.2em">Logging</span></p>
+	<p><span style="font-size:1.0em">Logging</span></p>
 	</li>
 	<li>
-	<p><span style="font-size:1.2em">Distributed Tracing</span></p>
+	<p><span style="font-size:1.0em">Distributed Tracing</span></p>
 	</li>
 	<li>
-	<p><span style="font-size:1.2em">OpenTracing</span></p>
+	<p><span style="font-size:1.0em">Distributed Tracing UI</span></p>
 	</li>
 	<li>
-	<p><span style="font-size:1.2em">Jaeger</span></p>
+	<p><span style="font-size:1.0em">Source Code Implementation</span></p>
 	</li>
 	<li>
-	<p><span style="font-size:1.2em">Service Mesh and Distributed Tracing</span></p>
+	<p><span style="font-size:1.0em">OpenTracing</span></p>
 	</li>
 	<li>
-	<p><span style="font-size:1.2em">Monitoring</span></p>
+	<p><span style="font-size:1.0em">Jaeger</span></p>
 	</li>
 	<li>
-	<p><span style="font-size:1.2em">Prometheus</span></p>
+	<p><span style="font-size:1.0em">Red Hat OpenShift Service Mesh and Distributed Tracing</span></p>
 	</li>
 	<li>
-	<p><span style="font-size:1.2em">Service Mesh and Monitoring</span></p>
+	<p><span style="font-size:1.0em">Monitoring</span></p>
 	</li>
 	<li>
-	<p><span style="font-size:1.2em">Visualization</span></p>
+	<p><span style="font-size:1.0em">Prometheus</span></p>
 	</li>
 	<li>
-	<p><span style="font-size:1.2em">Kiali</span></p>
+	<p><span style="font-size:1.0em">OpenShift Service Mesh and Monitoring</span></p>
+	</li>
+	<li>
+	<p><span style="font-size:1.0em">Visualization</span></p>
 	</li>
 </ul>
-</div></div></section><section data-id="14aee4ce6e77efac398800a568d4b75b"><div class="sl-block" data-block-type="text" style="height: auto; width: 1280px; left: 0px; top: 0px;" data-block-id="c6044dfb82e3dd38b10ae5790e6053ca"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10; padding: 15px;">
+</div></div></section><section data-id="14aee4ce6e77efac398800a568d4b75b"><div class="sl-block" data-block-type="text" style="height: auto; width: 1280px; left: 0px; top: 0px;" data-block-id="c6044dfb82e3dd38b10ae5790e6053ca"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10;">
 <h2><span style="font-size:1.0em">Observability</span></h2>
 
 <ul>
 	<li style="color:rgb(53, 64, 69)">
-	<p><span style="font-size:1.4em">Ability to understand how a system behaves in production</span></p>
+	<p><span style="font-size:1.0em">Ability to understand how system behaves in production</span></p>
 	</li>
 	<li style="color:rgb(53, 64, 69)">
-	<p><span style="font-size:1.4em">System is observable if its current state can be understood from outside</span></p>
+	<p><span style="font-size:1.0em">System is observable if current state can be understood from outside</span></p>
 	</li>
 	<li style="color:rgb(53, 64, 69)">
-	<p><span style="font-size:1.4em">Important characteristic of cloud-native distributed systems (just like availability and scalability)</span></p>
+	<p><span style="font-size:1.0em">Important characteristic of cloud-native distributed systems, like availability and scalability</span></p>
 	</li>
 	<li style="color:rgb(53, 64, 69)">
-	<p><span style="font-size:1.4em">Techniques:</span></p>
+	<p><span style="font-size:1.0em">Techniques:</span></p>
 
 	<ul>
 		<li>
-		<p><span style="font-size:1.4em">Logging</span></p>
+		<p><span style="font-size:1.0em">Logging</span></p>
 		</li>
 		<li>
-		<p><span style="font-size:1.4em">Tracing</span></p>
+		<p><span style="font-size:1.0em">Tracing</span></p>
 		</li>
 		<li>
-		<p><span style="font-size:1.4em">Monitoring</span></p>
+		<p><span style="font-size:1.0em">Monitoring</span></p>
 		</li>
 		<li>
-		<p><span style="font-size:1.4em">Visualization</span></p>
+		<p><span style="font-size:1.0em">Visualization</span></p>
 		</li>
 	</ul>
 	</li>
 	<li style="color:rgb(53, 64, 69)">
-	<p><span style="font-size:1.4em">Goal: Gain an understanding of the application services, to help understand, operate, maintain, and evolve system</span></p>
+	<p><span style="font-size:1.0em">Goal: Gain understanding of application services to help understand, operate, maintain, evolve system</span></p>
 	</li>
 </ul>
 </div></div>
-</section><section data-id="e6b375d2a4b44b1a6af2eb0e00df7c03"><div class="sl-block" data-block-type="text" style="height: auto; width: 1280px; left: 0px; top: 0px;" data-block-id="d6041988e3f94d2b1a19d7f8040da73c"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10; padding: 15px;">
+</section><section data-id="e6b375d2a4b44b1a6af2eb0e00df7c03"><div class="sl-block" data-block-type="text" style="height: auto; width: 1280px; left: 0px; top: 0px;" data-block-id="d6041988e3f94d2b1a19d7f8040da73c"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10;">
 <h2><span style="font-size:1.0em">Observability</span></h2>
+
+<h3><span style="font-size:1.0em">Representation</span></h3>
 </div></div>
-<div class="sl-block" data-block-type="image" style="min-width: 1px; min-height: 1px; width: 564.48px; height: 576px; left: 343.86px; top: 72px;" data-block-id="86fe55b2dfb6d60d1de3cdbd316a755a">
+<div class="sl-block" data-block-type="image" style="min-width: 1px; min-height: 1px; width: 564.48px; height: 576px; left: 277.76px; top: 118px;" data-block-id="86fe55b2dfb6d60d1de3cdbd316a755a">
     <div class="sl-block-content" style="z-index: 11;">
         <img style="" data-natural-width="392" data-natural-height="400" data-lazy-loaded="" data-src="service_mesh_advanced_04_observability/0b4e0f211c9440de9887dde85d9415ba.png">
     </div>
 </div>
-<div class="sl-block" data-block-type="text" data-block-id="4644e8908ce01ed344c7392222495dc0" style="height: auto; width: 600px; left: 375.283px; top: 694px;"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 12;">
+<div class="sl-block" data-block-type="text" data-block-id="4644e8908ce01ed344c7392222495dc0" style="height: auto; width: 600px; left: 260px; top: 694px;"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 12;">
 <p><span style="font-size:0.7em">Source: http://peter.bourgon.org/blog/2017/02/21/metrics-tracing-and-logging.html</span></p>
-</div></div></section><section data-id="138838f46acc7b8483a137a30afa869d"><div class="sl-block" data-block-type="text" style="height: auto; width: 1280px; left: 0px; top: 0px;" data-block-id="e70e819868a2b5dc6b646f21a1d8123f"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10; padding: 15px;" dir="ui">
+</div></div></section><section data-id="138838f46acc7b8483a137a30afa869d"><div class="sl-block" data-block-type="text" style="height: auto; width: 1280px; left: 0px; top: 0px;" data-block-id="e70e819868a2b5dc6b646f21a1d8123f"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10;" dir="ui" data-has-custom-html="">
 <h2><span style="font-size:1.0em">Logging</span></h2>
 
 <ul>
 	<li style="color:rgb(53, 64, 69)">
-	<p><span style="font-size:1.4em">Messages representing events</span></p>
+	<p><span style="font-size:1.0em">Messages representing events</span></p>
 	</li>
 	<li style="color:rgb(53, 64, 69)">
-	<p><span style="font-size:1.4em">Aggregation, correlation:</span></p>
+	<p><span style="font-size:1.0em">Aggregation and correlation:</span></p>
 
 	<ul>
 		<li>
-		<p><span style="font-size:1.4em">By process: thread name</span></p>
-		</li>
-		<li>
+		<p><span style="font-size:1.0em">By process: Thread name</span></p>
+
+		<p> </p>
+
+		<p> </p>
+
+		<p> </p>
+
+		<p> </p>
+
 		<p> </p>
 		</li>
 		<li>
-		<p> </p>
-		</li>
-		<li>
-		<p> </p>
-		</li>
-		<li>
-		<p> </p>
-		</li>
-		<li>
-		<p> </p>
-		</li>
-		<li>
-		<p><span style="font-size:1.4em">By transaction: correlation ID</span></p>
+		<p><span style="font-size:1.0em">By transaction: Correlation ID</span></p>
 		</li>
 	</ul>
 	</li>
 </ul>
 </div></div>
-<div class="sl-block" data-block-type="shape" data-block-id="b3687b9a0cdfd3e2acb6dd375f4fc38e" style="width: 37.1547px; height: 214.188px; left: 42.8453px; top: 231.377px;"><div class="sl-block-content" data-shape-type="rect" data-shape-fill-color="rgb(243, 244, 244)" data-shape-stretch="true" style="z-index: 11;"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="100%" height="100%" preserveaspectratio="none" viewbox="0 0 37 214"><rect width="37.1547" height="214.188" rx="0" ry="0" class="shape-element" fill="rgb(243, 244, 244)"></rect></svg></div></div>
-<div class="sl-block" data-block-type="code" style="width: 800px; height: 172.23px; left: 240px; top: 243.565px;" data-block-id="57ec0abc0ce5e7ac066c839122e480e1"><div class="sl-block-content notranslate" style="z-index: 12;"><pre><code>Thread-1 2018-09-03T15:52:54+02:00 Request started
+
+<div class="sl-block" data-block-type="code" style="width: 800px; height: 172.23px; left: 61.4227px; top: 201.885px;" data-block-id="57ec0abc0ce5e7ac066c839122e480e1"><div class="sl-block-content notranslate" style="z-index: 12;"><pre><code>Thread-1 2018-09-03T15:52:54+02:00 Request started
 Thread-2 2018-09-03T15:52:55+02:00 Charging credit card x321
 Thread-1 2018-09-03T15:52:55+02:00 Order submitted
 Thread-1 2018-09-03T15:52:56+02:00 Charging credit card x123
 Thread-1 2018-09-03T15:52:57+02:00 Changing order status
 Thread-1 2018-09-03T15:52:58+02:00 Dispatching event to inventory
 Thread-1 2018-09-03T15:52:59+02:00 Request finished</code></pre></div></div>
-<div class="sl-block" data-block-type="code" style="width: 800px; height: 146.409px; left: 240px; top: 501.591px;" data-block-id="db3a5d35f130df55e3fe282821f84303">
+<div class="sl-block" data-block-type="code" style="width: 800px; height: 146.409px; left: 61.4227px; top: 444.587px;" data-block-id="db3a5d35f130df55e3fe282821f84303">
     <div class="sl-block-content notranslate" style="z-index: 13;">
         <pre class="subunit"><code>abc123 Order     2018-09-03T15:52:58+02:00 Dispatching event to inventory
 def456 Order     2018-09-03T15:52:58+02:00 Dispatching event to inventory
@@ -1938,119 +1937,123 @@ abc123 Inventory 2018-09-03T15:53:00+02:00 Checking inventory status
 abc123 Inventory 2018-09-03T15:53:01+02:00 Updating inventory
 abc123 Inventory 2018-09-03T15:53:02+02:00 Preparing order manifest</code></pre>
     </div>
-</div></section><section data-id="521e76a53e10b02e715df827cb1bc08d"><div class="sl-block" data-block-type="text" style="height: auto; width: 1280px; left: 0px; top: 0px;" data-block-id="b4c49fbc9063f205f9e4d264b0cac60c"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10; padding: 15px;" dir="ui">
+</div></section><section data-id="521e76a53e10b02e715df827cb1bc08d"><div class="sl-block" data-block-type="text" style="height: auto; width: 1280px; left: 0px; top: 0px;" data-block-id="b4c49fbc9063f205f9e4d264b0cac60c"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10;" dir="ui">
 <h2><span style="font-size:1.0em">Distributed Tracing</span></h2>
 
 <ul>
 	<li style="color:rgb(53, 64, 69)">
-	<p><span style="font-size:1.4em">Story of a request across services</span></p>
+	<p><span style="font-size:1.0em">Story of request across services</span></p>
 
 	<ul>
 		<li>
-		<p><span style="font-size:1.4em">Which services were touched, when, in which order,</span></p>
+		<p><span style="font-size:1.0em">Which services were touched, when, in which order, etc.</span></p>
 		</li>
 		<li>
-		<p><span style="font-size:1.4em">With context information (routing info, version, and tags, ...)</span></p>
+		<p><span style="font-size:1.0em">With context information: Routing info, version, tags, etc.</span></p>
 		</li>
 	</ul>
 	</li>
 	<li style="color:rgb(53, 64, 69)">
-	<p><span style="font-size:1.4em">Not a replacement for logging</span></p>
+	<p><span style="font-size:1.0em">Not replacement for logging</span></p>
 
 	<ul>
 		<li>
-		<p><span style="font-size:1.4em">Process/thread level details</span></p>
+		<p><span style="font-size:1.0em">Process/thread-level details</span></p>
 		</li>
 		<li>
-		<p><span style="font-size:1.4em">Not all traces are sampled</span></p>
+		<p><span style="font-size:1.0em">Not all traces sampled</span></p>
 		</li>
 	</ul>
 	</li>
 </ul>
 </div></div>
-</section><section data-id="19b89085078ce261eb8873bd82a0eba2"><div class="sl-block" data-block-type="text" style="height: auto; width: 1280px; left: 0px; top: 0px;" data-block-id="bdf02a0691e32703d964dcce1c20f59f"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10; padding: 15px;" dir="ui">
+</section><section data-id="19b89085078ce261eb8873bd82a0eba2"><div class="sl-block" data-block-type="text" style="height: auto; width: 1280px; left: 0px; top: 0px;" data-block-id="bdf02a0691e32703d964dcce1c20f59f"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10;" dir="ui">
 <h2><span style="font-size:1.0em">Distributed Tracing</span></h2>
 
-<p style="color:rgb(53, 64, 69)"><span style="font-size:1.4em">Helps with:</span></p>
+<h3><span style="font-size:1.0em">Functions</span></h3>
 
 <ul>
 	<li>
-	<p><span style="font-size:1.4em">Root cause analysis</span></p>
+	<p><span style="font-size:1.0em">Root cause analysis</span></p>
 
 	<ul>
 		<li>
-		<p><span style="font-size:1.4em">Where did first failure happen?</span></p>
+		<p><span style="font-size:1.0em">Where did first failure happen?</span></p>
 		</li>
 		<li>
-		<p><span style="font-size:1.4em">Trace should contain error code and message</span></p>
+		<p><span style="font-size:1.0em">Trace contains error code and message</span></p>
 		</li>
 	</ul>
 	</li>
 	<li>
-	<p><span style="font-size:1.4em">Performance optimization</span></p>
+	<p><span style="font-size:1.0em">Performance optimization</span></p>
 
 	<ul>
 		<li>
-		<p><span style="font-size:1.4em">Is there a service behaving badly?</span></p>
+		<p><span style="font-size:1.0em">Is a service behaving badly?</span></p>
 		</li>
 		<li>
-		<p><span style="font-size:1.4em">Impact of performance optimization</span></p>
+		<p><span style="font-size:1.0em">Impact of performance optimization</span></p>
 		</li>
 	</ul>
 	</li>
 	<li>
-	<p><span style="font-size:1.4em">Service dependency visualization</span></p>
+	<p><span style="font-size:1.0em">Service dependency visualization</span></p>
 	</li>
 </ul>
 </div></div>
-</section><section data-id="373f9385e93a4b406e53982e6234f39b"><div class="sl-block" data-block-type="text" style="height: auto; width: 1280px; left: 0px; top: 0px;" data-block-id="b98e514920dc896b8089351aacc5ee54"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10; padding: 15px;" dir="ui">
-<h2><span style="font-size:1.0em">Distributed Tracing Concepts</span></h2>
+</section><section data-id="373f9385e93a4b406e53982e6234f39b"><div class="sl-block" data-block-type="text" style="height: auto; width: 1280px; left: 0px; top: 0px;" data-block-id="b98e514920dc896b8089351aacc5ee54"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10;" dir="ui">
+<h2><span style="font-size:1.0em">Distributed Tracing</span></h2>
+
+<h3><span style="font-size:1.0em">Concepts</span></h3>
 
 <ul>
 	<li style="color:rgb(53, 64, 69)">
-	<p><span style="font-size:1.4em">Measures unit of work</span></p>
+	<p><span style="font-size:1.0em">Measures unit of work</span></p>
 
 	<ul>
 		<li>
-		<p><span style="font-size:1.4em">Data stored in a <em>span</em></span></p>
+		<p><span style="font-size:1.0em">Data stored in <em>span</em></span></p>
 		</li>
 	</ul>
 	</li>
 	<li style="color:rgb(53, 64, 69)">
-	<p><span style="font-size:1.4em">References other spans</span></p>
+	<p><span style="font-size:1.0em">References other spans</span></p>
 
 	<ul>
 		<li>
-		<p><span style="font-size:1.4em">Causality</span></p>
+		<p><span style="font-size:1.0em">Causality</span></p>
 		</li>
 	</ul>
 	</li>
 	<li style="color:rgb(53, 64, 69)">
-	<p><span style="font-size:1.4em">Context propagation</span></p>
+	<p><span style="font-size:1.0em">Context propagation</span></p>
 
 	<ul>
 		<li>
-		<p><span style="font-size:1.4em">Similar to correlation identifiers</span></p>
+		<p><span style="font-size:1.0em">Similar to correlation identifiers</span></p>
 		</li>
 		<li>
-		<p><span style="font-size:1.4em">Typically autogenerated</span></p>
+		<p><span style="font-size:1.0em">Typically autogenerated</span></p>
 		</li>
 	</ul>
 	</li>
 	<li>
-	<p><span style="font-size:1.4em">​Additional information: tags, baggage</span></p>
+	<p><span style="font-size:1.0em">​Additional information: Tags, baggage</span></p>
 	</li>
 </ul>
 </div></div>
-</section><section data-id="ce472b8ce2331ca033927444660cce6b"><div class="sl-block" data-block-type="text" style="height: auto; width: 1280px; left: 0px; top: 0px;" data-block-id="7627aab681315b0914c88cc9d23e5aff"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10; padding: 15px;" dir="ui">
-<h2><span style="font-size:1.0em">Distributed Tracing Instrumentation Example</span></h2>
+</section><section data-id="ce472b8ce2331ca033927444660cce6b"><div class="sl-block" data-block-type="text" style="height: auto; width: 1280px; left: 0px; top: 0px;" data-block-id="7627aab681315b0914c88cc9d23e5aff"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10;" dir="ui">
+<h2><span style="font-size:1.0em">Distributed Tracing</span></h2>
+
+<h3><span style="font-size:1.0em">Instrumentation Example</span></h3>
 </div></div>
-<div class="sl-block" data-block-type="code" style="min-width: 30px; min-height: 30px; width: 800px; height: 136.127px; left: 240px; top: 122.77px;" data-block-id="b0a97b19b663a74cb3c4d538d268c12a"><div class="sl-block-content notranslate" style="z-index: 11;" data-highlight-theme="github-gist"><pre class="java"><code>public void processOrder() {
+<div class="sl-block" data-block-type="code" style="min-width: 30px; min-height: 30px; width: 800px; height: 136.127px; left: 28.8259px; top: 132.873px;" data-block-id="b0a97b19b663a74cb3c4d538d268c12a"><div class="sl-block-content notranslate" style="z-index: 11;" data-highlight-theme="github-gist"><pre class="java"><code>public void processOrder() {
     chargeCreditCard();
     changeOrderStatus();
     dispatchEventToInventory();
 }</code></pre></div></div>
-<div class="sl-block" data-block-type="code" style="min-width: 30px; min-height: 30px; width: 800px; height: 177.301px; left: 240px; top: 542.699px;" data-block-id="f8d6c1741c6b2ac3cdcfc084610405cf"><div class="sl-block-content notranslate" style="z-index: 12;" data-highlight-theme="github-gist"><pre class="java"><code>public void processOrder() {
+<div class="sl-block" data-block-type="code" style="min-width: 30px; min-height: 30px; width: 800px; height: 177.301px; left: 28.8259px; top: 527.152px;" data-block-id="f8d6c1741c6b2ac3cdcfc084610405cf"><div class="sl-block-content notranslate" style="z-index: 12;" data-highlight-theme="github-gist"><pre class="java"><code>public void processOrder() {
     try (Scope scope = tracer.buildSpan("submitOrder").startActive(true)) {
         scope.span().setTag("order-id", "c85b7644b6b5");
         chargeCreditCard();
@@ -2058,7 +2061,7 @@ abc123 Inventory 2018-09-03T15:53:02+02:00 Preparing order manifest</code></pre>
         dispatchEventToInventory();
     }
 }</code></pre></div></div>
-<div class="sl-block" data-block-type="code" style="min-width: 30px; min-height: 30px; width: 800px; height: 177.301px; left: 240px; top: 307px;" data-block-id="4689ec586f117c0cf5a0328a66ca7879"><div class="sl-block-content notranslate" style="z-index: 13;" data-highlight-theme="github-gist"><pre class="java"><code>public void processOrder() {
+<div class="sl-block" data-block-type="code" style="min-width: 30px; min-height: 30px; width: 800px; height: 177.301px; left: 28.8259px; top: 302.522px;" data-block-id="4689ec586f117c0cf5a0328a66ca7879"><div class="sl-block-content notranslate" style="z-index: 13;" data-highlight-theme="github-gist"><pre class="java"><code>public void processOrder() {
     try (Scope scope = tracer.buildSpan("submitOrder").startActive(true)) {
         chargeCreditCard();
         changeOrderStatus();
@@ -2067,141 +2070,146 @@ abc123 Inventory 2018-09-03T15:53:02+02:00 Preparing order manifest</code></pre>
 }</code></pre></div></div>
 <div class="sl-block" data-block-type="text" data-block-id="d9850657b88e4d9a1bb197de977335ab" style="height: auto; width: 600px; left: 0px; top: 269px;"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 14;">
 <ul>
-	<li><p><span style="font-size:1.4em">Starting a span</span></p></li>
+	<li>
+	<p><span style="font-size:1.0em">Start span:</span></p>
+	</li>
 </ul>
 </div></div>
 <div class="sl-block" data-block-type="text" style="height: auto; width: 600px; left: 0px; top: 493.929px;" data-block-id="7806e83cac377bc17c0f08bbccbfee8f"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 15;">
 <ul>
-	<li><p><span style="font-size:1.4em">Add a tag to a span</span></p></li>
+	<li>
+	<p><span style="font-size:1.0em">Add tag to span:</span></p>
+	</li>
 </ul>
-</div></div></section><section data-id="e7766250994c5d688664c23777071b4a"><div class="sl-block" data-block-type="text" style="height: auto; width: 1280px; left: 0px; top: 0px;" data-block-id="17ed29d841fb6391ed53e498f8f6e39c"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10; padding: 15px;" dir="ui">
+</div></div></section><section data-id="e7766250994c5d688664c23777071b4a"><div class="sl-block" data-block-type="text" style="height: auto; width: 1280px; left: 0px; top: 0px;" data-block-id="17ed29d841fb6391ed53e498f8f6e39c"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10;" dir="ui">
 <h2><span style="font-size:1.0em">Distributed Tracing UI</span></h2>
 </div></div>
-<div class="sl-block" data-block-type="image" style="min-width: 1px; min-height: 1px; width: 1120px; height: 558.105px; left: 80px; top: 93px;" data-block-id="1ad4d9e4d28a87eb0d4007dc86ac829b"><div class="sl-block-content" style="z-index: 11;"><img style="" data-natural-width="1182" data-natural-height="589" data-lazy-loaded="" data-src="service_mesh_advanced_04_observability/90e894011a7644cac976aa76b5b3c4ed.png"></div></div></section><section data-id="e30f67c6402a32664bcdefe08f75a0fb"><div class="sl-block" data-block-type="text" style="height: auto; width: 1280px; left: 0px; top: 0px;" data-block-id="2294b3b437758df37ff4392276bf7572"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10; padding: 15px;" dir="ui">
+<div class="sl-block" data-block-type="image" style="min-width: 1px; min-height: 1px; width: 1120px; height: 558.105px; left: 80px; top: 152.947px;" data-block-id="1ad4d9e4d28a87eb0d4007dc86ac829b"><div class="sl-block-content" style="z-index: 11;"><img style="" data-natural-width="1182" data-natural-height="589" data-lazy-loaded="" data-src="service_mesh_advanced_04_observability/90e894011a7644cac976aa76b5b3c4ed.png"></div></div></section><section data-id="e30f67c6402a32664bcdefe08f75a0fb"><div class="sl-block" data-block-type="text" style="height: auto; width: 1280px; left: 0px; top: 0px;" data-block-id="2294b3b437758df37ff4392276bf7572"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10;" dir="ui">
 <h2><span style="font-size:1.0em">Distributed Tracing UI</span></h2>
+
+<h3><span style="font-size:1.0em">Request Summary</span></h3>
 </div></div>
-<div class="sl-block" data-block-type="image" style="width: 863.33px; height: 430.204px; left: 336.67px; top: 93px; min-width: 1px; min-height: 1px;" data-block-id="56b70ef2f9180fa1435ab40c67a9f3dd"><div class="sl-block-content" style="z-index: 11;"><img style="" data-natural-width="1182" data-natural-height="589" data-lazy-loaded="" data-src="service_mesh_advanced_04_observability/90e894011a7644cac976aa76b5b3c4ed.png"></div></div>
-<div class="sl-block" data-block-type="image" style="min-width: 1px; min-height: 1px; width: 684px; height: 73px; left: 80px; top: 576px;" data-block-id="74bda3bc56c3c915dc8f1c898edc85be"><div class="sl-block-content" style="z-index: 12;"><img style="" data-natural-width="684" data-natural-height="73" data-lazy-loaded="" data-src="service_mesh_advanced_04_observability/0caea4700c126357af239b9641ec966d.png"></div></div>
-<div class="sl-block" data-block-type="shape" data-block-id="2337faa196cb9f940196fda7c9b32673" style="width: 863.33px; height: 344.076px; left: 336.67px; top: 179.128px;"><div class="sl-block-style" style="z-index: 13; opacity: 0.15;"><div class="sl-block-content" data-shape-type="rect" data-shape-fill-color="#000000" data-shape-stretch="true" style="z-index: 13;"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="100%" height="100%" preserveaspectratio="none" viewbox="0 0 863 344"><rect width="863.33" height="344.076" rx="0" ry="0" class="shape-element" fill="#000000"></rect></svg></div></div></div>
-<div class="sl-block" data-block-type="shape" style="width: 377.086px; height: 51.822px; left: 822.914px; top: 127.306px;" data-block-id="043051ec7726b34705d3003439b76302"><div class="sl-block-style" style="z-index: 14; opacity: 0.15;"><div class="sl-block-content" data-shape-type="rect" data-shape-fill-color="#000000" data-shape-stretch="true" style="z-index: 14;"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="100%" height="100%" preserveaspectratio="none" viewbox="0 0 377 52"><rect width="377.086" height="51.822" rx="0" ry="0" class="shape-element" fill="#000000"></rect></svg></div></div></div></section><section data-id="7da70f8e830877e185e3ddd9f67f7d41"><div class="sl-block" data-block-type="text" style="height: auto; width: 1280px; left: 0px; top: 0px;" data-block-id="db49443688861717fea6af939653f1a9"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10; padding: 15px;" dir="ui">
+<div class="sl-block" data-block-type="image" style="width: 863.33px; height: 430.204px; left: 359.67px; top: 254px; min-width: 1px; min-height: 1px;" data-block-id="56b70ef2f9180fa1435ab40c67a9f3dd"><div class="sl-block-content" style="z-index: 11;"><img style="" data-natural-width="1182" data-natural-height="589" data-lazy-loaded="" data-src="service_mesh_advanced_04_observability/90e894011a7644cac976aa76b5b3c4ed.png"></div></div>
+<div class="sl-block" data-block-type="image" style="min-width: 1px; min-height: 1px; width: 684px; height: 73px; left: 0px; top: 162.286px;" data-block-id="74bda3bc56c3c915dc8f1c898edc85be"><div class="sl-block-content" style="z-index: 12;"><img style="" data-natural-width="684" data-natural-height="73" data-lazy-loaded="" data-src="service_mesh_advanced_04_observability/0caea4700c126357af239b9641ec966d.png"></div></div>
+<div class="sl-block" data-block-type="shape" data-block-id="2337faa196cb9f940196fda7c9b32673" style="width: 863.33px; height: 344.076px; left: 359.67px; top: 374.128px;"><div class="sl-block-style" style="z-index: 13; opacity: 0.15;"><div class="sl-block-content" data-shape-type="rect" data-shape-fill-color="#000000" data-shape-stretch="true" style="z-index: 13;"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="100%" height="100%" preserveaspectratio="none" viewbox="0 0 863 344"><rect width="863.33" height="344.076" rx="0" ry="0" class="shape-element" fill="#000000"></rect></svg></div></div></div>
+</section><section data-id="7da70f8e830877e185e3ddd9f67f7d41"><div class="sl-block" data-block-type="text" style="height: auto; width: 1280px; left: 0px; top: 0px;" data-block-id="db49443688861717fea6af939653f1a9"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10;" dir="ui">
 <h2><span style="font-size:1.0em">Distributed Tracing UI</span></h2>
+
+<h3><span style="font-size:1.0em">Request Sequence</span></h3>
 </div></div>
-<div class="sl-block" data-block-type="image" style="width: 800px; height: 398.646px; left: 400px; top: 93px; min-width: 1px; min-height: 1px;" data-block-id="2bf2f3c34ba58206903a0ec61588a9e3"><div class="sl-block-content" style="z-index: 11;"><img style="" data-natural-width="1182" data-natural-height="589" data-lazy-loaded="" data-src="service_mesh_advanced_04_observability/90e894011a7644cac976aa76b5b3c4ed.png"></div></div>
-<div class="sl-block" data-block-type="shape" style="width: 599.251px; height: 258.686px; left: 600.749px; top: 232.96px;" data-block-id="144f35a8805a72d82a5aee21bae3f05b"><div class="sl-block-style" style="z-index: 12; opacity: 0.15;"><div class="sl-block-content" data-shape-type="rect" data-shape-fill-color="#000000" data-shape-stretch="true" style="z-index: 12;"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="100%" height="100%" preserveaspectratio="none" viewbox="0 0 599 259"><rect width="599.251" height="258.686" rx="0" ry="0" class="shape-element" fill="#000000"></rect></svg></div></div></div>
-<div class="sl-block" data-block-type="image" style="min-width: 1px; min-height: 1px; width: 291px; height: 377px; left: 14.5px; top: 343px;" data-block-id="c0bc332f1cf520476ed810110dd8a2a2"><div class="sl-block-content" style="z-index: 13;"><img style="" data-natural-width="291" data-natural-height="377" data-lazy-loaded="" data-src="service_mesh_advanced_04_observability/5171eca424cf7f2fd67d88d4330314ad.png"></div></div>
-<div class="sl-block" data-block-type="shape" style="width: 800px; height: 109.157px; left: 400px; top: 123.803px;" data-block-id="6cfc1dab5bd4d38015029a8460c27d2d"><div class="sl-block-style" style="z-index: 14; opacity: 0.15;"><div class="sl-block-content" data-shape-type="rect" data-shape-fill-color="#000000" data-shape-stretch="true" style="z-index: 14;"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="100%" height="100%" preserveaspectratio="none" viewbox="0 0 800 109"><rect width="800" height="109.157" rx="0" ry="0" class="shape-element" fill="#000000"></rect></svg></div></div></div></section><section data-id="1908958801752a469aa46c11f3055509"><div class="sl-block" data-block-type="text" style="height: auto; width: 1280px; left: 0px; top: 0px;" data-block-id="4f230875ab40e3c9c3d9ccc88974b09a"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10; padding: 15px;" dir="ui">
+<div class="sl-block" data-block-type="image" style="width: 800px; height: 398.646px; left: 414px; top: 254px; min-width: 1px; min-height: 1px;" data-block-id="2bf2f3c34ba58206903a0ec61588a9e3"><div class="sl-block-content" style="z-index: 11;"><img style="" data-natural-width="1182" data-natural-height="589" data-lazy-loaded="" data-src="service_mesh_advanced_04_observability/90e894011a7644cac976aa76b5b3c4ed.png"></div></div>
+<div class="sl-block" data-block-type="shape" style="width: 599.251px; height: 258.686px; left: 614.749px; top: 423.96px;" data-block-id="144f35a8805a72d82a5aee21bae3f05b"><div class="sl-block-style" style="z-index: 12; opacity: 0.15;"><div class="sl-block-content" data-shape-type="rect" data-shape-fill-color="#000000" data-shape-stretch="true" style="z-index: 12;"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="100%" height="100%" preserveaspectratio="none" viewbox="0 0 599 259"><rect width="599.251" height="258.686" rx="0" ry="0" class="shape-element" fill="#000000"></rect></svg></div></div></div>
+<div class="sl-block" data-block-type="image" style="min-width: 1px; min-height: 1px; width: 291px; height: 377px; left: 14.5px; top: 280px;" data-block-id="c0bc332f1cf520476ed810110dd8a2a2"><div class="sl-block-content" style="z-index: 13;"><img style="" data-natural-width="291" data-natural-height="377" data-lazy-loaded="" data-src="service_mesh_advanced_04_observability/5171eca424cf7f2fd67d88d4330314ad.png"></div></div>
+<div class="sl-block" data-block-type="shape" style="width: 800px; height: 109.157px; left: 414px; top: 314.803px;" data-block-id="6cfc1dab5bd4d38015029a8460c27d2d"><div class="sl-block-style" style="z-index: 14; opacity: 0.15;"><div class="sl-block-content" data-shape-type="rect" data-shape-fill-color="#000000" data-shape-stretch="true" style="z-index: 14;"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="100%" height="100%" preserveaspectratio="none" viewbox="0 0 800 109"><rect width="800" height="109.157" rx="0" ry="0" class="shape-element" fill="#000000"></rect></svg></div></div></div></section><section data-id="1908958801752a469aa46c11f3055509"><div class="sl-block" data-block-type="text" style="height: auto; width: 1280px; left: 0px; top: 0px;" data-block-id="4f230875ab40e3c9c3d9ccc88974b09a"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10;" dir="ui">
 <h2><span style="font-size:1.0em">Distributed Tracing UI</span></h2>
+
+<h3><span style="font-size:1.0em">Process Boundary</span></h3>
 </div></div>
-<div class="sl-block" data-block-type="image" style="width: 480px; height: 239.188px; left: 720px; top: 93px; min-width: 1px; min-height: 1px;" data-block-id="766fedf40c7b3f624872c8db9b0b7cd5"><div class="sl-block-content" style="z-index: 11;"><img style="" data-natural-width="1182" data-natural-height="589" data-lazy-loaded="" data-src="service_mesh_advanced_04_observability/90e894011a7644cac976aa76b5b3c4ed.png"></div></div>
-<div class="sl-block" data-block-type="shape" style="width: 119.988px; height: 154.268px; left: 720px; top: 177.92px;" data-block-id="1fb81122582a5758e85269e8239103ef"><div class="sl-block-style" style="z-index: 12; opacity: 0.15;"><div class="sl-block-content" data-shape-type="rect" data-shape-fill-color="#000000" data-shape-stretch="true" style="z-index: 12;"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="100%" height="100%" preserveaspectratio="none" viewbox="0 0 120 154"><rect width="119.988" height="154.268" rx="0" ry="0" class="shape-element" fill="#000000"></rect></svg></div></div></div>
-<div class="sl-block" data-block-type="image" style="min-width: 1px; min-height: 1px; width: 806px; height: 346px; left: 0px; top: 344px;" data-block-id="0cc04f2242188db89e0fc380bfcd7dd3"><div class="sl-block-content" style="z-index: 13;"><img style="" data-natural-width="885" data-natural-height="380" data-lazy-loaded="" data-src="service_mesh_advanced_04_observability/e47fd528283d017dde76bd63ef7cb672.png"></div></div>
-<div class="sl-block" data-block-type="text" style="height: auto; min-width: 30px; min-height: 30px; width: 253px; left: 253px; top: 690px;" data-block-id="c28bc9cc7365e3ad089a6baec363bc33"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 14;">
+<div class="sl-block" data-block-type="image" style="width: 480px; height: 239.188px; left: 739px; top: 156px; min-width: 1px; min-height: 1px;" data-block-id="766fedf40c7b3f624872c8db9b0b7cd5"><div class="sl-block-content" style="z-index: 11;"><img style="" data-natural-width="1182" data-natural-height="589" data-lazy-loaded="" data-src="service_mesh_advanced_04_observability/90e894011a7644cac976aa76b5b3c4ed.png"></div></div>
+<div class="sl-block" data-block-type="shape" style="width: 119.988px; height: 154.268px; left: 739px; top: 226.92px;" data-block-id="1fb81122582a5758e85269e8239103ef"><div class="sl-block-style" style="z-index: 12; opacity: 0.15;"><div class="sl-block-content" data-shape-type="rect" data-shape-fill-color="#000000" data-shape-stretch="true" style="z-index: 12;"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="100%" height="100%" preserveaspectratio="none" viewbox="0 0 120 154"><rect width="119.988" height="154.268" rx="0" ry="0" class="shape-element" fill="#000000"></rect></svg></div></div></div>
+<div class="sl-block" data-block-type="image" style="min-width: 1px; min-height: 1px; width: 720px; height: 309.153px; left: 0px; top: 344px;" data-block-id="0cc04f2242188db89e0fc380bfcd7dd3"><div class="sl-block-content" style="z-index: 13;"><img style="" data-natural-width="885" data-natural-height="380" data-lazy-loaded="" data-src="service_mesh_advanced_04_observability/e47fd528283d017dde76bd63ef7cb672.png"></div></div>
+<div class="sl-block" data-block-type="text" style="height: auto; min-width: 30px; min-height: 30px; width: 253px; left: 193.5px; top: 672.226px;" data-block-id="c28bc9cc7365e3ad089a6baec363bc33"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 14;">
 <p>Process (service) boundary</p>
 </div></div>
-<div class="sl-block" data-block-type="line" style="width: auto; height: auto; min-width: 1px; min-height: 1px; left: 352px; top: 565px;" data-block-id="fc2a5ad3aec298ee601e4b8a24a52045"><div class="sl-block-content" data-line-x1="49" data-line-y1="355" data-line-x2="321" data-line-y2="240" data-line-color="#000000" data-line-start-type="none" data-line-end-type="arrow" style="z-index: 15;"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" preserveaspectratio="xMidYMid" width="272" height="115" viewbox="49 240 272 115"><line stroke="rgba(0,0,0,0)" stroke-width="15" x1="49" y1="355" x2="317.31575721185897" y2="241.55767617880963"></line><line stroke="#000000" stroke-width="2" x1="49" y1="355" x2="317.31575721185897" y2="241.55767617880963"></line><polygon fill="#000000" transform="translate(317.31575721185897,241.55767617880963) rotate(67.082)" points="0,-4 4,4 -4,4"></polygon></svg></div></div>
-<div class="sl-block" data-block-type="shape" style="width: 480px; height: 66.156px; left: 720px; top: 111.764px;" data-block-id="7cc7f705b6f2ef12eac8647d53a17327"><div class="sl-block-style" style="z-index: 16; opacity: 0.15;"><div class="sl-block-content" data-shape-type="rect" data-shape-fill-color="#000000" data-shape-stretch="true" style="z-index: 16;"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="100%" height="100%" preserveaspectratio="none" viewbox="0 0 480 66"><rect width="480" height="66.156" rx="0" ry="0" class="shape-element" fill="#000000"></rect></svg></div></div></div></section><section data-id="a5649f7b92fd2cfaeb610ef72873a853"><div class="sl-block" data-block-type="text" style="height: auto; width: 1280px; left: 0px; top: 0px;" data-block-id="1751f90a8925f204d957a25cb7cd9305"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10; padding: 15px;" dir="ui">
+<div class="sl-block" data-block-type="line" style="width: auto; height: auto; min-width: 1px; min-height: 1px; left: 298.883px; top: 549.453px;" data-block-id="fc2a5ad3aec298ee601e4b8a24a52045"><div class="sl-block-content" data-line-x1="49" data-line-y1="355" data-line-x2="321" data-line-y2="240" data-line-color="#000000" data-line-start-type="none" data-line-end-type="arrow" style="z-index: 15;"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" preserveaspectratio="xMidYMid" width="272" height="115" viewbox="49 240 272 115"><line stroke="rgba(0,0,0,0)" stroke-width="15" x1="49" y1="355" x2="317.31575721185897" y2="241.55767617880963"></line><line class="line-element" stroke="#000000" stroke-width="2" x1="49" y1="355" x2="317.31575721185897" y2="241.55767617880963"></line><polygon fill="#000000" transform="translate(317.31575721185897,241.55767617880963) rotate(67.082)" points="0,-4 4,4 -4,4"></polygon></svg></div></div>
+<div class="sl-block" data-block-type="shape" style="width: 480px; height: 66.156px; left: 739px; top: 160.764px;" data-block-id="7cc7f705b6f2ef12eac8647d53a17327"><div class="sl-block-style" style="z-index: 16; opacity: 0.15;"><div class="sl-block-content" data-shape-type="rect" data-shape-fill-color="#000000" data-shape-stretch="true" style="z-index: 16;"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="100%" height="100%" preserveaspectratio="none" viewbox="0 0 480 66"><rect width="480" height="66.156" rx="0" ry="0" class="shape-element" fill="#000000"></rect></svg></div></div></div></section><section data-id="a5649f7b92fd2cfaeb610ef72873a853"><div class="sl-block" data-block-type="text" style="height: auto; width: 1280px; left: 0px; top: 0px;" data-block-id="1751f90a8925f204d957a25cb7cd9305"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10;" dir="ui">
 <h2><span style="font-size:1.0em">Distributed Tracing UI</span></h2>
+
+<h3><span style="font-size:1.0em">Performance Bottleneck</span></h3>
 </div></div>
-<div class="sl-block" data-block-type="image" style="width: 480px; height: 239.188px; left: 720px; top: 93px; min-width: 1px; min-height: 1px;" data-block-id="9280ba9790385e99ce314d3279500b1d"><div class="sl-block-content" style="z-index: 11;"><img style="" data-natural-width="1182" data-natural-height="589" data-lazy-loaded="" data-src="service_mesh_advanced_04_observability/90e894011a7644cac976aa76b5b3c4ed.png"></div></div>
-<div class="sl-block" data-block-type="shape" style="width: 480px; height: 59.445px; left: 720px; top: 272.743px;" data-block-id="79ec4f952fad663b9893a4a0c39018e6"><div class="sl-block-style" style="z-index: 12; opacity: 0.15;"><div class="sl-block-content" data-shape-type="rect" data-shape-fill-color="#000000" data-shape-stretch="true" style="z-index: 12;"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="100%" height="100%" preserveaspectratio="none" viewbox="0 0 480 59"><rect width="480" height="59.445" rx="0" ry="0" class="shape-element" fill="#000000"></rect></svg></div></div></div>
-<div class="sl-block" data-block-type="shape" style="width: 480px; height: 123.491px; left: 720px; top: 111.764px;" data-block-id="d125be1dbfb1265b5f558001f34adb72"><div class="sl-block-style" style="z-index: 13; opacity: 0.15;"><div class="sl-block-content" data-shape-type="rect" data-shape-fill-color="#000000" data-shape-stretch="true" style="z-index: 13;"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="100%" height="100%" preserveaspectratio="none" viewbox="0 0 480 123"><rect width="480" height="123.491" rx="0" ry="0" class="shape-element" fill="#000000"></rect></svg></div></div></div>
-<div class="sl-block" data-block-type="image" style="min-width: 1px; min-height: 1px; width: 806px; height: 79px; left: -6px; top: 432px;" data-block-id="9ef6cfd8c0250a4364410f9c596f7b5b"><div class="sl-block-content" style="z-index: 14;"><img style="" data-natural-width="1011" data-natural-height="99" data-lazy-loaded="" data-src="service_mesh_advanced_04_observability/000710c7cd60602e3626a41dc43f1b3d.png"></div></div>
-<div class="sl-block" data-block-type="text" style="height: auto; width: 303px; left: 473px; top: 583.741px;" data-block-id="741c05d9efedcaa1eb53ad3444ec848a"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 15;">
+<div class="sl-block" data-block-type="image" style="width: 480px; height: 239.188px; left: 720px; top: 153px; min-width: 1px; min-height: 1px;" data-block-id="9280ba9790385e99ce314d3279500b1d"><div class="sl-block-content" style="z-index: 11;"><img style="" data-natural-width="1182" data-natural-height="589" data-lazy-loaded="" data-src="service_mesh_advanced_04_observability/90e894011a7644cac976aa76b5b3c4ed.png"></div></div>
+<div class="sl-block" data-block-type="shape" style="width: 480px; height: 59.445px; left: 720px; top: 362.743px;" data-block-id="79ec4f952fad663b9893a4a0c39018e6"><div class="sl-block-style" style="z-index: 12; opacity: 0.15;"><div class="sl-block-content" data-shape-type="rect" data-shape-fill-color="#000000" data-shape-stretch="true" style="z-index: 12;"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="100%" height="100%" preserveaspectratio="none" viewbox="0 0 480 59"><rect width="480" height="59.445" rx="0" ry="0" class="shape-element" fill="#000000"></rect></svg></div></div></div>
+<div class="sl-block" data-block-type="shape" style="width: 480px; height: 123.491px; left: 720px; top: 201.764px;" data-block-id="d125be1dbfb1265b5f558001f34adb72"><div class="sl-block-style" style="z-index: 13; opacity: 0.15;"><div class="sl-block-content" data-shape-type="rect" data-shape-fill-color="#000000" data-shape-stretch="true" style="z-index: 13;"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="100%" height="100%" preserveaspectratio="none" viewbox="0 0 480 123"><rect width="480" height="123.491" rx="0" ry="0" class="shape-element" fill="#000000"></rect></svg></div></div></div>
+<div class="sl-block" data-block-type="image" style="min-width: 1px; min-height: 1px; width: 806px; height: 79px; left: 17px; top: 463px;" data-block-id="9ef6cfd8c0250a4364410f9c596f7b5b"><div class="sl-block-content" style="z-index: 14;"><img style="" data-natural-width="1011" data-natural-height="99" data-lazy-loaded="" data-src="service_mesh_advanced_04_observability/000710c7cd60602e3626a41dc43f1b3d.png"></div></div>
+<div class="sl-block" data-block-type="text" style="height: auto; width: 303px; left: 496px; top: 614.741px;" data-block-id="741c05d9efedcaa1eb53ad3444ec848a"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 15;">
 <p>Possible performance bottleneck</p>
 </div></div>
-<div class="sl-block" data-block-type="line" style="width: auto; height: auto; left: 473px; top: 481px;" data-block-id="4446e9a8bb0080e70bd9a7b0525478ba"><div class="sl-block-content" data-line-x1="250" data-line-y1="250" data-line-x2="180" data-line-y2="155" data-line-color="#000000" data-line-start-type="none" data-line-end-type="arrow" style="z-index: 16;"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" preserveaspectratio="xMidYMid" width="70" height="95" viewbox="180 155 70 95"><line stroke="rgba(0,0,0,0)" stroke-width="15" x1="250" y1="250" x2="182.3727961521994" y2="158.22022334941346"></line><line stroke="#000000" stroke-width="2" x1="250" y1="250" x2="182.3727961521994" y2="158.22022334941346"></line><polygon fill="#000000" transform="translate(182.3727961521994,158.22022334941346) rotate(-36.384)" points="0,-4 4,4 -4,4"></polygon></svg></div></div></section><section data-id="bf11e141e40c6c52eb905aaf08eaee5a"><div class="sl-block" data-block-type="text" style="height: auto; width: 1280px; left: 0px; top: 0px;" data-block-id="bcacf35c7c60e86a6b6f95aa7dd7e01c"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10; padding: 15px;">
+<div class="sl-block" data-block-type="line" style="width: auto; height: auto; left: 496px; top: 512px;" data-block-id="4446e9a8bb0080e70bd9a7b0525478ba"><div class="sl-block-content" data-line-x1="250" data-line-y1="250" data-line-x2="180" data-line-y2="155" data-line-color="#000000" data-line-start-type="none" data-line-end-type="arrow" style="z-index: 16;"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" preserveaspectratio="xMidYMid" width="70" height="95" viewbox="180 155 70 95"><line stroke="rgba(0,0,0,0)" stroke-width="15" x1="250" y1="250" x2="182.3727961521994" y2="158.22022334941346"></line><line class="line-element" stroke="#000000" stroke-width="2" x1="250" y1="250" x2="182.3727961521994" y2="158.22022334941346"></line><polygon fill="#000000" transform="translate(182.3727961521994,158.22022334941346) rotate(-36.384)" points="0,-4 4,4 -4,4"></polygon></svg></div></div></section><section data-id="bf11e141e40c6c52eb905aaf08eaee5a"><div class="sl-block" data-block-type="text" style="height: auto; width: 1280px; left: 0px; top: 0px;" data-block-id="bcacf35c7c60e86a6b6f95aa7dd7e01c"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10;">
 <h2>Source Code Instrumentation</h2>
 
 <ul>
 	<li style="color:rgb(53, 64, 69)">
-	<p><span style="font-size:1.4em">Explicit</span></p>
+	<p><span style="font-size:1.0em">Explicit</span></p>
 
 	<ul>
 		<li>
-		<p><span style="font-size:1.4em">Included in source code</span></p>
+		<p><span style="font-size:1.0em">Included in source code</span></p>
 		</li>
 	</ul>
 	</li>
 	<li style="color:rgb(53, 64, 69)">
-	<p><span style="font-size:1.4em">Implicit</span></p>
+	<p><span style="font-size:1.0em">Implicit</span></p>
 
 	<ul>
 		<li>
-		<p><span style="font-size:1.4em">Span generation and propagation done automatically</span></p>
+		<p><span style="font-size:1.0em">Span generation and propagation done automatically</span></p>
 		</li>
 		<li>
-		<p><span style="font-size:1.4em">Web frameworks, REST libraries, Spring Boot, JMS, ...</span></p>
+		<p><span style="font-size:1.0em">Web frameworks, REST libraries, Spring Boot, JMS, etc.</span></p>
 		</li>
 	</ul>
 	</li>
 	<li>
-	<p><span style="font-size:1.4em">Span propagation:</span></p>
+	<p><span style="font-size:1.0em">Span propagation</span></p>
 
 	<ul>
 		<li>
-		<p><span style="font-size:1.4em">Mechanism depends on the protocol</span></p>
+		<p><span style="font-size:1.0em">Mechanism depends on protocol</span></p>
 		</li>
 		<li>
-		<p><span style="font-size:1.4em">HTTP: span context propagated to upstream services as HTTP headers</span></p>
+		<p><span style="font-size:1.0em">HTTP: Span context propagated to upstream services as HTTP headers</span></p>
 		</li>
 	</ul>
 	</li>
 </ul>
 </div></div>
-</section><section data-id="d051208a980b93265f36a680511f5c28"><div class="sl-block" data-block-type="text" style="height: auto; width: 1280px; left: 0px; top: 0px;" data-block-id="18a52937f91e18d2b162b0c4ab714afd"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10; padding: 15px;">
+</section><section data-id="d051208a980b93265f36a680511f5c28"><div class="sl-block" data-block-type="text" style="height: auto; width: 1280px; left: 0px; top: 0px;" data-block-id="18a52937f91e18d2b162b0c4ab714afd"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10;" data-has-custom-html="">
 <h2><span style="font-size:1.0em">OpenTracing</span></h2>
 
 <ul>
 	<li>
-	<p><span style="font-size:1.2em">Open standard specification for distributed tracing</span></p>
+	<p><span style="font-size:1.0em">Open standard specification for distributed tracing</span></p>
 	</li>
 	<li>
-	<p><span style="font-size:1.2em">Defines semantics</span></p>
+	<p><span style="font-size:1.0em">Defines semantics: </span><span style="font-size:1em">What is a trace, what is a span, etc.</span></p>
+	</li>
+	<li>
+	<p><span style="font-size:1.0em">Instrumentation API</span></p>
 
 	<ul>
 		<li>
-		<p><span style="font-size:1.2em">What is a trace, what is a span...</span></p>
+		<p><span style="font-size:1.0em">Official APIs for Java, Go, Ruby</span></p>
+		</li>
+		<li>
+		<p><span style="font-size:1.0em">Can be used with compatible tracers—e.g., Zipkin, Jaeger</span></p>
 		</li>
 	</ul>
 	</li>
 	<li>
-	<p><span style="font-size:1.2em">Instrumentation API</span></p>
+	<p><span style="font-size:1.0em">Hosted at Cloud Native Computing Foundation</span></p>
+	</li>
+	<li>
+	<p><span style="font-size:1.0em">Integrations</span></p>
 
 	<ul>
 		<li>
-		<p><span style="font-size:1.2em">Official APIs for Java, Go, Ruby</span></p>
-		</li>
-		<li>
-		<p><span style="font-size:1.2em">Can be used with compatible tracers, such as Zipkin and Jaeger</span></p>
-		</li>
-	</ul>
-	</li>
-	<li>
-	<p><span style="font-size:1.2em">Hosted at Cloud Native Computing Foundatio</span></p>
-	</li>
-	<li>
-	<p><span style="font-size:1.2em">Integrations</span></p>
-
-	<ul>
-		<li>
-		<p><span style="font-size:1.2em">Frameworks, stack, platform</span></p>
+		<p><span style="font-size:1.0em">Frameworks, stack, platform</span></p>
 
 		<ul>
 			<li>
-			<p><span style="font-size:1.2em">JAX-RS, JDBC, JMS, and others</span></p>
+			<p><span style="font-size:1.0em">JAX-RS, JDBC, JMS, others</span></p>
 			</li>
 			<li>
-			<p><span style="font-size:1.2em">Spring Boot, MicroProfile, and others</span></p>
+			<p><span style="font-size:1.0em">Spring Boot, MicroProfile, others</span></p>
 			</li>
 		</ul>
 		</li>
 		<li>
-		<p><span style="font-size:1.2em">Infrastructure​</span></p>
+		<p><span style="font-size:1.0em">Infrastructure​</span></p>
 
 		<ul>
 			<li>
-<p><span style="font-size:1.2em">Istio</span></p>
-<p> </p>
+			<p><span style="font-size:1.0em">Istio</span></p>
 			</li>
 		</ul>
 		</li>
@@ -2209,46 +2217,48 @@ abc123 Inventory 2018-09-03T15:53:02+02:00 Preparing order manifest</code></pre>
 	</li>
 </ul>
 </div></div>
-</section><section data-id="1c654cc38ca798d1ac4bee248825d20d"><div class="sl-block" data-block-type="text" style="height: auto; width: 1280px; left: 0px; top: 0px;" data-block-id="0be4c808be9e6128bd00113e34086d96"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10; padding: 15px;">
+</section><section data-id="1c654cc38ca798d1ac4bee248825d20d"><div class="sl-block" data-block-type="text" style="height: auto; width: 1280px; left: 0px; top: 0px;" data-block-id="0be4c808be9e6128bd00113e34086d96"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10;">
 <h2><span style="font-size:1.0em">Jaeger</span></h2>
 
 <ul>
 	<li style="color:rgb(53, 64, 69)">
-	<p><span style="font-size:1.4em">Concrete OpenTracing implementation</span></p>
+	<p><span style="font-size:1.0em">Concrete OpenTracing implementation</span></p>
 
 	<ul>
 		<li>
-		<p><span style="font-size:1.4em">Native OpenTracing semantics</span></p>
+		<p><span style="font-size:1.0em">Native OpenTracing semantics</span></p>
 		</li>
 	</ul>
 	</li>
 	<li style="color:rgb(53, 64, 69)">
-	<p><span style="font-size:1.4em">Originated at Uber</span></p>
+	<p><span style="font-size:1.0em">Originated at Uber</span></p>
 	</li>
 	<li style="color:rgb(53, 64, 69)">
-	<p><span style="font-size:1.4em">Back-end components</span></p>
+	<p><span style="font-size:1.0em">Back-end components</span></p>
 
 	<ul>
 		<li>
-		<p><span style="font-size:1.4em">Agent, Collector, Query, UI</span></p>
+		<p><span style="font-size:1.0em">Agent, Collector, Query, UI</span></p>
 		</li>
 	</ul>
 	</li>
 	<li style="color:rgb(53, 64, 69)">
-	<p><span style="font-size:1.4em">Production-ready</span></p>
+	<p><span style="font-size:1.0em">Production-ready</span></p>
 
 	<ul>
 		<li>
-		<p><span style="font-size:1.4em">Bare metal, Kubernetes, OpenShift</span></p>
+		<p><span style="font-size:1.0em">Bare metal, Kubernetes, OpenShift</span></p>
 		</li>
 	</ul>
 	</li>
 </ul>
 </div></div>
-</section><section data-id="a3dd31b8a24e726f06a9bc3048e69202"><div class="sl-block" data-block-type="text" style="height: auto; width: 1280px; left: 0px; top: 0px;" data-block-id="6c5169bb89da79d40004261c75aaaf96"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10; padding: 15px;">
-<h2><span style="font-size:1.0em">Jaeger Architecture</span></h2>
+</section><section data-id="a3dd31b8a24e726f06a9bc3048e69202"><div class="sl-block" data-block-type="text" style="height: auto; width: 1280px; left: 0px; top: 0px;" data-block-id="6c5169bb89da79d40004261c75aaaf96"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10;">
+<h2><span style="font-size:1.0em">Jaeger</span></h2>
+
+<h3><span style="font-size:1.0em">Architecture</span></h3>
 </div></div>
-<div class="sl-block" data-block-type="image" style="min-width: 1px; min-height: 1px; width: 1068.16px; height: 573.437px; left: 105.92px; top: 93px;" data-block-id="23649d5be1310ffd4028847919d5bfbc">
+<div class="sl-block" data-block-type="image" style="min-width: 1px; min-height: 1px; width: 1068.16px; height: 573.437px; left: 105.92px; top: 146px;" data-block-id="23649d5be1310ffd4028847919d5bfbc">
     <div class="sl-block-content" style="z-index: 11;">
         <img style="" data-natural-width="2239" data-natural-height="1202" data-lazy-loaded="" data-src="service_mesh_advanced_04_observability/ca32c8dc373c080be9ab5e3eb012a0a3.png">
     </div>
@@ -2257,19 +2267,19 @@ abc123 Inventory 2018-09-03T15:53:02+02:00 Preparing order manifest</code></pre>
     <div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 12;">
 <p><span style="font-size:0.7em">Source: www.jaegertracing.io/docs/architecture/</span></p>
 </div>
-</div></section><section data-id="602bf4cb209912f3205674e4a2410d09"><div class="sl-block" data-block-type="text" style="height: auto; width: 1280px; left: 0px; top: 0px;" data-block-id="f08c6bde468cfedf3259a424cfe5a1f0"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10; padding: 15px;" dir="ui">
-<h2>Service Mesh and Distributed Tracing</h2>
+</div></section><section data-id="602bf4cb209912f3205674e4a2410d09"><div class="sl-block" data-block-type="text" style="height: auto; width: 1014px; left: 0px; top: 0px;" data-block-id="f08c6bde468cfedf3259a424cfe5a1f0"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10;" dir="ui" data-has-custom-html="">
+<h2>Red Hat OpenShift Service Mesh and Distributed Tracing</h2>
 
 <ul>
 	<li>
-	<p><span style="font-size:1.4em">Jaeger is optionally installed as part of Service Mesh.</span></p>
+	<p><span style="font-size:1.0em">Jaeger optionally installed as part of OpenShift Service Mesh</span></p>
 
 	<ul>
 		<li>
-		<p><span style="font-size:1.4em">all-in-one</span></p>
+		<p><span style="font-size:1.0em">All-in-one</span></p>
 		</li>
 		<li>
-		<p><span style="font-size:1.4em">​production-elasticsearch</span></p>
+		<p><span style="font-size:1.0em">Production Elasticsearch</span></p>
 		</li>
 	</ul>
 	</li>
@@ -2277,92 +2287,92 @@ abc123 Inventory 2018-09-03T15:53:02+02:00 Preparing order manifest</code></pre>
 
 <ul>
 	<li>
-	<p><span style="font-size:1.4em">Envoy proxy is responsible for generating the initial trace headers.</span></p>
+	<p><span style="font-size:1.0em">Envoy proxy responsible for generating initial trace headers</span></p>
 
 	<ul>
 		<li>
-		<p><span style="font-size:1.4em">Uses Zipkin format headers.</span></p>
+		<p><span style="font-size:1.0em">Uses Zipkin format headers.</span></p>
 		</li>
 		<li>
-		<p><span style="font-size:1.4em">Default sampling rate = 1%</span></p>
+		<p><span style="font-size:1.0em">Default sampling rate: 1%</span></p>
 		</li>
 	</ul>
 	</li>
 	<li>
-	<p><span style="font-size:1.4em">Envoy proxy sends tracing information directly to tracing backends</span></p>
+	<p><span style="font-size:1.0em">Envoy proxy sends tracing information directly to tracing back ends</span></p>
 	</li>
 	<li>
-	<p><span style="font-size:1.4em">Application is responsible to propagate trace context to upstream services.</span></p>
+	<p><span style="font-size:1.0em">Application responsible for propagating trace context to upstream services</span></p>
 
 	<ul>
 		<li>
-		<p><span style="font-size:1.4em">Envoy proxy is not compatible with Jaeger agent sidecar.</span></p>
+		<p><span style="font-size:1.0em">Envoy proxy not compatible with Jaeger agent sidecar</span></p>
 		</li>
 		<li>
-		<p><span style="font-size:1.4em">Applications must send the traces directly to the Jaeger collector.</span></p>
+		<p><span style="font-size:1.0em">Applications must send traces directly to Jaeger collector</span></p>
 		</li>
 	</ul>
 	</li>
 	<li>
-	<p><span style="font-size:1.4em">Integration with other tracers (e.g. StackDriver) is possible through Mixer adapters.</span></p>
+	<p><span style="font-size:1.0em">Integration with other tracers (e.g. StackDriver) possible through Mixer adapters</span></p>
 	</li>
 </ul>
 
 <p style="color:rgb(53, 64, 69)"> </p>
 </div></div>
-</section><section data-id="498a2cc3f059ab3132af35285fc9c90d"><div class="sl-block" data-block-type="text" style="height: auto; width: 1280px; left: 0px; top: 0px;" data-block-id="0b606a04327d94fb5fade1b87c9442ff"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10; padding: 15px;" dir="ui">
+</section><section data-id="498a2cc3f059ab3132af35285fc9c90d"><div class="sl-block" data-block-type="text" style="height: auto; width: 1280px; left: 0px; top: 0px;" data-block-id="0b606a04327d94fb5fade1b87c9442ff"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10;" dir="ui">
 <h2>Monitoring</h2>
 
 <ul>
 	<li style="color:rgb(53, 64, 69)">
-	<p><span style="font-size:1.4em">Gathering, processing, and storing metric data about system</span></p>
+	<p><span style="font-size:1.0em">Gathering, processing, storing metric data about system</span></p>
 	</li>
 	<li style="color:rgb(53, 64, 69)">
-	<p><span style="font-size:1.4em">Blackbox monitoring</span></p>
+	<p><span style="font-size:1.0em">Blackbox monitoring</span></p>
 
 	<ul>
 		<li>
-		<p><span style="font-size:1.4em">Tests externally visible behavior as a user would see it</span></p>
+		<p><span style="font-size:1.0em">Tests externally visible behavior as user sees it</span></p>
 
 		<ul>
 			<li>
-			<p><span style="font-size:1.4em">HTTP endpoints, ICMP, overall response times</span></p>
+			<p><span style="font-size:1.0em">HTTP endpoints, ICMP, overall response times</span></p>
 			</li>
 		</ul>
 		</li>
 	</ul>
 	</li>
 	<li style="color:rgb(53, 64, 69)">
-	<p><span style="font-size:1.4em">Whitebox monitoring</span></p>
+	<p><span style="font-size:1.0em">Whitebox monitoring</span></p>
 
 	<ul>
 		<li>
-		<p><span style="font-size:1.4em">Based on internal system metrics</span></p>
+		<p><span style="font-size:1.0em">Based on internal system metrics</span></p>
 
 		<ul>
 			<li>
-			<p><span style="font-size:1.4em">CPU, memory, JVM, application specific metrics</span></p>
+			<p><span style="font-size:1.0em">CPU, memory, JVM, application-specific metrics</span></p>
 			</li>
 		</ul>
 		</li>
 	</ul>
 	</li>
 	<li style="color:rgb(53, 64, 69)">
-	<p><span style="font-size:1.4em">Monitoring data typically stored as time series</span></p>
+	<p><span style="font-size:1.0em">Monitoring data typically stored as time series</span></p>
 	</li>
 	<li style="color:rgb(53, 64, 69)">
-	<p><span style="font-size:1.4em">Requirements for monitoring data:</span></p>
+	<p><span style="font-size:1.0em">Requirements for monitoring data:</span></p>
 
 	<ul>
 		<li>
-		<p><span style="font-size:1.4em">Aggregation</span></p>
+		<p><span style="font-size:1.0em">Aggregation</span></p>
 		</li>
 		<li>
-		<p><span style="font-size:1.4em">Mathematical processing and transformation</span></p>
+		<p><span style="font-size:1.0em">Mathematical processing and transformation</span></p>
 
 		<ul>
 			<li>
-			<p><span style="font-size:1.4em">Examples: averages, histograms</span></p>
+			<p><span style="font-size:1.0em">Examples: Averages, histograms</span></p>
 			</li>
 		</ul>
 		</li>
@@ -2370,193 +2380,228 @@ abc123 Inventory 2018-09-03T15:53:02+02:00 Preparing order manifest</code></pre>
 	</li>
 </ul>
 </div></div>
-</section><section data-id="b2eb7b29621535631d15a20643a03630"><div class="sl-block" data-block-type="text" style="height: auto; width: 1280px; left: 0px; top: 0px;" data-block-id="1736fd0ddd8d91f833fafb2e51a3c56e"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10; padding: 15px;" dir="ui">
+</section><section data-id="b2eb7b29621535631d15a20643a03630"><div class="sl-block" data-block-type="text" style="height: auto; width: 1280px; left: 0px; top: 0px;" data-block-id="1736fd0ddd8d91f833fafb2e51a3c56e"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10;" dir="ui" data-has-custom-html="">
 <h2>Monitoring</h2>
 
-<p style="color:rgb(53, 64, 69)"><span style="font-size:1.4em"><u>Monitoring Solutions for Cloud-Native Applications:</u></span></p>
-
-<ul>
-	<li>
-	<p><span style="font-size:1.4em">Commercial, closed source</span></p>
-
-	<ul>
-		<li>
-		<p><span style="font-size:1.4em">AppDynamics</span></p>
-		</li>
-		<li>
-		<p><span style="font-size:1.4em">New Relic</span></p>
-		</li>
-		<li>
-		<p><span style="font-size:1.4em">Dynatrace</span></p>
-		</li>
-	</ul>
-	</li>
-	<li>
-	<p><span style="font-size:1.4em">Open source</span></p>
-
-	<ul>
-		<li>
-		<p><span style="font-size:1.4em">Zabbix</span></p>
-		</li>
-		<li>
-		<p><span style="font-size:1.4em">Heapster</span></p>
-		</li>
-		<li>
-		<p><span style="font-size:1.4em">Prometheus</span></p>
-		</li>
-	</ul>
-	</li>
-</ul>
+<h3>Monitoring Solutions for Cloud-Native Applications</h3>
 </div></div>
-</section><section data-id="9503653fde5cbaf38698f339e29c790e"><div class="sl-block" data-block-type="text" style="height: auto; width: 1280px; left: 0px; top: 0px;" data-block-id="197f4bcb4a949b7a6ec09398c5dea05e"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10; padding: 15px;" dir="ui">
+<div class="sl-block" data-block-type="table" data-name="table-d1ad30" data-block-id="9c30b3815c6b343838666c1d7a27f66d" style="height: auto; min-width: 120px; width: 520.162px; left: 160px; top: 216px;"><div class="sl-block-content" style="z-index: 11;" data-table-rows="3" data-table-cols="2"><table><tbody>
+<tr>
+<th style="width: 254px;">Type</th>
+<th>Solutions</th>
+</tr>
+<tr>
+<td style="width: 254px;">Commercial, closed source</td>
+<td>• AppDynamics<br>
+• New Relic<br>
+• Dynatrace</td>
+</tr>
+<tr>
+<td style="width: 254px;">Open source</td>
+<td>• Zabbix<br>
+• Heapster<br>
+• Prometheus</td>
+</tr>
+</tbody></table></div></div></section><section data-id="9503653fde5cbaf38698f339e29c790e"><div class="sl-block" data-block-type="text" style="height: auto; width: 1280px; left: 0px; top: 0px;" data-block-id="197f4bcb4a949b7a6ec09398c5dea05e"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10;" dir="ui" data-has-custom-html="">
 <h2>Prometheus</h2>
 
 <ul>
 	<li style="color:rgb(53, 64, 69)">
-	<p><span style="font-size:1.4em">Open source monitoring solution</span></p>
+	<p><span style="font-size:1.0em">Open source monitoring solution</span></p>
 	</li>
 	<li style="color:rgb(53, 64, 69)">
-	<p><span style="font-size:1.4em">Inspired by Google's Borgmon monitoring tool</span></p>
+	<p><span style="font-size:1.0em">Inspired by Google's Borgmon monitoring tool</span></p>
 	</li>
 	<li style="color:rgb(53, 64, 69)">
-	<p><span style="font-size:1.4em">Graduated project of the CNCF (2nd after Kubernetes)</span></p>
+	<p><span style="font-size:1.0em">Graduated project of CNCF</span></p>
+
+	<ul>
+		<li style="color:rgb(53, 64, 69)">
+		<p><span style="font-size:1.0em">Second after Kubernetes</span></p>
+		</li>
+	</ul>
 	</li>
 	<li style="color:rgb(53, 64, 69)">
-	<p><span style="font-size:1.4em">Inclusive monitoring (blackbox/whitebox, client libraries)</span></p>
+	<p><span style="font-size:1.0em">Inclusive monitoring: Blackbox/whitebox, client libraries</span></p>
 	</li>
 	<li style="color:rgb(53, 64, 69)">
-	<p><span style="font-size:1.4em">Time series collection implemented via pull model over HTTP</span></p>
+	<p><span style="font-size:1.0em">Time series collection implemented via pull model over HTTP</span></p>
 	</li>
 	<li style="color:rgb(53, 64, 69)">
-	<p><span style="font-size:1.4em">Multi-dimensional data model with time series data identified by metric name and key/value pairs</span></p>
+	<p><span style="font-size:1.0em">Multi-dimensional data model with time series data identified by metric name and key/value pairs</span></p>
 	</li>
 	<li style="color:rgb(53, 64, 69)">
-	<p><span style="font-size:1.4em">Powerful query language</span></p>
+	<p><span style="font-size:1.0em">Powerful query language</span></p>
 
 	<ul>
 		<li>
-		<p><span style="font-size:1.4em">Multiply, add, aggregate, join, compute quantiles</span></p>
+		<p><span style="font-size:1.0em">Multiply, add, aggregate, join, compute quantiles</span></p>
 		</li>
 	</ul>
 	</li>
 </ul>
 </div></div>
-</section><section data-id="e5a7a0c60eb97871ab2771de44053f02"><div class="sl-block" data-block-type="text" style="height: auto; width: 1280px; left: 0px; top: 0px;" data-block-id="6136c78125ef292f2873312a3c0d37f2"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10; padding: 15px;" dir="ui">
+</section><section data-id="e5a7a0c60eb97871ab2771de44053f02"><div class="sl-block" data-block-type="text" style="height: auto; width: 1280px; left: 0px; top: 0px;" data-block-id="6136c78125ef292f2873312a3c0d37f2"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10;" dir="ui" data-has-custom-html="">
 <h2>Prometheus</h2>
 
+<h3>Features</h3>
+
 <ul>
 	<li style="color:rgb(53, 64, 69)">
-	<p><span style="font-size:1.4em">Monitoring targets discovered via service discovery or static configuration</span></p>
+	<p><span style="font-size:1.0em">Monitoring targets discovered via service discovery or static configuration</span></p>
 	</li>
 	<li style="color:rgb(53, 64, 69)">
-	<p><span style="font-size:1.4em">Kubernetes integration:  service discovery through Kubernetes API</span></p>
+	<p><span style="font-size:1.0em">Kubernetes integration:  Service discovery through Kubernetes API</span></p>
 	</li>
 	<li style="color:rgb(53, 64, 69)">
-	<p><span style="font-size:1.4em">No reliance on distributed storage - local on-disk time series database</span></p>
+	<p><span style="font-size:1.0em">No reliance on distributed storage: Local on-disk time series database</span></p>
 	</li>
 	<li style="color:rgb(53, 64, 69)">
-	<p><span style="font-size:1.4em">Efficient:</span></p>
+	<p><span style="font-size:1.0em">Efficient:</span></p>
 
 	<ul>
 		<li>
-		<p><span style="font-size:1.4em">Minimal datapoint size</span></p>
+		<p><span style="font-size:1.0em">Minimal datapoint size</span></p>
 		</li>
 		<li>
-		<p><span style="font-size:1.4em">Single server can handle millions of metrics</span></p>
+		<p><span style="font-size:1.0em">Single server can handle millions of metrics</span></p>
 		</li>
 		<li>
-		<p><span style="font-size:1.4em">Recording rules to precompute frequently needed or computationally expensive expressions</span></p>
+		<p><span style="font-size:1.0em">Recording rules to precompute frequently needed or computationally expensive expressions</span></p>
 		</li>
 	</ul>
 	</li>
 	<li style="color:rgb(53, 64, 69)">
-	<p><span style="font-size:1.4em">Scale out through sharding and federation</span></p>
+	<p><span style="font-size:1.0em">Scale out through sharding and federation</span></p>
 	</li>
 </ul>
 </div></div>
-</section><section data-id="66716d3e86ab5fc0d8628e46167bba95"><div class="sl-block" data-block-type="text" style="height: auto; width: 1280px; left: 0px; top: 0px;" data-block-id="218642f58e3b3110c41b108a53d4d7fe"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10; padding: 15px;">
-<h2><span style="font-size:1.0em">Prometheus Architecture</span></h2>
+</section><section data-id="66716d3e86ab5fc0d8628e46167bba95"><div class="sl-block" data-block-type="text" style="height: auto; width: 1280px; left: 0px; top: 0px;" data-block-id="218642f58e3b3110c41b108a53d4d7fe"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10;">
+<h2><span style="font-size:1.0em">Prometheus</span></h2>
+
+<h3><span style="font-size:1.0em">Architecture</span></h3>
 </div></div>
-<div class="sl-block" data-block-type="image" style="min-width: 1px; min-height: 1px; width: 1044.48px; height: 627px; left: 117.76px; top: 93px;" data-block-id="bbcf4ae8f46b8b0f1d519edce7cf3f95"><div class="sl-block-content" style="z-index: 11;"><img style="" data-natural-width="1351" data-natural-height="811" data-lazy-loaded="" data-src="service_mesh_advanced_04_observability/73e14236c645033947f0d744e2e215b2.png"></div></div></section><section data-id="6db0835051fca62045645d155a051c6f"><div class="sl-block" data-block-type="text" style="height: auto; width: 1280px; left: 0px; top: 0px;" data-block-id="85c7ca0dce427200a2ec76175681c095"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10; padding: 15px;">
-<h2>Service Mesh And Monitoring</h2>
+<div class="sl-block" data-block-type="image" style="min-width: 1px; min-height: 1px; width: 953.841px; height: 572.587px; left: 163.079px; top: 144px;" data-block-id="bbcf4ae8f46b8b0f1d519edce7cf3f95"><div class="sl-block-content" style="z-index: 11;"><img style="" data-natural-width="1351" data-natural-height="811" data-lazy-loaded="" data-src="service_mesh_advanced_04_observability/73e14236c645033947f0d744e2e215b2.png"></div></div></section><section data-id="6db0835051fca62045645d155a051c6f"><div class="sl-block" data-block-type="text" style="height: auto; width: 1280px; left: 0px; top: 0px;" data-block-id="85c7ca0dce427200a2ec76175681c095"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10;" data-has-custom-html="">
+<h2>OpenShift Service Mesh and Monitoring</h2>
 
 <ul>
 	<li>
-	<p><span style="font-size:1.4em">Prometheus and Grafana installed as part of Service Mesh</span></p>
+	<p><span style="font-size:1.0em">Prometheus and Grafana installed as part of OpenShift Service Mesh</span></p>
 	</li>
 	<li>
-	<p><span style="font-size:1.4em">Integration through Mixer adapters</span></p>
+	<p><span style="font-size:1.0em">Integration through Mixer adapters</span></p>
 
 	<ul>
 		<li>
-		<p><span style="font-size:1.4em">Prometheus</span></p>
+		<p><span style="font-size:1.0em">Prometheus</span></p>
 		</li>
 		<li>
-		<p><span style="font-size:1.4em">New Relic</span></p>
+		<p><span style="font-size:1.0em">New Relic</span></p>
 		</li>
 		<li>
-		<p><span style="font-size:1.4em">DataDog</span></p>
+		<p><span style="font-size:1.0em">DataDog</span></p>
 		</li>
 	</ul>
 	</li>
 	<li>
-	<p><span style="font-size:1.4em">Envoy generates metrics and sends them to Mixer (<em>istio-telemetry</em>)</span></p>
+	<p><span style="font-size:1.0em">Envoy generates metrics and sends them to Mixer (<span class="mono">istio-telemetry</span>)</span></p>
 	</li>
 	<li>
-	<p><span style="font-size:1.4em">Custom metrics with <em>Metric</em>, <em>Handler</em>, <em>Instance</em> and <em>Rule</em> resources</span></p>
+	<p><span style="font-size:1.0em">Custom metrics with <span class="mono">Metric</span>, <span class="mono">Handler</span>, <span class="mono">Instance</span>, <span class="mono">Rule</span> resources</span></p>
 	</li>
 	<li>
-	<p><span style="font-size:1.4em">Pre-built Grafana Dashboards for metrics generated by Envoy proxies and Istio control plane components</span></p>
+	<p><span style="font-size:1.0em">Prebuilt Grafana dashboards for metrics generated by Envoy proxies and Istio control plane components</span></p>
 	</li>
 </ul>
 
 <p> </p>
 </div></div>
-</section><section data-id="c3ab6046a69b460b959e30819085a4e1"><div class="sl-block" data-block-type="text" style="height: auto; width: 1280px; left: 0px; top: 0px;" data-block-id="87889a965e3339aa57df1ac674189641"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10; padding: 15px;" dir="ui">
+</section><section data-id="c3ab6046a69b460b959e30819085a4e1"><div class="sl-block" data-block-type="text" style="height: auto; width: 1280px; left: 0px; top: 0px;" data-block-id="87889a965e3339aa57df1ac674189641"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10;" dir="ui">
 <h2><span style="font-size:1.0em">Visualization</span></h2>
 
 <ul>
 	<li>
-	<p><span style="font-size:1.4em">Jaeger UI</span></p>
+	<p><span style="font-size:1.0em">Jaeger UI</span></p>
 	</li>
 	<li>
-	<p><span style="font-size:1.4em">Grafana Dashboards</span></p>
+	<p><span style="font-size:1.0em">Grafana dashboards</span></p>
 	</li>
 	<li>
-	<p><span style="font-size:1.4em">Kiali</span></p>
+	<p><span style="font-size:1.0em">Kiali</span></p>
 
 	<ul>
 		<li>
-		<p><span style="font-size:1.4em">Red Hat Service Mesh console</span></p>
+		<p><span style="font-size:1.0em">OpenShift Service Mesh console</span></p>
 		</li>
 		<li>
-		<p><span style="font-size:1.4em">Visualizes the service mesh topology in real time</span></p>
+		<p><span style="font-size:1.0em">Visualizes service mesh topology in real time</span></p>
 		</li>
 		<li>
-		<p><span style="font-size:1.4em">Provides visibility into features like request routing, circuit breakers, request rates, latency and more.</span></p>
+		<p><span style="font-size:1.0em">Provides visibility into features like request routing, circuit breakers, request rates, latency, etc.</span></p>
 		</li>
 		<li>
-		<p><span style="font-size:1.4em">Inline edition of the YAML representation of Istio resources, with powerful semantic validation.</span></p>
+		<p><span style="font-size:1.0em">Inline edition of YAML representation of Istio resources, with powerful semantic validation</span></p>
 		</li>
 		<li>
-		<p><span style="font-size:1.4em">Actions to create, update and delete Istio configuration resources, driven by wizards.</span></p>
+		<p><span style="font-size:1.0em">Actions to create, update, delete Istio configuration resources, driven by wizards</span></p>
 		</li>
 		<li>
-		<p><span style="font-size:1.4em">Custom metrics dashboards</span></p>
+		<p><span style="font-size:1.0em">Custom metrics dashboards</span></p>
 		</li>
 		<li>
-		<p><span style="font-size:1.4em">Integrated with distributed tracing</span></p>
+		<p><span style="font-size:1.0em">Integrated with distributed tracing</span></p>
 		</li>
 	</ul>
 	</li>
 </ul>
 </div></div>
-</section>
+</section><section data-id="bdd4bd4c3fa0d6a7cf0a227d019e170e"><div class="sl-block" data-block-type="text" style="height: auto; width: 1280px; left: 0px; top: 0px;" data-block-id="374a0fcf4e8bc060684a626224821ced"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10;">
+<h2>Module Summary</h2>
+
+<ul>
+	<li>
+	<p><span style="font-size:1.0em">Observability</span></p>
+	</li>
+	<li>
+	<p><span style="font-size:1.0em">Logging</span></p>
+	</li>
+	<li>
+	<p><span style="font-size:1.0em">Distributed Tracing</span></p>
+	</li>
+	<li>
+	<p><span style="font-size:1.0em">Distributed Tracing UI</span></p>
+	</li>
+	<li>
+	<p><span style="font-size:1.0em">Source Code Implementation</span></p>
+	</li>
+	<li>
+	<p><span style="font-size:1.0em">OpenTracing</span></p>
+	</li>
+	<li>
+	<p><span style="font-size:1.0em">Jaeger</span></p>
+	</li>
+	<li>
+	<p><span style="font-size:1.0em">Red Hat OpenShift Service Mesh and Distributed Tracing</span></p>
+	</li>
+	<li>
+	<p><span style="font-size:1.0em">Monitoring</span></p>
+	</li>
+	<li>
+	<p><span style="font-size:1.0em">Prometheus</span></p>
+	</li>
+	<li>
+	<p><span style="font-size:1.0em">OpenShift Service Mesh and Monitoring</span></p>
+	</li>
+	<li>
+	<p><span style="font-size:1.0em">Visualization</span></p>
+	</li>
+</ul>
+</div></div></section>
 			</div>
 		</div>
 
 		<script>
-			var SLConfig = {"deck": {"id":1696324,"slug":"service_mesh_advanced_04_observability","title":"Service_Mesh_Advanced_04_Observability","description":"","width":1280,"height":720,"margin":0.05,"visibility":"self","published_at":null,"sanitize_messages":null,"thumbnail_url":"https://s3.amazonaws.com/media-p.slid.es/thumbnails/1456b17c8f4ab7fbe10ee21395ebff0e/thumb.jpg?1579537047","view_count":0,"user":{"id":349930,"username":"btison","name":"Bernard Tison","description":null,"thumbnail_url":"https://www.gravatar.com/avatar/e2e3cdd3ce9e08ca385892a22816db22?s=140\u0026d=https%3A%2F%2Fstatic.slid.es%2Fimages%2Fdefault-profile-picture.png","paid":true,"pro":true,"lite":false,"team_id":32,"settings":{"id":183077,"present_controls":true,"present_upsizing":true,"present_pointer":false,"present_notes":true,"default_deck_tag_id":null},"enterprise":true,"membership":{"role":"member","manager":false,"activated":true}},"background_transition":"none","transition":"none","theme_id":176,"theme_font":"overpass2","theme_color":"no-color","auto_slide_interval":0,"comments_enabled":true,"forking_enabled":false,"rolling_links":false,"center":false,"shuffle":false,"should_loop":false,"share_notes":false,"slide_number":true,"slide_count":26,"rtl":false,"version":2,"collaborative":false,"deck_user_editor_limit":null,"data_updated_at":1580556774021,"font_typekit":null,"font_google":null,"time_limit":null,"upsizing_enabled":true,"notes":{"bedc0457df23e02319c4a5f2fb1e220f":"","14aee4ce6e77efac398800a568d4b75b":"","00c8743aad41872b1490fa1b34350a1b":"","57eadeb0bee99829e929666d4957b001":"","a0a8f62b4e04f627b163a856dfb59a4f":"","2ffc9af43b0e6f78c72fde3a1e0165f3":"","0d01f8dbe2b1c338949e507a3e9bb5ec":"","48dfbc8c76713fecc916f6ab82c26831":"","620d650e6e3ab7ea1fae9af7fc848890":"","4adbb56d9ccb48b44aac2c7cfa67cd26":"","a0567e5825addcdbc8496f3779b14e51":"","ffdb9b6bcf5f9b3b1412d9a6bd31eac5":"","407ed17b3f536db0b8d6f0fec7dc1da1":"","05baa377921dfc24bc2f976dfdeba3ac":"","4cd9c824a4d86a7211f8100e5794b5c4":"","503b95ca3245a464ab20828c58f29060":"","0c7a65c2ec6743d876e0f8a52019d607":"","883ab49bf404a9dcb67d33a2fb0299a1":"","0ea0feca0cfde165ad868afc2c554e79":"","00896e2961203a8b4eca7fafc7f957ee":"","d43265aed24508d5c80c5863b4a869e8":"","acdb0f554bba724e4bea7b4c88c6ae8d":"","e56c3cd4bd06f102c94d95a6b9f22cae":"","c94edad64a41b18e4e276e9914ca9f6f":""}}};
+			var SLConfig = {"deck": {"id":1696324,"slug":"service_mesh_advanced_04_observability","title":"Service_Mesh_Advanced_04_Observability","description":"","width":1280,"height":720,"margin":0.05,"visibility":"self","published_at":null,"sanitize_messages":null,"thumbnail_url":"https://s3.amazonaws.com/media-p.slid.es/thumbnails/1456b17c8f4ab7fbe10ee21395ebff0e/thumb.jpg?1583962887","view_count":0,"user":{"id":349930,"username":"btison","name":"Bernard Tison","description":null,"thumbnail_url":"https://www.gravatar.com/avatar/e2e3cdd3ce9e08ca385892a22816db22?s=140\u0026d=https%3A%2F%2Fstatic.slid.es%2Fimages%2Fdefault-profile-picture.png","paid":true,"pro":true,"lite":false,"team_id":32,"settings":{"id":183077,"present_controls":true,"present_upsizing":true,"present_pointer":false,"present_notes":true,"default_deck_tag_id":null},"enterprise":true,"membership":{"role":"member","manager":false,"activated":true}},"background_transition":"none","transition":"none","theme_id":176,"theme_font":"overpass2","theme_color":"no-color","auto_slide_interval":0,"comments_enabled":true,"forking_enabled":false,"rolling_links":false,"center":false,"shuffle":false,"should_loop":false,"share_notes":false,"slide_number":true,"slide_count":27,"rtl":false,"version":2,"collaborative":true,"deck_user_editor_limit":null,"data_updated_at":1585122383831,"font_typekit":null,"font_google":null,"time_limit":null,"upsizing_enabled":true,"notes":{"bedc0457df23e02319c4a5f2fb1e220f":"","14aee4ce6e77efac398800a568d4b75b":"","00c8743aad41872b1490fa1b34350a1b":"","57eadeb0bee99829e929666d4957b001":"","a0a8f62b4e04f627b163a856dfb59a4f":"","2ffc9af43b0e6f78c72fde3a1e0165f3":"","0d01f8dbe2b1c338949e507a3e9bb5ec":"","48dfbc8c76713fecc916f6ab82c26831":"","620d650e6e3ab7ea1fae9af7fc848890":"","4adbb56d9ccb48b44aac2c7cfa67cd26":"","a0567e5825addcdbc8496f3779b14e51":"","ffdb9b6bcf5f9b3b1412d9a6bd31eac5":"","407ed17b3f536db0b8d6f0fec7dc1da1":"","05baa377921dfc24bc2f976dfdeba3ac":"","4cd9c824a4d86a7211f8100e5794b5c4":"","503b95ca3245a464ab20828c58f29060":"","0c7a65c2ec6743d876e0f8a52019d607":"","883ab49bf404a9dcb67d33a2fb0299a1":"","0ea0feca0cfde165ad868afc2c554e79":"","00896e2961203a8b4eca7fafc7f957ee":"","d43265aed24508d5c80c5863b4a869e8":"","acdb0f554bba724e4bea7b4c88c6ae8d":"","e56c3cd4bd06f102c94d95a6b9f22cae":"","c94edad64a41b18e4e276e9914ca9f6f":""}}};
 
 				SLConfig.theme = {"id":176,"created_at":"2014-05-27T12:38:16.183Z","updated_at":"2019-10-17T00:32:59.630Z","name":"Red Hat Corporate (Archived)","thumbnail_url":"https://s3.amazonaws.com/media-p.slid.es/thumbnails/66755080be2b0c8c0146bfa70069ef16/thumb.jpg?1571272377","sanitize_messages":null,"slide_template_ids":[28642,36442,26765,26762,56704,16857,16856,16853,16855,16854,16852,16863,16862,16861,16860,16859,16858,56721,185268,185425],"font_typekit":"","font_google":"","width":960,"height":700};
 
@@ -2584,6 +2629,8 @@ abc123 Inventory 2018-09-03T15:53:02+02:00 Preparing order manifest</code></pre>
 
 				autoSlide: 0,
 				autoSlideStoppable: true,
+
+				autoAnimateMatcher: SL.deck.AutoAnimate.matcher,
 
 				center: false,
 				shuffle: false,
