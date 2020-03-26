@@ -1793,7 +1793,7 @@ html:not([data-mode="arrange"]) .reveal .future.in-3d-appear {
 		<div class="reveal">
 			<div class="slides">
 				<section data-background-color="rgb(144,12,18)" data-background-image="bxms_dm_foundational_m03/40cf27dd491393a1b2042f99486971a6.png" data-id="bedc0457df23e02319c4a5f2fb1e220f"><div class="sl-block" data-block-type="text" style="height: auto; width: 1065px; left: 160px; top: 288px;" data-block-id="22dfbc502d30872f61f60fafe62f4e42"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10; text-align: left;" data-has-custom-html="" dir="ui">
-<h1>Advanced Service Mesh</h1>
+<h1>Advanced Application Management Using Red Hat OpenShift Service Mesh</h1>
 
 <h2>Security</h2>
 </div></div>
@@ -1801,396 +1801,450 @@ html:not([data-mode="arrange"]) .reveal .future.in-3d-appear {
 
 <div class="sl-block" data-block-type="image" style="width: 360px; height: 122.4px; left: 0px; top: 0px; min-width: 1px; min-height: 1px;" data-block-id="c5ce7b97245def08c76fac2f2d539e9a"><div class="sl-block-content" style="z-index: 13;" data-inline-svg="true">
 <img data-natural-width="500" data-natural-height="170" data-lazy-loaded="" style="" data-src="service_mesh_advanced_02_security/bfa11a84cdd2fc0f50cb6fb54942bd62.svg"><svg xmlns="http://www.w3.org/2000/svg" viewbox="0 0 613 145" height="170" width="500" class="redhat-logo"><path class="logohat" style="fill:#fff;" d="M127.47,83.49c12.51,0,30.61-2.58,30.61-17.46a14,14,0,0,0-.31-3.42l-7.45-32.36c-1.72-7.12-3.23-10.35-15.73-16.6C124.89,8.69,103.76.5,97.51.5,91.69.5,90,8,83.06,8c-6.68,0-11.64-5.6-17.89-5.6-6,0-9.91,4.09-12.93,12.5,0,0-8.41,23.72-9.49,27.16A6.43,6.43,0,0,0,42.53,44c0,9.22,36.3,39.45,84.94,39.45M160,72.07c1.73,8.19,1.73,9.05,1.73,10.13,0,14-15.74,21.77-36.43,21.77C78.54,104,37.58,76.6,37.58,58.49a18.45,18.45,0,0,1,1.51-7.33C22.27,52,.5,55,.5,74.22c0,31.48,74.59,70.28,133.65,70.28,45.28,0,56.7-20.48,56.7-36.65,0-12.72-11-27.16-30.83-35.78"></path><path class="logotext" style="fill:#fff;" d="M579.74,92.8c0,11.89,7.15,17.67,20.19,17.67a52.11,52.11,0,0,0,11.89-1.68V95a24.84,24.84,0,0,1-7.68,1.16c-5.37,0-7.36-1.68-7.36-6.73V68.3h15.56V54.1H596.78v-18l-17,3.68V54.1H568.49V68.3h11.25Zm-53,.32c0-3.68,3.69-5.47,9.26-5.47a43.12,43.12,0,0,1,10.1,1.26v7.15a21.51,21.51,0,0,1-10.63,2.63c-5.46,0-8.73-2.1-8.73-5.57m5.2,17.56c6,0,10.84-1.26,15.36-4.31v3.37h16.82V74.08c0-13.56-9.14-21-24.39-21-8.52,0-16.94,2-26,6.1l6.1,12.52c6.52-2.74,12-4.42,16.83-4.42,7,0,10.62,2.73,10.62,8.31v2.73a49.53,49.53,0,0,0-12.62-1.58c-14.31,0-22.93,6-22.93,16.73,0,9.78,7.78,17.24,20.19,17.24m-92.44-.94h18.09V80.92h30.29v28.82H506V36.12H487.93V64.41H457.64V36.12H439.55ZM370.62,81.87c0-8,6.31-14.1,14.62-14.1A17.22,17.22,0,0,1,397,72.09V91.54A16.36,16.36,0,0,1,385.24,96c-8.2,0-14.62-6.1-14.62-14.09m26.61,27.87h16.83V32.44l-17,3.68V57.05a28.3,28.3,0,0,0-14.2-3.68c-16.19,0-28.92,12.51-28.92,28.5a28.25,28.25,0,0,0,28.4,28.6,25.12,25.12,0,0,0,14.93-4.83ZM320,67c5.36,0,9.88,3.47,11.67,8.83H308.47C310.15,70.3,314.36,67,320,67M291.33,82c0,16.2,13.25,28.82,30.28,28.82,9.36,0,16.2-2.53,23.25-8.42l-11.26-10c-2.63,2.74-6.52,4.21-11.14,4.21a14.39,14.39,0,0,1-13.68-8.83h39.65V83.55c0-17.67-11.88-30.39-28.08-30.39a28.57,28.57,0,0,0-29,28.81M262,51.58c6,0,9.36,3.78,9.36,8.31S268,68.2,262,68.2H244.11V51.58Zm-36,58.16h18.09V82.92h13.77l13.89,26.82H292l-16.2-29.45a22.27,22.27,0,0,0,13.88-20.72c0-13.25-10.41-23.45-26-23.45H226Z"></path></svg>
-</div></div></section><section data-id="c94edad64a41b18e4e276e9914ca9f6f"><div class="sl-block" data-block-type="text" style="height: auto; min-width: 30px; min-height: 30px; width: 1280px; left: 0px; top: 0px;" data-block-id="ff81d8deec2506adcd7ee99bd117cb3f"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 11; padding: 15px;">
+</div></div></section><section data-id="c94edad64a41b18e4e276e9914ca9f6f"><div class="sl-block" data-block-type="text" style="height: auto; min-width: 30px; min-height: 30px; width: 1280px; left: 0px; top: 0px;" data-block-id="ff81d8deec2506adcd7ee99bd117cb3f"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 11;" data-has-custom-html="">
 <h2>Module Topics</h2>
 
 <ul>
 	<li>
-	<p><span style="font-size:1.2em">Access Control</span></p>
+	<p>Access Control</p>
 	</li>
 	<li>
-	<p><span style="font-size:1.2em">Istio Security</span></p>
+	<p>Istio Security</p>
 	</li>
 	<li>
-	<p><span style="font-size:1.2em">Istio Identity</span></p>
+	<p>Istio Identity</p>
 	</li>
 	<li>
-	<p><span style="font-size:1.2em">Istio PKI</span></p>
+	<p>Istio PKI</p>
 	</li>
 	<li>
-	<p><span style="font-size:1.2em"><span>Istio mTLS</span></span></p>
+	<p>Istio mTLS</p>
 	</li>
 	<li>
-	<p><span style="font-size:1.2em"><span>Authentication Policy</span></span></p>
+	<p>Authentication Policy</p>
 	</li>
 	<li>
-	<p><span style="font-size:1.2em">Origin Authentication</span></p>
+	<p>Origin Authentication</p>
 	</li>
-	<li style="color:rgb(53, 64, 69)">
-	<p><span style="font-size:1.2em">Authorization</span></p>
+	<li>
+	<p>Authorization</p>
 	</li>
 </ul>
-</div></div></section><section data-id="14aee4ce6e77efac398800a568d4b75b"><div class="sl-block" data-block-type="text" style="height: auto; width: 1280px; left: 0px; top: 0px;" data-block-id="c6044dfb82e3dd38b10ae5790e6053ca"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10; padding: 15px;">
-<h2><span style="font-size:1.0em">Access Control</span></h2>
+</div></div></section><section data-id="14aee4ce6e77efac398800a568d4b75b"><div class="sl-block" data-block-type="text" style="height: auto; width: 1280px; left: 0px; top: 0px;" data-block-id="c6044dfb82e3dd38b10ae5790e6053ca"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10;" data-has-custom-html="">
+<h2>Access Control</h2>
 
 <ul>
-	<li style="color:rgb(53, 64, 69)">
-	<p><span style="font-size:1.4em">Can <em>entity</em> perform <em>action</em> on <em>objec</em>t?</span></p>
+	<li>
+	<p>Can <em>entity</em> perform <em>action</em> on <em>object</em>?</p>
 	</li>
-	<li style="color:rgb(53, 64, 69)">
-	<p><span style="font-size:1.4em">Authentication:</span></p>
+	<li>
+	<p>Authentication:</p>
 
 	<ul>
-		<li style="color:rgb(53, 64, 69)">
-		<p><span style="font-size:1.4em">Verify credentials of entity.</span></p>
+		<li>
+		<p>Verify credentials of entity</p>
 		</li>
-		<li style="color:rgb(53, 64, 69)">
-		<p><span style="font-size:1.4em">Ensure the identity of the entity is valid.</span></p>
+		<li>
+		<p>Ensure entity identity is valid</p>
 		</li>
 	</ul>
 	</li>
-	<li style="color:rgb(53, 64, 69)">
-	<p><span style="font-size:1.4em">Authorization:</span></p>
+	<li>
+	<p>Authorization:</p>
 
 	<ul>
-		<li style="color:rgb(53, 64, 69)">
-		<p><span style="font-size:1.4em">What actions an entity can perform.</span></p>
-		</li>
-	</ul>
-	</li>
-</ul>
-</div></div>
-</section><section data-id="bf11e141e40c6c52eb905aaf08eaee5a"><div class="sl-block" data-block-type="text" style="height: auto; width: 1280px; left: 0px; top: 0px;" data-block-id="bcacf35c7c60e86a6b6f95aa7dd7e01c"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10; padding: 15px;">
-<h2><span style="font-size:1.0em">Authentication</span></h2>
-
-<ul>
-	<li style="color:rgb(53, 64, 69)">
-	<p><span style="font-size:1.4em">Transport authentication:</span></p>
-
-	<ul>
-		<li style="color:rgb(53, 64, 69)">
-		<p><span style="font-size:1.4em">Service-to-service authentication.</span></p>
-		</li>
-		<li style="color:rgb(53, 64, 69)">
-		<p><span style="font-size:1.4em">Verifies the direct client making the conmnection.</span></p>
-		</li>
-		<li style="color:rgb(53, 64, 69)">
-		<p><span style="font-size:1.4em">Example: mTLS</span></p>
-		</li>
-	</ul>
-	</li>
-	<li style="color:rgb(53, 64, 69)">
-	<p><span style="font-size:1.4em">Origin Authentication</span></p>
-
-	<ul>
-		<li style="color:rgb(53, 64, 69)">
-		<p><span style="font-size:1.4em">End-user authentication</span></p>
-		</li>
-		<li style="color:rgb(53, 64, 69)">
-		<p><span style="font-size:1.4em">Verifies the original client (end-user, device) making the request.</span></p>
-		</li>
-		<li style="color:rgb(53, 64, 69)">
-		<p><span style="font-size:1.4em">OpenID Connect with JSON Web Token (JWT).</span></p>
+		<li>
+		<p>Determine actions entity can perform</p>
 		</li>
 	</ul>
 	</li>
 </ul>
 </div></div>
-</section><section data-id="d051208a980b93265f36a680511f5c28"><div class="sl-block" data-block-type="text" style="height: auto; width: 1280px; left: 0px; top: 0px;" data-block-id="18a52937f91e18d2b162b0c4ab714afd"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10; padding: 15px;">
-<h2><span style="font-size:1.0em">Goals of Istio Security</span></h2>
+</section><section data-id="bf11e141e40c6c52eb905aaf08eaee5a"><div class="sl-block" data-block-type="text" style="height: auto; width: 1280px; left: 0px; top: 0px;" data-block-id="bcacf35c7c60e86a6b6f95aa7dd7e01c"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10;" data-has-custom-html="" dir="ui">
+<h2>Access Control</h2>
 
-<ul>
-	<li style="color:rgb(53, 64, 69)">
-	<p><span style="font-size:1.4em">Security by default: no changes needed for application code and infrastructure.</span></p>
-	</li>
-	<li style="color:rgb(53, 64, 69)">
-	<p><span style="font-size:1.4em">Defense in depth: integrate with existing security systems to provide multiple layers of defense.</span></p>
-	</li>
-	<li><span style="font-size:1.4em">Zero-trust network: build security solutions on untrusted networks.</span></li>
-</ul>
-
-<p> </p>
-
-<p style="color:rgb(53, 64, 69)"> </p>
-
-<p> </p>
+<h3>Authentication</h3>
 </div></div>
-</section><section data-id="1c654cc38ca798d1ac4bee248825d20d"><div class="sl-block" data-block-type="text" style="height: auto; width: 1280px; left: 0px; top: 0px;" data-block-id="0be4c808be9e6128bd00113e34086d96"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10; padding: 15px;">
-<h2><span style="font-size:1.0em">Components of Istio Security</span></h2>
+<div class="sl-block" data-block-type="table" data-name="table-5a99a9" data-block-id="24587c6815d70cf6d8bd59a2b8dc05a7" style="height: auto; min-width: 120px; width: 800px; left: 80px; top: 216px;"><div class="sl-block-content" style="z-index: 11;" data-table-cols="2"><table><tbody>
+<tr>
+<th style="width: 232px;">Type</th>
+<th>Description</th>
+</tr>
+<tr>
+<td style="width: 232px;">Transport authentication</td>
+<td>• Service-to-service authentication<br>• Verifies direct client making connection<br>• Example: mTLS</td>
+</tr>
+<tr>
+<td style="width: 232px;">Origin authentication</td>
+<td>• End-user authentication<br>• Verifies original client (end user, device) making request<br>• OpenID Connect with JSON Web Tokens (JWT)</td>
+</tr>
+</tbody></table></div></div></section><section data-id="d051208a980b93265f36a680511f5c28"><div class="sl-block" data-block-type="text" style="height: auto; width: 1280px; left: 0px; top: 0px;" data-block-id="18a52937f91e18d2b162b0c4ab714afd"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10;" data-has-custom-html="">
+<h2>Istio Security</h2>
 
-<ul>
-	<li style="color:rgb(53, 64, 69)">
-	<p><span style="font-size:1.4em">Strong identity</span></p>
-	</li>
-	<li style="color:rgb(53, 64, 69)">
-	<p><span style="font-size:1.4em">Security policies</span></p>
-	</li>
-	<li style="color:rgb(53, 64, 69)">
-	<p><span style="font-size:1.4em">Transparent TLS encryption</span></p>
-	</li>
-	<li style="color:rgb(53, 64, 69)">
-	<p><span style="font-size:1.4em">Authentication</span></p>
-	</li>
-	<li style="color:rgb(53, 64, 69)">
-	<p><span style="font-size:1.4em">Authorization</span></p>
-	</li>
-	<li style="color:rgb(53, 64, 69)">
-	<p><span style="font-size:1.4em">Audit</span></p>
-	</li>
-</ul>
+<h3>Goals</h3>
 </div></div>
-</section><section data-id="a3dd31b8a24e726f06a9bc3048e69202"><div class="sl-block" data-block-type="text" style="height: auto; width: 1280px; left: 0px; top: 0px;" data-block-id="6c5169bb89da79d40004261c75aaaf96"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10; padding: 15px;">
-<h2><span style="font-size:1.0em">Istio Security Architecture</span></h2>
+<div class="sl-block" data-block-type="table" data-name="table-508078" data-block-id="961d8e95ceace4ef123cc4ff66e56103" style="height: auto; min-width: 120px; width: 854.413px; left: 153.198px; top: 216px;"><div class="sl-block-content" style="z-index: 11;" data-table-cols="2" data-table-rows="4"><table><tbody>
+<tr>
+<th style="width: 199px;">Goal</th>
+<th>Description</th>
+</tr>
+<tr>
+<td style="width: 199px;">Security by default</td>
+<td>No changes needed for application code and infrastructure</td>
+</tr>
+<tr>
+<td style="width: 199px;">Defense in depth</td>
+<td>Integrate with existing security systems to provide multiple layers of defense</td>
+</tr>
+<tr>
+<td style="width: 199px;">Zero-trust network</td>
+<td>Build security solutions on untrusted networks</td>
+</tr>
+</tbody></table></div></div></section><section data-id="1c654cc38ca798d1ac4bee248825d20d"><div class="sl-block" data-block-type="text" style="height: auto; width: 1280px; left: 0px; top: 0px;" data-block-id="0be4c808be9e6128bd00113e34086d96"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10;" data-has-custom-html="">
+<h2>Istio Security</h2>
 
-<ul>
-	<li style="color:rgb(53, 64, 69)">
-	<p><span style="font-size:1.4em">Citadel: key and certificate management.</span></p>
-	</li>
-	<li style="color:rgb(53, 64, 69)">
-	<p><span style="font-size:1.4em">Sidecar and perimeter proxies: implement secure communication between clients and servers.</span></p>
-	</li>
-	<li style="color:rgb(53, 64, 69)">
-	<p><span style="font-size:1.4em">Pilot: distribute authentication policies and secure naming information to the proxies.</span></p>
-	</li>
-	<li style="color:rgb(53, 64, 69)">
-	<p><span style="font-size:1.4em">Mixer: manage authorization and auditing.</span></p>
-	</li>
-</ul>
-</div></div>
-</section><section data-id="66716d3e86ab5fc0d8628e46167bba95"><div class="sl-block" data-block-type="text" style="height: auto; width: 1280px; left: 0px; top: 0px;" data-block-id="218642f58e3b3110c41b108a53d4d7fe"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10; padding: 15px;">
-<h2><span style="font-size:1.0em">Istio Security Architecture</span></h2>
-</div></div>
-<div class="sl-block" data-block-type="image" data-block-id="e769c984af9c5683a9e7316d76ab65e0" style="width: 1114.67px; height: 627px; left: 80px; top: 93px; min-width: 1px; min-height: 1px;"><div class="sl-block-content" style="z-index: 11;"><img style="" data-natural-width="960" data-natural-height="540" data-lazy-loaded="" data-src="service_mesh_advanced_02_security/f45e2aeeb63d4b8d97b894f6d9f8c445.svg"></div></div></section><section data-id="6db0835051fca62045645d155a051c6f"><div class="sl-block" data-block-type="text" style="height: auto; width: 1280px; left: 0px; top: 0px;" data-block-id="85c7ca0dce427200a2ec76175681c095"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10; padding: 15px;">
-<h2><span style="font-size:1.0em">Identity</span></h2>
+<h3>Components</h3>
 
 <ul>
 	<li>
-	<p><span style="font-size:1.4em">Fundamental aspect of any security infrastructure.</span></p>
+	<p>Strong identity</p>
 	</li>
 	<li>
-	<p><span style="font-size:1.4em">Secure service-to-service authentication:</span></p>
+	<p>Security policies</p>
+	</li>
+	<li>
+	<p>Transparent TLS encryption</p>
+	</li>
+	<li>
+	<p>Authentication</p>
+	</li>
+	<li>
+	<p>Authorization</p>
+	</li>
+	<li>
+	<p>Auditing</p>
+	</li>
+</ul>
+</div></div>
+</section><section data-id="a3dd31b8a24e726f06a9bc3048e69202"><div class="sl-block" data-block-type="text" style="height: auto; width: 1280px; left: 0px; top: 0px;" data-block-id="6c5169bb89da79d40004261c75aaaf96"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10;" data-has-custom-html="">
+<h2>Istio Security</h2>
+
+<h3>Architecture Components</h3>
+</div></div>
+<div class="sl-block" data-block-type="table" data-name="table-06b118" data-block-id="bf1607b0cffee7fb858e3ac462955701" style="height: auto; min-width: 120px; width: 923.077px; left: 160px; top: 211px;"><div class="sl-block-content" style="z-index: 11;" data-table-cols="2" data-table-rows="5"><table><tbody>
+<tr>
+<th style="width: 284px;">Component</th>
+<th>Role</th>
+</tr>
+<tr>
+<td style="width: 284px;">Citadel</td>
+<td>Manage keys and certificates</td>
+</tr>
+<tr>
+<td style="width: 284px;">Sidecar and perimeter proxies</td>
+<td>Implement secure communication between clients and servers</td>
+</tr>
+<tr>
+<td style="width: 284px;">Pilot</td>
+<td>Distribute authentication policies and secure naming information to proxies</td>
+</tr>
+<tr>
+<td style="width: 284px;">Mixer</td>
+<td>Manage authorization and auditing</td>
+</tr>
+</tbody></table></div></div></section><section data-id="66716d3e86ab5fc0d8628e46167bba95"><div class="sl-block" data-block-type="text" style="height: auto; width: 1280px; left: 0px; top: 0px;" data-block-id="218642f58e3b3110c41b108a53d4d7fe"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10;" data-has-custom-html="">
+<h2>Istio Security</h2>
+
+<h3>Architecture Diagram</h3>
+</div></div>
+<div class="sl-block" data-block-type="image" data-block-id="e769c984af9c5683a9e7316d76ab65e0" style="width: 1024px; height: 576px; left: 128px; top: 144px; min-width: 1px; min-height: 1px;"><div class="sl-block-content" style="z-index: 11;"><img style="" data-natural-width="960" data-natural-height="540" data-lazy-loaded="" data-src="service_mesh_advanced_02_security/f45e2aeeb63d4b8d97b894f6d9f8c445.svg"></div></div></section><section data-id="6db0835051fca62045645d155a051c6f"><div class="sl-block" data-block-type="text" style="height: auto; width: 1280px; left: 0px; top: 0px;" data-block-id="85c7ca0dce427200a2ec76175681c095"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10;" data-has-custom-html="">
+<h2>Istio Identity</h2>
+
+<ul>
+	<li>
+	<p>Identity is fundamental aspect of any security infrastructure</p>
+	</li>
+	<li>
+	<p>Secure service-to-service authentication</p>
 
 	<ul>
 		<li>
-		<p><span style="font-size:1.4em">Services exchange credentials with identity information.</span></p>
+		<p>Services exchange credentials with identity information</p>
 		</li>
 		<li>
-		<p><span style="font-size:1.4em">Client side: checks server identity, verifies if it is authorized runner of the service.</span></p>
+		<p>Client side:</p>
+
+		<ul>
+			<li>
+			<p>Checks server identity</p>
+			</li>
+			<li>
+			<p>Verifies if it is authorized runner of service</p>
+			</li>
+		</ul>
 		</li>
 		<li>
-		<p><span style="font-size:1.4em">Server side: determine what the client is authorized to do according to authorization policies.</span></p>
+		<p>Server side:</p>
+
+		<ul>
+			<li>
+			<p>Determines what client is authorized to do based on authorization policies</p>
+			</li>
+		</ul>
 		</li>
 	</ul>
 	</li>
 </ul>
 </div></div>
-</section><section data-id="c3ab6046a69b460b959e30819085a4e1"><div class="sl-block" data-block-type="text" style="height: auto; width: 1280px; left: 0px; top: 0px;" data-block-id="87889a965e3339aa57df1ac674189641"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10; padding: 15px;" dir="ui">
-<h2><span style="font-size:1.0em">Istio Identity Model</span></h2>
+</section><section data-id="c3ab6046a69b460b959e30819085a4e1"><div class="sl-block" data-block-type="text" style="height: auto; width: 1280px; left: 0px; top: 0px;" data-block-id="87889a965e3339aa57df1ac674189641"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10;" dir="ui" data-has-custom-html="">
+<h2>Istio Identity</h2>
+
+<h3>Model</h3>
 
 <ul>
 	<li>
-	<p><span style="font-size:1.4em">Based on SPIFFE standard</span></p>
+	<p>Based on SPIFFE standard</p>
 
 	<ul>
 		<li>
-		<p><span style="font-size:1.4em">"Secure Production Identity Framework for Everyone"</span></p>
+		<p>"Secure Production Identity Framework for Everyone"</p>
 		</li>
 		<li>
-		<p><span style="font-size:1.4em">Set of open-source standards for securely identifying software systems in dynamic and heterogeneous environments.</span></p>
+		<p>Set of open source standards for securely identifying software systems in dynamic and heterogeneous environments</p>
 		</li>
 	</ul>
 	</li>
 	<li>
-	<p><span style="font-size:1.4em">Istio Identity:</span></p>
+	<p>Istio identity:</p>
 
 	<ul>
 		<li>
-		<p><span style="font-size:1.4em">Based on Kubernetes Service Account.</span></p>
+		<p>Based on Kubernetes service account</p>
 		</li>
 		<li>
-		<pre><span style="font-size:1.4em">spiffe://&lt;domain&gt;/ns/&lt;namespace&gt;/sa/&lt;serviceaccount&gt;</span></pre>
-		</li>
-	</ul>
-	</li>
-</ul>
-
-<p> </p>
-</div></div>
-</section><section data-id="d79f65a484638c50350758e423666e0e"><div class="sl-block" data-block-type="text" style="height: auto; width: 1280px; left: 0px; top: 0px;" data-block-id="f72ebaf51756c23345cebb904f3eb69a"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10; padding: 15px;" dir="ui">
-<h2><span style="font-size:1.0em">Istio PKI</span></h2>
-
-<ul>
-	<li>
-	<p><span style="font-size:1.4em">Built on top of Istio Citadel</span></p>
-	</li>
-	<li>
-	<p><span style="font-size:1.4em">Securely provisions strong identities to every workload.</span></p>
-	</li>
-	<li>
-	<p><span style="font-size:1.4em">Uses X.509 certificates to carry the identities in SPIFFE format.</span></p>
-	</li>
-	<li>
-	<p><span style="font-size:1.4em">Automates the key &amp; certificate rotation.</span></p>
-	</li>
-</ul>
-
-<p> </p>
-</div></div>
-</section><section data-id="f2ffbf8fe281a7e3f62790b4a170c213"><div class="sl-block" data-block-type="text" style="height: auto; width: 1280px; left: 0px; top: 0px;" data-block-id="e1119f03541deaef51107ae3ad70962c"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10; padding: 15px;" dir="ui">
-<h2><span style="font-size:1.0em">Istio PKI: Certificate Secret</span></h2>
-
-<ul>
-	<li>
-	<p><span style="font-size:1.4em">Citadel watches the Kubernetes <em>apiserver</em>.</span></p>
-	</li>
-	<li>
-	<p><span style="font-size:1.4em">Creates a SPIFFE certificate and key pair for each of the existing and new service accounts.</span></p>
-	</li>
-	<li>
-	<p><span style="font-size:1.4em">Stores the certificate and key pairs as Kubernetes secrets.</span></p>
-	</li>
-	<li>
-	<p><span style="font-size:1.4em">When a pod is created, certificate secret is mounted into the pod according to its service account.</span></p>
-	</li>
-	<li>
-	<p><span style="font-size:1.4em">Citadel watches the lifetime of the certificate, and automatically rotates the certificates by rewriting the Kubernetes secrets and restarting the Envoy proxy.</span></p>
-	</li>
-	<li>
-	<p><span style="font-size:1.4em">Pilot generates the secure naming information</span></p>
-
-	<ul>
-		<li>
-		<p><span style="font-size:1.4em">Defines what service account or accounts can run a certain service.</span></p>
+		<p><span class="mono">spiffe://&lt;domain&gt;/ns/&lt;namespace&gt;/sa/&lt;serviceaccount&gt;</span></p>
 		</li>
 	</ul>
 	</li>
 </ul>
 </div></div>
-</section><section data-id="fa70b80d24f82c33cd38b3ff983b4d88"><div class="sl-block" data-block-type="text" style="height: auto; width: 1280px; left: 0px; top: 0px;" data-block-id="a969112bc369b0cc0a3fde73946ee2ff"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10; padding: 15px;" dir="ui">
-<h2>
-<span style="font-size:1.0em">Istio PKI: </span>Node Agent + SDS</h2>
+</section><section data-id="d79f65a484638c50350758e423666e0e"><div class="sl-block" data-block-type="text" style="height: auto; width: 1280px; left: 0px; top: 0px;" data-block-id="f72ebaf51756c23345cebb904f3eb69a"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10;" dir="ui" data-has-custom-html="">
+<h2>Istio PKI</h2>
 
 <ul>
 	<li>
-	<p><span style="font-size:1.4em">SDS: <em>Secret Discovery Service</em>.</span></p>
-
-	<ul>
-		<li>
-		<p><span style="font-size:1.4em">Remote protocol for Envoy proxy to fetch certificates.</span></p>
-		</li>
-	</ul>
+	<p>Built on top of Istio Citadel</p>
 	</li>
 	<li>
-	<p><span style="font-size:1.4em">Node Agent: gRPC service which takes CSR requests. Runs as DaemonSet on each node.</span></p>
+	<p>Securely provisions strong identities to every workload</p>
 	</li>
 	<li>
-	<p><span style="font-size:1.4em">When a pod is created, Envoy sends a certificate and key request via Envoy SDS API to the Node Agent.</span></p>
+	<p>Uses X.509 certificates to carry identities in SPIFFE format</p>
 	</li>
 	<li>
-	<p><span style="font-size:1.4em">The node agent creates the private key and CSR and sends the CSR with its credentials to Citadel for signing.</span></p>
-	</li>
-	<li>
-	<p><span style="font-size:1.4em">Citadel validates the credentials carried in the CSR and signs the CSR to generate the certificate.</span></p>
-	</li>
-	<li>
-	<p><span style="font-size:1.4em">The node agent sends the certificate received from Citadel and the private key to Envoy via the Envoy SDS API.</span></p>
-	</li>
-	<li>
-	<p><span style="font-size:1.4em">Process repeats periodically for certifcate and key rotation.</span></p>
+	<p>Automates key and certificate rotation</p>
 	</li>
 </ul>
 </div></div>
-</section><section data-id="626fd848f47a403f0ea5721403ec2149"><div class="sl-block" data-block-type="text" style="height: auto; width: 1280px; left: 0px; top: 0px;" data-block-id="57812fde8ec553fe15d7ff0a2c63dfee"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10; padding: 15px;" dir="ui">
-<h2>
-<span style="font-size:1.0em">Istio PKI: </span>Node Agent + SDS</h2>
+</section><section data-id="f2ffbf8fe281a7e3f62790b4a170c213"><div class="sl-block" data-block-type="text" style="height: auto; width: 1280px; left: 0px; top: 0px;" data-block-id="e1119f03541deaef51107ae3ad70962c"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10;" dir="ui" data-has-custom-html="">
+<h2>Istio PKI</h2>
+
+<h3>Certificate Secret</h3>
 
 <ul>
 	<li>
-	<p><span style="font-size:1.4em">Advantages of SDS:</span></p>
+	<p>Citadel watches Kubernetes <span class="mono">apiserver</span></p>
+	</li>
+	<li>
+	<p>Creates SPIFFE certificate and key pair for each existing and new service account</p>
+	</li>
+	<li>
+	<p>Stores certificate and key pairs as Kubernetes secrets</p>
+	</li>
+	<li>
+	<p>When pod is created, certificate secret mounted into pod according to its service account</p>
+	</li>
+	<li>
+	<p>Citadel:</p>
+	<ul>
+	<li>
+	<p>Watches lifetime of certificate</p>
+	</li>
+	<li>
+	<p>Automatically rotates certificates by rewriting Kubernetes secrets and restarting Envoy proxy</p>
+	</li>
+      </ul>
+  </li>
+	<li>
+	<p>Pilot generates secure naming information</p>
 
 	<ul>
 		<li>
-		<p><span style="font-size:1.4em">The private key never leaves the node: It is only in the Citadel agent and Envoy sidecar’s memory.</span></p>
-		</li>
-		<li>
-		<p><span style="font-size:1.4em">The secret volume mount is no longer needed: The reliance on the Kubernetes secrets is eliminated.</span></p>
-		</li>
-		<li>
-		<p><span style="font-size:1.4em">The sidecar Envoy is able to dynamically renew the key and certificate through the SDS API: Certificate rotations no longer require Envoy to restart.</span></p>
-		</li>
-	</ul>
-	</li>
-</ul>
-</div></div>
-</section><section data-id="2a7a257180c1adbfe07cc63241e5c27b"><div class="sl-block" data-block-type="text" style="height: auto; width: 1280px; left: 0px; top: 0px;" data-block-id="3a4eedf88b3c7194b51828886a8e32f7"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10; padding: 15px;" dir="ui">
-<h2>
-<span style="font-size:1.0em">Istio PKI: </span>Node Agent + SDS</h2>
-
-<ul>
-	<li>
-	<p><span style="font-size:1.4em">Not supported on the current version of Red Hat Service Mesh.</span></p>
-	</li>
-	<li>
-	<p><span style="font-size:1.4em">Reason: security risks associated with use of Unix Domain Socket.</span></p>
-	</li>
-	<li>
-	<p><span style="font-size:1.4em">Current upstream implementation uses Unix Domain Socket for connection between Node Agent and the Envoy Proxy.</span></p>
-	</li>
-	<li>
-	<p><span style="font-size:1.4em">All pods running in the same Kubernetes node share the Citadel agent and Unix domain socket.</span></p>
-	</li>
-	<li>
-	<p><span style="font-size:1.4em">A malicious pod could hijack the Unix domain socket to break the SDS service or steal the identity credentials from other pods running on the same Kubernetes node.</span></p>
-	</li>
-	<li>
-	<p><span style="font-size:1.4em">Might be supported on next release.</span></p>
-	</li>
-</ul>
-</div></div>
-</section><section data-id="b27db7b947f2f42c807414aa15937209"><div class="sl-block" data-block-type="text" style="height: auto; width: 1280px; left: 0px; top: 0px;" data-block-id="923df6c3028dc347145184de887f3be7"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10; padding: 15px;" dir="ui">
-<h2><span style="font-size:1.0em">Istio mTLS</span></h2>
-
-<ul>
-	<li>
-	<p><span style="font-size:1.4em">mTLS: provide two-way authentication and encryption.</span></p>
-	</li>
-	<li>
-	<p><span style="font-size:1.4em">With Istio services can engage in mTLS communication without requiring to implement mTLS at the application level.</span></p>
-	</li>
-	<li>
-	<p><span style="font-size:1.4em">For a client to call a server with mutual TLS authentication:</span></p>
-
-	<ul>
-		<li>
-		<p><span style="font-size:1.4em">Istio re-routes the outbound traffic from a client to the client’s local sidecar Envoy.</span></p>
-		</li>
-		<li>
-		<p><span style="font-size:1.4em">The client side Envoy starts a mutual TLS handshake with the server side Envoy.</span></p>
-		</li>
-		<li>
-		<p><span style="font-size:1.4em">During the handshake, the client side Envoy also does a secure naming check to verify that the service account presented in the server certificate is authorized to run the target service.</span></p>
-		</li>
-		<li>
-		<p><span style="font-size:1.4em">The client side Envoy and the server side Envoy establish a mutual TLS connection, and Istio forwards the traffic from the client side Envoy to the server side Envoy.</span></p>
-		</li>
-		<li>
-		<p><span style="font-size:1.4em">After authorization, the server side Envoy forwards the traffic to the server service through local TCP connections.</span></p>
+		<p>Defines which service account or accounts can run certain service</p>
 		</li>
 	</ul>
 	</li>
 </ul>
 </div></div>
-</section><section data-id="1d2fd845d8c8c3e152c9a71e1d74bb17"><div class="sl-block" data-block-type="text" style="height: auto; width: 1280px; left: 0px; top: 0px;" data-block-id="679d3992e0f65875cef1f5671928fc89"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10; padding: 15px;" dir="ui">
-<h2><span style="font-size:1.0em">Authentication Policies</span></h2>
+</section><section data-id="fa70b80d24f82c33cd38b3ff983b4d88"><div class="sl-block" data-block-type="text" style="height: auto; width: 1280px; left: 0px; top: 0px;" data-block-id="a969112bc369b0cc0a3fde73946ee2ff"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10;" dir="ui" data-has-custom-html="">
+<h2>Istio PKI</h2>
+
+<h3>Node Agent and SDS</h3>
 
 <ul>
 	<li>
-	<p><span style="font-size:1.4em">CRD: Policy, ServiceMeshPolicy.</span></p>
+	<p>SDS: Secret Discovery Service</p>
+
+	<ul>
+		<li>
+		<p>Remote protocol for Envoy proxy to fetch certificates</p>
+		</li>
+	</ul>
 	</li>
-	<li><span style="font-size:1.4em">Example:</span></li>
+	<li>
+	<p>Node agent: gRPC service that takes CSR requests</p>
+
+	<ul>
+		<li>
+		<p>Runs as DaemonSet on each node</p>
+		</li>
+	</ul>
+	</li>
+	<li>
+	<p>When pod is created, Envoy sends certificate and key request via Envoy SDS API to node agent</p>
+	</li>
+	<li>
+	<p>Node agent creates private key and CSR, sends CSR with its credentials to Citadel for signing</p>
+	</li>
+	<li>
+	<p>Citadel validates credentials carried in CSR, signs CSR to generate certificate</p>
+	</li>
+	<li>
+	<p>Node agent sends certificate received from Citadel and private key to Envoy via Envoy SDS API</p>
+	</li>
+	<li>
+	<p>Process repeats periodically for certificate and key rotation</p>
+	</li>
 </ul>
 </div></div>
-<div class="sl-block" data-block-type="text" data-block-id="49674f25892aafe3e0d55d645803b873" style="height: auto; width: 600px; left: 80px; top: 216px;"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 11;">
+</section><section data-id="626fd848f47a403f0ea5721403ec2149"><div class="sl-block" data-block-type="text" style="height: auto; width: 880px; left: 0px; top: 0px;" data-block-id="57812fde8ec553fe15d7ff0a2c63dfee"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10;" dir="ui" data-has-custom-html="">
+<h2>Istio PKI</h2>
+
+<h3>Node Agent and SDS: Advantages of SDS</h3>
+
+<ul>
+	<li>
+	<p>Private key never leaves node—exists only in Citadel agent and Envoy sidecar’s memory</p>
+	</li>
+	<li>
+	<p>Secret volume mount no longer needed—reliance on Kubernetes secrets eliminated</p>
+	</li>
+	<li>
+	<p>Sidecar Envoy able to dynamically renew key and certificate through SDS API—certificate rotations no longer require Envoy to restart</p>
+	</li>
+</ul>
+</div></div>
+</section><section data-id="2a7a257180c1adbfe07cc63241e5c27b"><div class="sl-block" data-block-type="text" style="height: auto; width: 1040px; left: 0px; top: 0px;" data-block-id="3a4eedf88b3c7194b51828886a8e32f7"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10;" dir="ui" data-has-custom-html="">
+<h2>Istio PKI</h2>
+
+<h3>Node Agent and SDS Support</h3>
+
+<ul>
+	<li>
+	<p>Not supported in current version of Red Hat OpenShift Service Mesh</p>
+	</li>
+	<li>
+	<p>Reason: Security risks associated with use of Unix domain socket</p>
+
+	<ul>
+		<li>
+		<p>Current upstream implementation uses Unix domain socket for connection between node agent and Envoy proxy</p>
+		</li>
+		<li>
+		<p>All pods running in same Kubernetes node share Citadel agent and Unix domain socket</p>
+		</li>
+		<li>
+		<p>Malicious pod could hijack Unix domain socket to break SDS service or steal identity credentials from other pods running on same Kubernetes node</p>
+		</li>
+	</ul>
+	</li>
+	<li>
+	<p>May be supported in next release</p>
+	</li>
+</ul>
+</div></div>
+</section><section data-id="b27db7b947f2f42c807414aa15937209"><div class="sl-block" data-block-type="text" style="height: auto; width: 1040px; left: 0px; top: 0px;" data-block-id="923df6c3028dc347145184de887f3be7"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10;" dir="ui" data-has-custom-html="">
+<h2>Istio mTLS</h2>
+
+<ul>
+	<li>
+	<p>mTLS provides two-way authentication and encryption</p>
+	</li>
+	<li>
+	<p>With Istio, services can engage in mTLS communication</p>
+
+	<ul>
+		<li>
+		<p>No need to implement mTLS at application level</p>
+		</li>
+	</ul>
+	</li>
+	<li>
+	<p>For client to call server with mutual TLS authentication:</p>
+
+	<ul>
+		<li>
+		<p>Istio reroutes outbound traffic from client to client’s local sidecar Envoy</p>
+		</li>
+		<li>
+		<p>Client-side Envoy starts mutual TLS handshake with server-side Envoy</p>
+		</li>
+		<li>
+		<p>During handshake, client-side Envoy also does secure naming check to verify that service account presented in server certificate is authorized to run target service</p>
+		</li>
+		<li>
+		<p>Client-side Envoy and server-side Envoy establish mutual TLS connection, and Istio forwards traffic from client-side Envoy to server-side Envoy</p>
+		</li>
+		<li>
+		<p>After authorization, server-side Envoy forwards traffic to server service through local TCP connections</p>
+		</li>
+	</ul>
+	</li>
+</ul>
+</div></div>
+</section><section data-id="1d2fd845d8c8c3e152c9a71e1d74bb17"><div class="sl-block" data-block-type="text" style="height: auto; width: 1280px; left: 0px; top: 0px;" data-block-id="679d3992e0f65875cef1f5671928fc89"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10;" dir="ui" data-has-custom-html="">
+<h2>Authentication Policy</h2>
+
+<ul>
+	<li>
+	<p>CRDs: <span class="mono">Policy</span>, <span class="mono">ServiceMeshPolicy</span></p>
+	</li>
+	<li>
+	<p>Example:</p>
+
+	<p> </p>
+
+	<p> </p>
+
+	<p> </p>
+
+	<p> </p>
+
+	<p> </p>
+
+	<p> </p>
+
+	<p> </p>
+	</li>
+	<li>
+	<p>Policy scope: Service-specific &gt; namespace-wide &gt; mesh-wide</p>
+	</li>
+	<li>
+      <p>mTLS values: <span class="mono">STRICT</span>, <span class="mono">PERMISSIVE</span></p>
+	</li>
+</ul>
+</div></div>
+<div class="sl-block" data-block-type="text" data-block-id="49674f25892aafe3e0d55d645803b873" style="height: auto; width: 600px; left: 38.3158px; top: 176.316px;"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 11;">
 <pre style="color: rgb(53, 64, 69); font-size: 21.3333px;">apiVersion: "authentication.istio.io/v1alpha1"
 kind: "Policy"
 metadata:
@@ -2201,35 +2255,28 @@ spec:
   peers:
   - mtls: {}</pre>
 </div></div>
-<div class="sl-block" data-block-type="text" style="height: auto; width: 1280px; left: 0px; top: 484.946px;" data-block-id="01c76d8beaefc406e8f0ab15ecc0c4d4"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 12; padding: 15px;" dir="ui">
-<ul>
-	<li>
-	<p><span style="font-size:1.4em">Policy scope: service-specific &gt; namespace-wide &gt; mesh-wide</span></p>
-	</li>
-	<li>
-	<p><span style="font-size:1.4em">mTLS values: STRICT, PERMISSIVE</span></p>
-	</li>
-</ul>
-</div></div></section><section data-id="9b7e6c66cf4255c5f38008de74c96971"><div class="sl-block" data-block-type="text" style="height: auto; width: 1280px; left: 0px; top: 0px;" data-block-id="03b4c0956a395c613a9bd8249b748393"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10; padding: 15px;" dir="ui">
-<h2><span style="font-size:1.0em">Origin Authentication</span></h2>
+</section><section data-id="9b7e6c66cf4255c5f38008de74c96971"><div class="sl-block" data-block-type="text" style="height: auto; width: 1280px; left: 0px; top: 0px;" data-block-id="03b4c0956a395c613a9bd8249b748393"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10;" dir="ui" data-has-custom-html="">
+<h2>Origin Authentication</h2>
 
 <ul>
 	<li>
-	<p><span style="font-size:1.4em">origins section in Policy resource.</span></p>
+      <p><span class="mono">origins</span> section in <span class="mono">Policy</span> resource</p>
 	</li>
 	<li>
-	<p><span style="font-size:1.4em">Istio only supports JWT authentication</span></p>
+	<p>Istio supports JWT authentication only</p>
 	</li>
 	<li>
-	<p><span style="font-size:1.4em">JWT token is passed to the application by the service proxy</span></p>
+	<p>JWT token passed to application by service proxy</p>
 	</li>
 	<li>
-	<p><span style="font-size:1.4em">JWT token propagation is the responsibility of the application</span></p>
+	<p>Application responsible for JWT token propagation</p>
 	</li>
-	<li><span style="font-size:1.4em">Example:</span></li>
+	<li>
+	<p>Example:</p>
+	</li>
 </ul>
 </div></div>
-<div class="sl-block" data-block-type="text" style="height: auto; width: 792.954px; left: 80px; top: 360px;" data-block-id="d2b491dea2eb848c39ce13e3f6f9857d"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 11;">
+<div class="sl-block" data-block-type="text" style="height: auto; width: 792.954px; left: 32.7692px; top: 292px;" data-block-id="d2b491dea2eb848c39ce13e3f6f9857d"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 11;">
 <pre>origins:
 - jwt:
     issuer: "https://accounts.google.com"
@@ -2237,20 +2284,38 @@ spec:
     trigger_rules:
     - excluded_paths:
       - exact: /health</pre>
-</div></div></section><section data-id="c4dcfc1d73ee30cce5a20180d096c488"><div class="sl-block" data-block-type="text" style="height: auto; width: 1280px; left: 0px; top: 0px;" data-block-id="da3808c9dcef258fea0f4ecbb7e7e34f"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10; padding: 15px;" dir="ui">
-<h2><span style="font-size:1.0em">Authorization</span></h2>
+</div></div></section><section data-id="c4dcfc1d73ee30cce5a20180d096c488"><div class="sl-block" data-block-type="text" style="height: auto; width: 1280px; left: 0px; top: 0px;" data-block-id="da3808c9dcef258fea0f4ecbb7e7e34f">
+    <div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10;" dir="ui" data-has-custom-html="">
+        <h2>Authorization</h2>
 
-<ul>
-	<li>
-	<p><span style="font-size:1.4em">Enabled with <em>ServiceMeshRbacConfig</em> resource.</span></p>
-	</li>
-	<li>
-	<p><span style="font-size:1.4em">Example:</span></p>
-	</li>
-</ul>
-</div></div>
-<div class="sl-block" data-block-type="text" style="height: auto; width: 600px; left: 80px; top: 192px;" data-block-id="483627f0046417bf85e4b3402aadd90f"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 11;">
-<pre>apiVersion: rbac.maistra.io/v1
+        <ul>
+            <li>
+                <p>Enabled with <span class="mono">ServiceMeshRbacConfig</span> resource</p>
+            </li>
+            <li>
+                <p>Example:</p>
+
+                <p> </p>
+
+                <p> </p>
+
+                <p> </p>
+
+                <p> </p>
+
+                <p> </p>
+
+                <p> </p>
+            </li>
+            <li>
+                <p><span class="mono">mode</span> values:</p>
+            </li>
+        </ul>
+    </div>
+</div>
+<div class="sl-block" data-block-type="text" style="height: auto; width: 600px; left: 32.0648px; top: 168px;" data-block-id="483627f0046417bf85e4b3402aadd90f">
+    <div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 11;">
+        <pre>apiVersion: rbac.maistra.io/v1
 kind: SeviceMeshRbacConfig
 metadata:
   name: default
@@ -2258,59 +2323,70 @@ spec:
   mode: 'ON_WITH_INCLUSION'
   inclusion:
     namespaces: ["default"]</pre>
-</div></div>
-<div class="sl-block" data-block-type="text" style="height: auto; width: 1280px; left: 0px; top: 400px;" data-block-id="d1a65edd8953db88c953c24215f74bec"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 12; padding: 15px;" dir="ui">
+    </div>
+</div>
+<div class="sl-block" data-block-type="table" data-name="table-b23ec2" data-block-id="d728f28424a84e3eba44ac9a7cd750c6" style="height: auto; min-width: 120px; width: 961.943px; left: 32.0648px; top: 435px;">
+    <div class="sl-block-content" style="z-index: 12;" data-table-cols="2" data-table-rows="4" data-table-has-header="false">
+        <table>
+            <tbody>
+                <tr>
+                    <td style="width: 251px;"><span class="mono">OFF</span></td>
+                    <td>Authorization disabled</td>
+                </tr>
+                <tr>
+                  <td style="width: 251px;"><span class="mono">ON</span></td>
+                    <td>Authorization enabled for all services in mesh</td>
+                </tr>
+                <tr>
+                  <td style="width: 251px;"><span class="mono">ON_WITH_INCLUSION</span></td>
+                    <td>Authorization enabled only for services and namespaces specified in inclusion field</td>
+                </tr>
+                <tr>
+                  <td style="width: 251px;"><span class="mono">ON_WITH_EXCLUSION</span></td>
+                    <td>Authorization enabled for all services in mesh except services and namespaces specified in exclusion field</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div></section><section data-id="2b6cfd9601fbd79161dc9715ef7f57e2"><div class="sl-block" data-block-type="text" style="height: auto; width: 1280px; left: 0px; top: 0px;" data-block-id="c171c9083a3fce9b1f5755d5a6e03c3c"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10;" dir="ui" data-has-custom-html="">
+<h2>Authorization</h2>
+
+<h3>Authorization Policy</h3>
+
 <ul>
 	<li>
-	<p><span style="font-size:1.4em"><em>mode</em> values:</span></p>
+	<p>Defined by <span class="mono">ServiceRole</span> and <span class="mono">ServiceRoleBinding</span> resources</p>
 
 	<ul>
 		<li>
-		<p><span style="font-size:1.2em">OFF: authorization is disabled.</span></p>
+		<p><span class="mono">ServiceRole</span>: Defines group of permissions to access services</p>
 		</li>
 		<li>
-		<p><span style="font-size:1.2em">ON: authorization is enabled for all services in the mesh.</span></p>
-		</li>
-		<li>
-		<p><span style="font-size:1.2em">ON_WITH_INCLUSION: authorization is enabled only for services and namespaces specified in the inclusion field.</span></p>
-		</li>
-		<li>
-		<p><span style="font-size:1.2em">ON_WITH_EXCLUSION: authorization is enabled for all services in the mesh except the services and namespaces specified in the exclusion field.</span></p>
+		<p><span class="mono">ServiceRoleBinding</span>: Grants <span class="mono">ServiceRole</span> to particular subjects—e.g., user, group, or service</p>
 		</li>
 	</ul>
 	</li>
-</ul>
-</div></div></section><section data-id="2b6cfd9601fbd79161dc9715ef7f57e2"><div class="sl-block" data-block-type="text" style="height: auto; width: 1280px; left: 0px; top: 0px;" data-block-id="c171c9083a3fce9b1f5755d5a6e03c3c"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10; padding: 15px;" dir="ui">
-<h2><span style="font-size:1.0em">Authorization Policy</span></h2>
-
-<ul>
 	<li>
-	<p><span style="font-size:1.4em">Defined by <em>ServiceRole</em> and <em>ServiceRoleBinding</em> resources.</span></p>
+	<p>Policy determines <em>who </em>is allowed to do <em>what </em>under which <em>conditions</em></p>
 	</li>
 	<li>
-	<p><span style="font-size:1.4em">ServiceRole: defines a group of permissions to access services.</span></p>
-	</li>
-	<li>
-	<p><span style="font-size:1.4em">ServiceRoleBinding: grants a ServiceRole to particular subjects, such as a user, a group, or a service.</span></p>
-	</li>
-	<li>
-	<p><span style="font-size:1.4em"><strong>who</strong> is allowed to do <strong>what</strong> under which <strong>conditions</strong>.</span></p>
-	</li>
-	<li>
-	<p><span style="font-size:1.4em">Next release of Service Mesh will be based on Istio 1.4, which supports <em>AuthorizationPolicy</em> CR.</span></p>
+	<p>Next release of OpenShift Service Mesh based on Istio 1.4, which supports <span class="mono">AuthorizationPolicy</span> CR</p>
 	</li>
 </ul>
 </div></div>
-</section><section data-id="9e86d5dc9304b3d56bae2410308fec4d"><div class="sl-block" data-block-type="text" style="height: auto; width: 1280px; left: 0px; top: 0px;" data-block-id="4ca23d671f3bc31a133d0aaf79a26fb9"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10; padding: 15px;" dir="ui">
-<h2><span style="font-size:1.0em">ServiceRole</span></h2>
+</section><section data-id="9e86d5dc9304b3d56bae2410308fec4d"><div class="sl-block" data-block-type="text" style="height: auto; width: 1280px; left: 0px; top: 0px;" data-block-id="4ca23d671f3bc31a133d0aaf79a26fb9"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10;" dir="ui" data-has-custom-html="">
+<h2>
+  Authorization
+</h2>
+<h3><span class="mono">ServiceRole</span></h3>
 
 <ul>
 	<li>
-	<p><span style="font-size:1.4em">Example:</span></p>
+	<p>Example:</p>
 	</li>
 </ul>
 </div></div>
-<div class="sl-block" data-block-type="text" style="height: auto; width: 600px; left: 80px; top: 192px;" data-block-id="83e99c2d52e5c573de96ad60e3ffcb1f"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 11;">
+<div class="sl-block" data-block-type="text" style="height: auto; width: 600px; left: 33.5223px; top: 193.838px;" data-block-id="83e99c2d52e5c573de96ad60e3ffcb1f"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 11;">
 <pre>apiVersion: "rbac.istio.io/v1alpha1"
 kind: ServiceRole
 metadata:
@@ -2320,28 +2396,30 @@ spec:
   rules:
   - services: ["products.ns1.svc.cluster.local"]
     methods: ["GET", "HEAD"]</pre>
-</div></div></section><section data-id="6ef45f9fb268dc29d33ca3aebc2e46a3"><div class="sl-block" data-block-type="text" style="height: auto; width: 1280px; left: 0px; top: 0px;" data-block-id="b115810306de4d28a7c76c29e07c7913"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10; padding: 15px;" dir="ui">
-<h2>ServiceRoleBinding</h2>
+</div></div></section><section data-id="6ef45f9fb268dc29d33ca3aebc2e46a3"><div class="sl-block" data-block-type="text" style="height: auto; width: 1280px; left: 0px; top: 0px;" data-block-id="b115810306de4d28a7c76c29e07c7913"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10;" dir="ui" data-has-custom-html="">
+<h2>Authorization</h2>
+
+<h3><span class="mono">ServiceRoleBinding</span></h3>
 
 <ul>
 	<li>
-	<p><span style="font-size:1.4em">Includes two parts:</span></p>
+	<p>Two parts:</p>
 
 	<ul>
 		<li>
-		<p><span style="font-size:1.4em"><em>roleRef</em> refers to a ServiceRole resource in the same namespace.</span></p>
+		<p><span class="mono">roleRef:</span> Refers to <span class="mono">ServiceRole</span> resource in same namespace</p>
 		</li>
 		<li>
-		<p><span style="font-size:1.4em">A list of <em>subjects</em> that are assigned to the role.</span></p>
+		<p>List of <span class="mono">subjects</span> assigned to role</p>
 		</li>
 	</ul>
 	</li>
 	<li>
-	<p><span style="font-size:1.4em">​Example:</span></p>
+	<p>Example:</p>
 	</li>
 </ul>
 </div></div>
-<div class="sl-block" data-block-type="text" style="height: auto; width: 1052.13px; left: 80px; top: 337.948px;" data-block-id="6dc3bcfb32c7f95fc38c66d40cb3c86f"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 11;">
+<div class="sl-block" data-block-type="text" style="height: auto; width: 1052.13px; left: 33.935px; top: 303px;" data-block-id="6dc3bcfb32c7f95fc38c66d40cb3c86f"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 11;">
 <pre>apiVersion: "rbac.istio.io/v1alpha1"
 kind: ServiceRoleBinding
 metadata:
@@ -2353,19 +2431,20 @@ spec:
   roleRef:
     kind: ServiceRole
     name: "products-viewer"</pre>
-</div></div></section><section data-id="c85753b58d1717fc3281eb9faccfb4b3"><div class="sl-block" data-block-type="text" style="height: auto; width: 1280px; left: 0px; top: 0px;" data-block-id="15ff5d00d960e13ef76cc87a182b332a"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10; padding: 15px;" dir="ui">
-<h2>Authorization On Plain TCP Protocols</h2>
+</div></div></section><section data-id="c85753b58d1717fc3281eb9faccfb4b3"><div class="sl-block" data-block-type="text" style="height: auto; width: 1280px; left: 0px; top: 0px;" data-block-id="15ff5d00d960e13ef76cc87a182b332a"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10;" dir="ui" data-has-custom-html="">
+<h2>Authorization</h2>
+<h3>Authorization on Plain TCP Protocols</h3>
 
 <ul>
 	<li>
-	<p><span style="font-size:1.4em">Authorization also supported for non-HTTP traffic</span></p>
+	<p>Authorization also supported for non-HTTP traffic</p>
 	</li>
 	<li>
-	<p><span style="font-size:1.4em">​Example:</span></p>
+	<p>Example:</p>
 	</li>
 </ul>
 </div></div>
-<div class="sl-block" data-block-type="text" style="height: auto; width: 1052.13px; left: 227.87px; top: 168px;" data-block-id="8b6d09524f97a2a1894b1386afe620be"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 11;">
+<div class="sl-block" data-block-type="text" style="height: auto; width: 1052.13px; left: 41.87px; top: 227px;" data-block-id="8b6d09524f97a2a1894b1386afe620be"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 11; font-size: 90%;">
 <pre><span style="font-size:1.0em">apiVersion: "rbac.istio.io/v1alpha1"
 kind: ServiceRole
 metadata:
@@ -2389,12 +2468,41 @@ spec:
   roleRef:
     kind: ServiceRole
     name: "mongodb-viewer"</span></pre>
+</div></div></section><section data-id="6b44a5decb5d9d737a9a8a9baad3f60b"><div class="sl-block" data-block-type="text" style="height: auto; width: 1280px; left: 0px; top: 0px;" data-block-id="a352bbe8b4b47fc400b581f5f8385e59"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10;" data-has-custom-html="">
+<h2>Module Summary</h2>
+
+<ul>
+	<li>
+	<p>Access Control</p>
+	</li>
+	<li>
+	<p>Istio Security</p>
+	</li>
+	<li>
+	<p>Istio Identity</p>
+	</li>
+	<li>
+	<p>Istio PKI</p>
+	</li>
+	<li>
+	<p>Istio mTLS</p>
+	</li>
+	<li>
+	<p>Authentication Policy</p>
+	</li>
+	<li>
+	<p>Origin Authentication</p>
+	</li>
+	<li>
+	<p>Authorization</p>
+	</li>
+</ul>
 </div></div></section>
 			</div>
 		</div>
 
 		<script>
-			var SLConfig = {"deck": {"id":1693928,"slug":"service_mesh_advanced_02_security","title":"Service_Mesh_Advanced_02_Security","description":"","width":1280,"height":720,"margin":0.05,"visibility":"self","published_at":null,"sanitize_messages":null,"thumbnail_url":"https://s3.amazonaws.com/media-p.slid.es/thumbnails/fd1b1c5e7956c5d8347886827820b7db/thumb.jpg?1579213709","view_count":0,"user":{"id":349930,"username":"btison","name":"Bernard Tison","description":null,"thumbnail_url":"https://www.gravatar.com/avatar/e2e3cdd3ce9e08ca385892a22816db22?s=140\u0026d=https%3A%2F%2Fstatic.slid.es%2Fimages%2Fdefault-profile-picture.png","paid":true,"pro":true,"lite":false,"team_id":32,"settings":{"id":183077,"present_controls":true,"present_upsizing":true,"present_pointer":false,"present_notes":true,"default_deck_tag_id":null},"enterprise":true,"membership":{"role":"member","manager":false,"activated":true}},"background_transition":"none","transition":"none","theme_id":176,"theme_font":"overpass2","theme_color":"no-color","auto_slide_interval":0,"comments_enabled":true,"forking_enabled":false,"rolling_links":false,"center":false,"shuffle":false,"should_loop":false,"share_notes":false,"slide_number":true,"slide_count":23,"rtl":false,"version":2,"collaborative":false,"deck_user_editor_limit":null,"data_updated_at":1579270413296,"font_typekit":null,"font_google":null,"time_limit":null,"upsizing_enabled":true,"notes":{"bedc0457df23e02319c4a5f2fb1e220f":"","14aee4ce6e77efac398800a568d4b75b":"","00c8743aad41872b1490fa1b34350a1b":"","57eadeb0bee99829e929666d4957b001":"","a0a8f62b4e04f627b163a856dfb59a4f":"","2ffc9af43b0e6f78c72fde3a1e0165f3":"","0d01f8dbe2b1c338949e507a3e9bb5ec":"","48dfbc8c76713fecc916f6ab82c26831":"","620d650e6e3ab7ea1fae9af7fc848890":"","4adbb56d9ccb48b44aac2c7cfa67cd26":"","a0567e5825addcdbc8496f3779b14e51":"","ffdb9b6bcf5f9b3b1412d9a6bd31eac5":"","407ed17b3f536db0b8d6f0fec7dc1da1":"","05baa377921dfc24bc2f976dfdeba3ac":"","4cd9c824a4d86a7211f8100e5794b5c4":"","503b95ca3245a464ab20828c58f29060":"","0c7a65c2ec6743d876e0f8a52019d607":"","883ab49bf404a9dcb67d33a2fb0299a1":"","0ea0feca0cfde165ad868afc2c554e79":"","00896e2961203a8b4eca7fafc7f957ee":"","d43265aed24508d5c80c5863b4a869e8":"","acdb0f554bba724e4bea7b4c88c6ae8d":"","e56c3cd4bd06f102c94d95a6b9f22cae":"","c94edad64a41b18e4e276e9914ca9f6f":""}}};
+			var SLConfig = {"deck": {"id":1693928,"slug":"service_mesh_advanced_02_security","title":"Service_Mesh_Advanced_02_Security","description":"","width":1280,"height":720,"margin":0.05,"visibility":"self","published_at":null,"sanitize_messages":null,"thumbnail_url":"https://s3.amazonaws.com/media-p.slid.es/thumbnails/fd1b1c5e7956c5d8347886827820b7db/thumb.jpg?1583949105","view_count":0,"user":{"id":349930,"username":"btison","name":"Bernard Tison","description":null,"thumbnail_url":"https://www.gravatar.com/avatar/e2e3cdd3ce9e08ca385892a22816db22?s=140\u0026d=https%3A%2F%2Fstatic.slid.es%2Fimages%2Fdefault-profile-picture.png","paid":true,"pro":true,"lite":false,"team_id":32,"settings":{"id":183077,"present_controls":true,"present_upsizing":true,"present_pointer":false,"present_notes":true,"default_deck_tag_id":null},"enterprise":true,"membership":{"role":"member","manager":false,"activated":true}},"background_transition":"none","transition":"none","theme_id":176,"theme_font":"overpass2","theme_color":"no-color","auto_slide_interval":0,"comments_enabled":true,"forking_enabled":false,"rolling_links":false,"center":false,"shuffle":false,"should_loop":false,"share_notes":false,"slide_number":true,"slide_count":24,"rtl":false,"version":2,"collaborative":true,"deck_user_editor_limit":null,"data_updated_at":1584030897166,"font_typekit":null,"font_google":null,"time_limit":null,"upsizing_enabled":true,"notes":{"bedc0457df23e02319c4a5f2fb1e220f":"","14aee4ce6e77efac398800a568d4b75b":"","00c8743aad41872b1490fa1b34350a1b":"","57eadeb0bee99829e929666d4957b001":"","a0a8f62b4e04f627b163a856dfb59a4f":"","2ffc9af43b0e6f78c72fde3a1e0165f3":"","0d01f8dbe2b1c338949e507a3e9bb5ec":"","48dfbc8c76713fecc916f6ab82c26831":"","620d650e6e3ab7ea1fae9af7fc848890":"","4adbb56d9ccb48b44aac2c7cfa67cd26":"","a0567e5825addcdbc8496f3779b14e51":"","ffdb9b6bcf5f9b3b1412d9a6bd31eac5":"","407ed17b3f536db0b8d6f0fec7dc1da1":"","05baa377921dfc24bc2f976dfdeba3ac":"","4cd9c824a4d86a7211f8100e5794b5c4":"","503b95ca3245a464ab20828c58f29060":"","0c7a65c2ec6743d876e0f8a52019d607":"","883ab49bf404a9dcb67d33a2fb0299a1":"","0ea0feca0cfde165ad868afc2c554e79":"","00896e2961203a8b4eca7fafc7f957ee":"","d43265aed24508d5c80c5863b4a869e8":"","acdb0f554bba724e4bea7b4c88c6ae8d":"","e56c3cd4bd06f102c94d95a6b9f22cae":"","c94edad64a41b18e4e276e9914ca9f6f":""}}};
 
 				SLConfig.theme = {"id":176,"created_at":"2014-05-27T12:38:16.183Z","updated_at":"2019-10-17T00:32:59.630Z","name":"Red Hat Corporate (Archived)","thumbnail_url":"https://s3.amazonaws.com/media-p.slid.es/thumbnails/66755080be2b0c8c0146bfa70069ef16/thumb.jpg?1571272377","sanitize_messages":null,"slide_template_ids":[28642,36442,26765,26762,56704,16857,16856,16853,16855,16854,16852,16863,16862,16861,16860,16859,16858,56721,185268,185425],"font_typekit":"","font_google":"","width":960,"height":700};
 
@@ -2422,6 +2530,8 @@ spec:
 
 				autoSlide: 0,
 				autoSlideStoppable: true,
+
+				autoAnimateMatcher: SL.deck.AutoAnimate.matcher,
 
 				center: false,
 				shuffle: false,
