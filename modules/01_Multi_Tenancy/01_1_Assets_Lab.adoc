@@ -6,6 +6,9 @@
 
 == Assets and Tooling Lab
 
+*IMPORTANT: This course is intended for use in an instructor-led classroom environment. While you can access the content online and attempt to perform the labs, Red Hat does not provide instructor support for use of this course outside of an instructor-led classroom environment.*
+
+
 .Goals
 * Review lab environment
 * Review preinstalled Red Hat^(R)^ OpenShift^(R)^ Service Mesh _operator_
