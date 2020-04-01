@@ -182,7 +182,7 @@ $ oc get all -l app=3scale-istio-adapter -n $SM_CP_NS
 
 * Expect the response to list the `3scale-istio-adapter` deployment, ReplicaSet, and pod.
 
-* Per the diagram above, the `3scale-istio-adapter` Linux container includes the following two components:
+* Per the diagram above, the `3scale-istio-adapter` Linux^(R)^ container includes the following two components:
 ** `3scale-istio-adapter`: Accepts gRPC invocations from the Istio ingress gateway and routes them to the other sidecar in the pod, `3scale-istio-httpclient`.
 
 ** `3scale-istio-httpclient`: Accepts invocations from `3scale-istio-adapter` and invokes the `system-provider` and `backend-listener` endpoints of the remote Red Hat 3scale API Management system.

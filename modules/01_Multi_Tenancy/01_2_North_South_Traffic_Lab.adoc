@@ -18,7 +18,7 @@ Securing and managing a microservice-architected application is often a phased e
 
 One potential strategy for onboarding customers on this journey is to start by applying API policies to north/south traffic into the application. Red Hat^(R)^ 3scale API Management is well suited for this exact use case. Onboarding your new customer may potentially be as straightforward as leveraging the 3scale API Management link:https://www.3scale.net/[SaaS offering].
 
-Later labs show you how API policy management (via 3scale API Management) and service mesh management (via OpenShift Service Mesh) are _complementary_ technologies.
+Later labs show you how API policy management (via 3scale API Management) and service mesh management (via Red Hat OpenShift^(R)^ Service Mesh) are _complementary_ technologies.
 
 In this lab, you quickly ease your customer into the management of their north/south API traffic by applying API policies using Red Hat 3scale API Management.
 

@@ -7,7 +7,7 @@
 == Istio Security: mTLS and Authorization Policies Lab
 
 .Prerequisites
-* Access to the OpenShift 4.x cluster
+* Access to the Red Hat^(R)^ OpenShift^(R)^ Container Platform 4.x cluster
 * Istio control plane installed and ready
 * Emergency Response Demo application installed
 
@@ -21,7 +21,7 @@
 
 == Review OpenShift Service Mesh Control Plane Installation
 
-Before starting the lab, you review the Red Hat^(R)^ OpenShift^(R)^ Service Mesh installation.
+Before starting the lab, you review the Red Hat OpenShift Service Mesh installation.
 
 . Make sure you are logged in to OpenShift Container Platform as the control plane admin user:
 +

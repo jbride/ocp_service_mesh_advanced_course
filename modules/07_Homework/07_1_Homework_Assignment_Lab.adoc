@@ -33,7 +33,7 @@ In particular, refer to the first lab of the link:https://learning.redhat.com/en
 
 == Business Application
 
-BookRetail Inc. has made the Linux containers and corresponding OpenShift configurations available for their `bookinfo` application.
+BookRetail Inc. has made the Linux^(R)^ containers and corresponding OpenShift configurations available for their `bookinfo` application.
 
 Complete the following steps once your OpenShift Container Platform 4 lab environment has been provisioned.
 
