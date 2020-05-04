@@ -59,10 +59,9 @@ $ oc get RoleBinding  -n $ERDEMO_NS -l release=istio
 +
 .Sample Output
 -----
+NAME                                                             AGE
 istio-citadel-admin50-istio-system                               24s
-istio-egressgateway-admin50-istio-system                         24s
 istio-galley-admin-role-binding-admin50-istio-system             24s
-istio-ingressgateway-admin50-istio-system                        24s
 istio-mixer-admin-role-binding-admin50-istio-system              24s
 istio-pilot-admin50-istio-system                                 24s
 istio-sidecar-injector-admin-role-binding-admin50-istio-system   24s
@@ -80,6 +79,7 @@ $ oc get NetworkPolicy istio-mesh -n $ERDEMO_NS
 +
 .Sample Output
 -----
+NAME         POD-SELECTOR   AGE
 istio-mesh   <none>         26m
 -----
 * This `NetworkPolicy` resource allows ingress to all pods specific to this namespace from all other registered members of the same OpenShift Service Mesh control plane.
@@ -93,7 +93,7 @@ $ oc get secrets -n $ERDEMO_NS | grep istio
 .Sample Output
 -----
 [...]
-istio.builder                                    istio.io/key-and-cert                 3      9m58s
+istio.builder                                   istio.io/key-and-cert                 3      9m58s
 istio.default                                   istio.io/key-and-cert                 3      9m55s
 istio.deployer                                  istio.io/key-and-cert                 3      9m57s
 istio.disaster-simulator-service                istio.io/key-and-cert                 3      9m58s
@@ -344,15 +344,13 @@ sh-4.4# nsenter -t 45315 -n iptables -t nat -S
 -A ISTIO_REDIRECT -p tcp -j REDIRECT --to-ports 15001
 -A ISTIO_IN_REDIRECT -p tcp -j REDIRECT --to-ports 15001
 -A ISTIO_INBOUND -p tcp -m tcp --dport 8080 -j ISTIO_IN_REDIRECT
--A ISTIO_INBOUND -p tcp -m tcp --dport 9779 -j ISTIO_IN_REDIRECT
--A ISTIO_INBOUND -p tcp -m tcp --dport 8778 -j ISTIO_IN_REDIRECT
 -A ISTIO_OUTPUT ! -d 127.0.0.1/32 -o lo -j ISTIO_REDIRECT
 -A ISTIO_OUTPUT -m owner --uid-owner 1000710001 -j RETURN
 -A ISTIO_OUTPUT -m owner --gid-owner 1000710001 -j RETURN
 -A ISTIO_OUTPUT -d 127.0.0.1/32 -j RETURN
 -A ISTIO_OUTPUT -j ISTIO_REDIRECT
 -----
-* Note that all of the incoming traffic for this operating system process to port 8080, 9779, and 8778--the ports on which the Emergency Response `response-service` is listening--are being redirected to port 15001--the port on which the `istio-proxy` is listening.
+* Note that all of the incoming traffic for this operating system process to port 8080--the port on which the Emergency Response `response-service` is listening--is being redirected to port 15001--the port on which the `istio-proxy` is listening.
 The same holds true for the outgoing traffic.
 
 
@@ -373,14 +371,14 @@ $ oc login -u $ERDEMO_USER -p $OCP_PASSWD
 +
 -----
 $ oc rsh `oc get pod -n $ERDEMO_NS | grep "responder-service" | grep "Running" | awk '{print $1}'` \
-    curl http://localhost:15000/help
+    curl http://127.0.0.1:15000/help
 -----
 
 . Retrieve the status of all of the clusters visible to this Envoy service proxy:
 +
 -----
 $ oc rsh `oc get pod -n $ERDEMO_NS | grep "responder-service" | grep "Running" | awk '{print $1}'` \
-   curl http://localhost:15000/clusters?format=json \
+   curl http://127.0.0.1:15000/clusters?format=json \
    > $HOME/lab/responder-service-clusters.json
 -----
 
@@ -400,7 +398,7 @@ $ istioctl proxy-config cluster -n <POD NAMESPACE> <PODNAME> -o json
 +
 -----
 $ oc rsh `oc get pod -n $ERDEMO_NS | grep "responder-service" | awk '{print $1}'` \
-         curl http://localhost:15000/config_dump \
+         curl http://127.0.0.1:15000/config_dump \
          > $HOME/lab/config_dump \
          && less $HOME/lab/config_dump \
          | jq ".configs | last | .dynamic_route_configs"
@@ -460,16 +458,10 @@ spec:
         - namespaceSelector:
             matchLabels:
               maistra.io/member-of: admin1-istio-system
-  egress:
-    - to:
-        - namespaceSelector:
-            matchLabels:
-              maistra.io/member-of: admin1-istio-system
   policyTypes:
     - Ingress
-    - Egress
 ----
-** This policy allows all traffic--ingress and egress--between namespaces that are labeled with `maistra.io/member-of: $SM_CP_ADMIN-istio-system`. This includes the service mesh data plane namespace as well as the mesh member namespaces as defined in `ServiceMeshMemberRoll`.
+** This policy allows all ingress traffic between namespaces that are labeled with `maistra.io/member-of: $SM_CP_ADMIN-istio-system`. This includes the service mesh data plane namespace as well as the mesh member namespaces as defined in `ServiceMeshMemberRoll`.
 
 .. Review the `istio-expose-route` network policy:
 +
