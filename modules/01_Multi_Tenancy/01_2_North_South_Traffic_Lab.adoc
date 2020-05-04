@@ -74,7 +74,7 @@ $ echo $(oc get secret apicast-configuration-url-secret -o yaml -n $GW_PROJECT |
 +
 .Sample Output
 ----
-https://95d1c0a311ba965cd23562164db2126516344b6ff5985b49a4282662181e68ae@user25-3scale-mt-api0-admin.apps.cluster-094b.094b.example.opentlc.com
+https://95d1c0a311ba965cd23562164db2126516344b6ff5985b49a4282662181e68ae@user50-3scale-mt-api0-admin.apps.cluster-094b.094b.example.opentlc.com
 ----
 
 
@@ -84,7 +84,7 @@ https://95d1c0a311ba965cd23562164db2126516344b6ff5985b49a4282662181e68ae@user25-
 
 . In the Admin Portal, navigate to *Audience -> Accounts -> Listing -> Developer*:
 +
-image::images/3scale_navigate_app.png[]
+image::images/3scale_navigate_app_1.png[]
 
 . In the *Apps* column, click the number of existing applications (most likely `0`) associated with the *Developer* account.
 . In the top right corner, click *Create Application*.
@@ -109,7 +109,7 @@ $ echo "export INCIDENT_SERVICE_API_KEY=<change me>" >> $HOME/.bashrc
 .. From the top panel, navigate to *API: incident-service -> Configuration, Methods and Settings*.
 .. Locate the value of your `ID for API calls` similar to the following:
 +
-image::images/incident_service_id.png[]
+image::images/incident_service_id_1.png[]
 
 .. Using this value, set the environment variable:
 +
