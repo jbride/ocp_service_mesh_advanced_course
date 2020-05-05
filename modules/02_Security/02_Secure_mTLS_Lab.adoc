@@ -74,7 +74,9 @@ spec:
         ior_enabled: false
     global:
       disablePolicyChecks: false
-      mtls: false
+      mtls:
+        auto: false
+        enabled: false
       proxy:
         resources:
           limits:
@@ -110,7 +112,7 @@ status:
 [...]
 ----
 +
-* Note that `mTLS` is set to `false`. This means that mTLS is not enforced, and services are able to communicate over plain HTTP.
+* Note that `mTLS.enabled` is set to `false`. This means that mTLS is not enforced, and services are able to communicate over plain HTTP.
 * Setting `mTLS` as globally disabled is the recommended starting point when migrating an existing set of applications to use Istio and mTLS.
 . As part of the OpenShift Service Mesh installation, a global `ServiceMeshPolicy` policy is created in the service mesh control plane namespace.
 The scope of `ServiceMeshPolicy` is the service mesh. It can be overridden by namespace-scoped and service-scoped policies. Review the policy:
@@ -340,9 +342,6 @@ Enabling mTLS for the incident service involves the following tasks:
 * Ensure that health checks are still working when using strict mTLS.
 ** When enforcing strict mTLS when calling the incident service, the HTTP-based health check fails because it is executed from the kubelet and is not able to present a suitable certificate. The command-based health checks are executed in the container itself, so they are not impacted.
 ** The OpenShift Service Mesh sidecar injector service can be configured to rewrite HTTP probes at sidecar injection time, so that the requests are sent to the _Pilot agent_ in the Envoy sidecar, which then redirects to the application. This global configuration is set in the `ServiceMeshControlPlane` CR and is applied to all pods in the service mesh data plane that have the Envoy sidecar injected.
-+
-[NOTE]
-The latest versions of upstream Istio also allow HTTP probe rewrites per service by setting an annotation (`sidecar.istio.io/rewriteAppHTTPProbers: "true"`) on the pods. OpenShift Service Mesh does not yet support this functionality.
 
 ==== Inject Envoy Proxy Sidecar
 
@@ -751,10 +750,10 @@ $ istioctl -n $SM_CP_NS -i $SM_CP_NS authn tls-check ${ISTIO_INGRESSGATEWAY_POD}
 .Sample Output
 [options="nowrap"]
 ----
-HOST:PORT                                                           STATUS     SERVER        CLIENT     AUTHN POLICY                                             DESTINATION RULE
-incident-service.emergency-response-demo.svc.cluster.local:8080     OK         HTTP/mTLS     mTLS       incident-service-strict-mtls/emergency-response-demo     incident-service-client-mtls/emergency-response-demo
+HOST:PORT                                                           STATUS     SERVER        CLIENT             AUTHN POLICY                                             DESTINATION RULE
+incident-service.emergency-response-demo.svc.cluster.local:8080     OK         PERMISSIVE    ISTIO_MUTUAL       incident-service-strict-mtls/emergency-response-demo     incident-service-client-mtls/emergency-response-demo
 ----
-* `SERVER` is the mode used on the server. The incident service mTLS policy is set to `PERMISSIVE`, so the status is `HTTP/mTLS`.
+* `SERVER` is the mode used on the server. The incident service mTLS policy is set to `PERMISSIVE`.
 * `CLIENT` is the mode used on the client--the Istio ingress gateway. The client uses mTLS to call the incident service.
 
 . Use the Istio Grafana dashboards to verify that the traffic between the Istio ingress gateway and the incident service uses mTLS:
@@ -2432,7 +2431,7 @@ In this section, you configure the SSO instance to be able to obtain a JWT token
 .. Obtain the URL for the Admin console of the SSO instance:
 +
 ----
-$ $ echo -en "\n\nhttps://sso-user-sso.apps.$SUBDOMAIN_BASE/auth/admin/$ERDEMO_USER-emergency-realm/console\n\n"
+$ echo -en "\n\nhttps://sso-user-sso.apps.$SUBDOMAIN_BASE/auth/admin/$ERDEMO_USER-emergency-realm/console\n\n"
 ----
 .. In a browser window, navigate to the SSO Admin console and log in using the username and password you registered with in the Emergency Response application.
 * Expect to see the administration section of your realm.
@@ -2633,7 +2632,7 @@ Byb2ZpbGUiLCJlbWFpbF92ZXJpZmllZCI6ZmFsc2UsIm5hbWUiOiJCZXJuYXJkIFRpc29uIiwicHJlZm
 ====
 * All external traffic to the Emergency Response Demo application goes through the ingress gateway, and all requests require a valid JWT token. This means that the disaster simulator UI and the emergency console will not work as expected anymore. To fix this would require a separate ingress gateway for these services that does not require origin authentication.
 
-* The service mesh policy only checks for a valid token based on the issuer, the validity of the signature on the token, and the token expiry time. It is possible to configure more fine-grained authorization based on groups or roles, however, the way SSO encodes role information in a JWT token is incompatible with how the service mesh expects this information.
+* The service mesh policy only checks for a valid token based on the issuer, the validity of the signature on the token, and the token expiry time. It is possible to configure more fine-grained authorization based on groups or roles, however, the default way SSO encodes role information in a JWT token is incompatible with how the service mesh expects this information. 
 
 * The service mesh only propagates the JWT token one hop. The service proxy takes the body of the JWT token and sends it along to the application in a separate HTTP header. The JWT body is sent in the `sec-istio-auth-userinfo` header. It is the responsibility of the application to propagate the token to downstream services or resubmit for a new token based on the end user’s identity and the service’s identity.
 ====
