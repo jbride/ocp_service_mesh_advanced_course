@@ -60,65 +60,68 @@ image::images/prometheus-metrics.png[]
 *** `istio_request_duration_seconds`: A histogram that collects latency for requests between workloads.
 *** `istio_request_bytes` and `istio_response_bytes`: Histograms that collect the ingoing and outgoing bytes per request and response.
 
-. Internally, the metrics exposed through Mixer are configured with a combination of `metric`, `handler`, and `rule` resources.
+. Internally, the metrics exposed through Mixer are configured with a combination of `instance`, `handler`, and `rule` resources.
 .. Get a list of the default metrics:
 +
 ----
-$ oc get metric -n $SM_CP_NS
+$ oc get instance -n $SM_CP_NS
 ----
 +
 .Sample Output
 ----
 NAME                   AGE
-requestcount           9d
-requestduration        9d
-requestsize            9d
-responsesize           9d
-tcpbytereceived        9d
-tcpbytesent            9d
-tcpconnectionsclosed   9d
-tcpconnectionsopened   9d
+attributes             2d4h
+requestcount           2d4h
+requestduration        2d4h
+requestsize            2d4h
+responsesize           2d4h
+tcpbytereceived        2d4h
+tcpbytesent            2d4h
+tcpconnectionsclosed   2d4h
+tcpconnectionsopened   2d4h
 ----
-* The `metric` resources are translated into Prometheus metrics.
-.. View details of a `metric` resource:
+* The `instance` resources are translated into Prometheus metrics.
+.. View details of an `instance` resource:
 +
 ----
-$ oc get metric requestcount -o yaml -n $SM_CP_NS
+$ oc get instance requestcount -o yaml -n $SM_CP_NS
 ----
 +
 .Sample Output (truncated)
 ----
 apiVersion: config.istio.io/v1alpha2
-kind: metric
+kind: instance
 metadata:
   [...]
 spec:
-spec:
-  dimensions:
-    connection_security_policy: conditional((context.reporter.kind | "inbound") ==
-      "outbound", "unknown", conditional(connection.mtls | false, "mutual_tls", "none"))
-    destination_app: destination.labels["app"] | "unknown"
-    destination_principal: destination.principal | "unknown"
-    destination_service: destination.service.host | "unknown"
-    destination_service_name: destination.service.name | "unknown"
-    destination_service_namespace: destination.service.namespace | "unknown"
-    destination_version: destination.labels["version"] | "unknown"
-    destination_workload: destination.workload.name | "unknown"
-    destination_workload_namespace: destination.workload.namespace | "unknown"
-    permissive_response_code: rbac.permissive.response_code | "none"
-    permissive_response_policyid: rbac.permissive.effective_policy_id | "none"
-    reporter: conditional((context.reporter.kind | "inbound") == "outbound", "source",
-      "destination")
-    request_protocol: api.protocol | context.protocol | "unknown"
-    response_code: response.code | 200
-    response_flags: context.proxy_error_code | "-"
-    source_app: source.labels["app"] | "unknown"
-    source_principal: source.principal | "unknown"
-    source_version: source.labels["version"] | "unknown"
-    source_workload: source.workload.name | "unknown"
-    source_workload_namespace: source.workload.namespace | "unknown"
-  monitored_resource_type: '"UNSPECIFIED"'
-  value: "1"
+  compiledTemplate: metric
+  params:
+    dimensions:
+      connection_security_policy: conditional((context.reporter.kind | "inbound")
+        == "outbound", "unknown", conditional(connection.mtls | false, "mutual_tls",
+        "none"))
+      destination_app: destination.labels["app"] | "unknown"
+      destination_principal: destination.principal | "unknown"
+      destination_service: destination.service.host | conditional((destination.service.name
+        | "unknown") == "unknown", "unknown", request.host)
+      destination_service_name: destination.service.name | "unknown"
+      destination_service_namespace: destination.service.namespace | "unknown"
+      destination_version: destination.labels["version"] | "unknown"
+      destination_workload: destination.workload.name | "unknown"
+      destination_workload_namespace: destination.workload.namespace | "unknown"
+      grpc_response_status: response.grpc_status | ""
+      reporter: conditional((context.reporter.kind | "inbound") == "outbound", "source",
+        "destination")
+      request_protocol: api.protocol | context.protocol | "unknown"
+      response_code: response.code | 200
+      response_flags: context.proxy_error_code | "-"
+      source_app: source.labels["app"] | "unknown"
+      source_principal: source.principal | "unknown"
+      source_version: source.labels["version"] | "unknown"
+      source_workload: source.workload.name | "unknown"
+      source_workload_namespace: source.workload.namespace | "unknown"
+    monitored_resource_type: '"UNSPECIFIED"'
+    value: "1"
 ----
 .. View a `handler` resource:
 +
@@ -132,21 +135,21 @@ apiVersion: config.istio.io/v1alpha2
 kind: handler
 metadata:
   [...]
-spec:
-  compiledAdapter: prometheus
-  params:
-    metrics:
-    - instance_name: requestcount.metric.admin50-istio-system
-      kind: COUNTER
-      label_names:
-      - reporter
-      - source_app
-      - source_principal
-      - source_workload
-      - source_workload_namespace
-      - source_version
-      - destination_app
-      - destination_principal
+spec:                                                                                                                
+  compiledAdapter: prometheus                                                                                        
+  params:                                                                                                            
+    metrics:                                                                                                         
+    - instance_name: requestcount.instance.admin50-istio-system                                                       
+      kind: COUNTER                                                                                                  
+      label_names:                                                                                                   
+      - reporter                                                                                                     
+      - source_app                                                                                                   
+      - source_principal                                                                                             
+      - source_workload                                                                                              
+      - source_workload_namespace                                                                                    
+      - source_version                                                                                               
+      - destination_app                                                                                              
+      - destination_principal 
       - destination_workload
       - destination_workload_namespace
       - destination_version
@@ -155,9 +158,8 @@ spec:
       - destination_service_namespace
       - request_protocol
       - response_code
+      - grpc_response_status
       - response_flags
-      - permissive_response_code
-      - permissive_response_policyid
       - connection_security_policy
       name: requests_total
     [...]
@@ -612,7 +614,7 @@ groups:
 ----
 $ oc delete configmap prometheus -n $SM_CP_NS
 $ oc create configmap prometheus -n $SM_CP_NS --from-file=prometheus.yml --from-file=ingress.rules --from-file=ingress-alert.rules --save-config=true
-$ oc label configmap prometheus -n $SM_CP_NS app=prometheus app.kubernetes.io/component=prometheus app.kubernetes.io/instance=$SM_CP_NS app.kubernetes.io/managed-by=maistra-istio-operator app.kubernetes.io/name=prometheus app.kubernetes.io/part-of=istio app.kubernetes.io/version=1.0.1-8.el8-1 chart=prometheus heritage=Tiller maistra.io/owner=$SM_CP_NS release=istio
+$ oc label configmap prometheus -n $SM_CP_NS app=prometheus app.kubernetes.io/part-of=istio app.kubernetes.io/instance=$SM_CP_NS release=istio app.kubernetes.io/version=1.1.1-5.el8-1 app.kubernetes.io/component=prometheus maistra-version=1.1.1 app.kubernetes.io/managed-by=maistra-istio-operator maistra.io/owner=$SM_CP_NS app.kubernetes.io/name=prometheus chart=prometheus heritage=Tiller
 ----
 . Restart the Prometheus pod in the control plane namespace:
 +
