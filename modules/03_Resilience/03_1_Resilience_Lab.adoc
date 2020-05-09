@@ -532,6 +532,7 @@ spec:
         attempts: 2
         retryOn: 5xx
         perTryTimeout: 200ms
+      timeout: 500ms
 ----
 . Call the incident priority service using `curl` or `siege`.
 * Expect all calls to return a 200 response code.
@@ -625,6 +626,8 @@ spec:
 ----
 $ while :; do curl -k -s -w %{http_code} --output /dev/null https://incident-priority-service.$ERDEMO_USER.apps.$SUBDOMAIN_BASE/priority/qwerty; echo "";sleep .1; done
 ----
+
+. Verify the logs of the faulty pod.
 +
 .Sample Output
 ----
@@ -689,6 +692,6 @@ $ siege -r 100 -c 4 -d0 -v https://incident-priority-service.$ERDEMO_USER.apps.$
 . Go back to the `siege` load test and observe that you have a fair number of 503 responses.
 Once the limits in the `connectionPool` are met, the circuit breaker functionality of the Envoy proxy short-circuits the call to the service and immediately returns a 503 response.
 . Open the `DestinationRule` resource of the incident priority service for edit, and set `http1MaxPendingRequests` and `maxRequestsPerConnection` to `10`.
-. Go back to the `siege` load test, and expect to see that you get about 200 responses.
+. Go back to the `siege` load test, and expect to see that you get only 200 responses.
 
 This concludes the lab. You have explored the Istio resiliency functionality including retries, timeouts, circuit breakers, and outlier detection.

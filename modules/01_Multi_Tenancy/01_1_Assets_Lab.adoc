@@ -25,9 +25,9 @@
 . Download and install the following utilities on your workstation:
 .. `openssl` (Use the `yum install openssl` command on Red Hat Enterprise Linux^(R)^ or Fedora).
 .. link:https://stedolan.github.io/jq/download/[jq] (Use the `dnf install jq` command on Fedora).
-.. link:https://mirror.openshift.com/pub/openshift-v4/clients/oc/4.2/[`oc` utility].
+.. link:https://mirror.openshift.com/pub/openshift-v4/clients/oc/4.3/[`oc` utility].
 
-... After installing the `oc` client, make sure it is on your `$PATH` and that its version is in the OpenShift 4.2 family:
+... After installing the `oc` client, make sure it is on your `$PATH` and that its version is in the OpenShift 4.3 family:
 +
 -----
 $ oc version
@@ -35,11 +35,11 @@ $ oc version
 +
 .Sample Output
 -----
-Client Version: v4.2.0
+Client Version: 4.3.19-202005020952-4fb2d4d
 -----
 
-.. link:https://github.com/istio/istio/releases/tag/1.3.5[`istioctl` utility].
-** This link provides a more recent version of the `istioctl` command line utility than the version of Istio that OpenShift Service Mesh 1.0 is based on. However, for the purposes of this course, this version of `istioctl` works well.
+.. link:https://github.com/istio/istio/releases/tag/1.4.6[`istioctl` utility].
+** This link provides the same version of the `istioctl` command line utility than the version of Istio that OpenShift Service Mesh 1.1 is based on.
 ... Unarchive the download and place the `bin/istioctl` binary somewhere on your `$PATH`.
 
 === Set Environment Variables
@@ -89,11 +89,15 @@ $ oc get projects
 +
 .Sample Output
 -----
-istio-operator       Service Mesh Operator         Active
-kafka-operator-erd                                 Active
-tools-erd                                          Active
-user50-er-demo                                      Active
-admin50-istio-system   admin5 Service Mesh System   Active
+NAME                  DISPLAY NAME                        STATUS
+3scale-mt-api0        3scale-mt-api0                      Active
+admin50-istio-system  admin50 Service Mesh Control Plane  Active
+istio-operator        istio-operator                      Active
+kafka-operator-erd                                        Active
+tools-erd                                                 Active
+user-sso                                                  Active
+user50-er-demo                                            Active
+user50-gw                                                 Active
 -----
 
 * Subsequent sections of this lab introduce you to each of these namespaces.
@@ -117,10 +121,11 @@ $ oc get projects
 +
 .Sample Output
 -----
-3scale-mt-api0         3scale-mt-api0                Active
-admin50-istio-system   admin50 Service Mesh System   Active
-istio-operator         Service Mesh Operator         Active
-user50-er-demo                                       Active
+NAME                  DISPLAY NAME                        STATUS
+3scale-mt-api0        3scale-mt-api0                      Active
+admin50-istio-system  admin50 Service Mesh Control Plane  Active
+istio-operator        istio-operator                      Active
+user50-er-demo                                            Active
 -----
 
 === Access OpenShift Container Platform Web Console
@@ -156,6 +161,7 @@ $ oc get deploy istio-operator -n istio-operator
 +
 .Sample Output
 -----
+NAME             READY   UP-TO-DATE   AVAILABLE   AGE
 istio-operator   1/1     1            1           15h
 -----
 
@@ -220,7 +226,7 @@ $ oc get crd --as=system:admin | grep 'maistra\|istio'
 [NOTE]
 You need to impersonate an OpenShift cluster admin to do this because a service mesh control plane administrator does not have access to this in a production environment.
 
-* Expect to see about 55 CRDs.
+* Expect to see about 25 CRDs.
 
 . Review some of the more prominent service mesh-related CRD extensions to the OpenShift master API including those in the following table:
 +
@@ -326,8 +332,9 @@ $ istioctl version --remote=true -i $SM_CP_ADMIN-istio-system
 +
 .Sample Output
 -----
-client version: 1.3.5
-control plane version: 1.0.1-1
+client version: 1.4.6
+control plane version: OSSM_1.1.1
+data plane version: maistra-1.1.1 (2 proxies)
 -----
 
 . Examine the service mesh control plane deployments:
@@ -361,15 +368,15 @@ $ oc get ServiceMeshControlPlane -n $SM_CP_NS
 +
 .Sample Output
 -----
-NAME           READY
-full-install   True
+NAME           READY   STATUS              TEMPLATE   VERSION   AGE
+full-install   9/9     InstallSuccessful   default    v1.1      4h6m
 -----
 
 * During the installation of your lab environment, the `$SM_CP_NS` namespace was created and this link:https://github.com/gpe-mw-training/ocp_service_mesh_advanced/blob/master/ansible/roles/maistra_control_plane/tasks/main.yml#L3-L5[`ServiceMeshControlPlane` custom resource] was applied to it.
 The OpenShift Service Mesh operator detected the presence of this new custom resource and subsequently provisioned the service mesh control plane.
 +
 [NOTE]
-If the status in the `READY` column is not `True`, this means that the service mesh control plane did not install correctly. If this occurs, examine the status of the `ServiceMeshControlPlane` custom resource to determine the issue.
+If the status in the `READY` column is not `9/9`, this means that the service mesh control plane did not install correctly. If this occurs, examine the status of the `ServiceMeshControlPlane` custom resource to determine the issue.
 
 . Note the existence of a _ServiceMeshPolicy_:
 +
@@ -393,17 +400,20 @@ $ oc get RoleBinding -n $SM_CP_NS
 +
 .Sample Output
 -----
-istio-citadel-admin50-istio-system                               24h
-istio-citadel-admin50-istio-system                               24h
-istio-egressgateway-admin50-istio-system                         24h
-istio-galley-admin-role-binding-admin50-istio-system             24h
-istio-ingressgateway-admin50-istio-system                        24h
-istio-ingressgateway-sds                                         24h
-istio-mixer-admin-role-binding-admin50-istio-system              24h
-istio-pilot-admin50-istio-system                                 24h
-istio-sidecar-injector-admin-role-binding-admin50-istio-system   24h
-kiali                                                            24h
-prometheus-admin50-istio-system                                  24h
+admin                                                           4h8m
+istio-citadel-admin50-istio-system                              4h8m
+istio-galley-admin-role-binding-admin50-istio-system            4h8m
+istio-ingressgateway-sds                                        4h7m
+istio-mixer-admin-role-binding-admin50-istio-system             4h7m
+istio-pilot-admin50-istio-system                                4h7m
+istio-sidecar-injector-admin-role-binding-admin50-istio-system  4h7m
+kiali                                                           4h6m
+mesh-users                                                      4h8m
+prometheus-admin50-istio-system                                 4h8m
+system:deployers                                                4h8m
+system:image-builders                                           4h8m
+system:image-pullers                                            4h8m
+view                                                            3h33m
 -----
 +
 NOTE: The use of a project-scoped `RoleBinding` resource rather than a cluster-scoped `ClusterRoleBinding` resource is a key enabler of the multi-tenant capabilities of the OpenShift Service Mesh component.
@@ -428,7 +438,7 @@ For the purposes of this course, your service mesh control plane manages your in
 
 The intent of the Emergency Response Demo application is to showcase the breadth of the Red Hat Middleware portfolio running on Red Hat OpenShift.
 
-The services of the Emergency Response Demo application use a mix of HTTP-based synchronous communication and AMQ streams-based asynchronous communication.
+The services of the Emergency Response Demo application use a mix of HTTP-based synchronous communication and AMQ Streams-based asynchronous communication.
 Because of this, the demo is an excellent application to highlight the existing capabilities and limitations of a service mesh.
 
 === Explore Resources
@@ -448,18 +458,19 @@ $ oc get dc -n $ERDEMO_NS
 +
 .Sample Output
 -----
-NAME                                REVISION   DESIRED   CURRENT
-postgresql                          1          1         1
-user50-disaster-simulator           1          1         1
-user50-emergency-console            1          1         1
-user50-incident-priority-service    1          1         1
-user50-incident-service             1          1         1
-user50-mission-service              1          1         1
-user50-process-service              1          1         1
-user50-process-service-postgresql   1          1         1
-user50-process-viewer               1          1         1
-user50-responder-service            1          1         1
-user50-responder-simulator          1          1         1
+NAME                              REVISION   DESIRED   CURRENT   TRIGGERED BY
+postgresql                        1          1         1         config,image(postgresql:9.6)
+process-service-postgresql        1          1         1         config,image(postgresql:9.6)
+user50-disaster-simulator         1          1         1         config,image(user50-disaster-simulator:c6818a7a8)
+user50-emergency-console          1          1         1         config,image(user50-emergency-console:1fa91c80b)
+user50-incident-priority-service  1          1         1         config,image(user50-incident-priority-service:1f5b136f5)
+user50-incident-service           1          1         1         config,image(user50-incident-service:ba3e9bca3)
+user50-mission-service            1          1         1         config,image(user50-mission-service:803e6420f)
+user50-process-service            1          1         1         config,image(user50-process-service:cbfad8cf2)
+user50-process-viewer             1          1         1         config,image(user50-process-viewer:8eac584e7)
+user50-responder-client-app       1          1         1         config,image(user50-responder-client-app:f2394c06c)
+user50-responder-service          1          1         1         config,image(user50-responder-service:4ca7b4bab)
+user50-responder-simulator        1          1         1         config,image(user50-responder-simulator:66105af21)
 -----
 
 . Observe that the Emergency Response Demo application also makes use of Red Hat AMQ streams for event-driven, streams-based communication between many of its services:
@@ -481,7 +492,7 @@ $ oc get statefulset -l strimzi.io/kind=Kafka -n $ERDEMO_NS
 .Sample Output
 -----
 kafka-cluster-kafka       3/3     3d5h
-kafka-cluster-zookeeper   0/3     3d5h
+kafka-cluster-zookeeper   3/3     3d5h
 -----
 
 . Also, observe that the Emergency Response Demo application makes use of Red Hat Data Grid:

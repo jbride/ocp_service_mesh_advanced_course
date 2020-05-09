@@ -74,7 +74,9 @@ spec:
         ior_enabled: false
     global:
       disablePolicyChecks: false
-      mtls: false
+      mtls:
+        auto: false
+        enabled: false
       proxy:
         resources:
           limits:
@@ -110,7 +112,7 @@ status:
 [...]
 ----
 +
-* Note that `mTLS` is set to `false`. This means that mTLS is not enforced, and services are able to communicate over plain HTTP.
+* Note that `mTLS.enabled` is set to `false`. This means that mTLS is not enforced, and services are able to communicate over plain HTTP.
 * Setting `mTLS` as globally disabled is the recommended starting point when migrating an existing set of applications to use Istio and mTLS.
 . As part of the OpenShift Service Mesh installation, a global `ServiceMeshPolicy` policy is created in the service mesh control plane namespace.
 The scope of `ServiceMeshPolicy` is the service mesh. It can be overridden by namespace-scoped and service-scoped policies. Review the policy:
@@ -340,9 +342,6 @@ Enabling mTLS for the incident service involves the following tasks:
 * Ensure that health checks are still working when using strict mTLS.
 ** When enforcing strict mTLS when calling the incident service, the HTTP-based health check fails because it is executed from the kubelet and is not able to present a suitable certificate. The command-based health checks are executed in the container itself, so they are not impacted.
 ** The OpenShift Service Mesh sidecar injector service can be configured to rewrite HTTP probes at sidecar injection time, so that the requests are sent to the _Pilot agent_ in the Envoy sidecar, which then redirects to the application. This global configuration is set in the `ServiceMeshControlPlane` CR and is applied to all pods in the service mesh data plane that have the Envoy sidecar injected.
-+
-[NOTE]
-The latest versions of upstream Istio also allow HTTP probe rewrites per service by setting an annotation (`sidecar.istio.io/rewriteAppHTTPProbers: "true"`) on the pods. OpenShift Service Mesh does not yet support this functionality.
 
 ==== Inject Envoy Proxy Sidecar
 
@@ -751,10 +750,10 @@ $ istioctl -n $SM_CP_NS -i $SM_CP_NS authn tls-check ${ISTIO_INGRESSGATEWAY_POD}
 .Sample Output
 [options="nowrap"]
 ----
-HOST:PORT                                                           STATUS     SERVER        CLIENT     AUTHN POLICY                                             DESTINATION RULE
-incident-service.emergency-response-demo.svc.cluster.local:8080     OK         HTTP/mTLS     mTLS       incident-service-strict-mtls/emergency-response-demo     incident-service-client-mtls/emergency-response-demo
+HOST:PORT                                                           STATUS     SERVER        CLIENT             AUTHN POLICY                                             DESTINATION RULE
+incident-service.emergency-response-demo.svc.cluster.local:8080     OK         PERMISSIVE    ISTIO_MUTUAL       incident-service-strict-mtls/emergency-response-demo     incident-service-client-mtls/emergency-response-demo
 ----
-* `SERVER` is the mode used on the server. The incident service mTLS policy is set to `PERMISSIVE`, so the status is `HTTP/mTLS`.
+* `SERVER` is the mode used on the server. The incident service mTLS policy is set to `PERMISSIVE`.
 * `CLIENT` is the mode used on the client--the Istio ingress gateway. The client uses mTLS to call the incident service.
 
 . Use the Istio Grafana dashboards to verify that the traffic between the Istio ingress gateway and the incident service uses mTLS:
@@ -2149,7 +2148,14 @@ The second error requires further investigation.
 ====
 
 
-== Set Authorization Policy for Services
+== Set Authorization Policy for Services usin Istio RBAC
+
+[WARNING]
+====
+Since Istio v1.4, _RBAC_ has been deprecated in favor of _AuthorizationPolicy_. However RBAC is still supported for backward compatibility reasons. Hence, the exercises in this lab section will still work, but are no longer the preferred way to define authorization policies for the service mesh.
+The next section of this lab handles authorization policies using AuthorizationPolicy resources.
+Feel free to skip this section, and move directly to the next section.
+====
 
 With a service mesh authorization policy, you can define service-to-service authorization policies to control which services can communicate with other services.
 
@@ -2419,6 +2425,271 @@ Note: Unnecessary use of -X or --request, POST is already inferred.
 RBAC: access denied
 ----
 
+== Set Authorization Policy for Services using AuthorizationPolicy
+
+[NOTE]
+====
+If you have done the previous section ofthe lab, delete the `ServiceMeshRbacConfig`, `ServiceRole` and `ServiceRoleBinding` resources created.
+
+----
+$ oc delete ServiceMeshRbacConfig default -n $SM_CP_NS
+$ oc delete servicerole incident-service-ingress -n $ERDEMO_NS
+$ oc delete servicerole incident-service-internal -n $ERDEMO_NS
+$ oc delete servicerolebinding incident-service-ingress -n $ERDEMO_NS
+$ oc delete servicerolebinding incident-service-internal -n $EREMO_NS
+----
+====
+
+Istio 1.4 introduces the _AuthorizationPolicy_ policy, which is a major update to the previous role-based access control (RBAC) policy. The new policy provides these improvements:
+
+* Aligns with Istio configuration model.
+* Improves the user experience by simplifying the API. AuthorizationPolicy only uses 1 CRD instead of three.
+* Supports more use cases (e.g. Ingress/Egress gateway support) without added complexity.
+
+With a service mesh authorization policy, you can define service-to-service authorization policies to control which services can communicate with other services.
+
+To configure an authorization policy, you create an _AuthorizationPolicy_ custom resource. An authorization policy includes a selector, an action, and a list of rules:
+
+* The _selector_ field specifies the target of the policy
+* The _action_ field specifies whether to allow or deny the request. The default action is allow.
+* The _rules_ specify when to trigger the action.
+** The _from_ field in the rules specifies the sources of the request
+** The _to_ field in the rules specifies the operations of the request
+** The _when_ field specifies the conditions needed to apply the rule
+
+As a use case for this lab, you define and enable the following policy:
+
+* All services within the Emergency Response Demo application are allowed to call the incident service REST APIs, using all HTTP methods.
+* When accessed from outside the cluster, only the APIs that use HTTP GET are allowed.
+
+{nbsp}
+
+. Create a deny-all policy for the incident service.
+.. On the local file system, create a file called `deny-all-incident-service.yml`:
++
+----
+$ echo "---
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: deny-all-incident-service
+spec:
+  selector:
+    matchLabels:
+      app: $ERDEMO_USER-incident-service
+      group: erd-services
+" > deny-all-incident-service.yml
+----
+* The selector matches the labels on the incident service workload (pods).
+* There are no rules defined, so no rules can be matched. This effectively corresponds to a deny-all policy.
+
+.. Create the resource in the emergency response demo namespace:
++
+----
+$ oc create -f deny-all-incident-service.yml -n $ERDEMO_NS
+----
+
+. At this point, no service can call the incident service from within the mesh or from outside the mesh. Test this as follows:
+.. Call the `/incidents` REST endpoint of the incident service with `curl`:
++
+----
+$ INCIDENT_SERVICE_URL=$(oc get route incident-service-gateway -n $SM_CP_NS -o template --template={{.spec.host}})
+$ curl -v -k https://$INCIDENT_SERVICE_URL/incidents
+----
++
+.Sample Output
+----           
+*   Trying 35.158.48.203:443...                                       
+* TCP_NODELAY set                                                     
+* Connected to incident-service.user1.apps.cluster-18ac.18ac.example.opentlc.com (35.158.48.203) port 443 (#0)                               
+* ALPN, offering h2                                                   
+* ALPN, offering http/1.1                                             
+* successfully set certificate verify locations:                      
+*   CAfile: /etc/pki/tls/certs/ca-bundle.crt                          
+  CApath: none                                                        
+* TLSv1.3 (OUT), TLS handshake, Client hello (1):                     
+* TLSv1.3 (IN), TLS handshake, Server hello (2):                      
+* TLSv1.3 (IN), TLS handshake, Encrypted Extensions (8):              
+* TLSv1.3 (IN), TLS handshake, Certificate (11):                      
+* TLSv1.3 (IN), TLS handshake, CERT verify (15):                      
+* TLSv1.3 (IN), TLS handshake, Finished (20):                         
+* TLSv1.3 (OUT), TLS change cipher, Change cipher spec (1):                                                                                  
+* TLSv1.3 (OUT), TLS handshake, Finished (20):                        
+* SSL connection using TLSv1.3 / TLS_AES_256_GCM_SHA384               
+* ALPN, server accepted to use h2                                     
+* Server certificate:                                                 
+*  subject: CN=user1.apps.cluster-18ac.18ac.example.opentlc.com                                                                              
+*  start date: May  4 18:51:29 2020 GMT                               
+*  expire date: May  4 18:51:29 2022 GMT                              
+*  issuer: CN=user1.apps.cluster-18ac.18ac.example.opentlc.com                                                                               
+*  SSL certificate verify result: self signed certificate (18), continuing anyway.                                                           
+* Using HTTP2, server supports multi-use                              
+* Connection state changed (HTTP/2 confirmed)                         
+* Copying HTTP/2 data in stream buffer to connection buffer after upgrade: len=0                                                             
+* Using Stream ID: 1 (easy handle 0x55efdc8a4200)                     
+> GET /incidents HTTP/2                                               
+> Host: incident-service.user1.apps.cluster-18ac.18ac.example.opentlc.com                                                                    
+> User-Agent: curl/7.66.0                                             
+> Accept: */*                                                         
+>                                                                     
+* TLSv1.3 (IN), TLS handshake, Newsession Ticket (4):                 
+* TLSv1.3 (IN), TLS handshake, Newsession Ticket (4):                 
+* old SSL session ID is stale, removing                               
+* Connection state changed (MAX_CONCURRENT_STREAMS == 4294967295)!                                                                           
+< HTTP/2 403                                                          
+< content-length: 19                                                  
+< content-type: text/plain                                            
+< date: Tue, 05 May 2020 15:37:51 GMT                                 
+< server: istio-envoy                                                 
+< x-envoy-upstream-service-time: 6                                    
+<                                                                     
+* Connection #0 to host incident-service.user1.apps.cluster-18ac.18ac.example.opentlc.com left intact                                        
+RBAC: access denied
+----
+** The HTTP return code is 403, with message "RBAC: access denied".
+.. Test a call to the incident service from within the cluster by opening the *Disaster Simulator* home page in a browser and clicking *Clear Incidents*. Then check the logs of the disaster simulator pod and expect to see something similar to this:
++
+----
+Oct 30, 2019 2:19:52 PM com.redhat.cajun.navy.datagenerate.RestClientVerticle lambda$resetIncidents$4
+INFO: Reset incidents: HTTP response status 403
+----
+
+. Create an `AuthorizationPolicy` to allow workloads inside the service mesh to access the incident service using all HTTP methods.
+.. On the local file system, create a file called `incident-service-internal.yml`:
++
+----
+$ echo "---
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: incident-service-internal
+spec:
+  rules:
+  - from:
+    - source:
+        namespaces: 
+        - $ERDEMO_NS
+    to:
+    - operation:
+        methods:
+        - '*'
+  selector:
+    matchLabels:
+      app: $ERDEMO_USER-incident-service
+      group: erd-services
+" > incident-service-internal.yml
+----
+.. Create the resource in the emergency response demo namespace:
++
+----
+$ oc create -f incident-service-internal.yml -n $ERDEMO_NS
+----
+
+. Confirm that the incident service can now be called from other services in the Emergency Response Demo namespace, but not from services outside the namespace:
+.. From the *Disaster Simulator* home page, click *Clear Incidents*. Review the disaster simulator pod logs and expect to see something similar to this:
++
+----
+Oct 30, 2019 3:02:31 PM com.redhat.cajun.navy.datagenerate.RestClientVerticle lambda$resetIncidents$4
+INFO: Reset incidents: HTTP response status 200
+----
+** `curl` requests to the `/incidents` endpoint of the incident service still error out with an HTTP 403 return code.
+
+. Create an `AuthorizationPolicy` resource for external access to the incident service. This service role grants only HTTP GET access to the incident service REST APIs for all traffic handled by the ingress gateway.
+.. On the local file system, create a file called `incident-service-external.yml`:
++
+----
+$ echo "---
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: incident-service-external
+spec:
+  rules:
+  - from:
+    - source:
+        principals:
+        - cluster.local/ns/$SM_CP_NS/sa/istio-ingressgateway-service-account
+    to:
+    - operation:
+        methods:
+        - GET
+  selector:
+    matchLabels:
+      app: $ERDEMO_USER-incident-service
+      group: erd-services
+" > incident-service-external.yml
+----
+* The ingress gateway is specified as the SPIFFE identity of its service account.
+
+.. Create the resource in the emergency response demo namespace:
++
+----
+$ oc create -f incident-service-external.yml -n $ERDEMO_NS
+----
+
+. Confirm that the incident service can now be called from outside of the cluster, but only for HTTP GET endpoints:
+.. A `curl` request to the `/incidents` endpoint of the incident service returns an HTTP 200 code.
+.. A `curl` POST request to the `/incidents` endpoint returns an HTTP 403 error:
++
+----
+$ curl -k -v -X POST -H "Content-type: application/json" -d '{"lat": 34.14338, "lon": -77.86569, "numberOfPeople": 3, "medicalNeeded": true, "victimName": "victim",  "victimPhoneNumber": "111-111-111" }' https://$INCIDENT_SERVICE_URL/incidents
+----
++
+.Sample output
+----
+$ curl -k -v -X POST -H "Content-type: application/json" -d '{"lat": 34.14338, "lon": -77.86569, "numberOfPeople": 3, "medicalNeeded": true, "victimName": "victim",  "victimPhoneNumber": "111-111-111" }' https://$INCIDENT_SERVICE_URL/incidents
+Note: Unnecessary use of -X or --request, POST is already inferred.                                                  
+*   Trying 35.158.48.203:443...                                                                                      
+* TCP_NODELAY set                                                                                                    
+* Connected to incident-service.user1.apps.cluster-18ac.18ac.example.opentlc.com (35.158.48.203) port 443 (#0)       
+* ALPN, offering h2                                                                                                  
+* ALPN, offering http/1.1                                                                                            
+* successfully set certificate verify locations:                                                                     
+*   CAfile: /etc/pki/tls/certs/ca-bundle.crt                                                                         
+  CApath: none                                                                                                       
+* TLSv1.3 (OUT), TLS handshake, Client hello (1):                                                                    
+* TLSv1.3 (IN), TLS handshake, Server hello (2):                                                                     
+* TLSv1.3 (IN), TLS handshake, Encrypted Extensions (8):                                                             
+* TLSv1.3 (IN), TLS handshake, Certificate (11):                                                                     
+* TLSv1.3 (IN), TLS handshake, CERT verify (15):                                                                     
+* TLSv1.3 (IN), TLS handshake, Finished (20):                                                                        
+* TLSv1.3 (OUT), TLS change cipher, Change cipher spec (1):                                                          
+* TLSv1.3 (OUT), TLS handshake, Finished (20):                                                                       
+* SSL connection using TLSv1.3 / TLS_AES_256_GCM_SHA384                                                              
+* ALPN, server accepted to use h2                                                                                    
+* Server certificate:                                                                                                
+*  subject: CN=user1.apps.cluster-18ac.18ac.example.opentlc.com                                                      
+*  start date: May  4 18:51:29 2020 GMT                                                                              
+*  expire date: May  4 18:51:29 2022 GMT                                                                             
+*  issuer: CN=user1.apps.cluster-18ac.18ac.example.opentlc.com                                                       
+*  SSL certificate verify result: self signed certificate (18), continuing anyway.                                                           
+* Using HTTP2, server supports multi-use        
+* Connection state changed (HTTP/2 confirmed)           
+* Copying HTTP/2 data in stream buffer to connection buffer after upgrade: len=0                                                             
+* Using Stream ID: 1 (easy handle 0x5601e8398200)
+> POST /incidents HTTP/2                                  
+> Host: incident-service.user1.apps.cluster-18ac.18ac.example.opentlc.com
+> User-Agent: curl/7.66.0                                 
+> Accept: */*                                             
+> Content-type: application/json 
+> Content-Length: 141
+>                                                                                                                    
+* We are completely uploaded and fine  
+* TLSv1.3 (IN), TLS handshake, Newsession Ticket (4):                 
+* TLSv1.3 (IN), TLS handshake, Newsession Ticket (4):                 
+* old SSL session ID is stale, removing                               
+* Connection state changed (MAX_CONCURRENT_STREAMS == 4294967295)!                                                                           
+< HTTP/2 403                                                          
+< content-length: 19                                                  
+< content-type: text/plain                                            
+< date: Tue, 05 May 2020 15:45:36 GMT                                 
+< server: istio-envoy                                                 
+< x-envoy-upstream-service-time: 2                                    
+<                                                                     
+* Connection #0 to host incident-service.user1.apps.cluster-18ac.18ac.example.opentlc.com left intact                                        
+RBAC: access denied
+----
+
 == Configure Origin Authentication
 
 Istio supports end-user authentication using JSON Web Tokens (JWT). End-user authentication verifies the original client making the request as an end user (or device). The end-user request requires passing a JWT token to be verified by the target service proxy. End-user authentication is configured in the `origins` section of a `Policy` resource.
@@ -2432,7 +2703,7 @@ In this section, you configure the SSO instance to be able to obtain a JWT token
 .. Obtain the URL for the Admin console of the SSO instance:
 +
 ----
-$ $ echo -en "\n\nhttps://sso-user-sso.apps.$SUBDOMAIN_BASE/auth/admin/$ERDEMO_USER-emergency-realm/console\n\n"
+$ echo -en "\n\nhttps://sso-user-sso.apps.$SUBDOMAIN_BASE/auth/admin/$ERDEMO_USER-emergency-realm/console\n\n"
 ----
 .. In a browser window, navigate to the SSO Admin console and log in using the username and password you registered with in the Emergency Response application.
 * Expect to see the administration section of your realm.
@@ -2633,7 +2904,7 @@ Byb2ZpbGUiLCJlbWFpbF92ZXJpZmllZCI6ZmFsc2UsIm5hbWUiOiJCZXJuYXJkIFRpc29uIiwicHJlZm
 ====
 * All external traffic to the Emergency Response Demo application goes through the ingress gateway, and all requests require a valid JWT token. This means that the disaster simulator UI and the emergency console will not work as expected anymore. To fix this would require a separate ingress gateway for these services that does not require origin authentication.
 
-* The service mesh policy only checks for a valid token based on the issuer, the validity of the signature on the token, and the token expiry time. It is possible to configure more fine-grained authorization based on groups or roles, however, the way SSO encodes role information in a JWT token is incompatible with how the service mesh expects this information.
+* The service mesh policy only checks for a valid token based on the issuer, the validity of the signature on the token, and the token expiry time. It is possible to configure more fine-grained authorization based on groups or roles, however, the default way SSO encodes role information in a JWT token is incompatible with how the service mesh expects this information. 
 
 * The service mesh only propagates the JWT token one hop. The service proxy takes the body of the JWT token and sends it along to the application in a separate HTTP header. The JWT body is sent in the `sec-istio-auth-userinfo` header. It is the responsibility of the application to propagate the token to downstream services or resubmit for a new token based on the end user’s identity and the service’s identity.
 ====
