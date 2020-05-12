@@ -39,7 +39,7 @@ $ oc login -u $ERDEMO_USER -p $OCP_PASSWD
 . Access your 3scale by Red Hat Admin Portal by pointing your browser to the output of the following:
 +
 -----
-$ echo -en "\n\nhttps://$(oc get routes -n $API_MANAGER_NS | grep admin | grep $ERDEMO_USER | awk '{print $2}')\n"
+$ echo -en "\n\nhttps://$(oc get routes -n $API_MANAGER_NS | grep admin | grep ${ERDEMO_USER}- | awk '{print $2}')\n"
 -----
 +
 image::images/3scale_login.png[]
@@ -120,7 +120,7 @@ $ echo "export INCIDENT_SERVICE_ID=<change me>" >> $HOME/.bashrc
 . Set a `SYSTEM_PROVIDER_URL` environment variable to use later:
 +
 -----
-$ echo "export SYSTEM_PROVIDER_URL=$(oc get routes -n $API_MANAGER_NS | grep admin | grep $ERDEMO_USER | awk '{print $2}')" >> $HOME/.bashrc
+$ echo "export SYSTEM_PROVIDER_URL=$(oc get routes -n $API_MANAGER_NS | grep admin | grep ${ERDEMO_USER}- | awk '{print $2}')" >> $HOME/.bashrc
 -----
 
 * This is the URL to the `system-provider` API manager specific to your tenant that all API gateways use to pull information about APIs.
@@ -144,7 +144,7 @@ $ source $HOME/.bashrc
 . Verify that you can get a list of incidents using your user key:
 +
 -----
-$ curl -v https://$(oc get route -n $API_MANAGER_NS | grep $ERDEMO_USER | grep prod | awk '{print $2}')/incidents?user_key=$INCIDENT_SERVICE_API_KEY
+$ curl -v https://$(oc get route -n $API_MANAGER_NS | grep ${ERDEMO_USER}- | grep prod | awk '{print $2}')/incidents?user_key=$INCIDENT_SERVICE_API_KEY
 -----
 +
 .Sample Output
@@ -205,7 +205,7 @@ $ curl -v https://$(oc get route -n $API_MANAGER_NS | grep $ERDEMO_USER | grep p
 . Confirm that the service is truly secured. Attempt to access the service with an invalid user key:
 +
 -----
-$ curl -v https://$(oc get route -n $API_MANAGER_NS | grep $ERDEMO_USER | grep prod | awk '{print $2}')/incidents?user_key=FAKEKEY
+$ curl -v https://$(oc get route -n $API_MANAGER_NS | grep ${ERDEMO_USER}- | grep prod | awk '{print $2}')/incidents?user_key=FAKEKEY
 -----
 +
 .Sample Output
