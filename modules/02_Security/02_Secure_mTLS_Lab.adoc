@@ -2436,7 +2436,7 @@ $ oc delete ServiceMeshRbacConfig default -n $SM_CP_NS
 $ oc delete servicerole incident-service-ingress -n $ERDEMO_NS
 $ oc delete servicerole incident-service-internal -n $ERDEMO_NS
 $ oc delete servicerolebinding incident-service-ingress -n $ERDEMO_NS
-$ oc delete servicerolebinding incident-service-internal -n $EREMO_NS
+$ oc delete servicerolebinding incident-service-internal -n $ERDEMO_NS
 ----
 ====
 
