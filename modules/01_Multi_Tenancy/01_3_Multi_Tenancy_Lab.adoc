@@ -398,10 +398,10 @@ $ istioctl proxy-config cluster -n <POD NAMESPACE> <PODNAME> -o json
 +
 -----
 $ oc rsh `oc get pod -n $ERDEMO_NS | grep "responder-service" | awk '{print $1}'` \
-         curl http://127.0.0.1:15000/config_dump \
-         > $HOME/lab/config_dump \
-         && less $HOME/lab/config_dump \
-         | jq ".configs | last | .dynamic_route_configs"
+       curl http://127.0.0.1:15000/config_dump \
+         > $HOME/lab/config_dump  \
+        && cat $HOME/lab/config_dump \
+        | jq ".configs | .[] | select(.dynamic_route_configs) | .dynamic_route_configs" | less
 -----
 
 == Explore Network Policies
