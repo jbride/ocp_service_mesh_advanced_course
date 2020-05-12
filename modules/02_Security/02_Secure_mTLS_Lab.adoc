@@ -2148,7 +2148,7 @@ The second error requires further investigation.
 ====
 
 
-== Set Authorization Policy for Services usin Istio RBAC
+== Set Authorization Policy for Services using Istio RBAC
 
 [WARNING]
 ====
@@ -2429,7 +2429,7 @@ RBAC: access denied
 
 [NOTE]
 ====
-If you have done the previous section ofthe lab, delete the `ServiceMeshRbacConfig`, `ServiceRole` and `ServiceRoleBinding` resources created.
+If you have done the previous section of the lab, delete the `ServiceMeshRbacConfig`, `ServiceRole` and `ServiceRoleBinding` resources created.
 
 ----
 $ oc delete ServiceMeshRbacConfig default -n $SM_CP_NS
