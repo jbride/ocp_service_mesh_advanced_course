@@ -18,29 +18,42 @@
 
 :numbered:
 
-== Set Up Local Workstation
+== Set Up Workstation
 
-=== Install Client Utilities
+In the labs for this course, you use the command line for many of the tasks. 
+The labs assume that you are using the proper versions of these tools, all of which can be found on the provided Student VM.
 
-. Download and install the following utilities on your workstation:
-.. `openssl` (Use the `yum install openssl` command on Red Hat Enterprise Linux^(R)^ or Fedora).
-.. link:https://stedolan.github.io/jq/download/[jq] (Use the `dnf install jq` command on Fedora).
-.. link:https://mirror.openshift.com/pub/openshift-v4/clients/oc/4.2/[`oc` utility].
-
-... After installing the `oc` client, make sure it is on your `$PATH` and that its version is in the OpenShift 4.2 family:
+. Go to the link:https://labs.opentlc.com/[OPENTLC lab portal^] and use your OPENTLC credentials to log in.
+. Navigate to *Services -> Catalogs -> All Services -> OPENTLC OpenShift 4 Labs*.
+. On the left, select *OpenShift 4 Student VM*.
+. On the right, click *Order*.
+. On the *Lab Information* Tab make the following selections:
+.. *4.3* for *OpenShift Release*
+.. The region closest to you for *Region* (North America, EMEA, APAC or LATAM)
+. On the bottom right, click *Submit*.
 +
------
-$ oc version
------
-+
-.Sample Output
------
-Client Version: v4.2.0
------
+[IMPORTANT]
+Do not select *App Control -> Start* after ordering the client VM. This is not necessary in this environment. Selecting *Start* may corrupt the lab environment or cause other complications.
 
-.. link:https://github.com/istio/istio/releases/tag/1.3.5[`istioctl` utility].
-** This link provides a more recent version of the `istioctl` command line utility than the version of Istio that OpenShift Service Mesh 1.0 is based on. However, for the purposes of this course, this version of `istioctl` works well.
-... Unarchive the download and place the `bin/istioctl` binary somewhere on your `$PATH`.
+* After a few minutes, expect to receive an email with instructions on how to connect to the environment.
+
+. Read the email carefully and specifically note the following:
+* The hostname for your Student VM.
+* The username and password for your Student VM
+
+=== Start Client VM After Shut Down
+
+To conserve resources, the Student VM shuts down automatically after eight hours. 
+In this section, you restart the Student VM for this course after it has shut down automatically.
+
+. Go to the link:https://labs.opentlc.com/[OPENTLC lab portal^] and use your OPENTLC credentials to log in.
+. Navigate to *Services -> My Services* (this should be the screen shown right after logging in).
+. In the list of your services, select your *OpenShift 4 Student VM*.
+. Select *App Control -> Start* to start your *OpenShift 4 Student VM*.
+. Select *Yes* at the *Are you sure?* prompt.
+. On the bottom right, click *Submit*.
+
+After a few minutes, expect to receive an email letting you know that the Student VM has been started.
 
 === Set Environment Variables
 
@@ -68,7 +81,8 @@ $ $HOME/lab/set_env_vars.sh
 -----
 
 == Review OpenShift Container Platform Assets
-Your lab is built on a shared OpenShift Container Platform v4 cluster in the cloud.
+
+Your lab is built on a shared OpenShift Container Platform 4 cluster in the cloud.
 
 === Explore OpenShift User: `$ERDEMO_USER`
 
