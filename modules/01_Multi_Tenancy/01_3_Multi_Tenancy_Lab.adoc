@@ -262,97 +262,6 @@ ifdef::showscript[]
 
 endif::showscript[]
 
-=== Demonstrate Modified iptables
-
-When an Envoy service proxy is injected into an application pod, the `istio-cni` resource modifies iptables on the node that the pod lands on.
-Recall from a previous lab that the `istio-cni` resource is deployed as a DaemonSet and subsequently runs one pod for all of the nodes in an OpenShift cluster.
-
-In particular, the `istio-cni` resource creates iptable rules so that all ingress to and egress from the application container is redirected to port 15001 of the pod.
-The Envoy service proxy has its listener bound to port 15001.
-
-
-Have your instructor demonstrate these modified iptable rules in a manner similar to the following:
-
-. Identify the OpenShift Container Platform worker node that one of the Emergency Response Demo application pods is running on:
-+
------
-$ oc get pod user50-responder-service-6-5xr86 -o json | jq .spec.nodeName
------
-+
-.Sample Output
------
-[...]
-ip-10-0-136-113.eu-central-1.compute.internal
------
-
-
-. Identify the ID of either container (application container or `envoy-proxy`) in that pod:
-+
------
-$ oc describe pod user50-responder-service-6-5xr86 | grep cri-o
------
-+
-.Sample Output
------
-[...]
-Container ID:  cri-o://397fea50eb8ecd03db9fe8c9a7657c7980f23c8462e9cf2554e9a4493308e651
-Container ID:  cri-o://90260d3d7ece810bb4c44a8aee3e23ebe50fd6b1225d48e6e103da070194c53a
------
-
-
-. Set up a debug session into the node where the target Emergency Response pod runs:
-+
------
-$ oc debug node/ip-10-0-136-113.eu-central-1.compute.internal
------
-
-. On that OpenShift node, switch to the host operating system shell that runs host operating system binaries:
-+
------
-sh-4.4# chroot /host
------
-
-. Using the previously determined container ID, determine the operating system process ID of the container on the OpenShift node:
-+
------
-sh-4.4# crictl inspect --output json  90260d3d7ece810bb4c44a8aee3e23ebe50fd6b1225d48e6e103da070194c53a | grep pid
------
-+
-.Sample Output
------
-45315
------
-
-. Using the process ID of the container, view the iptable rules on that host machine:
-+
------
-sh-4.4# nsenter -t 45315 -n iptables -t nat -S
------
-+
-.Sample Output
------
--P PREROUTING ACCEPT
--P INPUT ACCEPT
--P POSTROUTING ACCEPT
--P OUTPUT ACCEPT
--N ISTIO_REDIRECT
--N ISTIO_IN_REDIRECT
--N ISTIO_INBOUND
--N ISTIO_OUTPUT
--A PREROUTING -p tcp -j ISTIO_INBOUND
--A OUTPUT -p tcp -j ISTIO_OUTPUT
--A ISTIO_REDIRECT -p tcp -j REDIRECT --to-ports 15001
--A ISTIO_IN_REDIRECT -p tcp -j REDIRECT --to-ports 15001
--A ISTIO_INBOUND -p tcp -m tcp --dport 8080 -j ISTIO_IN_REDIRECT
--A ISTIO_OUTPUT ! -d 127.0.0.1/32 -o lo -j ISTIO_REDIRECT
--A ISTIO_OUTPUT -m owner --uid-owner 1000710001 -j RETURN
--A ISTIO_OUTPUT -m owner --gid-owner 1000710001 -j RETURN
--A ISTIO_OUTPUT -d 127.0.0.1/32 -j RETURN
--A ISTIO_OUTPUT -j ISTIO_REDIRECT
------
-* Note that all of the incoming traffic for this operating system process to port 8080--the port on which the Emergency Response `response-service` is listening--is being redirected to port 15001--the port on which the `istio-proxy` is listening.
-The same holds true for the outgoing traffic.
-
 
 === Explore Administration API
 
@@ -370,16 +279,18 @@ $ oc login -u $ERDEMO_USER -p $OCP_PASSWD
 . Retrieve the help documentation provided by the Envoy administration API:
 +
 -----
-$ oc rsh `oc get pod -n $ERDEMO_NS | grep "responder-service" | grep "Running" | awk '{print $1}'` \
+$ oc -n $ERDEMO_NS rsh -c $ERDEMO_USER-responder-service \
+    `oc get pod -n $ERDEMO_NS | grep "responder-service" | grep "Running" | awk '{print $1}'` \
     curl http://127.0.0.1:15000/help
 -----
 
 . Retrieve the status of all of the clusters visible to this Envoy service proxy:
 +
 -----
-$ oc rsh `oc get pod -n $ERDEMO_NS | grep "responder-service" | grep "Running" | awk '{print $1}'` \
-   curl http://127.0.0.1:15000/clusters?format=json \
-   > $HOME/lab/responder-service-clusters.json
+$ oc -n $ERDEMO_NS rsh -c $ERDEMO_USER-responder-service \
+    `oc get pod -n $ERDEMO_NS | grep "responder-service" | grep "Running" | awk '{print $1}'` \
+    curl http://127.0.0.1:15000/clusters?format=json \
+     > $HOME/lab/responder-service-clusters.json
 -----
 
 . Skim through the contents of `$HOME/lab/responder-service-clusters.json`.
@@ -388,20 +299,20 @@ $ oc rsh `oc get pod -n $ERDEMO_NS | grep "responder-service" | grep "Running" |
 +
 IMPORTANT: Under no circumstances do any of your Envoy proxies have visibility to services that you do not own. This is critical from performance, scalability, and security perspectives.
 
-. Inspect the configuration sent by Pilot to your pod's sidecar using `istioctl`:
+. Inspect the configuration sent by Pilot to the `responder-service` pod's sidecar using `istioctl`:
 +
 -----
-$ istioctl proxy-config cluster -n <POD NAMESPACE> <PODNAME> -o json
+$ istioctl proxy-config cluster -n $ERDEMO_NS \
+    `oc get pod -n $ERDEMO_NS | grep "responder-service" | awk '{print $1}'` -o json | less
 -----
 
 . Search for the destination service name to see an embedded metadata JSON element that names the specific DestinationRule that pod is currently using to communicate with the external service:
 +
 -----
-$ oc rsh `oc get pod -n $ERDEMO_NS | grep "responder-service" | awk '{print $1}'` \
-       curl http://127.0.0.1:15000/config_dump \
-         > $HOME/lab/config_dump  \
-        && cat $HOME/lab/config_dump \
-        | jq ".configs | .[] | select(.dynamic_route_configs) | .dynamic_route_configs" | less
+$ oc -n $ERDEMO_NS rsh -c $ERDEMO_USER-responder-service \
+  `oc get pod -n $ERDEMO_NS | grep "responder-service" | awk '{print $1}'` \
+  curl http://127.0.0.1:15000/config_dump \
+  | jq ".configs | .[] | select(.dynamic_route_configs) | .dynamic_route_configs" | less
 -----
 
 == Explore Network Policies
