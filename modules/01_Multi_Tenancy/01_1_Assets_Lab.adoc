@@ -510,16 +510,170 @@ datagrid-service   3/3     3d5h
 
 The Emergency Response Demo application includes a web console where you can view emergency _incidents_ being accepted by volunteer _responders_.
 
+==== Visit ER Demo App
 . Access the web console at the following URL:
 +
 -----
 echo -en "\n\nhttps://$(oc get route $ERDEMO_USER-emergency-console -o template --template={{.spec.host}} -n $ERDEMO_NS)\n\n"
 -----
 
-. Log in to the web console and simulate an emergency by following the instructions in the link:https://www.erdemo.io/gettingstarted/[Getting Started guide].
+. On the login page, click the *Register Now* button
++
+image::images/er-demo-register-now-button.png[]
 
-. Attempt to create one or more emergency incidents that trigger responses from volunteer community responders.
+. Register a new test user
+.. *Boat Capacity*: How many rescuees the responder can carry in their boat. Setting a boat-capability of 10-12 is typically sufficient to be assigned an incident
+.. *Medical Support*: Set to true if the responder can provide medical/first-aid support.
++
+image::images/er-demo-register-now-responder.png[]
 
+.. Once completed, click: *Register*
+
+
+. Click the *Dashboard* link in the left panel. You will see the main application screen.
++
+image::images/er-demo-main-screen.png[]
+
+
+
+===== Incident Status
+The Incident Status section tracks the data for number of incidents requested, assigned, picked up and rescued. These values update in real-time based on application events.
+
+===== Responder Utilization
+The Responder Utilization section monitors the total number of responders, active and idle responders. This section is also updated in real-time based on application events.
+
+===== Map
+The map shows the location of the incidents, responders and their associated routes. 
+
+==== Mission
+
+When a Responder is assigned an Incident, a Mission is created. The Mission defines where the Responder needs to go to collect the victims of the Incident (the Way Point) and what shelter the victims should be dropped off at (the Target Location). The mission also has details of the responders location history.
+
+. Select the link for *Mission*
+
+** This screen shows the view for an individual responder which shows their current mission, including the router to the Incident and onward route to the shelter.
+
+. Add yourself to the map as a responder
+.. Click any location on the map.
++
+image::images/er-demo-add-as-responder-to-the-map.png[width="80%"]
+
+.. Click your boat icon. It will show the details of your boat profile.
++
+image::images/er-demo-responder-boat-details.png[width="80%"]
+
+.. Click the *Available* button. 
+
+NOTE: Scroll to the bottom of the screen to see the *Available* button.
+
+image::images/er-demo-mission_click_available_button.png[width="80%"]
+
+NOTE: After you click the *Available* button, the button may continue to spin. You don't have to wait for the button to finish spinning. You can safely proceed to the next section.
+
+==== View the Dashboard
+
+. Click the *Dashboard* link
+** In the *Responder Utilization* section, verify that there are 1 total responders. This is based on your recent action.
++
+image::images/er-demo-1-total-responders.png[width="80%"]
+
+==== Incidents
+
+An incident is a request for help from an individual (or group of individuals) that are in need of rescue. Details of an Incident include the location (Lat, Long), the number of people stranded and whether medical assistance is required.
+
+. Click the *Incidents* link
+
+** This screen shows a list of incidents. At the moment, this screen is empty, but we will create incidents in the next section.
++
+image::images/er-demo-incidents-empty.png[width="80%"]
+
+==== Disaster Simulator
+Let's get the web URL for the Disaster Simulator
+
+. In your terminal window, type the following
++
+-----
+echo -en "\n\nhttp://$(oc get route $ERDEMO_USER-disaster-simulator -o template --template={{.spec.host}} -n $ERDEMO_NS)\n\n"
+-----
+
+. In your web browser, visit the above URL.
+
+===== Create Incidents
+
+. In the section for *Create Incidents*, move to the field for *Number of Incidents* and enter `50`.
+. Click *Submit*
++
+image::images/er-demo-create-incidents.png[width="60%"]
+
+** At the top of the screen, you will see the result of the command.
++
+image::images/er-demo-simulator-create-incidents-result.png[]
+
+===== Create Responders
+. In the section for *Create Responders*, move to the field for *Number of Responders* and enter `3`.
+. Click *Submit*
++
+image::images/er-demo-create-responders.png[width="60%"]
+
+** At the top of the screen, you will see the result of the command.
++
+image::images/er-demo-simulator-create-responders-result.png[]
+
+. Move back to the *Emergency Response Demo Web Console* window
+
+. Click the *Dashboard* link.
+
+. Confirm that you have incidents and responders. 
+
+** You will see activity as the responders are assigned to missions. The responders will start moving to rescue the stranded victims.
+
+==== View Your Mission
+
+By this time, your boat should have been assigned to a mission.
+
+. Click the *Mission* link.
+
+* You will see your boat moving towards an incident.
+
+* Once your boat makes it to the incident location, click the *Picked up* button. 
+
+NOTE: Scroll to the bottom of the screen to see the *Picked up* button.
+
+image::images/er-demo-mission-picked-up.png[width="80%"]
+
+* This confirms that you have picked up the passengers and your boat will proceed to the shelter.
+
+==== View Incidents
+
+You can view a list of all incidents and check their status.
+
+. Click the *Incidents* link.
++
+image::images/er-demo-view-all-incidents.png[width="80%"]
+
+==== Process Automation
+
+The Process Service is responsible for managing the overall process flow of the system. The Process Service operates purely on Kafka messages and does not expose any HTTP API - although it does invoke HTTP APIs in the Responder and Incident Priority Services. 
+
+When a new Incident is reported on the topic-incident-event Topic, the process Service kicks off a new BPM process to manage the new Incident. When a Responder is shown as available (via the topic-responder-event Topic), the BPM process is updated to reflect this. As the Mission progresses and additional messages are received on the topic-mission-event Topic, the BPM process is updated to reflect the latest state.
+
+The Process Service sends out multiple types of messages on various Topics in response to the Incident progressing through the Business Process.
+
+Let's view the process diagram for an incident.
+
+. Click the *Dashboard* link.
+
+. Click an Incident on the map.
+** This will show a pop-up for the incident.
++
+image::images/er-demo-incident-popup.png[width="80%"]
+
+. Click the link for *Process Diagram*
+** This will open new tab to view the Process Diagram for this incident.
++
+image::images/er-demo-view-process-diagram.png[width="80%"]
+
+. Review the process diagram for this incident.
 
 == Appendix
 
