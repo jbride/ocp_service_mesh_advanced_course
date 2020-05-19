@@ -370,16 +370,18 @@ $ oc login -u $ERDEMO_USER -p $OCP_PASSWD
 . Retrieve the help documentation provided by the Envoy administration API:
 +
 -----
-$ oc rsh `oc get pod -n $ERDEMO_NS | grep "responder-service" | grep "Running" | awk '{print $1}'` \
+$ oc -n $ERDEMO_NS rsh -c $ERDEMO_USER-responder-service \
+    `oc get pod -n $ERDEMO_NS | grep "responder-service" | grep "Running" | awk '{print $1}'` \
     curl http://127.0.0.1:15000/help
 -----
 
 . Retrieve the status of all of the clusters visible to this Envoy service proxy:
 +
 -----
-$ oc rsh `oc get pod -n $ERDEMO_NS | grep "responder-service" | grep "Running" | awk '{print $1}'` \
-   curl http://127.0.0.1:15000/clusters?format=json \
-   > $HOME/lab/responder-service-clusters.json
+$ oc -n $ERDEMO_NS rsh -c $ERDEMO_USER-responder-service \
+    `oc get pod -n $ERDEMO_NS | grep "responder-service" | grep "Running" | awk '{print $1}'` \
+    curl http://127.0.0.1:15000/clusters?format=json \
+     > $HOME/lab/responder-service-clusters.json
 -----
 
 . Skim through the contents of `$HOME/lab/responder-service-clusters.json`.
@@ -391,17 +393,17 @@ IMPORTANT: Under no circumstances do any of your Envoy proxies have visibility t
 . Inspect the configuration sent by Pilot to your pod's sidecar using `istioctl`:
 +
 -----
-$ istioctl proxy-config cluster -n <POD NAMESPACE> <PODNAME> -o json
+$ istioctl proxy-config cluster -n $ERDEMO_NS \
+    `oc get pod -n $ERDEMO_NS | grep "responder-service" | awk '{print $1}'` -o json | less
 -----
 
 . Search for the destination service name to see an embedded metadata JSON element that names the specific DestinationRule that pod is currently using to communicate with the external service:
 +
 -----
-$ oc rsh `oc get pod -n $ERDEMO_NS | grep "responder-service" | awk '{print $1}'` \
-       curl http://127.0.0.1:15000/config_dump \
-         > $HOME/lab/config_dump  \
-        && cat $HOME/lab/config_dump \
-        | jq ".configs | .[] | select(.dynamic_route_configs) | .dynamic_route_configs" | less
+$ oc -n $ERDEMO_NS rsh -c $ERDEMO_USER-responder-service \
+  `oc get pod -n $ERDEMO_NS | grep "responder-service" | awk '{print $1}'` \
+  curl http://127.0.0.1:15000/config_dump \
+  | jq ".configs | .[] | select(.dynamic_route_configs) | .dynamic_route_configs" | less
 -----
 
 == Explore Network Policies
