@@ -153,6 +153,14 @@ image::images/jaeger-ui-incident-service-trace-tags.png[]
 * `downstream_cluster`, `upstream_cluster`: Information about the incoming (downstream) and outgoing (upstream) requests as recorded by the Envoy proxy.
 * `internal_span_format`: The value here is `zipkin` because Envoy uses a Zipkin-compatible format.
 
+. Obtain the URL to the Emergency Response Demo Console:
++
+----
+$ echo -en "\n\nhttps://emergency-console.$ERDEMO_USER.apps.$SUBDOMAIN_BASE\n\n"
+----
+
+. In a browser window, navigate to the Emergency Response Demo Console.
+
 . Perform a run of the Emergency Response Demo application.
 * Expect this to generate traces for all HTTP-based calls.
 . Refresh the Jaeger UI, click the *Service* list, and expect to see a number of services belonging to the Emergency Response Demo application:
