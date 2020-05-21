@@ -1,0 +1,20 @@
+—————————————————————————————————— \n
+Minor Release \n
+April 29, 2020 \n
+version 0.0.2 \n
+Advanced Application Management Using Red Hat Service Mesh\n
+courseID:\n
+Changes:\n
+- Tech Edit of slides and labs.\n
+- Slides module 6 - differences with upstream istio.\n
+- Module 2: new lab: configure Citadel with external certificates.\n
+- Several fixes to labs.\n
+—————————————————————————————————— \n
+Pilot Release \n
+February 5, 2020 \n
+version 0.0.1 \n
+Advanced Application Management Using Red Hat Service Mesh\n
+courseID: \n
+Changes:\n
+- Initial release.\n
+—————————————————————————————————— \n
