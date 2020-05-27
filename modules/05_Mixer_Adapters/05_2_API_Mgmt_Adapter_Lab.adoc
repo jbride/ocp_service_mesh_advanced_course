@@ -61,6 +61,12 @@ OpenShift Service Mesh allows for enabling or disabling policy evaluation throug
 
 In order for API management policies to be applied to service mesh traffic, policy evaluation in `mixer` needs to be enabled. By default, policy checks are disabled in the service mesh.
 
+. Log in to the OpenShift Container Platform as the control plane admin user:
++
+----
+$ oc login $LAB_MASTER_API -u $SM_CP_ADMIN -p $OCP_PASSWD
+----
+
 . Use the `oc` client to edit the `ServiceMeshControlPlane` resource in the control plane namespace:
 +
 ----
