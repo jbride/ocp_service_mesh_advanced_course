@@ -34,6 +34,12 @@ OpenShift Service Mesh also comes with a FluentD Mixer adapter, which allows you
 
 In this section of the lab, you configure the `stdio` Mixer adapter to log HTTP requests to the services of the Emergency Response Demo application.
 
+. Log in to OpenShift Container Platform as the control plane admin user:
++
+----
+$ oc login $LAB_MASTER_API -u $SM_CP_ADMIN -p $OCP_PASSWD
+----
+
 . Create an `instance` CR in the Emergency Response Demo namespace:
 +
 ----
@@ -127,7 +133,16 @@ spec:
 . In a browser window, navigate to the disaster simulator application at `https://disaster-simulator.$ERDEMO_USER.apps.$SUBDOMAIN_BASE`.
 . Click the *Clear Incidents* button a few times.
 * This causes a REST call to the incident service and the incident priority service.
-. View the logs of the `istio-telemetry` pod in the service mesh control plane and expect to see entries similar to this:
+
+. View the logs of the `istio-telemetry` pod in the service mesh control plane:
++
+----
+oc logs -f $(oc get pods -n $SM_CP_NS | grep Running | \
+  grep istio-telemetry | awk '{ print $1 }') \
+  -c mixer -n $SM_CP_NS
+----
+
+* Expect to see entries similar to this:
 +
 ----
 {"level":"info","time":"2020-01-24T11:46:01.266021Z","instance":"access-log.instance.user1-er-demo","destination":"user1-disaster-simulator","forwardedFor":"10.128.2.115","host":"disaster-simulator.user1.apps.cluster-44e5.44e5.example.opentlc.com","latency":"967.171µs","method":"GET","protocol":"http","responseCode":200,"responseSize":107,"source":"istio-ingressgateway","sourceIp":"10.131.0.167","url":"/c/incidents?clearIncidents=true","user":"cluster.local/ns/admin1-istio-system/sa/istio-ingressgateway-service-account","userAgent":"Mozilla/5.0 (X11; Fedora; Linux x86_64; rv:71.0) Gecko/20100101 Firefox/71.0"}
@@ -140,7 +155,7 @@ spec:
 . To see log entries from requests coming from outside the mesh, execute some `curl` requests against the incident service:
 +
 ----
-$ curl -k incident-service.$ERDEMO_USER.apps.$SUBDOMAIN_BASE/incidents
+$ curl -k https://incident-service.$ERDEMO_USER.apps.$SUBDOMAIN_BASE/incidents
 ----
 
 . View the logs of the `istio-telemetry` pod:
@@ -169,7 +184,7 @@ In this exercise, you introduce a rate limit for calls to the incident service c
 $ oc edit servicemeshcontrolplane full-install -n $SM_CP_NS
 ----
 
-. In the `global` section, change the value of `disablePolicyChecks` to `true`, and then save your changes:
+. In the `global` section, change the value of `disablePolicyChecks` to `false`, and then save your changes:
 +
 ----
     global:
@@ -381,6 +396,15 @@ $ curl -k -v https://incident-service.$ERDEMO_USER.apps.$SUBDOMAIN_BASE/incident
 PERMISSION_DENIED:deny-curl-handler.admin1-istio-system:not allowed
 ----
 * Note that the call fails with a `403 Forbidden` return code and a `not allowed` message.
-. Obtain a remote shell (`oc rsh`) in the the disaster simulator pod, and verify that a `curl` request to the incident service succeeds.
+
+. Obtain a remote shell (`oc rsh`) in the the disaster simulator pod and perform a `curl` request to the incident service.
++
+----
+oc -n $ERDEMO_NS rsh -c $ERDEMO_USER-disaster-simulator \
+    `oc get pod -n $ERDEMO_NS | grep "disaster-simulator" | grep "Running" | awk '{print $1}'` \
+    curl -v http://$ERDEMO_USER-incident-service.$ERDEMO_USER-er-demo.svc:8080/incidents
+----
+
+* Verify the requests returns a successful 200 response code.
 
 This concludes the lab. You learned about a few of the built-in Mixer adapters and created and deployed custom resources to configure them. To learn more, see this list of link:https://istio.io/docs/reference/config/policy-and-telemetry/adapters/[built-in Mixer adapters].
