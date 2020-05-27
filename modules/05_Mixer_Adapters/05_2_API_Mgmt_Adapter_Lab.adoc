@@ -61,6 +61,12 @@ OpenShift Service Mesh allows for enabling or disabling policy evaluation throug
 
 In order for API management policies to be applied to service mesh traffic, policy evaluation in `mixer` needs to be enabled. By default, policy checks are disabled in the service mesh.
 
+. Log in to the OpenShift Container Platform as the control plane admin user:
++
+----
+$ oc login $LAB_MASTER_API -u $SM_CP_ADMIN -p $OCP_PASSWD
+----
+
 . Use the `oc` client to edit the `ServiceMeshControlPlane` resource in the control plane namespace:
 +
 ----
@@ -330,11 +336,11 @@ items:
   spec:
     adapter: threescale
     connection:
-      address: threescaleistioadapter:3333
+      address: threescale-istio-adapter:3333
     params:
       access_token: secret-token
       service_id: "15"
-      system_url: https://user1-3scale-mt-admin.apps.4a64.openshift.opentlc.com
+      system_url: https://user50-3scale-mt-admin.apps.4a64.openshift.opentlc.com
 
 -----
 
@@ -352,9 +358,9 @@ $ echo -en "\n\nhttps://$(oc get routes -n $API_MANAGER_NS | grep admin | grep $
 .. *Username*: `$API_TENANT_USERNAME`
 .. *Password*: `$API_TENANT_PASSWORD`
 
-. In your `incident-service` API, navigate to *Integration -> Configuration* and click *edit APIcast configuration*:
+. In your `incident-service` API, navigate to *Integration -> Settings*:
 +
-image::images/edit_apicast.png[]
+image::images/edit_apicast_1.png[]
 
 . Change the value of *Production Public Base URL* to the value of the following:
 +
@@ -364,16 +370,19 @@ $ echo -en "\nhttps://`oc get route incident-service-gateway -n $SM_CP_NS -o tem
 +
 image::images/istioingress_public_url.png[]
 
-. Save the configuration change by scrolling down to the bottom of the page and clicking *Update & test in Staging Environment*:
+. Save the configuration change by scrolling down to the bottom of the page and clicking *Update Product*:
 +
-image::images/back_to_integration.png[]
+image::images/update_product.png[]
 
 
 . Promote the change to production:
-.. Click *Back to Integration & Configuration*.
-.. Click *Promote to Production*:
+.. Navigate to *Integration -> Configuration*.
+.. Click *Promote to Staging APIcast*:
 +
-image::images/promote.png[]
+image::images/promote_to_staging.png[]
+.. Click *Promote to Production APIcast*
++
+image::images/promote_to_production.png[]
 
 
 
@@ -439,11 +448,12 @@ However, all POST requests to the `/incidents` endpoint continue to have API pol
 
 [NOTE]
 ====
-For this section of the lab to work as expected, you need to delete the `ServiceRole` and `ServiceRoleBinding` resources you created in the Secure mTLS lab in module 2.
+For this section of the lab to work as expected, you need to delete the `AuthorizationPolicy` resources you created in the Secure mTLS lab in module 2.
 
 ----
-$ oc delete servicerole incident-service-ingress -n $ERDEMO_NS
-$ oc delete servicerolebinding incident-service-ingress -n $ERDEMO_NS
+$ oc delete AuthorizationPolicy incident-service-external -n $ERDEMO_NS
+$ oc delete AuthorizationPolicy deny-all-incident-service -n $ERDEMO_NS
+$ oc delete AuthorizationPolicy allow-incident-service-internal -n $ERDEMO_NS
 ----
 ====
 
@@ -462,21 +472,17 @@ $ echo -en "\n\nhttps://$(oc get routes -n $API_MANAGER_NS | grep admin | grep $
 .. *Username*: `$API_TENANT_USERNAME`
 .. *Password*: `$API_TENANT_PASSWORD`
 
-. In your `incident-service` API, navigate to *Integration -> Configuration* and click *edit APIcast configuration*:
-+
-image::images/edit_apicast_configs.png[]
+. In your `incident-service` API, navigate to *Integration -> Mapping Rules*:
 
-. Scroll down to the *MAPPING RULES* section and add a new mapping rule with the following values:
+. Add a new mapping rule with the following values:
 .. *Verb*: `POST`
 .. *Pattern*: `/`
 +
-image::images/post_mapping.png[]
+image::images/post_mapping_1.png[]
 
-. Scroll down to the bottom and click *Update & test in Staging Environment*.
-. Click *Back to Integration & Configuration*.
-. Click *Promote to Production*:
-+
-image::images/promote.png[]
+. Navigate to *Integration -> Configuration*.
+.. Click *Promote to Staging APIcast*:
+.. Click *Promote to Production APIcast*
 
 . At the command line, modify the existing `usethreescale` rule in `$SM_CP_NS`:
 +
