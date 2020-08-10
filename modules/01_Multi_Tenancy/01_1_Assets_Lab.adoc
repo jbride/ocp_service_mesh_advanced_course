@@ -80,6 +80,19 @@ $ curl https://raw.githubusercontent.com/gpe-mw-training/ocp_service_mesh_advanc
 $ $HOME/lab/set_env_vars.sh
 -----
 
+. Ensure that the environment variables are set correctly.
++
+----
+$ echo $GW_PROJECT
+----
++
+.Sample Output
+----
+user2-gw
+----
++
+NOTE: If you see empty output, make sure you source your `.bashrc` file using `source $HOME/.bashrc`.
+
 == Review OpenShift Container Platform Assets
 
 Your lab is built on a shared OpenShift Container Platform 4 cluster in the cloud.
