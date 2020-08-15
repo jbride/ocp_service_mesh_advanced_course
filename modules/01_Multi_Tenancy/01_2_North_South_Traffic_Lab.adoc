@@ -69,14 +69,13 @@ stage-apicast   1          1         1         config
 . Get the value of `$THREESCALE_PORTAL_ENDPOINT` from the `apicast-configuration-url-secret` secret in the `$GW_PROJECT` namespace:
 +
 ----
-$ echo $(oc get secret apicast-configuration-url-secret -o yaml -n $GW_PROJECT | grep password | awk '{print $2}' | base64 -d)
+$ echo $(oc get secret apicast-configuration-url-secret -o yaml -n $GW_PROJECT | grep password -m1 | awk '{print $2}' | base64 -d)
 ----
 +
 .Sample Output
 ----
 https://95d1c0a311ba965cd23562164db2126516344b6ff5985b49a4282662181e68ae@user50-3scale-mt-api0-admin.apps.cluster-094b.094b.example.opentlc.com
 ----
-
 
 * The API gateways use the value of `$THREESCALE_PORTAL_ENDPOINT` to invoke the _system-provider_ of your API Manager tenant and retrieve details of your APIs, or _policy_config_.
 
@@ -128,7 +127,7 @@ $ echo "export SYSTEM_PROVIDER_URL=$(oc get routes -n $API_MANAGER_NS | grep adm
 . Set an `API_ADMIN_ACCESS_TOKEN` environment variable to use later:
 +
 -----
-$ echo "export API_ADMIN_ACCESS_TOKEN=$(oc get secret apicast-configuration-url-secret -o yaml -n $GW_PROJECT | grep password | awk '{print $2}' | base64 -d | cut -d'@' -f1 | cut -d'/' -f3)" >> $HOME/.bashrc
+$ echo "export API_ADMIN_ACCESS_TOKEN=$(oc get secret apicast-configuration-url-secret -o yaml -n $GW_PROJECT | grep password -m1 | awk '{print $2}' | base64 -d | cut -d'@' -f1 | cut -d'/' -f3)" >> $HOME/.bashrc
 -----
 
 * This access token is specific to your API tenant and is used by API gateways to invoke the system management API of 3scale API Management.

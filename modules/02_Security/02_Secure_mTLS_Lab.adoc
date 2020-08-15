@@ -36,8 +36,8 @@ $ oc get servicemeshcontrolplane -n $SM_CP_NS
 +
 .Sample Output
 ----
-NAME           READY
-full-install   True
+NAME           READY   STATUS             TEMPLATE   VERSION   AGE
+full-install   9/9     UpdateSuccessful   default    v1.1      2d1h
 ----
 
 . Review the `ServiceMeshControlPlane` custom resource:
@@ -408,25 +408,25 @@ spec:
   [...]
 ----
 . Save the `ServiceMeshControlPlane` resource.
-. Verify that the `rewriteAppHTTPProbe` directive has been added to the `istio-sidecar-injector` ConfigMap:
-+
-----
-Name:         istio-sidecar-injector
-Namespace:    admin1-istio-system
-Labels:       [...]
-Annotations:  [...]
-Data
-====
-config:
----
-policy: disabled
-template: |-
-  annotations:
-    k8s.v1.cni.cncf.io/networks: istio-cni
-  rewriteAppHTTPProbe: true
-  containers:
-  [...]
-----
+// . Verify that the `rewriteAppHTTPProbe` directive has been added to the `istio-sidecar-injector` ConfigMap:
+// +
+// ----
+// Name:         istio-sidecar-injector
+// Namespace:    admin1-istio-system
+// Labels:       [...]
+// Annotations:  [...]
+// Data
+// ====
+// config:
+// ---
+// policy: disabled
+// template: |-
+//   annotations:
+//     k8s.v1.cni.cncf.io/networks: istio-cni
+//   rewriteAppHTTPProbe: true
+//   containers:
+//   [...]
+// ----
 . Redeploy the incident service:
 +
 ----
@@ -2001,112 +2001,112 @@ https://emergency-console.$ERDEMO_USER.apps.$SUBDOMAIN_BASE/*
 
 . Test access to the emergency console in a browser window using the `https://emergency-console.$ERDEMO_USER.apps.$SUBDOMAIN_BASE` URL.
 
-=== Configure PostgreSQL
+// === Configure PostgreSQL
 
-Service mesh mTLS can also be enabled for TCP traffic. The incident service, responder service, and process service use a PostgreSQL database. With OpenShift Service Mesh you can secure the communication between the service and the database.
+// Service mesh mTLS can also be enabled for TCP traffic. The incident service, responder service, and process service use a PostgreSQL database. With OpenShift Service Mesh you can secure the communication between the service and the database.
 
-. Scale down the incident service and responder service pods to `0` pods.
-. Annotate the PostgreSQL pod with the `sidecar.istio.io/inject: "true"` annotation:
-+
-----
-$ oc patch dc postgresql --type='json' -p "[{\"op\": \"add\", \"path\": \"/spec/template/metadata\", \"value\": {\"annotations\":{\"sidecar.istio.io/inject\": \"true\"}, \"labels\":{\"app\":\"postgresql\", \"name\":\"postgresql\"}}}]" -n $ERDEMO_NS
-----
+// . Scale down the incident service and responder service pods to `0` pods.
+// . Annotate the PostgreSQL pod with the `sidecar.istio.io/inject: "true"` annotation:
+// +
+// ----
+// $ oc patch dc postgresql --type='json' -p "[{\"op\": \"add\", \"path\": \"/spec/template/metadata\", \"value\": {\"annotations\":{\"sidecar.istio.io/inject\": \"true\"}, \"labels\":{\"app\":\"postgresql\", \"name\":\"postgresql\"}}}]" -n $ERDEMO_NS
+// ----
 
-. Create a `Policy` resource for the PostgreSQL service:
-+
-----
-$ echo "---
-apiVersion: authentication.istio.io/v1alpha1
-kind: Policy
-metadata:
-  name: postgresql-mtls
-spec:
-  peers:
-  - mtls:
-      mode: PERMISSIVE
-  targets:
-  - name: postgresql
-" > postgresql-policy.yml
-----
-+
-----
-$ oc create -f postgresql-policy.yml -n $ERDEMO_NS
-----
+// . Create a `Policy` resource for the PostgreSQL service:
+// +
+// ----
+// $ echo "---
+// apiVersion: authentication.istio.io/v1alpha1
+// kind: Policy
+// metadata:
+//   name: postgresql-mtls
+// spec:
+//   peers:
+//   - mtls:
+//       mode: PERMISSIVE
+//   targets:
+//   - name: postgresql
+// " > postgresql-policy.yml
+// ----
+// +
+// ----
+// $ oc create -f postgresql-policy.yml -n $ERDEMO_NS
+// ----
 
-. Create a `DestinationRule` resource for the PostgreSQL service:
-+
-----
-$ echo "---
-apiVersion: networking.istio.io/v1alpha3
-kind: DestinationRule
-metadata:
-  name: postgresql-client-mtls
-spec:
-  host: postgresql.$ERDEMO_NS.svc.cluster.local
-  trafficPolicy:
-    tls:
-      mode: ISTIO_MUTUAL
-" > postgresql-mtls-destinationrule.yml
-----
-+
-----
-$ oc create -f postgresql-mtls-destinationrule.yml -n $ERDEMO_NS
-----
+// . Create a `DestinationRule` resource for the PostgreSQL service:
+// +
+// ----
+// $ echo "---
+// apiVersion: networking.istio.io/v1alpha3
+// kind: DestinationRule
+// metadata:
+//   name: postgresql-client-mtls
+// spec:
+//   host: postgresql.$ERDEMO_NS.svc.cluster.local
+//   trafficPolicy:
+//     tls:
+//       mode: ISTIO_MUTUAL
+// " > postgresql-mtls-destinationrule.yml
+// ----
+// +
+// ----
+// $ oc create -f postgresql-mtls-destinationrule.yml -n $ERDEMO_NS
+// ----
 
-. After the PostgreSQL pods redeploy successfully, scale up the incident service and responder service.
+// . After the PostgreSQL pods redeploy successfully, scale up the incident service and responder service.
 
-=== Configure Process Service PostgreSQL
+// === Configure Process Service PostgreSQL
 
-. Scale the process service down to `0` pods.
-. Annotate the process service PostgreSQL pod with the `sidecar.istio.io/inject: "true"` annotation:
-+
-----
-$ oc patch dc process-service-postgresql --type='json' -p "[{\"op\": \"add\", \"path\": \"/spec/template/metadata\", \"value\": {\"annotations\":{\"sidecar.istio.io/inject\": \"true\"}, \"labels\":{\"app\":\"$ERDEMO_USER-process-service\", \"name\":\"process-service-postgresql\"}}}]" -n $ERDEMO_NS
+// . Scale the process service down to `0` pods.
+// . Annotate the process service PostgreSQL pod with the `sidecar.istio.io/inject: "true"` annotation:
+// +
+// ----
+// $ oc patch dc process-service-postgresql --type='json' -p "[{\"op\": \"add\", \"path\": \"/spec/template/metadata\", \"value\": {\"annotations\":{\"sidecar.istio.io/inject\": \"true\"}, \"labels\":{\"app\":\"$ERDEMO_USER-process-service\", \"name\":\"process-service-postgresql\"}}}]" -n $ERDEMO_NS
 
-----
+// ----
 
-. Create a `Policy` resource for the process service PostgreSQL service:
-+
-----
-$ echo "---
-apiVersion: authentication.istio.io/v1alpha1
-kind: Policy
-metadata:
-  name: process-postgresql-mtls
-spec:
-  peers:
-  - mtls:
-      mode: PERMISSIVE
-  targets:
-  - name: process-service-postgresql
-" > process-postgresql-policy.yml
-----
-+
-----
-$ oc create -f process-postgresql-policy.yml -n $ERDEMO_NS
-----
+// . Create a `Policy` resource for the process service PostgreSQL service:
+// +
+// ----
+// $ echo "---
+// apiVersion: authentication.istio.io/v1alpha1
+// kind: Policy
+// metadata:
+//   name: process-postgresql-mtls
+// spec:
+//   peers:
+//   - mtls:
+//       mode: PERMISSIVE
+//   targets:
+//   - name: process-service-postgresql
+// " > process-postgresql-policy.yml
+// ----
+// +
+// ----
+// $ oc create -f process-postgresql-policy.yml -n $ERDEMO_NS
+// ----
 
-. Create a `DestinationRule` resource for the process service PostgreSQL service:
-+
-----
-$ echo "---
-apiVersion: networking.istio.io/v1alpha3
-kind: DestinationRule
-metadata:
-  name: process-service-postgresql-client-mtls
-spec:
-  host: $ERDEMO_USER-process-service-postgresql.$ERDEMO_NS.svc.cluster.local
-  trafficPolicy:
-    tls:
-      mode: ISTIO_MUTUAL
-" > process-postgresql-mtls-destinationrule.yml
-----
-+
-----
-$ oc create -f process-postgresql-mtls-destinationrule.yml -n $ERDEMO_NS
-----
+// . Create a `DestinationRule` resource for the process service PostgreSQL service:
+// +
+// ----
+// $ echo "---
+// apiVersion: networking.istio.io/v1alpha3
+// kind: DestinationRule
+// metadata:
+//   name: process-service-postgresql-client-mtls
+// spec:
+//   host: $ERDEMO_USER-process-service-postgresql.$ERDEMO_NS.svc.cluster.local
+//   trafficPolicy:
+//     tls:
+//       mode: ISTIO_MUTUAL
+// " > process-postgresql-mtls-destinationrule.yml
+// ----
+// +
+// ----
+// $ oc create -f process-postgresql-mtls-destinationrule.yml -n $ERDEMO_NS
+// ----
 
-. After the PostgreSQL pod redeploys successfully, scale up the process service.
+// . After the PostgreSQL pod redeploys successfully, scale up the process service.
 
 === Set Strict mTLS Policy
 
@@ -2122,323 +2122,323 @@ $ oc patch policy incident-service-mtls --type='json' -p '[{"op":"replace","path
 . Test the application again.
 * Expect everything to work correctly.
 
-With strict mTLS enforced, the Prometheus pod in the `$ERDEMO_USER-er-metrics` namespace can no longer scrape metric data from the pods in the `$ERDEMO_USER-er-demo` namespace.
-Adding the `$ERDEMO_USER-er-metrics` namespace to the service mesh and injecting the Envoy proxy in the Prometheus pod does not work because the scraping targets for Prometheus are pod IP addresses, not service names. The Envoy proxy does not process the traffic properly when directed to a pod IP instead of a service URL.
+// With strict mTLS enforced, the Prometheus pod in the `$ERDEMO_USER-er-metrics` namespace can no longer scrape metric data from the pods in the `$ERDEMO_USER-er-demo` namespace.
+// Adding the `$ERDEMO_USER-er-metrics` namespace to the service mesh and injecting the Envoy proxy in the Prometheus pod does not work because the scraping targets for Prometheus are pod IP addresses, not service names. The Envoy proxy does not process the traffic properly when directed to a pod IP instead of a service URL.
 
-Possible solutions:
+// Possible solutions:
 
-- Applications expose Prometheus metrics on a separate port and TLS is disabled for that port in the DestinationRule.
-- Applications expose Prometheus metrics on a separate port, and that port is configured for pass-through in the service mesh proxy init container (which sets up the networking in the pod so that all traffic is intercepted by the proxy sidecar). This is a mesh-wide setting, so all application services must use the same port. Also it is not possible to configure the init container settings using the service mesh CR.
+// - Applications expose Prometheus metrics on a separate port and TLS is disabled for that port in the DestinationRule.
+// - Applications expose Prometheus metrics on a separate port, and that port is configured for pass-through in the service mesh proxy init container (which sets up the networking in the pod so that all traffic is intercepted by the proxy sidecar). This is a mesh-wide setting, so all application services must use the same port. Also it is not possible to configure the init container settings using the service mesh CR.
 
-[NOTE]
-====
-* When using mTLS to the PostgreSQL database, the process service does not always start correctly, and frequently shows database errors in the logs, including the following:
-+
-----
-org.postgresql.util.PSQLException: An I/O error occurred while sending to the backend.
+// [NOTE]
+// ====
+// * When using mTLS to the PostgreSQL database, the process service does not always start correctly, and frequently shows database errors in the logs, including the following:
+// +
+// ----
+// org.postgresql.util.PSQLException: An I/O error occurred while sending to the backend.
 
-org.postgresql.util.PSQLException: Connection has been closed automatically because a new connection was opened for the same PooledConnection or the PooledConnection has been closed.
-----
-+
-The second error requires further investigation.
+// org.postgresql.util.PSQLException: Connection has been closed automatically because a new connection was opened for the same PooledConnection or the PooledConnection has been closed.
+// ----
+// +
+// The second error requires further investigation.
 
-* The communication between the mission service and the data grid is not managed by the service mesh. There are several bug reports about Istio mTLS not working with StatefulSets. Also, the communication between the mission service and the data grid uses the HotRod protocol, with support for transport-level security.
+// * The communication between the mission service and the data grid is not managed by the service mesh. There are several bug reports about Istio mTLS not working with StatefulSets. Also, the communication between the mission service and the data grid uses the HotRod protocol, with support for transport-level security.
 
-* The communication between the services and Kafka is not managed by the service mesh. Strimzi/Kafka has its own security mechanisms, including transport security and authentication/authorization.
-====
+// * The communication between the services and Kafka is not managed by the service mesh. Strimzi/Kafka has its own security mechanisms, including transport security and authentication/authorization.
+// ====
 
 
-== Set Authorization Policy for Services using Istio RBAC
+// == Set Authorization Policy for Services using Istio RBAC
 
-[WARNING]
-====
-Since Istio v1.4, _RBAC_ has been deprecated in favor of _AuthorizationPolicy_. However RBAC is still supported for backward compatibility reasons. Hence, the exercises in this lab section will still work, but are no longer the preferred way to define authorization policies for the service mesh.
-The next section of this lab handles authorization policies using AuthorizationPolicy resources.
-Feel free to skip this section, and move directly to the next section.
-====
+// [WARNING]
+// ====
+// Since Istio v1.4, _RBAC_ has been deprecated in favor of _AuthorizationPolicy_. However RBAC is still supported for backward compatibility reasons. Hence, the exercises in this lab section will still work, but are no longer the preferred way to define authorization policies for the service mesh.
+// The next section of this lab handles authorization policies using AuthorizationPolicy resources.
+// Feel free to skip this section, and move directly to the next section.
+// ====
 
-With a service mesh authorization policy, you can define service-to-service authorization policies to control which services can communicate with other services.
+// With a service mesh authorization policy, you can define service-to-service authorization policies to control which services can communicate with other services.
 
-Service mesh authorization is enabled using a `ServiceMeshRbacConfig` resource. The authorization policies are defined using a combination of `ServiceRole` and `ServiceRoleBinding` resources. `ServiceRole` defines a list of permissions, which are then bound to one or more `Subjects` using a `ServiceRoleBinding` resource.
+// Service mesh authorization is enabled using a `ServiceMeshRbacConfig` resource. The authorization policies are defined using a combination of `ServiceRole` and `ServiceRoleBinding` resources. `ServiceRole` defines a list of permissions, which are then bound to one or more `Subjects` using a `ServiceRoleBinding` resource.
 
-As a use case for this lab, you define and enable the following policy:
+// As a use case for this lab, you define and enable the following policy:
 
-* All services within the Emergency Response Demo application are allowed to call the incident service REST APIs, using all HTTP methods.
-* When accessed from outside the cluster, only the APIs that use HTTP GET are allowed.
+// * All services within the Emergency Response Demo application are allowed to call the incident service REST APIs, using all HTTP methods.
+// * When accessed from outside the cluster, only the APIs that use HTTP GET are allowed.
 
-The service mesh RBAC policy requires mTLS strict mode.
+// The service mesh RBAC policy requires mTLS strict mode.
 
-. Enable mesh-wide strict mTLS by patching the default `ServiceMeshPolicy` resource to change the mTLS mode from `PERMISSIVE` to `STRICT`:
-+
-----
-$ oc patch servicemeshpolicy default --type='json' -p '[{"op":"replace","path":"/spec/peers/0/mtls/mode","value":"STRICT"}]' -n $SM_CP_NS
-----
+// . Enable mesh-wide strict mTLS by patching the default `ServiceMeshPolicy` resource to change the mTLS mode from `PERMISSIVE` to `STRICT`:
+// +
+// ----
+// $ oc patch servicemeshpolicy default --type='json' -p '[{"op":"replace","path":"/spec/peers/0/mtls/mode","value":"STRICT"}]' -n $SM_CP_NS
+// ----
 
-. Create a `ServiceMeshRbacConfig` resource:
-.. On the local file system, create a file called `servicemesh-rbac.yml`:
-+
-----
-$ echo "---
-apiVersion: rbac.maistra.io/v1
-kind: ServiceMeshRbacConfig
-metadata:
-  name: default
-spec:
-  mode: ON_WITH_INCLUSION
-  inclusion:
-    services:
-      - $ERDEMO_USER-incident-service.$ERDEMO_NS.svc.cluster.local
-" > servicemesh-rbac.yml
-----
+// . Create a `ServiceMeshRbacConfig` resource:
+// .. On the local file system, create a file called `servicemesh-rbac.yml`:
+// +
+// ----
+// $ echo "---
+// apiVersion: rbac.maistra.io/v1
+// kind: ServiceMeshRbacConfig
+// metadata:
+//   name: default
+// spec:
+//   mode: ON_WITH_INCLUSION
+//   inclusion:
+//     services:
+//       - $ERDEMO_USER-incident-service.$ERDEMO_NS.svc.cluster.local
+// " > servicemesh-rbac.yml
+// ----
 
-** The name of the `ServiceMeshRbacConfig` resource must be `default`.
-** The mode is set to `ON_WITH_INCLUSION`. This means that RBAC is enabled only for the services listed in the `inclusion` whitelist. Other possible values are `ON`, `OFF`, and `ON_WITH_EXCLUSION`.
-** In this case, service mesh authorization is enabled only for the incident service in the Emergency Response Demo namespace.
-. Create the resource in the service mesh control plane namespace:
-+
-----
-$ oc create -f servicemesh-rbac.yml -n $SM_CP_NS
-----
+// ** The name of the `ServiceMeshRbacConfig` resource must be `default`.
+// ** The mode is set to `ON_WITH_INCLUSION`. This means that RBAC is enabled only for the services listed in the `inclusion` whitelist. Other possible values are `ON`, `OFF`, and `ON_WITH_EXCLUSION`.
+// ** In this case, service mesh authorization is enabled only for the incident service in the Emergency Response Demo namespace.
+// . Create the resource in the service mesh control plane namespace:
+// +
+// ----
+// $ oc create -f servicemesh-rbac.yml -n $SM_CP_NS
+// ----
 
-. At this point, no service can call the incident service from within the mesh or from outside the mesh. Test this as follows:
-.. Call the `/incidents` REST endpoint of the incident service with `curl`:
-+
-----
-$ INCIDENT_SERVICE_URL=$(oc get route incident-service-gateway -n $SM_CP_NS -o template --template={{.spec.host}})
-$ curl -v -k https://$INCIDENT_SERVICE_URL/incidents
-----
-+
-.Sample Output
-----
-*   Trying 35.156.140.248:443...
-* TCP_NODELAY set
-* Connected to incident-service.erd.apps.cluster-a3c6.a3c6.example.opentlc.com (35.156.140.248) port 443 (#0)
-* ALPN, offering h2
-* ALPN, offering http/1.1
-* successfully set certificate verify locations:
-*   CAfile: /etc/pki/tls/certs/ca-bundle.crt
-  CApath: none
-* TLSv1.3 (OUT), TLS handshake, Client hello (1):
-* TLSv1.3 (IN), TLS handshake, Server hello (2):
-* TLSv1.3 (IN), TLS handshake, Encrypted Extensions (8):
-* TLSv1.3 (IN), TLS handshake, Certificate (11):
-* TLSv1.3 (IN), TLS handshake, CERT verify (15):
-* TLSv1.3 (IN), TLS handshake, Finished (20):
-* TLSv1.3 (OUT), TLS change cipher, Change cipher spec (1):
-* TLSv1.3 (OUT), TLS handshake, Finished (20):
-* SSL connection using TLSv1.3 / TLS_AES_256_GCM_SHA384
-* ALPN, server accepted to use h2
-* Server certificate:
-*  subject: CN=*.erd.apps.cluster-a3c6.a3c6.example.opentlc.com
-*  start date: Oct 25 15:12:23 2019 GMT
-*  expire date: Jan 23 15:12:23 2020 GMT
-*  issuer: C=US; O=Let's Encrypt; CN=Let's Encrypt Authority X3
-*  SSL certificate verify result: unable to get local issuer certificate (20), continuing anyway.
-* Using HTTP2, server supports multi-use
-* Connection state changed (HTTP/2 confirmed)
-* Copying HTTP/2 data in stream buffer to connection buffer after upgrade: len=0
-* Using Stream ID: 1 (easy handle 0x562314295a40)
-> GET /incidents HTTP/2
-> Host: incident-service.erd.apps.cluster-a3c6.a3c6.example.opentlc.com
-> User-Agent: curl/7.65.3
-> Accept: */*
->
-* TLSv1.3 (IN), TLS handshake, Newsession Ticket (4):
-* TLSv1.3 (IN), TLS handshake, Newsession Ticket (4):
-* old SSL session ID is stale, removing
-* Connection state changed (MAX_CONCURRENT_STREAMS == 4294967295)!
-< HTTP/2 403
-< content-length: 19
-< content-type: text/plain
-< date: Wed, 30 Oct 2019 20:09:18 GMT
-< server: istio-envoy
-< x-envoy-upstream-service-time: 7
-<
-* Connection #0 to host incident-service.erd.apps.cluster-a3c6.a3c6.example.opentlc.com left intact
-RBAC: access denied
-----
-** The HTTP return code is 403, with message "RBAC: access denied".
-.. Test a call to the incident service from within the cluster by opening the *Disaster Simulator* home page in a browser and clicking *Clear Incidents*. Then check the logs of the disaster simulator pod and expect to see something similar to this:
-+
-----
-Oct 30, 2019 2:19:52 PM com.redhat.cajun.navy.datagenerate.RestClientVerticle lambda$resetIncidents$4
-INFO: Reset incidents: HTTP response status 403
-----
+// . At this point, no service can call the incident service from within the mesh or from outside the mesh. Test this as follows:
+// .. Call the `/incidents` REST endpoint of the incident service with `curl`:
+// +
+// ----
+// $ INCIDENT_SERVICE_URL=$(oc get route incident-service-gateway -n $SM_CP_NS -o template --template={{.spec.host}})
+// $ curl -v -k https://$INCIDENT_SERVICE_URL/incidents
+// ----
+// +
+// .Sample Output
+// ----
+// *   Trying 35.156.140.248:443...
+// * TCP_NODELAY set
+// * Connected to incident-service.erd.apps.cluster-a3c6.a3c6.example.opentlc.com (35.156.140.248) port 443 (#0)
+// * ALPN, offering h2
+// * ALPN, offering http/1.1
+// * successfully set certificate verify locations:
+// *   CAfile: /etc/pki/tls/certs/ca-bundle.crt
+//   CApath: none
+// * TLSv1.3 (OUT), TLS handshake, Client hello (1):
+// * TLSv1.3 (IN), TLS handshake, Server hello (2):
+// * TLSv1.3 (IN), TLS handshake, Encrypted Extensions (8):
+// * TLSv1.3 (IN), TLS handshake, Certificate (11):
+// * TLSv1.3 (IN), TLS handshake, CERT verify (15):
+// * TLSv1.3 (IN), TLS handshake, Finished (20):
+// * TLSv1.3 (OUT), TLS change cipher, Change cipher spec (1):
+// * TLSv1.3 (OUT), TLS handshake, Finished (20):
+// * SSL connection using TLSv1.3 / TLS_AES_256_GCM_SHA384
+// * ALPN, server accepted to use h2
+// * Server certificate:
+// *  subject: CN=*.erd.apps.cluster-a3c6.a3c6.example.opentlc.com
+// *  start date: Oct 25 15:12:23 2019 GMT
+// *  expire date: Jan 23 15:12:23 2020 GMT
+// *  issuer: C=US; O=Let's Encrypt; CN=Let's Encrypt Authority X3
+// *  SSL certificate verify result: unable to get local issuer certificate (20), continuing anyway.
+// * Using HTTP2, server supports multi-use
+// * Connection state changed (HTTP/2 confirmed)
+// * Copying HTTP/2 data in stream buffer to connection buffer after upgrade: len=0
+// * Using Stream ID: 1 (easy handle 0x562314295a40)
+// > GET /incidents HTTP/2
+// > Host: incident-service.erd.apps.cluster-a3c6.a3c6.example.opentlc.com
+// > User-Agent: curl/7.65.3
+// > Accept: */*
+// >
+// * TLSv1.3 (IN), TLS handshake, Newsession Ticket (4):
+// * TLSv1.3 (IN), TLS handshake, Newsession Ticket (4):
+// * old SSL session ID is stale, removing
+// * Connection state changed (MAX_CONCURRENT_STREAMS == 4294967295)!
+// < HTTP/2 403
+// < content-length: 19
+// < content-type: text/plain
+// < date: Wed, 30 Oct 2019 20:09:18 GMT
+// < server: istio-envoy
+// < x-envoy-upstream-service-time: 7
+// <
+// * Connection #0 to host incident-service.erd.apps.cluster-a3c6.a3c6.example.opentlc.com left intact
+// RBAC: access denied
+// ----
+// ** The HTTP return code is 403, with message "RBAC: access denied".
+// .. Test a call to the incident service from within the cluster by opening the *Disaster Simulator* home page in a browser and clicking *Clear Incidents*. Then check the logs of the disaster simulator pod and expect to see something similar to this:
+// +
+// ----
+// Oct 30, 2019 2:19:52 PM com.redhat.cajun.navy.datagenerate.RestClientVerticle lambda$resetIncidents$4
+// INFO: Reset incidents: HTTP response status 403
+// ----
 
-. Create a `ServiceRole` resource for the services in the Emergency Response Demo namespace:
-.. On the local file system, create a file called `sr-incident-service-internal.yml`:
-+
-----
-$ echo "---
-apiVersion: rbac.istio.io/v1alpha1
-kind: ServiceRole
-metadata:
-  name: incident-service-internal
-spec:
-  rules:
-    - services: [\"$ERDEMO_USER-incident-service.$ERDEMO_NS.svc.cluster.local\"]
-      methods: [\"*\"]
-" > sr-incident-service-internal.yml
-----
-** This policy allows calls to the incident service using all HTTP methods.
-.. Create the `ServiceRole` resource in the Emergency Response Demo namespace:
-+
-----
-$ oc create -f sr-incident-service-internal.yml -n $ERDEMO_NS
-----
+// . Create a `ServiceRole` resource for the services in the Emergency Response Demo namespace:
+// .. On the local file system, create a file called `sr-incident-service-internal.yml`:
+// +
+// ----
+// $ echo "---
+// apiVersion: rbac.istio.io/v1alpha1
+// kind: ServiceRole
+// metadata:
+//   name: incident-service-internal
+// spec:
+//   rules:
+//     - services: [\"$ERDEMO_USER-incident-service.$ERDEMO_NS.svc.cluster.local\"]
+//       methods: [\"*\"]
+// " > sr-incident-service-internal.yml
+// ----
+// ** This policy allows calls to the incident service using all HTTP methods.
+// .. Create the `ServiceRole` resource in the Emergency Response Demo namespace:
+// +
+// ----
+// $ oc create -f sr-incident-service-internal.yml -n $ERDEMO_NS
+// ----
 
-. Create a `ServiceRoleBinding` resource referencing the `ServiceRole` resource you just created and bind it to all services in the Emergency Response Demo namespace:
-.. On the local file system, create a file called `srb-incident-service-internal.yml`:
-+
-----
-$ echo "---
-apiVersion: rbac.istio.io/v1alpha1
-kind: ServiceRoleBinding
-metadata:
-  name: incident-service-internal
-spec:
-  subjects:
-    - properties:
-        source.namespace: \"$ERDEMO_NS\"
-  roleRef:
-    kind: ServiceRole
-    name: \"incident-service-internal\"
-" > srb-incident-service-internal.yml
-----
-.. Create the `ServiceRoleBinding` resource in the Emergency Response Demo namespace:
-+
-----
-$ oc create -f srb-incident-service-internal.yml -n $ERDEMO_NS
-----
-. Confirm that the incident service can now be called from other services in the Emergency Response Demo namespace, but not from services outside the namespace:
-.. From the *Disaster Simulator* home page, click *Clear Incidents*. Review the disaster simulator pod logs and expect to see something similar to this:
-+
-----
-Oct 30, 2019 3:02:31 PM com.redhat.cajun.navy.datagenerate.RestClientVerticle lambda$resetIncidents$4
-INFO: Reset incidents: HTTP response status 200
-----
-** `curl` requests to the `/incidents` endpoint of the incident service still error out with an HTTP 403 return code.
+// . Create a `ServiceRoleBinding` resource referencing the `ServiceRole` resource you just created and bind it to all services in the Emergency Response Demo namespace:
+// .. On the local file system, create a file called `srb-incident-service-internal.yml`:
+// +
+// ----
+// $ echo "---
+// apiVersion: rbac.istio.io/v1alpha1
+// kind: ServiceRoleBinding
+// metadata:
+//   name: incident-service-internal
+// spec:
+//   subjects:
+//     - properties:
+//         source.namespace: \"$ERDEMO_NS\"
+//   roleRef:
+//     kind: ServiceRole
+//     name: \"incident-service-internal\"
+// " > srb-incident-service-internal.yml
+// ----
+// .. Create the `ServiceRoleBinding` resource in the Emergency Response Demo namespace:
+// +
+// ----
+// $ oc create -f srb-incident-service-internal.yml -n $ERDEMO_NS
+// ----
+// . Confirm that the incident service can now be called from other services in the Emergency Response Demo namespace, but not from services outside the namespace:
+// .. From the *Disaster Simulator* home page, click *Clear Incidents*. Review the disaster simulator pod logs and expect to see something similar to this:
+// +
+// ----
+// Oct 30, 2019 3:02:31 PM com.redhat.cajun.navy.datagenerate.RestClientVerticle lambda$resetIncidents$4
+// INFO: Reset incidents: HTTP response status 200
+// ----
+// ** `curl` requests to the `/incidents` endpoint of the incident service still error out with an HTTP 403 return code.
 
-. Create a `ServiceRole` resource for external access to the incident service. This service role grants only HTTP GET access to the incident service REST APIs:
-.. On the local file system, create a file called `srb-incident-service-ingress.yml`:
-+
-----
-$ echo "---
-apiVersion: rbac.istio.io/v1alpha1
-kind: ServiceRole
-metadata:
-  name: incident-service-ingress
-spec:
-  rules:
-    - services: [\"$ERDEMO_USER-incident-service.$ERDEMO_NS.svc.cluster.local\"]
-      methods: [\"GET\"]
-" > sr-incident-service-ingress.yml
-----
-** This policy allows calls to the incident service using HTTP GET, but disallows other HTTP methods.
-.. Create the `ServiceRole` resource in the Emergency Response Demo namespace:
-+
-----
-$ oc create -f sr-incident-service-ingress.yml -n $ERDEMO_NS
-----
+// . Create a `ServiceRole` resource for external access to the incident service. This service role grants only HTTP GET access to the incident service REST APIs:
+// .. On the local file system, create a file called `srb-incident-service-ingress.yml`:
+// +
+// ----
+// $ echo "---
+// apiVersion: rbac.istio.io/v1alpha1
+// kind: ServiceRole
+// metadata:
+//   name: incident-service-ingress
+// spec:
+//   rules:
+//     - services: [\"$ERDEMO_USER-incident-service.$ERDEMO_NS.svc.cluster.local\"]
+//       methods: [\"GET\"]
+// " > sr-incident-service-ingress.yml
+// ----
+// ** This policy allows calls to the incident service using HTTP GET, but disallows other HTTP methods.
+// .. Create the `ServiceRole` resource in the Emergency Response Demo namespace:
+// +
+// ----
+// $ oc create -f sr-incident-service-ingress.yml -n $ERDEMO_NS
+// ----
 
-. Create a `ServiceRoleBinding` resource referencing the `ServiceRole` resource you just created and bind it to the SPIFFE identity of the Istio ingress gateway service:
-.. On the local file system, create a file called `srb-incident-service-ingress.yml`:
-+
-----
-$ echo "---
-apiVersion: rbac.istio.io/v1alpha1
-kind: ServiceRoleBinding
-metadata:
-  name: incident-service-ingress
-spec:
-  subjects:
-    - user: \"cluster.local/ns/$SM_CP_NS/sa/istio-ingressgateway-service-account\"
-  roleRef:
-    kind: ServiceRole
-    name: \"incident-service-ingress\"
-" > srb-incident-service-ingress.yml
-----
-.. Create the `ServiceRoleBinding` resource in the Emergency Response Demo namespace:
-+
-----
-$ oc create -f srb-incident-service-ingress.yml -n $ERDEMO_NS
-----
-. Confirm that the incident service can now be called from outside of the cluster, but only for HTTP GET endpoints:
-.. A `curl` request to the `/incidents` endpoint of the incident service returns an HTTP 200 code.
-.. A `curl` POST request to the `/incidents` endpoint returns an HTTP 403 error:
-+
-----
-$ curl -k -v -X POST -H "Content-type: application/json" -d '{"lat": 34.14338, "lon": -77.86569, "numberOfPeople": 3, "medicalNeeded": true, "victimName": "victim",  "victimPhoneNumber": "111-111-111" }' https://$INCIDENT_SERVICE_URL/incidents
-----
-+
-.Sample Output
-----
-Note: Unnecessary use of -X or --request, POST is already inferred.
-*   Trying 35.158.14.219:443...
-* TCP_NODELAY set
-* Connected to incident-service.erd.apps.cluster-a3c6.a3c6.example.opentlc.com (35.158.14.219) port 443 (#0)
-* ALPN, offering h2
-* ALPN, offering http/1.1
-* successfully set certificate verify locations:
-*   CAfile: /etc/pki/tls/certs/ca-bundle.crt
-  CApath: none
-* TLSv1.3 (OUT), TLS handshake, Client hello (1):
-* TLSv1.3 (IN), TLS handshake, Server hello (2):
-* TLSv1.3 (IN), TLS handshake, Encrypted Extensions (8):
-* TLSv1.3 (IN), TLS handshake, Certificate (11):
-* TLSv1.3 (IN), TLS handshake, CERT verify (15):
-* TLSv1.3 (IN), TLS handshake, Finished (20):
-* TLSv1.3 (OUT), TLS change cipher, Change cipher spec (1):
-* TLSv1.3 (OUT), TLS handshake, Finished (20):
-* SSL connection using TLSv1.3 / TLS_AES_256_GCM_SHA384
-* ALPN, server accepted to use h2
-* Server certificate:
-*  subject: CN=*.erd.apps.cluster-a3c6.a3c6.example.opentlc.com
-*  start date: Oct 25 15:12:23 2019 GMT
-*  expire date: Jan 23 15:12:23 2020 GMT
-*  issuer: C=US; O=Let's Encrypt; CN=Let's Encrypt Authority X3
-*  SSL certificate verify result: unable to get local issuer certificate (20), continuing anyway.
-* Using HTTP2, server supports multi-use
-* Connection state changed (HTTP/2 confirmed)
-* Copying HTTP/2 data in stream buffer to connection buffer after upgrade: len=0
-* Using Stream ID: 1 (easy handle 0x55e4c4578a40)
-> POST /incidents HTTP/2
-> Host: incident-service.erd.apps.cluster-a3c6.a3c6.example.opentlc.com
-> User-Agent: curl/7.65.3
-> Accept: */*
-> Content-type: application/json
-> Content-Length: 141
->
-* We are completely uploaded and fine
-* TLSv1.3 (IN), TLS handshake, Newsession Ticket (4):
-* TLSv1.3 (IN), TLS handshake, Newsession Ticket (4):
-* old SSL session ID is stale, removing
-* Connection state changed (MAX_CONCURRENT_STREAMS == 4294967295)!
-< HTTP/2 403
-< content-length: 19
-< content-type: text/plain
-< date: Wed, 30 Oct 2019 21:52:32 GMT
-< server: istio-envoy
-< x-envoy-upstream-service-time: 1
-<
-* Connection #0 to host incident-service.erd.apps.cluster-a3c6.a3c6.example.opentlc.com left intact
-RBAC: access denied
-----
+// . Create a `ServiceRoleBinding` resource referencing the `ServiceRole` resource you just created and bind it to the SPIFFE identity of the Istio ingress gateway service:
+// .. On the local file system, create a file called `srb-incident-service-ingress.yml`:
+// +
+// ----
+// $ echo "---
+// apiVersion: rbac.istio.io/v1alpha1
+// kind: ServiceRoleBinding
+// metadata:
+//   name: incident-service-ingress
+// spec:
+//   subjects:
+//     - user: \"cluster.local/ns/$SM_CP_NS/sa/istio-ingressgateway-service-account\"
+//   roleRef:
+//     kind: ServiceRole
+//     name: \"incident-service-ingress\"
+// " > srb-incident-service-ingress.yml
+// ----
+// .. Create the `ServiceRoleBinding` resource in the Emergency Response Demo namespace:
+// +
+// ----
+// $ oc create -f srb-incident-service-ingress.yml -n $ERDEMO_NS
+// ----
+// . Confirm that the incident service can now be called from outside of the cluster, but only for HTTP GET endpoints:
+// .. A `curl` request to the `/incidents` endpoint of the incident service returns an HTTP 200 code.
+// .. A `curl` POST request to the `/incidents` endpoint returns an HTTP 403 error:
+// +
+// ----
+// $ curl -k -v -X POST -H "Content-type: application/json" -d '{"lat": 34.14338, "lon": -77.86569, "numberOfPeople": 3, "medicalNeeded": true, "victimName": "victim",  "victimPhoneNumber": "111-111-111" }' https://$INCIDENT_SERVICE_URL/incidents
+// ----
+// +
+// .Sample Output
+// ----
+// Note: Unnecessary use of -X or --request, POST is already inferred.
+// *   Trying 35.158.14.219:443...
+// * TCP_NODELAY set
+// * Connected to incident-service.erd.apps.cluster-a3c6.a3c6.example.opentlc.com (35.158.14.219) port 443 (#0)
+// * ALPN, offering h2
+// * ALPN, offering http/1.1
+// * successfully set certificate verify locations:
+// *   CAfile: /etc/pki/tls/certs/ca-bundle.crt
+//   CApath: none
+// * TLSv1.3 (OUT), TLS handshake, Client hello (1):
+// * TLSv1.3 (IN), TLS handshake, Server hello (2):
+// * TLSv1.3 (IN), TLS handshake, Encrypted Extensions (8):
+// * TLSv1.3 (IN), TLS handshake, Certificate (11):
+// * TLSv1.3 (IN), TLS handshake, CERT verify (15):
+// * TLSv1.3 (IN), TLS handshake, Finished (20):
+// * TLSv1.3 (OUT), TLS change cipher, Change cipher spec (1):
+// * TLSv1.3 (OUT), TLS handshake, Finished (20):
+// * SSL connection using TLSv1.3 / TLS_AES_256_GCM_SHA384
+// * ALPN, server accepted to use h2
+// * Server certificate:
+// *  subject: CN=*.erd.apps.cluster-a3c6.a3c6.example.opentlc.com
+// *  start date: Oct 25 15:12:23 2019 GMT
+// *  expire date: Jan 23 15:12:23 2020 GMT
+// *  issuer: C=US; O=Let's Encrypt; CN=Let's Encrypt Authority X3
+// *  SSL certificate verify result: unable to get local issuer certificate (20), continuing anyway.
+// * Using HTTP2, server supports multi-use
+// * Connection state changed (HTTP/2 confirmed)
+// * Copying HTTP/2 data in stream buffer to connection buffer after upgrade: len=0
+// * Using Stream ID: 1 (easy handle 0x55e4c4578a40)
+// > POST /incidents HTTP/2
+// > Host: incident-service.erd.apps.cluster-a3c6.a3c6.example.opentlc.com
+// > User-Agent: curl/7.65.3
+// > Accept: */*
+// > Content-type: application/json
+// > Content-Length: 141
+// >
+// * We are completely uploaded and fine
+// * TLSv1.3 (IN), TLS handshake, Newsession Ticket (4):
+// * TLSv1.3 (IN), TLS handshake, Newsession Ticket (4):
+// * old SSL session ID is stale, removing
+// * Connection state changed (MAX_CONCURRENT_STREAMS == 4294967295)!
+// < HTTP/2 403
+// < content-length: 19
+// < content-type: text/plain
+// < date: Wed, 30 Oct 2019 21:52:32 GMT
+// < server: istio-envoy
+// < x-envoy-upstream-service-time: 1
+// <
+// * Connection #0 to host incident-service.erd.apps.cluster-a3c6.a3c6.example.opentlc.com left intact
+// RBAC: access denied
+// ----
 
 == Set Authorization Policy for Services using AuthorizationPolicy
 
-[NOTE]
-====
-If you have done the previous section of the lab, delete the `ServiceMeshRbacConfig`, `ServiceRole` and `ServiceRoleBinding` resources created.
+// [NOTE]
+// ====
+// If you have done the previous section of the lab, delete the `ServiceMeshRbacConfig`, `ServiceRole` and `ServiceRoleBinding` resources created.
 
-----
-$ oc delete ServiceMeshRbacConfig default -n $SM_CP_NS
-$ oc delete servicerole incident-service-ingress -n $ERDEMO_NS
-$ oc delete servicerole incident-service-internal -n $ERDEMO_NS
-$ oc delete servicerolebinding incident-service-ingress -n $ERDEMO_NS
-$ oc delete servicerolebinding incident-service-internal -n $ERDEMO_NS
-----
-====
+// ----
+// $ oc delete ServiceMeshRbacConfig default -n $SM_CP_NS
+// $ oc delete servicerole incident-service-ingress -n $ERDEMO_NS
+// $ oc delete servicerole incident-service-internal -n $ERDEMO_NS
+// $ oc delete servicerolebinding incident-service-ingress -n $ERDEMO_NS
+// $ oc delete servicerolebinding incident-service-internal -n $ERDEMO_NS
+// ----
+// ====
 
 Istio 1.4 introduces the _AuthorizationPolicy_ policy, which is a major update to the previous role-based access control (RBAC) policy. The new policy provides these improvements:
 

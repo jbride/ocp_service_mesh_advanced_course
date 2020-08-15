@@ -28,7 +28,7 @@ The labs assume that you are using the proper versions of these tools, all of wh
 . On the left, select *OpenShift 4 Student VM*.
 . On the right, click *Order*.
 . On the *Lab Information* Tab make the following selections:
-.. *4.3* for *OpenShift Release*
+.. *4.5* for *OpenShift Release*
 .. The region closest to you for *Region* (North America, EMEA, APAC or LATAM)
 . On the bottom right, click *Submit*.
 +
@@ -235,9 +235,8 @@ $ oc describe daemonset istio-node -n istio-operator | grep Image
 +
 .Sample Output
 -----
-registry.redhat.io/openshift-service-mesh/istio-cni-rhel8:1.0.1
+registry.redhat.io/openshift-service-mesh/istio-cni-rhel8@sha256:6312d3d...
 -----
-
 
 === Explore CRDs
 Custom Resource Definitions (CRDs) facilitate domain-specific extensions to the OpenShift master API.
@@ -253,7 +252,7 @@ $ oc get crd --as=system:admin | grep 'maistra\|istio'
 [NOTE]
 You need to impersonate an OpenShift cluster admin to do this because a service mesh control plane administrator does not have access to this in a production environment.
 
-* Expect to see about 25 CRDs.
+* Expect to see about 55 CRDs.
 
 . Review some of the more prominent service mesh-related CRD extensions to the OpenShift master API including those in the following table:
 +
