@@ -1835,7 +1835,7 @@ $ curl -v -k https://process-viewer.$ERDEMO_USER.apps.$SUBDOMAIN_BASE/image/proc
 .. Open the DeploymentConfig of the emergency console for editing:
 +
 ----
-$ oc edit dc emergency-console -o yaml -n $ERDEMO_NS
+$ oc edit dc $ERDEMO_USER-emergency-console -o yaml -n $ERDEMO_NS
 ----
 
 .. Replace the existing liveness and readiness probes with command-based probes:
