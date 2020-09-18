@@ -310,6 +310,8 @@ To verify the API Manager Provisioning, follow these steps.
 .. `1 Application`
 .. `0 messages`
 
+image::images/3scale-master-verification.png[]
+
 === Tenant management
 
 . This ansible will create multiple tenants in the previously provisioned 3scale API Manager.  Ensure the following when invoking this ansible:
