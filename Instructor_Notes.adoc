@@ -14,6 +14,8 @@
 .. Emergency Response (16GB RAM) + Istio Control Plane (6GB RAM) = 22GB RAM per student
 .. Provision 1 worker node per 2 students.
 
+.. Login to the OCP Environment as cluster administrator
+
 .. Find the currently available machinesets: oc get machinesets -n openshift-machine-api
 +
 ----
@@ -37,7 +39,7 @@ image::images/admin-unidle.png[]
 
 You will need an environment to run the Ansible provisioning playbooks. 
 
-NOTE: If you are using a Mac, it is best to run the installation from a Linux environment. You can order a *Student VM* from OPENTLC.
+NOTE: If you are using a Mac, it is best to run the installation from a Linux environment. You can order a *Student VM* from OPENTLC. Once the environment is created then you'll need to ssh into Student VM and run the installation commands in this document.
 
 === Install Python Package Manager - pip
 
@@ -57,7 +59,7 @@ $ pip --version
 
 === Install Supporting Python Packages
 
-The installation requires Python modules `lxml` and `kubernetes`
+The installation requires Python modules https://lxml.de/[lxml] and https://pypi.org/project/openshift/[openshift]
 
 . Install lxml python module
 +
@@ -65,7 +67,7 @@ The installation requires Python modules `lxml` and `kubernetes`
 $ sudo pip3 install lxml
 ----
 
-. Install kubernetes python module
+. Install OpenShift python module
 +
 ----
 $ sudo pip3 install openshift
