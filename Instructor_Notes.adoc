@@ -412,7 +412,10 @@ To verify the tenant accounts, follow these steps.
 .. In top of 3scale screen select: *Dashboard > Audience*
 .. Click *Accounts > userX-3scale-xyz*
 .. Move to the *Admin domain* and click the link
-.. Login with: apiXX / admin. (For example: api1 / admin)
+.. Login with: 
+... User: api1
+... Pass: admin
+
 .. Verify that you are able to log in successfully
                                            
 == Emergency Response Demo
