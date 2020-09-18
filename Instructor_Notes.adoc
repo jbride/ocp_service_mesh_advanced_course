@@ -26,6 +26,12 @@ $ oc get machinesets -n openshift-machine-api
 oc scale machineset <MACHINESETNAME> --replicas=<COUNT> -n openshift-machine-api
 ----
 
+. Configure Environment to Stay Up
+.. During the course, you want the environment to stay up, without idling. You can set this in the CloudForms UI.
+.. Select your service, then select *Admin* drop-down
+.. Select *Unidle*
+
+image::images/admin-unidle.png[]
 
 == 3scale Control Plane
 . link:https://github.com/gpe-mw-ansible-org/3scale_multitenant[3scale_multitenant] ansible is recommended (for the time being).
