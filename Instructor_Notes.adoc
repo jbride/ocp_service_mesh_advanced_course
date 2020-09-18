@@ -15,6 +15,10 @@
 .. Provision 1 worker node per 2 students.
 
 .. Login to the OCP Environment as cluster administrator
++
+----
+$ oc login <<CLASSROOM-OCP-ENVIRONMENT>> -u opentlc-mgr
+----
 
 .. Find the currently available machinesets: oc get machinesets -n openshift-machine-api
 +
@@ -91,10 +95,124 @@ The 3scale installation process has three major steps:
 .. Provision 1 tenant per student
 .. Provision 1 set of API gateways (staging and production) per tenant
 
+=== Overview
 
-. link:https://github.com/gpe-mw-ansible-org/3scale_multitenant[3scale_multitenant] ansible is recommended (for the time being).
+This workload provisions a single centralized 3scale API Manager in a single OCP namespace.
+
+This workload only needs to be executed once per OCP cluster.
+
+It also allows for management (ie: creation / deletion) of a configurable number of API _tenants_ in the 3scale API Manager installation.
+
+This role might be valuable in the following circumstances:
+
+. *Instructor Led Training (ILTs), Hackathons and workshops*:
 +
+Given X number of students in an ILT requiring 3scale, provision a single central multi-tenant Red Hat 3scale API Manager where each student is assigned their own tenant.
++
+The student is provided with administrative credentials to their assigned tenant.
++
+This approach might be more desirable than the alternative where each student provisions their own 3scale API Manager.
 
+=== Ansible Project Layout
+
+. Notice the directory layout and files included in this project:
++
+-----
+$ tree
+
+├── defaults
+│   └── main.yml
+├── meta
+│   └── main.yml
+├── README.adoc
+├── tasks
+│   ├── main.yml
+│   ├── pre_workload.yml
+│   ├── remove_workload.yml
+│   ├── tenant_loop.yml
+│   ├── tenant_mgmt.yml
+│   ├── wait_for_deploy.yml
+│   └── workload.yml
+└── templates
+    └── limitrange.yaml
+-----
+
+. Highlights of the most important files are as follows:
+
+.. *defaults/main.yml* : ansible variables and their defaults
+.. *tasks/pre_workload.ymml* : ansible tasks used to set clusterquota
+.. *tasks/workload.yml* : ansible tasks executed when provisioning 3scale API Manager
+.. *tasks/tenant_mgmt.yml* : ansible tasks executed when provisioning tenants
+
+=== 3scale Deployment
+
+. Log into the OCP environment as cluster manager
++
+----
+$ oc login <<CLASSROOM-OCP-ENVIRONMENT>> -u opentlc-mgr
+----
+
+=== Environment Variables
+
+. Set up environment variables
++
+----
+$ echo "export OCP_AMP_ADMIN_ID=api0" >> ~/.bashrc  # OCP user that owns OCP namespace where mult-tenant 3scale resides
+                                                    # A cluster quota is assigned to this user
+                                                    # NOTE: this OCP user doesn't necessarily need to exist
+
+
+$ echo "export API_MANAGER_NS=3scale-mt-\$OCP_AMP_ADMIN_ID" >> ~/.bashrc      # OCP namespace where 3scale API Manager resides
+----
+
+. Execute the following:
++
+----
+$ source ~/.bashrc
+----
+
+. SMTP Configurations to enable API Manager to send emails
+.. The following SMTP configurations are set to null values, since the labs do not require 3scale Developer Portal sign-up flows.
+
+.. Execute the following commands in the shell:
++
+----
+smtp_host=
+smtp_port=
+smtp_authentication=
+smtp_userid=
+smtp_passwd=
+smtp_domain=
+adminEmailUser=3scaleadmin
+adminEmailDomain=redhat.com
+----
+
+. 3Scale Gateway Configurations
+.. Execute the following commands in the shell:
++
+----
+RESUME_CONTROL_PLANE_GWS=true
+SUBDOMAIN_BASE=`oc whoami --show-server | cut -d'.' -f 2,3,4,5,6 | cut -d':' -f 1`
+use_rwo_for_cms=true
+----
+
+** `RESUME_CONTROL_PLANE_GWS`: 3scale API Manager includes a staging and production gateway by default. These two GWs typically are not used for applying API policies to requests  because the "data plane" (aka: gateways) tends to be deployed in a different environment. However, the staging gateway is needed by system-provider web application for API Gateway policies details. Subsequently, the default value is:  true
+
+** `SUBDOMAIN_BASE`: OCP wildcard DNS after "apps";  ie; 2345.openshift.opentlc.com
+
+** `use_rwo_for_cms`: 3scale control plane consists of a Content Management System (CMS) that typically is scaled out for improved performance in a production environment. 
+
+. Red Hat Service Tokens
+
+The installation requires Red Hat Service Tokens. You can retrieve these tokens from your Red Hat account (https://access.redhat.com/terms-based-registry).
+
+. Set the following environment variables
++
+----
+$ rht_service_token_user=<change me>    # RHT Registry Service Account name as per:   https://access.redhat.com/terms-based-registry
+
+$ rht_service_token_password=<changeme> # RHT Registry Service Account passwd as per: https://access.redhat.com/terms-based-registry/
+----
 
 == Emergency Response Demo
 
