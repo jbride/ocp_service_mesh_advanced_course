@@ -420,33 +420,59 @@ To verify the tenant accounts, follow these steps.
                                            
 == Emergency Response Demo
 
-. Instructor layers 1 Emergency Response Demo per student
-.. git clone https://github.com/btison/emergency-response-demo-install.git
-.. git checkout service-mesh-advanced-ilt
-.. cd ansible
-.. cp inventories/inventory.template inventories/inventory
-.. Add the value of your link:[mapbox token] to the _map_token_ variable in _inventories/inventory_ file. ie;
+=== MapBox Tokens
+* The ER demo uses MapBox to display incidents and responders on the map. The app uses the MapBox API via a MapBox token. 
+
+* MapBox has throttling for the free tier. If you reuse the same key for too many environments, you might hit the throttling limits when actually running the demo simultaneously on these environments. It is recommend to use a different key per 5 users.
+
+* You can get a free MapBox token at the https://account.mapbox.com/auth/signup/[MapBox website].
+
+=== Provision Emergency Response Demo
+
+Instructor layers 1 Emergency Response Demo per student
+
+==== Set up Configuration
+. Checkout the installation code:
++
+----
+$ git clone https://github.com/btison/emergency-response-demo-install.git
+$ cd emergency-response-demo-install
+$ git checkout service-mesh-advanced-ilt
+----
+
+. Move into Ansible directory and copy template file
++
+----
+$ cd ansible
+$ cp inventories/inventory.template inventories/inventory
+----
+
+. Update Ansible template file with MapBox token
++
+----
+$ MY_MAPBOX_TOKEN=<<INSERT-YOUR-MAPBOX-TOKEN>>
+$ sed -i "s/replaceme/${MY_MAPBOX_TOKEN}/g" inventories/inventory
+----
+
+==== Provision Emergency Response Demo Per Student
+
+WARNING: Provision 1 ER demo application at a time. Do not run it sequentially in a custom loop, because it won't detect failing playbooks. If a playbook fails, it just jumps to the next one.
+
+. Provision ER demo for a given student:
 +
 -----
-[all:vars]
-# MapBox API token, see https://docs.mapbox.com/help/how-mapbox-works/access-tokens/
-map_token=pk.eyJ1KJoiamjyaWRlIiwiGSI6ImNqeGNjamxqYjAxcXczdXBrcW5mbmguamkifQ.iBEb0APX1Vmo_VtsDj-Y3f
------
+$ student_id=1
 
-.. execute:
-+
------
-start_id=1
-end_id=20
-
-for x in $(seq $start_id $end_id); do
-   ansible-playbook -i inventories/inventory playbooks/install.yml \
-      -e project_admin=user$x \
+$ ansible-playbook -i inventories/inventory playbooks/install.yml \
+      -e project_admin=user${student_id} \
       -e set_realm_admin_as_default=True \
       -e install_monitoring=False \
       -e install_tools=False
-done
 -----
+
+. Repeat this process for each student.
+.. Be sure to update the `student_id`
+.. Be sure to cycle the MapBox token for every 5th student
 
 == *Red Hat Service Mesh*
 . The ansible found in the course link:https://github.com/gpe-mw-training/ocp_service_mesh_advanced[Lab Assets] is recommended.
