@@ -29,7 +29,7 @@ $ oc get machinesets -n openshift-machine-api
 .. Scale up a machineset, using this command:
 +
 ----
-oc scale machineset <MACHINESETNAME> --replicas=<COUNT> -n openshift-machine-api
+$ oc scale machineset <MACHINESETNAME> --replicas=<COUNT> -n openshift-machine-api
 ----
 
 . Configure Environment to Stay Up
