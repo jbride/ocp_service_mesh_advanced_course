@@ -191,7 +191,7 @@ $ rht_service_token_password=<changeme> # RHT Registry Service Account passwd as
 
 === Ansible Set-up
 
-. Install this role locally
+. Install the GPTE 3scale Ansible role.
 +
 -----
 $ ansible-galaxy install gpe_mw_ansible.3scale_multitenant --force -p $HOME/.ansible/roles
