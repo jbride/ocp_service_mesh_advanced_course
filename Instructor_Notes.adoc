@@ -6,11 +6,26 @@
 
 . link:https://docs.google.com/spreadsheets/d/1vazinjjbOSN-uDY8u_mmg-lXtrRlZtm1l5vJQucdKz8/edit#gid=959461386[Class Assignment Spreadsheet]
 
-== *OCP 4.2*
-. Provisioned from labs.opentlc.com -> OCP4 Workshop Deployer
+== *OCP 4.3 Workshop Deployer*
+. Provisioned from https://labs.opentlc.com 
+.. *Services -> Catalogs -> OPENTLC OpenShift 4 Labs -> OpenShift Workshop Deployer - 4.3*
+
 . Instructor uses _MachineSet API_ to scale to appropriately sized cluster
 .. Emergency Response (16GB RAM) + Istio Control Plane (6GB RAM) = 22GB RAM per student
 .. Provision 1 worker node per 2 students.
+
+.. Find the currently available machinesets: oc get machinesets -n openshift-machine-api
++
+----
+$ oc get machinesets -n openshift-machine-api
+----
+
+.. Scale up a machineset, using this command:
++
+----
+oc scale machineset <MACHINESETNAME> --replicas=<COUNT> -n openshift-machine-api
+----
+
 
 == 3scale Control Plane
 . link:https://github.com/gpe-mw-ansible-org/3scale_multitenant[3scale_multitenant] ansible is recommended (for the time being).
