@@ -403,7 +403,9 @@ To verify the tenant accounts, follow these steps.
 .. Go back the OpenShift Console
 .. View the project `userXX-gw`. You will see projects for each user XX (1..xx)
 .. Select *Workloads > Pod*
-.. Verify that you see two gateways: *stage* and *prod*
+.. Verify that you see two pods for the 3scale gateways:
+... *prod-apicast-xyz*
+... *stage-apicast-xyz*
 
 . Log into Tenant Account
 .. To log into the tenant, move back to 3scale screen
