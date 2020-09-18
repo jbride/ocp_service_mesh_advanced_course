@@ -33,14 +33,63 @@ oc scale machineset <MACHINESETNAME> --replicas=<COUNT> -n openshift-machine-api
 
 image::images/admin-unidle.png[]
 
+== Prep Provisioning Environment
+
+You will need an environment to run the Ansible provisioning playbooks. 
+
+NOTE: If you are using a Mac, it is best to run the installation from a Linux environment. You can order a *Student VM* from OPENTLC.
+
+=== Install Python Package Manager - pip
+
+. Download and install pip
++
+----
+$ curl "https://bootstrap.pypa.io/get-pip.py" -o "get-pip.py"
+
+$ python get-pip.py
+----
+
+. Verify The Installation
+----
+pip --version
+----
+
+=== Install Supporting Python Packages
+
+The installation requires Python modules `lxml` and `kubernetes`
+
+. Install lxml python module
++
+----
+$ sudo pip3 install lxml
+----
+
+. Install kubernetes python module
++
+----
+$ sudo pip3 install openshift
+----
+
+=== Install Ansible Tooling
+
+The installation requires Ansible tooling
+
+. Install Ansible
++
+----
+$ sudo dnf -y install ansible
+----
 == 3scale Control Plane
+
+The 3scale installation process has three major steps:
+
+.. Provision 1 3scale Control Plane
+.. Provision 1 tenant per student
+.. Provision 1 set of API gateways (staging and production) per tenant
+
+
 . link:https://github.com/gpe-mw-ansible-org/3scale_multitenant[3scale_multitenant] ansible is recommended (for the time being).
 +
-This ansible does the following:
-
-.. Provisions 1 3scale Control Plane
-.. Provisions 1 tenant per student
-.. Provisions 1 set of API gateways (staging and production) per tenant
 
 
 == Emergency Response Demo
