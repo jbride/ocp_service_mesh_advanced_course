@@ -196,10 +196,10 @@ $ rht_service_token_password=<changeme> # RHT Registry Service Account passwd as
 -----
 $ ansible-galaxy install gpe_mw_ansible.3scale_multitenant --force -p $HOME/.ansible/roles
 -----
-
+ 
 === Ansible Project Layout
 
-. Notice the directory layout and files included in this project:
+. This is the directory layout and files included in this Ansible project:
 +
 -----
 $ tree
