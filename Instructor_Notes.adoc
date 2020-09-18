@@ -316,7 +316,7 @@ image::images/3scale-master-verification.png[]
 
 . This ansible will create multiple tenants in the previously provisioned 3scale API Manager.  Ensure the following when invoking this ansible:
 
-.. specify "start_tenant" and "end_tenant" variables. This relates to the number of tenants to create.
+.. specify `START_TENANT` and `END_TENANT` environment variables. This relates to the number of tenants to create.
 
 . Set the environment variables:
 +
