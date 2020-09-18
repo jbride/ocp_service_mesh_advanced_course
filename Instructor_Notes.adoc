@@ -413,8 +413,8 @@ To verify the tenant accounts, follow these steps.
 .. Click *Accounts > userX-3scale-xyz*
 .. Move to the *Admin domain* and click the link
 .. Login with: 
-... User: api1
-... Pass: admin
+... User: `api1`
+... Pass: `admin`
 
 .. Verify that you are able to log in successfully
                                            
