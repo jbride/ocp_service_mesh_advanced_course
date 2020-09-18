@@ -202,7 +202,7 @@ $ ansible-galaxy install gpe_mw_ansible.3scale_multitenant --force -p $HOME/.ans
 . This is the directory layout and files included in this Ansible project:
 +
 -----
-$ tree
+$ tree ~/.ansible/roles/gpe_mw_ansible.3scale_multitenant
 
 ├── defaults
 │   └── main.yml
