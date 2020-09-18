@@ -173,7 +173,7 @@ use_rwo_for_cms=true
 +
 ** `RESUME_CONTROL_PLANE_GWS`: 3scale API Manager includes a staging and production gateway by default. These two GWs typically are not used for applying API policies to requests  because the "data plane" (aka: gateways) tends to be deployed in a different environment. However, the staging gateway is needed by system-provider web application for API Gateway policies details. Subsequently, the default value is:  true
 
-** `SUBDOMAIN_BASE`: OCP wildcard DNS after "apps";  ie; `cluster-af2b.af2b.example.opentlc.com
+** `SUBDOMAIN_BASE`: OCP wildcard DNS after "apps";  ie; `cluster-af2b.af2b.example.opentlc.com`
 
 ** `use_rwo_for_cms`: 3scale control plane consists of a Content Management System (CMS) that typically is scaled out for improved performance in a production environment. 
 
