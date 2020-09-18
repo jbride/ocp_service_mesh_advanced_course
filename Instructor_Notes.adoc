@@ -409,7 +409,7 @@ To verify the tenant accounts, follow these steps.
 
 . Log into Tenant Account
 .. To log into the tenant, move back to 3scale screen
-.. Click *Accounts > userX-3scale—xyz*
+.. Click *Accounts > userX-3scale-xyz*
 .. Click the *Admin Domain* 
 .. Login with: apiXX / admin. (For example: api1 / admin)
 .. Verify that you are able to log in successfully
