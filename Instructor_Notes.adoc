@@ -269,7 +269,7 @@ $ ansible-playbook -i localhost, -c local /tmp/3scale_multitenant.yml \
 -----
 
 . After about 5 minutes, provisioning of the  API Manager should complete.
-. Being that the API Manager is a large application with many different components, the components are broought up in an ordered manner.
+. Being that the API Manager is a large application with many different components, the components are brought up in an ordered manner.
 +
 Subsequently, the ansible places itself in a wait loop at each stage of the provisioning process.
 
