@@ -299,11 +299,11 @@ To verify the API Manager Provisioning, follow these steps.
 . Log into OpenShift web console using `opentlc-mgr` account
 . View project: `3scale-mt-api0`
 . View with routes: *Networking > Routes*
-. Select the route for master. It has `master` in the name
+. In the *Filter* box, search for `3scale-master`
 . Click the Location URL for the route
 . Log in using
-** User id: master
-** Password: master
+** User id: `master`
+** Password: `master`
 
 . You should see the following on the screen
 .. `1 Account`
