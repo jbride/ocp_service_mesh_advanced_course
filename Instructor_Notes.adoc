@@ -272,15 +272,24 @@ $ ansible-playbook -i localhost, -c local /tmp/3scale_multitenant.yml \
 . Being that the API Manager is a large application with many different components, the components are brought up in an ordered manner.
 +
 Subsequently, the ansible places itself in a wait loop at each stage of the provisioning process.
++
+[NOTE]
+====
+If the deployment fails then run it again. But first you have to delete the project
 
-. After running the Ansible, you should see
+. `$ oc delete project 3scale-mt-api0` 
+. Run the Ansible playbook in previous step again
+====
+
+. When the Ansible finishes successfully, you will see:
 +
 ----
-TASK [gpe_mw_ansible.3scale_multitenant : Tenant Rollout Complete] ********************************************
+...
+TASK [gpe_mw_ansible.3scale_multitenant : Tenant Rollout Complete] ***********************************************************************************
 skipping: [localhost]
 
-PLAY RECAP ****************************************************************************************************
-localhost                  : ok=46   changed=27   unreachable=0    failed=0    skipped=24   rescued=0    ignored=2
+PLAY RECAP *******************************************************************************************************************************************
+localhost                  : ok=42   changed=20   unreachable=0    failed=0    skipped=24   rescued=0    ignored=3
 ----
 
 ==== Verify API Manager Provisioning
