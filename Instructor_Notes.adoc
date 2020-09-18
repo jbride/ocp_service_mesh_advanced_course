@@ -32,7 +32,11 @@ $ oc get machinesets -n openshift-machine-api
 $ oc scale machineset <MACHINESETNAME> --replicas=<COUNT> -n openshift-machine-api
 ----
 
-.. Wait until all of the machinesets are scaled up and ready.
+.. Wait until all of the machinesets are READY and AVAILABLE.
++
+----
+$ oc get machinesets -n openshift-machine-api -w
+----
 
 . Configure Environment to Stay Up
 .. During the course, you want the environment to stay up, without idling. You can set this in the CloudForms UI.
