@@ -50,8 +50,9 @@ $ python get-pip.py
 ----
 
 . Verify The Installation
++
 ----
-pip --version
+$ pip --version
 ----
 
 === Install Supporting Python Packages
@@ -79,6 +80,7 @@ The installation requires Ansible tooling
 ----
 $ sudo dnf -y install ansible
 ----
+
 == 3scale Control Plane
 
 The 3scale installation process has three major steps:
