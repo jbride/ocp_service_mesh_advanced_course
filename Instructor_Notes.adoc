@@ -483,7 +483,7 @@ If the deployment fails then run it again. But first you have to delete the proj
 .. Be sure to cycle the MapBox token for every 5th student
 
 == *Red Hat Service Mesh*
-. The ansible found in the course link:https://github.com/gpe-mw-training/ocp_service_mesh_advanced[Lab Assets] is recommended.
+. The ansible found in the course link:https://github.com/gpe-mw-training/ocp_service_mesh_advanced/tree/master/ansible[Lab Assets] is recommended.
 
 [IMPORTANT]
 ====
