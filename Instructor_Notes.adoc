@@ -469,6 +469,14 @@ $ ansible-playbook -i inventories/inventory playbooks/install.yml \
       -e install_monitoring=False \
       -e install_tools=False
 -----
++
+[NOTE]
+====
+If the deployment fails then run it again. But first you have to delete the project
+
+. `$ oc delete project user${student_id}-er-demo` 
+. Run the Ansible playbook in previous step again
+====
 
 . Repeat this process for each student.
 .. Be sure to update the `student_id`
