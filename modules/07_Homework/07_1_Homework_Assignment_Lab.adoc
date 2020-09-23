@@ -4,16 +4,16 @@
 :linkattrs:
 :data-uri:
 
-== Homework Assignment Lab
+== Final Lab
 
 .Goal
 * Assess hands-on proficiency with Red Hat^(R)^ OpenShift^(R)^ Service Mesh
 
 .Expectations
-* Assignments take approximately six to eight hours to complete.
-* Assignments are an individual effort--you must complete the assignment without collaboration.
-* Assignments simulate a challenge typically encountered in a Red Hat consulting engagement.
-** Assignment requirements are intentionally vague.
+* The final lab takes approximately six to eight hours to complete.
+* The final lab is an individual effort--you must complete the final lab without collaboration.
+* The final lab simulates a challenge typically encountered in a Red Hat consulting engagement.
+** The final lab requirements are intentionally vague.
 
 :numbered:
 
@@ -115,7 +115,7 @@ IMPORTANT: All of the following configurations need to be executed as part of an
 
 
 
-== Homework Submittal
+== Final Lab Submittal
 
 * *Grading*:  Minimum *75%* score needed to pass
 
@@ -132,9 +132,9 @@ IMPORTANT: Make sure that the lab environment is accessible for two days after s
 
 ** Automation script written in `ansible` or `bash` that provisions the tasks described in the previous sections.
 
-* *Homework Submittal*:
+* *Final Lab Submittal*:
 
-** Submit your homework via one of the following:
+** Submit your final lab via one of the following:
 
 *** *Red Hat employees*: link:https://docs.google.com/document/d/1nxlvAOlSdNs3-y8AkmDjnc8vtCH9rJdI5zbN9deCK50/edit[Red Hat LMS]
 *** *Red Hat partners*: link:https://partner.redhat.com[Red Hat Connect]
