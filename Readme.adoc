@@ -110,3 +110,4 @@ Each course module listed below will consist of a slide presentation and one or 
 0.0.1 - Feb 05, 2020 - Pilot release
 0.0.2 - Apr 28, 2020 - Editor updates
 1.0.0 - Aug 13, 2020 - Full Release
+1.0.1 - Sep 24, 2020 - minor update
