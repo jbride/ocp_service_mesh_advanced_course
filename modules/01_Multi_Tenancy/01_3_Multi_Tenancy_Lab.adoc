@@ -519,20 +519,6 @@ $ curl http://$ERDEMO_USER-incident-service.apps.$SUBDOMAIN_BASE/incidents
 
 * Based on this test, is this service mesh network isolated? Can you explain?
 ****
-// . Delete the `allow-from-all-namespaces` and `allow-from-ingress-namespace` `NetworkPolicy` objects from the Emergency Response namespace:
-// +
-// ----
-// $ oc delete networkpolicy allow-from-all-namespaces -n $ERDEMO_NS
-// $ oc delete networkpolicy allow-from-ingress-namespace -n $ERDEMO_NS
-// ----
-
-// . Try to reach the incident service from within another namespace or from outside the cluster using `curl`.
-// +
-// ****
-// *Question*:
-
-// * What do you observe?
-// ****
 
 . Add the `maistra.io/expose-route: 'true'` label to the template section of the DeploymentConfig of the incident service:
 +
@@ -574,44 +560,6 @@ Alternatively, run the following `oc patch` command:
 $ oc patch dc $ERDEMO_USER-emergency-console -p '{"spec": {"template": {"metadata": {"labels": {"maistra.io/expose-route": "true"}}}}}'
 ----
 ====
-
-
-// . (Optional) Execute the following commands to restore the network policies to their original state:
-// +
-// ----
-// $ echo "---
-// kind: NetworkPolicy
-// apiVersion: networking.k8s.io/v1
-// metadata:
-//   name: allow-from-all-namespaces
-// spec:
-//   podSelector: {}
-//   ingress:
-//     - from:
-//         - namespaceSelector: {}
-//   policyTypes:
-//     - Ingress
-// " | oc create -f - -n $ERDEMO_NS
-// ----
-// +
-// ----
-// $ echo "---
-// kind: NetworkPolicy
-// apiVersion: networking.k8s.io/v1
-// metadata:
-//   name: allow-from-ingress-namespace
-// spec:
-//   podSelector: {}
-//   ingress:
-//     - from:
-//         - namespaceSelector:
-//             matchLabels:
-//               network-policy: global
-//   policyTypes:
-//     - Ingress
-// " | oc create -f - -n $ERDEMO_NS
-// ----
-
 
 == Appendix
 
