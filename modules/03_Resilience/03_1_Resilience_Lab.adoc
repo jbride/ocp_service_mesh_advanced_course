@@ -193,6 +193,18 @@ By default, automatic retry is only enabled for 503 return codes, not for other 
 ----
 $ curl -X POST http://127.0.0.1:9080/reset
 ----
++
+[TIP]
+====
+To automatically reset all of the pods for the `incident-priority-service`, use these commands:
+
+----
+for pod in $(oc get pods -n $ERDEMO_NS -l app=$ERDEMO_USER-incident-priority-service | awk '/Running/ {print $1}'); do 
+    echo $pod 
+    oc exec -it -n $ERDEMO_NS $pod -c $ERDEMO_USER-incident-priority-service -- curl -X POST http://127.0.0.1:9080/reset;
+done
+----
+====
 
 . Log in to one of the pods of the incident priority service and have it return a 500 return code:
 +
@@ -286,7 +298,9 @@ Other retry conditions include the following:
 * See the complete list in the link:https://www.envoyproxy.io/docs/envoy/latest/configuration/http/http_filters/router_filter#x-envoy-retry-on[Envoy documentation].
 ====
 
-. When you are done with this exercise, reset the incident priority service pods to not return error codes. Also reset the `VirtualService` resource to its original state by removing the `retries` element.
+. When you are done with this exercise, reset the incident priority service pods to not return error codes. Use the reset steps from earlier in the exercise.
+
+. Reset the `VirtualService` resource to its original state by removing the `retries` element.
 
 == Explore Timeouts
 
