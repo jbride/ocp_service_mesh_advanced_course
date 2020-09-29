@@ -6,9 +6,9 @@
 
 . link:https://docs.google.com/spreadsheets/d/1vazinjjbOSN-uDY8u_mmg-lXtrRlZtm1l5vJQucdKz8/edit#gid=959461386[Class Assignment Spreadsheet]
 
-== *OCP 4.3 Workshop Deployer*
+== *OCP 4.4 Workshop Deployer*
 . Provisioned from https://labs.opentlc.com 
-.. *Services -> Catalogs -> OPENTLC OpenShift 4 Labs -> OpenShift Workshop Deployer - 4.3*
+.. *Services -> Catalogs -> OPENTLC OpenShift 4 Labs -> OpenShift Workshop Deployer - 4.4*
 
 . Instructor uses _MachineSet API_ to scale to appropriately sized cluster
 .. Emergency Response (16GB RAM) + Istio Control Plane (6GB RAM) = 22GB RAM per student
