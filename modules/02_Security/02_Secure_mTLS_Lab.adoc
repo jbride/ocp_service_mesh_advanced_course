@@ -758,8 +758,15 @@ incident-service.emergency-response-demo.svc.cluster.local:8080     OK         P
 
 . Use the Istio Grafana dashboards to verify that the traffic between the Istio ingress gateway and the incident service uses mTLS:
 .. In a browser window, navigate to the Istio Grafana instance at `https://grafana-$SM_CP_NS.apps.$SUBDOMAIN_BASE` and log in with your OpenShift admin credentials.
+.. On the left hand side, select the Square Icon. Then select *Dashboard > Manage*
++
+image::images/dashboard-manage.png[]
+
 .. Locate the *Istio Workload Dashboard*.
-.. Select the `Incident Service` workload in the `emergency-response-demo` namespace.
+.. Select the `emergency-response-demo` namespace and the `Incident Service` workload.
++
+image::images/select-workload-and-workspace.png[]
+
 .. Scroll down to the *Inbound Workloads* section and use `curl` to send some requests to the incident service.
 .. Observe the graphs and expect to see a spike in the incoming requests from the ingress gateway.
 ** Note that the traffic is marked as mTLS.
