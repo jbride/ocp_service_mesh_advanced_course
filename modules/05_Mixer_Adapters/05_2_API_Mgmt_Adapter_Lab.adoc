@@ -434,6 +434,14 @@ $ oc logs -f `oc get pod -n $SM_CP_NS | grep "3scale-istio-adapter" | awk '{prin
 $ curl -v -k \
        `echo "https://"$(oc get route incident-service-gateway -n $SM_CP_NS -o template --template {{.spec.host}})"/incidents?user_key=$INCIDENT_SERVICE_API_KEY"`
 -----
++
+[TIP]
+====
+If you see the message `PERMISSION_DENIED:deny-curl-handler.admin21-istio-system:not allowed`, remove the _deny-curl_ `rule` you created in the previous lab.
+----
+$ oc delete rule incident-service-deny-curl -n $SM_CP_NS
+----
+====
 
 * Expect to see that the incident service is again being managed and secured by Red Hat 3scale API Management.
 This time however, the 3scale Istio adapter is being utilized rather than the API gateway.
@@ -453,7 +461,7 @@ For this section of the lab to work as expected, you need to delete the `Authori
 ----
 $ oc delete AuthorizationPolicy incident-service-external -n $ERDEMO_NS
 $ oc delete AuthorizationPolicy deny-all-incident-service -n $ERDEMO_NS
-$ oc delete AuthorizationPolicy allow-incident-service-internal -n $ERDEMO_NS
+$ oc delete AuthorizationPolicy incident-service-internal -n $ERDEMO_NS
 ----
 ====
 

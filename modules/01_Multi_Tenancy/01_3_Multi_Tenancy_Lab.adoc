@@ -425,14 +425,11 @@ $ oc get networkpolicy -n $ERDEMO_NS
 +
 .Sample Output
 ----
-allow-from-all-namespaces                <none>                                    17h
-allow-from-ingress-namespace             <none>                                    17h
 istio-expose-route                       maistra.io/expose-route=true              19h
 istio-mesh                               <none>                                    19h
 kafka-cluster-network-policy-kafka       strimzi.io/name=kafka-cluster-kafka       32h
 kafka-cluster-network-policy-zookeeper   strimzi.io/name=kafka-cluster-zookeeper   32h
 ----
-** `allow-from-all-namespaces` and `allow-from-ingress-namespace` are installed by default in every namespace when using OpenShift SDN mode. The policies allow traffic between all pods in all namespaces, as well as ingress to pods through the router.
 ** `kafka-cluster-network-policy-kafka` and `kafka-cluster-network-policy-zookeeper` are created when installing the Kafka cluster, and define ingress rules for the Kafka and Zookeeper pods.
 ** `istio-mesh` and `istio-expose-route` are created when adding the namespace to the service mesh.
 .. Review the `istio-mesh` network policy:
@@ -515,27 +512,14 @@ sh-4.2$ curl http://$ERDEMO_USER-incident-service.$ERDEMO_NS.svc:8080/incidents
 ----
 $ curl http://$ERDEMO_USER-incident-service.apps.$SUBDOMAIN_BASE/incidents
 ----
-** Expect both `curl` requests to succeed.
+** Expect both `curl` requests to fail.
 +
 ****
 *Question*:
 
-* This seems to violate the concept of an isolated service mesh network. Can you explain?
+* Based on this test, is this service mesh network isolated? Can you explain?
 ****
-. Delete the `allow-from-all-namespaces` and `allow-from-ingress-namespace` `NetworkPolicy` objects from the Emergency Response namespace:
-+
-----
-$ oc delete networkpolicy allow-from-all-namespaces -n $ERDEMO_NS
-$ oc delete networkpolicy allow-from-ingress-namespace -n $ERDEMO_NS
-----
 
-. Try to reach the incident service from within another namespace or from outside the cluster using `curl`.
-+
-****
-*Question*:
-
-* What do you observe?
-****
 . Add the `maistra.io/expose-route: 'true'` label to the template section of the DeploymentConfig of the incident service:
 +
 ----
@@ -565,42 +549,17 @@ spec:
 * What do you observe?
 ****
 
-. (Optional) Execute the following commands to restore the network policies to their original state:
+. To preserve functionality of the Emergency Response Demo console, repeat the same process for that `DeploymentConfig`.
+If you do not do this, you will not be able to access the console until you have fully configured the application in the next module.
 +
-----
-$ echo "---
-kind: NetworkPolicy
-apiVersion: networking.k8s.io/v1
-metadata:
-  name: allow-from-all-namespaces
-spec:
-  podSelector: {}
-  ingress:
-    - from:
-        - namespaceSelector: {}
-  policyTypes:
-    - Ingress
-" | oc create -f - -n $ERDEMO_NS
-----
-+
-----
-$ echo "---
-kind: NetworkPolicy
-apiVersion: networking.k8s.io/v1
-metadata:
-  name: allow-from-ingress-namespace
-spec:
-  podSelector: {}
-  ingress:
-    - from:
-        - namespaceSelector:
-            matchLabels:
-              network-policy: global
-  policyTypes:
-    - Ingress
-" | oc create -f - -n $ERDEMO_NS
-----
+[TIP]
+====
+Alternatively, run the following `oc patch` command:
 
+----
+$ oc patch dc $ERDEMO_USER-emergency-console -p '{"spec": {"template": {"metadata": {"labels": {"maistra.io/expose-route": "true"}}}}}'
+----
+====
 
 == Appendix
 

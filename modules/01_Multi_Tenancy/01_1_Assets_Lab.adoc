@@ -18,29 +18,42 @@
 
 :numbered:
 
-== Set Up Local Workstation
+== Set Up Workstation
 
-=== Install Client Utilities
+In the labs for this course, you use the command line for many of the tasks. 
+The labs assume that you are using the proper versions of these tools, all of which can be found on the provided Student VM.
 
-. Download and install the following utilities on your workstation:
-.. `openssl` (Use the `yum install openssl` command on Red Hat Enterprise Linux^(R)^ or Fedora).
-.. link:https://stedolan.github.io/jq/download/[jq] (Use the `dnf install jq` command on Fedora).
-.. link:https://mirror.openshift.com/pub/openshift-v4/clients/oc/4.3/[`oc` utility].
-
-... After installing the `oc` client, make sure it is on your `$PATH` and that its version is in the OpenShift 4.3 family:
+. Go to the link:https://labs.opentlc.com/[OPENTLC lab portal^] and use your OPENTLC credentials to log in.
+. Navigate to *Services -> Catalogs -> All Services -> OPENTLC OpenShift 4 Labs*.
+. On the left, select *OpenShift 4 Student VM*.
+. On the right, click *Order*.
+. On the *Lab Information* Tab make the following selections:
+.. *4.5* for *OpenShift Release*
+.. The region closest to you for *Region* (North America, EMEA, APAC or LATAM)
+. On the bottom right, click *Submit*.
 +
------
-$ oc version
------
-+
-.Sample Output
------
-Client Version: 4.3.19-202005020952-4fb2d4d
------
+[IMPORTANT]
+Do not select *App Control -> Start* after ordering the client VM. This is not necessary in this environment. Selecting *Start* may corrupt the lab environment or cause other complications.
 
-.. link:https://github.com/istio/istio/releases/tag/1.4.6[`istioctl` utility].
-** This link provides the same version of the `istioctl` command line utility than the version of Istio that OpenShift Service Mesh 1.1 is based on.
-... Unarchive the download and place the `bin/istioctl` binary somewhere on your `$PATH`.
+* After a few minutes, expect to receive an email with instructions on how to connect to the environment.
+
+. Read the email carefully and specifically note the following:
+* The hostname for your Student VM.
+* The username and password for your Student VM
+
+=== Start Client VM After Shut Down
+
+To conserve resources, the Student VM shuts down automatically after eight hours. 
+In this section, you restart the Student VM for this course after it has shut down automatically.
+
+. Go to the link:https://labs.opentlc.com/[OPENTLC lab portal^] and use your OPENTLC credentials to log in.
+. Navigate to *Services -> My Services* (this should be the screen shown right after logging in).
+. In the list of your services, select your *OpenShift 4 Student VM*.
+. Select *App Control -> Start* to start your *OpenShift 4 Student VM*.
+. Select *Yes* at the *Are you sure?* prompt.
+. On the bottom right, click *Submit*.
+
+After a few minutes, expect to receive an email letting you know that the Student VM has been started.
 
 === Set Environment Variables
 
@@ -67,8 +80,22 @@ $ curl https://raw.githubusercontent.com/gpe-mw-training/ocp_service_mesh_advanc
 $ $HOME/lab/set_env_vars.sh
 -----
 
+. Ensure that the environment variables are set correctly.
++
+----
+$ echo $GW_PROJECT
+----
++
+.Sample Output
+----
+user2-gw
+----
++
+NOTE: If you see empty output, make sure you source your `.bashrc` file using `source $HOME/.bashrc`.
+
 == Review OpenShift Container Platform Assets
-Your lab is built on a shared OpenShift Container Platform v4 cluster in the cloud.
+
+Your lab is built on a shared OpenShift Container Platform 4 cluster in the cloud.
 
 === Explore OpenShift User: `$ERDEMO_USER`
 
@@ -208,9 +235,8 @@ $ oc describe daemonset istio-node -n istio-operator | grep Image
 +
 .Sample Output
 -----
-registry.redhat.io/openshift-service-mesh/istio-cni-rhel8:1.0.1
+registry.redhat.io/openshift-service-mesh/istio-cni-rhel8@sha256:6312d3d...
 -----
-
 
 === Explore CRDs
 Custom Resource Definitions (CRDs) facilitate domain-specific extensions to the OpenShift master API.
@@ -226,7 +252,7 @@ $ oc get crd --as=system:admin | grep 'maistra\|istio'
 [NOTE]
 You need to impersonate an OpenShift cluster admin to do this because a service mesh control plane administrator does not have access to this in a production environment.
 
-* Expect to see about 25 CRDs.
+* Expect to see about 55 CRDs.
 
 . Review some of the more prominent service mesh-related CRD extensions to the OpenShift master API including those in the following table:
 +

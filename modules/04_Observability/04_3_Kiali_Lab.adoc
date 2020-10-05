@@ -65,6 +65,22 @@ $ while :; do curl -k https://incident-service.$ERDEMO_USER.apps.$SUBDOMAIN_BASE
 * *Services* are organized around Kubernetes services.
 * *Workloads* represent DeploymentConfig and Deployment resources.
 * For every one of these levels, the *Metrics* tab shows metric dashboards for inbound and outbound traffic. These metrics are the equivalent to those in the Grafana dashboards in OpenShift Service Mesh and they are obtained from the Prometheus instance.
++
+[NOTE]
+====
+In order to see all of the `DeploymentConfigs` in the _Workloads_ list, you must modify the *Kiali* `ConfigMap` in the `$SM_CP_NS` namespace.
+Make sure you remove the `DeploymentConfig` entry so they are not excluded.
+----
+kubernetes_config:
+      [...]
+      excluded_workloads:
+      - CronJob
+      - DeploymentConfig
+      - Job
+      - ReplicationController
+      - StatefulSet
+----
+====
 
 . Explore *Istio Config* to see the different service mesh configuration resources such as gateways, VirtualServices, and DestinationRules. Kiali provides inline editions of the YAML representation of these resources, as well as powerful semantic validation.
 
