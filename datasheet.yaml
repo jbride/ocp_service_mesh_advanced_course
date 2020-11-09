@@ -88,7 +88,6 @@ FIELDS:
     * Understand service mesh Mixer adapters and create and deploy custom resources to configure built-in Mixer adapters
     * Review 3scale Istio adapter components and apply API policies to network traffic within microservices applications using the 3scale Istio adapter
 
-	
 
 - name: SHORT DESCRIPTION
   description: |
@@ -125,6 +124,9 @@ FIELDS:
 
 - name: COURSE OUTLINE
   description: |
+    An outline for the course contents
+  responsible: dev, post-kickoff
+  value: |
     *Introduction*
     * Describe a service mesh.
     * Understand the complexity of distributed applications and how to address this.
