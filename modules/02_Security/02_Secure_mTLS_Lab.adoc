@@ -2166,7 +2166,6 @@ $ oc create -f incident-service-internal.yml -n $ERDEMO_NS
 Oct 30, 2019 3:02:31 PM com.redhat.cajun.navy.datagenerate.RestClientVerticle lambda$resetIncidents$4
 INFO: Reset incidents: HTTP response status 200
 ----
-// ** `curl` requests to the `/incidents` endpoint of the incident service still error out with an HTTP 403 return code.
 
 . Create an `AuthorizationPolicy` resource for external access to the incident service. This service role grants only HTTP GET access to the incident service REST APIs for all traffic handled by the ingress gateway.
 .. On the local file system, create a file called `incident-service-external.yml`:
