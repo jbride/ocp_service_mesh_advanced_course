@@ -215,9 +215,9 @@ Downstream to upstream is how traffic always flows through Envoy.
 image::images/envoy_architecture.png[]
 
 
-=== Configure Service Proxy Container
+=== Review Service Proxy Container
 
-. Delete any `deploy` pods that are in a `completed` status and have not yet been deleted:
+. Delete any `deploy` pods that are in a `completed` status and have not yet been deleted (this is just a cleanup):
 +
 -----
 $ curl https://raw.githubusercontent.com/gpe-mw-training/ocp_service_mesh_advanced/master/utils/delete_pod_deploys.sh \
