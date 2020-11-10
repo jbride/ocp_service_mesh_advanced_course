@@ -47,7 +47,7 @@ $ oc get servicemeshcontrolplane full-install -o yaml -n $SM_CP_NS
 ----
 +
 ----
-apiVersion: maistra.io/v1
+apiVersion: maistra.io/v2
 kind: ServiceMeshControlPlane
 metadata:
   annotations:
@@ -129,7 +129,7 @@ metadata:
   name: default
   namespace: istio-system
   ownerReferences:
-    - apiVersion: maistra.io/v1
+    - apiVersion: maistra.io/v2
       blockOwnerDeletion: true
       controller: true
       kind: ServiceMeshControlPlane
@@ -137,16 +137,17 @@ metadata:
       uid: 37f6be7f-f5d8-11e9-a89b-06c64aecfabc
   labels:
     app: security
-    app.kubernetes.io/part-of: istio
-    app.kubernetes.io/instance: istio-system
-    release: istio
-    app.kubernetes.io/version: 1.0.1-8.el8-1
     app.kubernetes.io/component: security
+    app.kubernetes.io/instance: admin27-istio-system
     app.kubernetes.io/managed-by: maistra-istio-operator
-    maistra.io/owner: istio-system
     app.kubernetes.io/name: security
+    app.kubernetes.io/part-of: istio
+    app.kubernetes.io/version: 2.0.0-11.el8-1
     chart: security
     heritage: Tiller
+    maistra-version: 1.1.10
+    maistra.io/owner: admin27-istio-system
+    release: istio
 spec:
   peers:
     - mtls:
@@ -746,7 +747,7 @@ image::images/dashboard-manage.png[]
 .. Locate the *Istio Workload Dashboard*.
 .. Select the `emergency-response-demo` namespace and the `Incident Service` workload.
 +
-image::images/select-workload-and-workspace.png[]
+image::images/select-namespace-and-workload.png[]
 
 .. Scroll down to the *Inbound Workloads* section and use `curl` to send some requests to the incident service.
 .. Observe the graphs and expect to see a spike in the incoming requests from the ingress gateway.
