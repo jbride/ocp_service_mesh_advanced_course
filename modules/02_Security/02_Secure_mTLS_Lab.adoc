@@ -2614,7 +2614,7 @@ $ oc create secret generic cacerts -n $SM_CP_NS --from-file=ca-cert.pem=$SM_CP_A
 . Configure Citadel to use the CA certificates rather than self-signed certificates by setting the `.spec.istio.security.selfSigned` element in the `ServiceMeshControlPlane` CR to `false`:
 +
 ----
-$ oc edit servicemeshcontrolplane full-install -n $SM_CP_NS
+$ oc edit servicemeshcontrolplane.v1.maistra.io full-install -n $SM_CP_NS
 ----
 
 .. Add the `.spec.istio.security.selfSigned` element to the CR:
