@@ -385,30 +385,21 @@ image::images/incident-service-pod-sidecar.png[]
 
 In this section, you configure the HTTP-based health checks to be rewritten and handled by the Pilot agent in the sidecar container.
 
-. Open the `ServiceMeshControlPlane` resource in the service mesh control plane for editing:
+. Open the `Deployment Config` resource for editing:
 +
 ----
-$ oc edit servicemeshcontrolplane full-install -o yaml -n $SM_CP_NS
+$ oc edit dc/$ERDEMO_USER-incident-service -n $ERDEMO_NS
 ----
 . Add the configuration to allow rewriting of HTTP probes:
 +
 ----
-apiVersion: maistra.io/v1
-kind: ServiceMeshControlPlane
-metadata:
-  [...]
-  name: full-install
-  [...]
 spec:
-  istio:
     [...]
-    tracing:
-      enabled: true
-    sidecarInjectorWebhook:
-      rewriteAppHTTPProbe: true
+    annotations:
+      sidecar.istio.io/rewriteAppHTTPProbers: "true"
   [...]
 ----
-. Save the `ServiceMeshControlPlane` resource.
+. Save the `DeploymentConfig` resource.
 . Redeploy the incident service:
 +
 ----
