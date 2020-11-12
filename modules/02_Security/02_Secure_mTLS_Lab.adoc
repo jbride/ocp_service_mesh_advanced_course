@@ -167,7 +167,7 @@ As part of client-side verification when using mTLS, this identity is verified a
 . In the Emergency Response Demo project, verify that the `istio` secrets for `key-and-cert` were created:
 +
 ----
-oc get secrets --field-selector=type=istio.io/key-and-cert -n $ERDEMO_NS
+$ oc get secrets --field-selector=type=istio.io/key-and-cert -n $ERDEMO_NS
 ----
 +
 .Sample Output
