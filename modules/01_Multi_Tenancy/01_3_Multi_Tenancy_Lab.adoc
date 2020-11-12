@@ -215,7 +215,7 @@ Downstream to upstream is how traffic always flows through Envoy.
 image::images/envoy_architecture.png[]
 
 
-=== Review Service Proxy Container
+=== Explore Service Proxy Container
 
 . Delete any `deploy` pods that are in a `completed` status and have not yet been deleted (this is just a cleanup):
 +
