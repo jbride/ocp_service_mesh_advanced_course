@@ -74,7 +74,7 @@ In this section of the lab, you enable it.
 . Update the `ServiceMeshControlPlane` resource with the `threeScale` component:
 +
 -----
-$ oc patch smcp/full-install -n $SM_CP_NS --type=json -p \
+$ oc patch smcp.v1.maistra.io full-install -n $SM_CP_NS --type=json -p \
 '[
     {
         "op": "replace",
