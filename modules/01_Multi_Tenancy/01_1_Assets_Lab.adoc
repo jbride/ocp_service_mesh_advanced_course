@@ -215,7 +215,7 @@ Subsequently, it is implemented as a DaemonSet in the `istio-operator` namespace
 . View the previously installed `istio-cni` pods implemented as an OpenShift DaemonSet in the `istio-operator` namespace:
 +
 -----
-oc get daemonset istio-node -n istio-operator
+$ oc get daemonset istio-node -n istio-operator
 -----
 +
 .Sample Output
@@ -299,7 +299,7 @@ $ oc get mutatingwebhookconfiguration --as=system:admin | grep $SM_CP_NS
 -----
 [...]
 
-istio-sidecar-injector-admin25-istio-system   2019-11-12T15:15:18Z
+istio-sidecar-injector-admin50-istio-system        1          19h
 -----
 
 . Extract the details of `mutatingwebhookconfiguration` specific to your OpenShift Service Mesh installation:
