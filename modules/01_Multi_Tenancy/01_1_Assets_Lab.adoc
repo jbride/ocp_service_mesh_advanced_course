@@ -322,7 +322,7 @@ $ oc get mutatingwebhookconfiguration istio-sidecar-injector-$SM_CP_NS \
       path: /inject
 -----
 
-* The scope of your mutating webhook is the namespace of your service mesh control plane:
+* The scope of your mutating webhook are the namespaces of your service mesh data plane. Namespaces belonging to a service mesh instance have a label `maistra.io/member-of` with value equal to the namespace of the service mesh control plane.
 +
 -----
   namespaceSelector:
