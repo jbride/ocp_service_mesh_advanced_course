@@ -42,7 +42,7 @@ $ oc login $LAB_MASTER_API -u $SM_CP_ADMIN -p $OCP_PASSWD
 . Review the `Tracing` section of the `ServiceMeshControlPlane` custom resource:
 +
 ----
-$ oc describe servicemeshcontrolplane full-install -n $SM_CP_NS
+$ oc describe servicemeshcontrolplane.v1.maistra.io full-install -n $SM_CP_NS
 ----
 +
 .Sample Output (Truncated)
