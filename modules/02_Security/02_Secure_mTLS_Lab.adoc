@@ -1970,7 +1970,7 @@ $ oc delete route $ERDEMO_USER-emergency-console -n $ERDEMO_NS
 ----
 $ echo -en "\n\nhttps://sso-user-sso.apps.$SUBDOMAIN_BASE/auth/admin/$ERDEMO_USER-emergency-realm/console\n\n"
 ----
-. In a browser window, navigate to the SSO console and log in using the username and password you registered with in the Emergency Response Demo application.
+. In a browser window, navigate to the SSO console and log in with `incident_commander/r3dh4t1!`.
 * Expect to be routed to the administration section of your realm.
 . In the left-hand menu, click *Clients* and select the `js` client.
 . On the *Settings* tab, scroll to the *Valid Redirect URIs* field, remove the existing redirect URL for the emergency console, and add the new URL for the emergency console:
@@ -2269,7 +2269,7 @@ In this section, you configure the SSO instance to be able to obtain a JWT token
 ----
 $ echo -en "\n\nhttps://sso-user-sso.apps.$SUBDOMAIN_BASE/auth/admin/$ERDEMO_USER-emergency-realm/console\n\n"
 ----
-.. In a browser window, navigate to the SSO Admin console and log in using the username and password you registered with in the Emergency Response application.
+.. In a browser window, navigate to the SSO Admin console and log in using `incident_commander/r3dh4t1!`.
 * Expect to see the administration section of your realm.
 . In the left-hand panel, click *Clients* and then click *Create* to add a new client.
 . Enter `curl` as the *Client ID* and click *Save*:
@@ -2285,12 +2285,10 @@ image::images/sso-client-settings.png[]
 ----
 $ export RHSSO_URL=https://sso-user-sso.apps.$SUBDOMAIN_BASE
 $ export REALM=$ERDEMO_USER-emergency-realm
-$ export USER=<realm username>
-$ export PASSWD=<realm password>
 $ TKN=$(curl -X POST "$RHSSO_URL/auth/realms/$REALM/protocol/openid-connect/token" \
  -H "Content-Type: application/x-www-form-urlencoded" \
- -d "username=$USER" \
- -d "password=$PASSWD" \
+ -d "username=incident_commander" \
+ -d "password=r3dh4t1!" \
  -d "grant_type=password" \
  -d "client_id=curl" \
   --insecure \
@@ -2400,8 +2398,8 @@ Origin authentication failed.
 ----
 $ TKN=$(curl -X POST "$RHSSO_URL/auth/realms/$REALM/protocol/openid-connect/token" \
  -H "Content-Type: application/x-www-form-urlencoded" \
- -d "username=$USER" \
- -d "password=$PASSWD" \
+ -d "username=incident_commander" \
+ -d "password=r3dh4t1!" \
  -d "grant_type=password" \
  -d "client_id=curl" \
   --insecure \
