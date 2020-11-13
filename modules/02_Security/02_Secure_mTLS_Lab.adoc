@@ -37,13 +37,13 @@ $ oc get servicemeshcontrolplane -n $SM_CP_NS
 .Sample Output
 ----
 NAME           READY   STATUS             TEMPLATE   VERSION   AGE
-full-install   9/9     UpdateSuccessful   default    v1.1      2d1h
+full-install   11/11   ComponentsReady    [default]  1.1.10    26h
 ----
 
 . Review the `ServiceMeshControlPlane` custom resource:
 +
 ----
-$ oc get servicemeshcontrolplane full-install -o yaml -n $SM_CP_NS
+$ oc get smcp.v1.maistra.io full-install -o yaml -n $SM_CP_NS
 ----
 +
 ----
@@ -52,31 +52,44 @@ kind: ServiceMeshControlPlane
 metadata:
   annotations:
     kubectl.kubernetes.io/last-applied-configuration: |
-      {"apiVersion":"maistra.io/v1","kind":"ServiceMeshControlPlane","metadata":{"annotations":{},"name":"full-install","namespace":"admin50-istio-system"},"spec":{"istio":{"gateways":{"istio-egressgateway":{"autoscaleEnabled":false},"istio-ingressgateway":{"autoscaleEnabled":false
-,"ior_enabled":false}},"global":{"disablePolicyChecks":false,"mtls":false,"proxy":{"resources":{"limits":{"cpu":"500m","memory":"128Mi"},"requests":{"cpu":"100m","memory":"128Mi"}}}},"kiali":{"dashboard":{"passphrase":"redhat","user":"admin"}},"mixer":{"policy":{"autoscaleEnabled":
-false},"telemetry":{"autoscaleEnabled":false,"resources":{"limits":{"cpu":"500m","memory":"4G"},"requests":{"cpu":"100m","memory":"1G"}}}},"pilot":{"autoscaleEnabled":false,"traceSampling":100},"tracing":{"enabled":true}},"threeScale":{"enabled":false}}}
-  creationTimestamp: "2019-11-12T15:08:30Z"
+      {"apiVersion":"maistra.io/v1","kind":"ServiceMeshControlPlane","metadata":{"annotations":{},"name":"full-install","namespace":"admin1-istio-system"},"spec":{"istio":{"gateways":{"istio-egressgateway":{"autoscaleEnabled":false},"istio-ingressgateway":{"autoscaleEnabled":false,"ior_enabled":false}},"global":{"disablePolicyChecks":true,"mtls":{"auto":false,"enabled":false},"proxy":{"resources":{"limits":{"cpu":"500m","memory":"128Mi"},"requests":{"cpu":"100m","memory":"128Mi"}}}},"kiali":{"dashboard":{"passphrase":"redhat","user":"admin"}},"mixer":{"policy":{"autoscaleEnabled":false},"telemetry":{"autoscaleEnabled":false,"resources":{"limits":{"cpu":"500m","memory":"4G"},"requests":{"cpu":"100m","memory":"1G"}}}},"pilot":{"autoscaleEnabled":false,"traceSampling":100},"tracing":{"enabled":true}},"threeScale":{"enabled":false},"version":"v1.1"}}
+  creationTimestamp: "2020-11-11T13:54:36Z"
   finalizers:
   - maistra.io/istio-operator
   generation: 1
+  managedFields:
+    [...]
   name: full-install
-  namespace: admin50-istio-system
-  resourceVersion: "704679"
-  selfLink: /apis/maistra.io/v1/namespaces/admin50-istio-system/servicemeshcontrolplanes/full-install
-  uid: 4998df80-055e-11ea-8412-0aaef3f8697a
+  namespace: admin1-istio-system
+  resourceVersion: "237122"
+  selfLink: /apis/maistra.io/v1/namespaces/admin1-istio-system/servicemeshcontrolplanes/full-install
+  uid: 0a839c95-6e9a-465c-9a7f-2e59654ab5b4
 spec:
   istio:
     gateways:
       istio-egressgateway:
         autoscaleEnabled: false
+        gatewayType: egress
+        name: istio-egressgateway
       istio-ingressgateway:
         autoscaleEnabled: false
+        gatewayType: ingress
         ior_enabled: false
+        name: istio-ingressgateway
     global:
-      disablePolicyChecks: false
+      disablePolicyChecks: true
+      enableTracing: true
+      meshExpansion:
+        enabled: false
+        useILB: false
       mtls:
         auto: false
         enabled: false
+      multiCluster:
+        enabled: false
+        multiClusterOverrides:
+          expansionEnabled: null
+          multiClusterEnabled: null
       proxy:
         resources:
           limits:
@@ -85,6 +98,7 @@ spec:
           requests:
             cpu: 100m
             memory: 128Mi
+        tracer: zipkin
     kiali:
       dashboard:
         passphrase: redhat
@@ -106,8 +120,13 @@ spec:
       traceSampling: 100
     tracing:
       enabled: true
+      provider: jaeger
+  profiles:
+  - default
+  template: default
   threeScale:
     enabled: false
+  version: v1.1
 status:
 [...]
 ----
@@ -126,32 +145,43 @@ $ oc get servicemeshpolicy default -o yaml -n $SM_CP_NS
 apiVersion: authentication.maistra.io/v1
 kind: ServiceMeshPolicy
 metadata:
-  name: default
-  namespace: istio-system
-  ownerReferences:
-    - apiVersion: maistra.io/v2
-      blockOwnerDeletion: true
-      controller: true
-      kind: ServiceMeshControlPlane
-      name: full-install
-      uid: 37f6be7f-f5d8-11e9-a89b-06c64aecfabc
+  annotations:
+    kubectl.kubernetes.io/last-applied-configuration: |
+      [...]
+    maistra.io/mesh-generation: 2.0.0-13.el8-1
+  creationTimestamp: "2020-11-11T13:54:40Z"
+  generation: 1
   labels:
     app: security
     app.kubernetes.io/component: security
-    app.kubernetes.io/instance: admin27-istio-system
+    app.kubernetes.io/instance: admin1-istio-system
     app.kubernetes.io/managed-by: maistra-istio-operator
     app.kubernetes.io/name: security
     app.kubernetes.io/part-of: istio
-    app.kubernetes.io/version: 2.0.0-11.el8-1
+    app.kubernetes.io/version: 2.0.0-13.el8-1
     chart: security
     heritage: Tiller
     maistra-version: 1.1.10
-    maistra.io/owner: admin27-istio-system
+    maistra.io/owner: admin1-istio-system
     release: istio
+  managedFields:
+    [...]
+  name: default
+  namespace: admin1-istio-system
+  ownerReferences:
+  - apiVersion: maistra.io/v2
+    blockOwnerDeletion: true
+    controller: true
+    kind: ServiceMeshControlPlane
+    name: full-install
+    uid: 0a839c95-6e9a-465c-9a7f-2e59654ab5b4
+  resourceVersion: "235912"
+  selfLink: /apis/authentication.maistra.io/v1/namespaces/admin1-istio-system/servicemeshpolicies/default
+  uid: c44d0b5e-6148-41eb-a013-746c26453b24
 spec:
   peers:
-    - mtls:
-        mode: PERMISSIVE
+  - mtls:
+      mode: PERMISSIVE
 ----
 
 * The global policy for mTLS is set to `PERMISSIVE`, which means that the proxy sidecar accepts non-mTLS encrypted traffic.
@@ -385,21 +415,73 @@ image::images/incident-service-pod-sidecar.png[]
 
 In this section, you configure the HTTP-based health checks to be rewritten and handled by the Pilot agent in the sidecar container.
 
-. Open the `Deployment Config` resource for editing:
+[WARNING]
+====
+In the latest released version of the OpenShift Service Mesh operator, mesh wide rewrite of HTTP-based health checks does not longer work for Service Mesh v1.
+
+The alternatives are:
+
+* Use command based HTTP health-checks
+* Add the `sidecar.istio.io/rewriteAppHTTPProbers` annotation to the pod template in the DeploymentConfig of the service (at the same level as the `sidecar.istio.io/inject` annotation):
 +
 ----
-$ oc edit dc/$ERDEMO_USER-incident-service -n $ERDEMO_NS
+kind: DeploymentConfig
+apiVersion: apps.openshift.io/v1
+metadata:
+  [...]
+  namespace: user1-er-demo
+  labels:
+    app: user1-incident-service
+spec:
+  strategy:
+    [...]
+  triggers:
+    [...]
+  replicas: 1
+  revisionHistoryLimit: 2
+  test: false
+  selector:
+    app: user4-incident-service
+    group: erd-services
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: user4-incident-service
+        group: erd-services
+      annotations:
+        sidecar.istio.io/inject: 'true'
+        sidecar.istio.io/rewriteAppHTTPProbers: 'true'
+    spec:
+      [...]
 ----
+====
+
+. Open the `ServiceMeshControlPlane` resource in the service mesh control plane for editing:
++
+----
+$ oc edit smcp.v1.maistra.io full-install -o yaml -n $SM_CP_NS
+----
+
 . Add the configuration to allow rewriting of HTTP probes:
 +
 ----
+apiVersion: maistra.io/v1
+kind: ServiceMeshControlPlane
+metadata:
+  [...]
+  name: full-install
+  [...]
 spec:
+  istio:
     [...]
-    annotations:
-      sidecar.istio.io/rewriteAppHTTPProbers: "true"
+    tracing:
+      enabled: true
+    sidecarInjectorWebhook:
+      rewriteAppHTTPProbe: true
   [...]
 ----
-. Save the `DeploymentConfig` resource.
+. Save the `ServiceMeshControlPlane` resource.
 . Redeploy the incident service:
 +
 ----
@@ -1995,14 +2077,6 @@ $ oc patch policy incident-service-mtls --type='json' -p '[{"op":"replace","path
 . Test the application again.
 * Expect everything to work correctly.
 
-// With strict mTLS enforced, the Prometheus pod in the `$ERDEMO_USER-er-metrics` namespace can no longer scrape metric data from the pods in the `$ERDEMO_USER-er-demo` namespace.
-// Adding the `$ERDEMO_USER-er-metrics` namespace to the service mesh and injecting the Envoy proxy in the Prometheus pod does not work because the scraping targets for Prometheus are pod IP addresses, not service names. The Envoy proxy does not process the traffic properly when directed to a pod IP instead of a service URL.
-
-// Possible solutions:
-
-// - Applications expose Prometheus metrics on a separate port and TLS is disabled for that port in the DestinationRule.
-// - Applications expose Prometheus metrics on a separate port, and that port is configured for pass-through in the service mesh proxy init container (which sets up the networking in the pod so that all traffic is intercepted by the proxy sidecar). This is a mesh-wide setting, so all application services must use the same port. Also it is not possible to configure the init container settings using the service mesh CR.
-
 == Set Authorization Policy for Services using AuthorizationPolicy
 
 Istio 1.4 introduces the _AuthorizationPolicy_ policy, which is a major update to the previous role-based access control (RBAC) policy. The new policy provides these improvements:
@@ -2550,7 +2624,7 @@ $ export CITADEL_SERIAL=$RANDOM
 .. Create an `openssl` configuration file for the intermediate certificate:
 +
 ----
-echo "
+$ echo "
 [ req ]
 encrypt_key = no
 prompt = no
@@ -2619,10 +2693,14 @@ spec:
     pilot:
       autoscaleEnabled: false
       traceSampling: 100
-    security:
-      selfSigned: false
     tracing:
       enabled: true
+      provider: jaeger
+    security:
+      selfSigned: false
+  profiles:
+  - default
+  template: default
   threeScale:
     enabled: false
 ----
