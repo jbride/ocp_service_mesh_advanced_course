@@ -66,6 +66,7 @@ In order for API management policies to be applied to service mesh traffic, poli
 ----
 $ oc login $LAB_MASTER_API -u $SM_CP_ADMIN -p $OCP_PASSWD
 ----
+
 === Explore 3scale Istio Adapter Components
 
 Your service mesh control plane was initially installed without the 3scale Istio adapter.
