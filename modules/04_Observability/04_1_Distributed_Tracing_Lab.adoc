@@ -55,7 +55,8 @@ Spec:
   Istio:
     [...]
     Tracing:
-      Enabled:  true
+      Enabled:   true
+      Provider:  jaeger
 Status:
   [...]
   Last Applied Configuration:
@@ -67,6 +68,7 @@ Status:
           Enabled:  true
         Jaeger:
           Template:  all-in-one
+        Provider:    jaeger
 [...]
 ----
 * Distributed tracing is enabled by setting `Tracing.Enabled` to `True`.
