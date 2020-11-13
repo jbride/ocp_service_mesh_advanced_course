@@ -507,8 +507,8 @@ $ oc edit dc $ERDEMO_USER-incident-service -o yaml -n $ERDEMO_NS
           exec:
             command:
               - curl
-              - 'http://127.0.0.1:8080/actuator/health'
-          initialDelaySeconds: 30
+              - 'http://127.0.0.1:8080/health/live'
+          initialDelaySeconds: 10
           periodSeconds: 30
           timeoutSeconds: 3
 [...]
@@ -517,7 +517,7 @@ $ oc edit dc $ERDEMO_USER-incident-service -o yaml -n $ERDEMO_NS
           exec:
             command:
               - curl
-              - 'http://127.0.0.1:8080/actuator/health'
+              - 'http://127.0.0.1:8080/health/ready'
           initialDelaySeconds: 30
           periodSeconds: 30
           timeoutSeconds: 3
@@ -529,7 +529,7 @@ $ oc edit dc $ERDEMO_USER-incident-service -o yaml -n $ERDEMO_NS
 Alternatively you can use the following `oc patch` command to patch the DeploymentConfig:
 
 ----
-$ oc patch dc $ERDEMO_USER-incident-service --type='json' -p '[{"op": "remove", "path": "/spec/template/spec/containers/0/livenessProbe/httpGet"}, {"op": "add", "path": "/spec/template/spec/containers/0/livenessProbe", "value": { "exec": { "command" : ["curl", "http://127.0.0.1:8080/actuator/health"]}, "initialDelaySeconds": 30, "timeoutSeconds": 3, "periodSeconds": 30, "successThreshold": 1, "failureThreshold": 3}}, {"op": "remove", "path": "/spec/template/spec/containers/0/readinessProbe/httpGet"}, {"op": "add", "path": "/spec/template/spec/containers/0/readinessProbe", "value": { "exec": { "command" : ["curl", "http://127.0.0.1:8080/actuator/health"]}, "initialDelaySeconds": 30, "timeoutSeconds": 3, "periodSeconds": 30, "successThreshold": 1, "failureThreshold": 3}}]' -n $ERDEMO_NS
+$ oc patch dc $ERDEMO_USER-incident-service --type='json' -p '[{"op": "remove", "path": "/spec/template/spec/containers/0/livenessProbe/httpGet"}, {"op": "add", "path": "/spec/template/spec/containers/0/livenessProbe", "value": { "exec": { "command" : ["curl", "http://127.0.0.1:8080/health/ready"]}, "initialDelaySeconds": 10, "timeoutSeconds": 3, "periodSeconds": 30, "successThreshold": 1, "failureThreshold": 3}}, {"op": "remove", "path": "/spec/template/spec/containers/0/readinessProbe/httpGet"}, {"op": "add", "path": "/spec/template/spec/containers/0/readinessProbe", "value": { "exec": { "command" : ["curl", "http://127.0.0.1:8080/health/ready"]}, "initialDelaySeconds": 10, "timeoutSeconds": 3, "periodSeconds": 30, "successThreshold": 1, "failureThreshold": 3}}]' -n $ERDEMO_NS
 ----
 ====
 
@@ -768,8 +768,8 @@ $ oc edit dc $ERDEMO_USER-responder-service -o yaml -n $ERDEMO_NS
           exec:
             command:
               - curl
-              - 'http://127.0.0.1:8080/actuator/health'
-          initialDelaySeconds: 30
+              - 'http://127.0.0.1:8080/health/live'
+          initialDelaySeconds: 10
           periodSeconds: 30
           timeoutSeconds: 3
 [...]
@@ -778,8 +778,8 @@ $ oc edit dc $ERDEMO_USER-responder-service -o yaml -n $ERDEMO_NS
           exec:
             command:
               - curl
-              - 'http://127.0.0.1:8080/actuator/health'
-          initialDelaySeconds: 30
+              - 'http://127.0.0.1:8080/health/ready'
+          initialDelaySeconds: 3
           periodSeconds: 30
           timeoutSeconds: 3
 [...]
@@ -790,7 +790,7 @@ $ oc edit dc $ERDEMO_USER-responder-service -o yaml -n $ERDEMO_NS
 Alternatively, you can run the following `oc patch` command:
 
 ----
-$ oc patch dc $ERDEMO_USER-responder-service --type='json' -p '[{"op": "remove", "path": "/spec/template/spec/containers/0/livenessProbe/httpGet"}, {"op": "add", "path": "/spec/template/spec/containers/0/livenessProbe", "value": { "exec": { "command" : ["curl", "http://127.0.0.1:8080/actuator/health"]},"initialDelaySeconds": 30, "timeoutSeconds": 3, "periodSeconds": 30, "successThreshold": 1, "failureThreshold": 3}}, {"op": "remove", "path": "/spec/template/spec/containers/0/readinessProbe/httpGet"}, {"op": "add", "path": "/spec/template/spec/containers/0/readinessProbe", "value": { "exec": { "command" : ["curl", "http://127.0.0.1:8080/actuator/health"]},"initialDelaySeconds": 30, "timeoutSeconds": 3, "periodSeconds": 30, "successThreshold": 1, "failureThreshold": 3}}]' -n $ERDEMO_NS
+$ oc patch dc $ERDEMO_USER-responder-service --type='json' -p '[{"op": "remove", "path": "/spec/template/spec/containers/0/livenessProbe/httpGet"}, {"op": "add", "path": "/spec/template/spec/containers/0/livenessProbe", "value": { "exec": { "command" : ["curl", "http://127.0.0.1:8080/health/live"]},"initialDelaySeconds": 10, "timeoutSeconds": 3, "periodSeconds": 30, "successThreshold": 1, "failureThreshold": 3}}, {"op": "remove", "path": "/spec/template/spec/containers/0/readinessProbe/httpGet"}, {"op": "add", "path": "/spec/template/spec/containers/0/readinessProbe", "value": { "exec": { "command" : ["curl", "http://127.0.0.1:8080/health/ready"]},"initialDelaySeconds": 3, "timeoutSeconds": 3, "periodSeconds": 30, "successThreshold": 1, "failureThreshold": 3}}]' -n $ERDEMO_NS
 ----
 ====
 . Annotate the responder service pods with the `sidecar.istio.io/inject: "true"` annotation:
@@ -1341,7 +1341,7 @@ $ oc edit dc $ERDEMO_USER-mission-service -o yaml -n $ERDEMO_NS
           exec:
             command:
               - curl
-              - 'http://127.0.0.1:8080'
+              - 'http://127.0.0.1:8080/health/live'
           initialDelaySeconds: 10
           periodSeconds: 10
           timeoutSeconds: 1
@@ -1351,8 +1351,8 @@ $ oc edit dc $ERDEMO_USER-mission-service -o yaml -n $ERDEMO_NS
           exec:
             command:
               - curl
-              - 'http://127.0.0.1:8080'
-          initialDelaySeconds: 10
+              - 'http://127.0.0.1:8080/health/ready'
+          initialDelaySeconds: 3
           periodSeconds: 10
           timeoutSeconds: 1
 [...]
@@ -1363,7 +1363,7 @@ $ oc edit dc $ERDEMO_USER-mission-service -o yaml -n $ERDEMO_NS
 Alternatively, run the following `oc patch` command:
 
 ----
-$ oc patch dc $ERDEMO_USER-mission-service --type='json' -p '[{"op": "remove", "path": "/spec/template/spec/containers/0/livenessProbe/httpGet"}, {"op": "add", "path": "/spec/template/spec/containers/0/livenessProbe", "value": { "exec": { "command" : ["curl", "http://127.0.0.1:8080"]},"initialDelaySeconds": 10, "timeoutSeconds": 1, "periodSeconds": 10, "successThreshold": 1, "failureThreshold": 3}}, {"op": "remove", "path": "/spec/template/spec/containers/0/readinessProbe/httpGet"}, {"op": "add", "path": "/spec/template/spec/containers/0/readinessProbe", "value": { "exec": { "command" : ["curl", "http://127.0.0.1:8080"]},"initialDelaySeconds": 10, "timeoutSeconds": 1, "periodSeconds": 10, "successThreshold": 1, "failureThreshold": 3}}]' -n $ERDEMO_NS
+$ oc patch dc $ERDEMO_USER-mission-service --type='json' -p '[{"op": "remove", "path": "/spec/template/spec/containers/0/livenessProbe/httpGet"}, {"op": "add", "path": "/spec/template/spec/containers/0/livenessProbe", "value": { "exec": { "command" : ["curl", "http://127.0.0.1:8080/health/live"]},"initialDelaySeconds": 10, "timeoutSeconds": 1, "periodSeconds": 10, "successThreshold": 1, "failureThreshold": 3}}, {"op": "remove", "path": "/spec/template/spec/containers/0/readinessProbe/httpGet"}, {"op": "add", "path": "/spec/template/spec/containers/0/readinessProbe", "value": { "exec": { "command" : ["curl", "http://127.0.0.1:8080/health/ready"]},"initialDelaySeconds": 3, "timeoutSeconds": 1, "periodSeconds": 10, "successThreshold": 1, "failureThreshold": 3}}]' -n $ERDEMO_NS
 ----
 ====
 . Annotate the mission service pods with the `sidecar.istio.io/inject: "true"` annotation:
@@ -1501,7 +1501,7 @@ $ oc edit dc $ERDEMO_USER-responder-simulator -o yaml -n $ERDEMO_NS
           exec:
             command:
               - curl
-              - 'http://127.0.0.1:8080'
+              - 'http://127.0.0.1:8080/health'
           initialDelaySeconds: 10
           periodSeconds: 10
           timeoutSeconds: 1
@@ -1511,8 +1511,8 @@ $ oc edit dc $ERDEMO_USER-responder-simulator -o yaml -n $ERDEMO_NS
           exec:
             command:
               - curl
-              - 'http://127.0.0.1:8080'
-          initialDelaySeconds: 10
+              - 'http://127.0.0.1:8080/health'
+          initialDelaySeconds: 3
           periodSeconds: 10
           timeoutSeconds: 1
 [...]
@@ -1523,7 +1523,7 @@ $ oc edit dc $ERDEMO_USER-responder-simulator -o yaml -n $ERDEMO_NS
 Alternatively, run the following `oc patch` command:
 
 ----
-$ oc patch dc $ERDEMO_USER-responder-simulator --type='json' -p '[{"op": "remove", "path": "/spec/template/spec/containers/0/livenessProbe/httpGet"}, {"op": "add", "path": "/spec/template/spec/containers/0/livenessProbe", "value": { "exec": { "command" : ["curl", "http://127.0.0.1:8080/metrics"]},"initialDelaySeconds": 10, "timeoutSeconds": 1, "periodSeconds": 10, "successThreshold": 1, "failureThreshold": 3}}, {"op": "remove", "path": "/spec/template/spec/containers/0/readinessProbe/httpGet"}, {"op": "add", "path": "/spec/template/spec/containers/0/readinessProbe", "value": { "exec": { "command" : ["curl", "http://127.0.0.1:8080/metrics"]},"initialDelaySeconds": 10, "timeoutSeconds": 1, "periodSeconds": 10, "successThreshold": 1, "failureThreshold": 3}}]' -n $ERDEMO_NS
+$ oc patch dc $ERDEMO_USER-responder-simulator --type='json' -p '[{"op": "remove", "path": "/spec/template/spec/containers/0/livenessProbe/httpGet"}, {"op": "add", "path": "/spec/template/spec/containers/0/livenessProbe", "value": { "exec": { "command" : ["curl", "http://127.0.0.1:8080/health"]},"initialDelaySeconds": 10, "timeoutSeconds": 1, "periodSeconds": 10, "successThreshold": 1, "failureThreshold": 3}}, {"op": "remove", "path": "/spec/template/spec/containers/0/readinessProbe/httpGet"}, {"op": "add", "path": "/spec/template/spec/containers/0/readinessProbe", "value": { "exec": { "command" : ["curl", "http://127.0.0.1:8080/health"]},"initialDelaySeconds": 3, "timeoutSeconds": 1, "periodSeconds": 10, "successThreshold": 1, "failureThreshold": 3}}]' -n $ERDEMO_NS
 ----
 ====
 
