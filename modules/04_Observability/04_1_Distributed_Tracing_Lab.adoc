@@ -202,18 +202,18 @@ $ oc edit configmap incident-service -n $ERDEMO_NS
 . Add the following lines to the `application.properties` file in the configmap, replacing `<admin user>` with the name of the control plane admin user:
 +
 ----
-opentracing.jaeger.enabled=true
-opentracing.jaeger.service-name=incident-service
-opentracing.jaeger.http-sender.url=http://jaeger-collector.<admin user>-istio-system.svc:14268/api/traces
-opentracing.jaeger.probabilistic-sampler.sampling-rate=1
-opentracing.jaeger.enable-b3-propagation=true
+quarkus.jaeger.endpoint=http://jaeger-collector.<admin user>-istio-system.svc:14268/api/traces
+quarkus.jaeger.service-name=incident-service
+quarkus.jaeger.propagation=b3
+quarkus.jaeger.sampler-type=probabilistic
+quarkus.jaeger.sampler-param=1
 ----
-* `jaeger-collector` is the service that exposes the collector in the Jaeger `all-in-one` image. It listens on port 14268.
-* `opentracing.jaeger.enable-b3-propagation` is the property that enables compatibility between Jaeger and HTTP headers in Zipkin format.
-. Patch the incident service DeploymentConfig to point to the `1.0.0-jaeger` tag of the incident service image:
+* `jaeger.endpoint` is the service that exposes the collector in the Jaeger `all-in-one` image. It listens on port 14268.
+* `jaeger.propagation=b3` is the property that enables compatibility between Jaeger and HTTP headers in Zipkin format.
+. Patch the incident service DeploymentConfig to point to the `sm-tracing` tag of the incident service image:
 +
 ----
-$ oc patch dc $ERDEMO_USER-incident-service -p "{\"spec\":{\"triggers\":[{\"type\": \"ConfigChange\"},{\"type\": \"ImageChange\",\"imageChangeParams\": {\"automatic\": true, \"containerNames\":[\"$ERDEMO_USER-incident-service\"], \"from\": {\"kind\": \"ImageStreamTag\", \"namespace\": \"$ERDEMO_NS\", \"name\": \"$ERDEMO_USER-incident-service:1.0.0-jaeger\"}}}]}}" -n $ERDEMO_NS
+$ oc patch dc $ERDEMO_USER-incident-service -p "{\"spec\":{\"triggers\":[{\"type\": \"ConfigChange\"},{\"type\": \"ImageChange\",\"imageChangeParams\": {\"automatic\": true, \"containerNames\":[\"$ERDEMO_USER-incident-service\"], \"from\": {\"kind\": \"ImageStreamTag\", \"namespace\": \"$ERDEMO_NS\", \"name\": \"$ERDEMO_USER-incident-service:sm-tracing\"}}}]}}" -n $ERDEMO_NS
 ----
 * This forces a redeployment of the incident service.
 
