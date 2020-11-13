@@ -51,7 +51,7 @@ In the lab for module 2, you created a wildcard gateway as well as a VirtualServ
 OpenShift Service Mesh provides a Mixer adapter called the _3scale Istio adapter_.
 In this section of the lab, you review the various components of the adapter and then configure it so that it applies API management policies to inbound requests.
 
-General information about Istio's plug-in architecture for applying policies and capturing telemetry can be found link:https://istio.io/docs/concepts/policies-and-telemetry/[here].
+General information about Istio's plug-in architecture for applying policies and capturing telemetry can be found link:https://istio.io/v1.4/docs/concepts/observability/[here].
 
 image::images/mixer_architecture.png[]
 
