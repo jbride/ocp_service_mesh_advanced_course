@@ -258,19 +258,16 @@ spec:
     app: $ERDEMO_USER-incident-service
     group: erd-services
   strategy:
-    activeDeadlineSeconds: 21600
+    type: Recreate
+    recreateParams:
+      timeoutSeconds: 600
     resources: {}
-    rollingParams:
-      intervalSeconds: 1
-      maxSurge: 25%
-      maxUnavailable: 25%
-      timeoutSeconds: 3600
-      updatePeriodSeconds: 1
-    type: Rolling
+    activeDeadlineSeconds: 21600
   template:
     metadata:
       annotations:
-        sidecar.istio.io/inject: \"true\"
+        sidecar.istio.io/inject: 'true'
+        sidecar.istio.io/rewriteAppHTTPProbers: 'true'
       creationTimestamp: null
       labels:
         app: $ERDEMO_USER-incident-service
@@ -286,30 +283,30 @@ spec:
               fieldPath: metadata.namespace
         imagePullPolicy: IfNotPresent
         livenessProbe:
-          exec:
-            command:
-            - curl
-            - http://127.0.0.1:8080/actuator/health
-          failureThreshold: 3
-          initialDelaySeconds: 30
+          httpGet:
+            path: /health/live
+            port: 8080
+            scheme: HTTP
+          initialDelaySeconds: 10
+          timeoutSeconds: 3
           periodSeconds: 30
           successThreshold: 1
-          timeoutSeconds: 3
+          failureThreshold: 3
         name: $ERDEMO_USER-incident-service
         ports:
-        - containerPort: 8080
-          name: http
+        - name: http
+          containerPort: 8080
           protocol: TCP
         readinessProbe:
-          exec:
-            command:
-            - curl
-            - http://127.0.0.1:8080/actuator/health
-          failureThreshold: 3
-          initialDelaySeconds: 30
-          periodSeconds: 30
-          successThreshold: 1
+          httpGet:
+            path: /health/ready
+            port: 8080
+            scheme: HTTP
+          initialDelaySeconds: 3
           timeoutSeconds: 3
+          periodSeconds: 10
+          successThreshold: 1
+          failureThreshold: 3
         resources:
           limits:
             cpu: 500m
@@ -323,8 +320,8 @@ spec:
         terminationMessagePath: /dev/termination-log
         terminationMessagePolicy: File
         volumeMounts:
-        - mountPath: /app/logging
-          name: logging
+        - name: config
+          mountPath: /deployments/config
       dnsPolicy: ClusterFirst
       restartPolicy: Always
       schedulerName: default-scheduler
@@ -333,22 +330,22 @@ spec:
       serviceAccountName: incident-service
       terminationGracePeriodSeconds: 30
       volumes:
-      - configMap:
+      - name: config
+        configMap:
+          name: incident-service
           defaultMode: 420
-          name: incident-service-logging
-        name: logging
   test: false
   triggers:
   - type: ConfigChange
-  - imageChangeParams:
+  - type: ImageChange
+    imageChangeParams:
       automatic: true
       containerNames:
       - $ERDEMO_USER-incident-service
       from:
         kind: ImageStreamTag
-        name: $ERDEMO_USER-incident-service:1.0.0-jaeger
+        name: $ERDEMO_USER-incident-service:sm-tracing
         namespace: $ERDEMO_NS
-    type: ImageChange
 " | oc create -f - -n $ERDEMO_NS
 ----
 
