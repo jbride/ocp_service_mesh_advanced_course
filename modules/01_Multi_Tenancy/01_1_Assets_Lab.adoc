@@ -93,6 +93,12 @@ user2-gw
 +
 NOTE: If you see empty output, make sure you source your `.bashrc` file using `source $HOME/.bashrc`.
 
+=== Download `istioctl`
+
+Some exercises in this course use the `istioctl` Istio command line tool. +
+Download the upstream Istio distribution from link:https://github.com/istio/istio/releases/tag/1.4.10[]. Make sure to download the _1.4.10_ version, which corresponds with the upstream Istio version that Red Hat Service Mesh is based on. +
+Extract the archive and add the `bin` folder to your path.
+
 == Review OpenShift Container Platform Assets
 
 Your lab is built on a shared OpenShift Container Platform 4 cluster in the cloud.
