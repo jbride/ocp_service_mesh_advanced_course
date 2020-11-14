@@ -24,7 +24,7 @@ $ echo -en "\n\nhttps://$(oc get route kiali -o template --template={{.spec.host
 +
 image::images/kiali-homepage.png[]
 
-* Expect to see the Kaili home page, which shows an overview of the namespaces that form the service mesh. From here you can navigate to the different pages in the application by clicking items in the left menu, or by clicking the icons in the namespace overview box.
+* Expect to see the Kiali home page, which shows an overview of the namespaces that form the service mesh. From here you can navigate to the different pages in the application by clicking items in the left menu, or by clicking the icons in the namespace overview box.
 +
 [NOTE]
 ====
@@ -68,18 +68,25 @@ $ while :; do curl -k https://incident-service.$ERDEMO_USER.apps.$SUBDOMAIN_BASE
 +
 [NOTE]
 ====
-In order to see all of the `DeploymentConfigs` in the _Workloads_ list, you must modify the *Kiali* `ConfigMap` in the `$SM_CP_NS` namespace.
-Make sure you remove the `DeploymentConfig` entry so they are not excluded.
+In order to see all of the `DeploymentConfigs` in the _Workloads_ list, you must modify the *Kiali* Custom Resource in the `$SM_CP_NS` namespace.
+
 ----
-kubernetes_config:
-      [...]
-      excluded_workloads:
+$ oc edit kiali kiali -n $SM_CP_NS
+----
+
+Add the following at the end of the `spec` section, under the `version` setting:
+
+----
+  version: v1.12
+  kubernetes_config:
+    excluded_workloads:
       - CronJob
-      - DeploymentConfig
       - Job
       - ReplicationController
       - StatefulSet
 ----
+
+Save the Custom Resource. This will cause a redeployment of the Kiali pod.
 ====
 
 . Explore *Istio Config* to see the different service mesh configuration resources such as gateways, VirtualServices, and DestinationRules. Kiali provides inline editions of the YAML representation of these resources, as well as powerful semantic validation.
