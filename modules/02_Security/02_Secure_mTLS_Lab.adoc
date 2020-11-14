@@ -1407,6 +1407,8 @@ $ oc create -f process-service-mtls-destinationrule.yml -n $ERDEMO_NS
 
 === Configure Mission Service
 
+The mission service is not exposed outside of the cluster, so there is no need for a `VirtualService` resource or a route.
+
 . Replace the health checks in the mission service DeploymentConfig to use a command-based health check with `curl` rather than an HTTP-based health check. You can skip this step if you enabled HTTP probe rewriting in the service mesh.
 .. Open the DeploymentConfig of the mission service for editing:
 +
@@ -1494,78 +1496,9 @@ spec:
 $ oc create -f mission-service-mtls-destinationrule.yml -n $ERDEMO_NS
 ----
 
-. Create a `VirtualService` resource for the mission service:
-+
-----
-$ echo "---
-apiVersion: networking.istio.io/v1alpha3
-kind: VirtualService
-metadata:
-  name: mission-service-virtualservice
-spec:
-  hosts:
-  - mission-service.$ERDEMO_USER.apps.$SUBDOMAIN_BASE
-  gateways:
-  - erd-wildcard-gateway.$SM_CP_NS.svc.cluster.local
-  http:
-  - match:
-    - uri:
-        prefix: /
-    route:
-    - destination:
-        port:
-          number: 8080
-        host: $ERDEMO_USER-mission-service.$ERDEMO_NS.svc.cluster.local
-" > mission-service-virtualservice.yml
-----
-+
-----
-$ oc create -f mission-service-virtualservice.yml -n $ERDEMO_NS
-----
-
-. Create a route for the mission service:
-+
-----
-$ echo "---
-apiVersion: route.openshift.io/v1
-kind: Route
-metadata:
-  annotations:
-    openshift.io/host.generated: 'true'
-  labels:
-    app: mission-service
-  name: mission-service-gateway
-spec:
-  host: mission-service.$ERDEMO_USER.apps.$SUBDOMAIN_BASE
-  port:
-    targetPort: https
-  tls:
-    termination: passthrough
-  to:
-    kind: Service
-    name: istio-ingressgateway
-    weight: 100
-  wildcardPolicy: None
-" > mission-service-gateway.yml
-----
-+
-----
-$ oc create -f mission-service-gateway.yml -n $SM_CP_NS
-----
-
-. Delete the existing mission service route:
-+
-----
-$ oc delete route $ERDEMO_USER-mission-service -n $ERDEMO_NS
-----
-
-. Test external access to the mission service:
-+
-----
-$ curl -v -k https://mission-service.$ERDEMO_USER.apps.$SUBDOMAIN_BASE/api/missions
-----
-
 === Configure Responder Simulator
+
+The responder simulator service is not exposed outside of the cluster, so there is no need for a `VirtualService` resource or a route.
 
 . Replace the health checks in the responder simulator DeploymentConfig to use a command-based health check with `curl` rather than an HTTP-based health check. You can skip this step if you enabled HTTP probe rewriting in the service mesh.
 .. Open the DeploymentConfig of the responder simulator for editing:
@@ -1656,78 +1589,9 @@ spec:
 $ oc create -f responder-simulator-mtls-destinationrule.yml -n $ERDEMO_NS
 ----
 
-. Create a `VirtualService` resource for the responder simulator:
-+
-----
-$ echo "---
-apiVersion: networking.istio.io/v1alpha3
-kind: VirtualService
-metadata:
-  name: responder-simulator-virtualservice
-spec:
-  hosts:
-  - responder-simulator.$ERDEMO_USER.apps.$SUBDOMAIN_BASE
-  gateways:
-  - erd-wildcard-gateway.$SM_CP_NS.svc.cluster.local
-  http:
-  - match:
-    - uri:
-        prefix: /
-    route:
-    - destination:
-        port:
-          number: 8080
-        host: $ERDEMO_USER-responder-simulator.$ERDEMO_NS.svc.cluster.local
-" > responder-simulator-virtualservice.yml
-----
-+
-----
-$ oc create -f responder-simulator-virtualservice.yml -n $ERDEMO_NS
-----
-
-. Create a route for the responder simulator:
-+
-----
-$ echo "---
-apiVersion: route.openshift.io/v1
-kind: Route
-metadata:
-  annotations:
-    openshift.io/host.generated: 'true'
-  labels:
-    app: responder-simulator
-  name: responder-simulator-gateway
-spec:
-  host: responder-simulator.$ERDEMO_USER.apps.$SUBDOMAIN_BASE
-  port:
-    targetPort: https
-  tls:
-    termination: passthrough
-  to:
-    kind: Service
-    name: istio-ingressgateway
-    weight: 100
-  wildcardPolicy: None
-" > responder-simulator-gateway.yml
-----
-+
-----
-$ oc create -f responder-simulator-gateway.yml -n $SM_CP_NS
-----
-
-. Delete the existing responder simulator route:
-+
-----
-$ oc delete route $ERDEMO_USER-responder-simulator -n $ERDEMO_NS
-----
-
-. Test external access to the responder simulator:
-+
-----
-$ curl -v -k https://responder-simulator.$ERDEMO_USER.apps.$SUBDOMAIN_BASE/stats/mc
-----
-
 === Configure Process Viewer
+
+The process viewer service is not exposed outside of the cluster, so there is no need for a `VirtualService` resource or a route.
 
 . Replace the health checks in the process viewer DeploymentConfig to use a command-based health check with `curl` rather than an HTTP-based health check. You can skip this step if you enabled HTTP probe rewriting in the service mesh.
 .. Open the DeploymentConfig of the process viewer for editing:
@@ -1816,79 +1680,6 @@ spec:
 +
 ----
 $ oc create -f process-viewer-mtls-destinationrule.yml -n $ERDEMO_NS
-----
-
-. Create a `VirtualService` resource for the process viewer:
-+
-----
-$ echo "---
-apiVersion: networking.istio.io/v1alpha3
-kind: VirtualService
-metadata:
-  name: process-viewer-virtualservice
-spec:
-  hosts:
-  - process-viewer.$ERDEMO_USER.apps.$SUBDOMAIN_BASE
-  gateways:
-  - erd-wildcard-gateway.$SM_CP_NS.svc.cluster.local
-  http:
-  - match:
-    - uri:
-        prefix: /image
-    - uri:
-        prefix: /data
-    route:
-    - destination:
-        port:
-          number: 8080
-        host: $ERDEMO_USER-process-viewer.$ERDEMO_NS.svc.cluster.local
-" > process-viewer-virtualservice.yml
-----
-+
-----
-$ oc create -f process-viewer-virtualservice.yml -n $ERDEMO_NS
-----
-
-. Create a route for the process viewer:
-+
-----
-$ echo "---
-apiVersion: route.openshift.io/v1
-kind: Route
-metadata:
-  annotations:
-    openshift.io/host.generated: 'true'
-  labels:
-    app: process-viewer
-  name: process-viewer-gateway
-spec:
-  host: process-viewer.$ERDEMO_USER.apps.$SUBDOMAIN_BASE
-  port:
-    targetPort: https
-  tls:
-    termination: passthrough
-  to:
-    kind: Service
-    name: istio-ingressgateway
-    weight: 100
-  wildcardPolicy: None
-" > process-viewer-gateway.yml
-----
-+
-----
-$ oc create -f process-viewer-gateway.yml -n $SM_CP_NS
-----
-
-. Delete the existing process viewer route:
-+
-----
-$ oc delete route $ERDEMO_USER-process-viewer -n $ERDEMO_NS
-----
-
-. Test external access to the process viewer service:
-+
-----
-$ curl -v -k https://process-viewer.$ERDEMO_USER.apps.$SUBDOMAIN_BASE/image/process/incident-process
 ----
 
 === Configure Emergency Console
