@@ -372,7 +372,7 @@ Enabling mTLS for the incident service involves the following tasks:
 
 * Ensure that health checks are still working when using strict mTLS.
 ** When enforcing strict mTLS when calling the incident service, the HTTP-based health check fails because it is executed from the kubelet and is not able to present a suitable certificate. The command-based health checks are executed in the container itself, so they are not impacted.
-** The OpenShift Service Mesh sidecar injector service can be configured to rewrite HTTP probes at sidecar injection time, so that the requests are sent to the _Pilot agent_ in the Envoy sidecar, which then redirects to the application. This global configuration is set in the `ServiceMeshControlPlane` CR and is applied to all pods in the service mesh data plane that have the Envoy sidecar injected.
+** The OpenShift Service Mesh sidecar injector service can be configured to rewrite HTTP probes at sidecar injection time, so that the requests are sent to the _Pilot agent_ in the Envoy sidecar, which then redirects to the application. This global configuration is set in the `ServiceMeshControlPlane` CR and is applied to all pods in the service mesh data plane that have the Envoy sidecar injected. HTTP probe rewriting can also be configured on individual deployments by annotating the Deployment or DeploymentConfig.
 
 ==== Inject Envoy Proxy Sidecar
 
@@ -417,7 +417,7 @@ In this section, you configure the HTTP-based health checks to be rewritten and 
 
 [WARNING]
 ====
-In the latest released version of the OpenShift Service Mesh operator, mesh wide rewrite of HTTP-based health checks does not longer work for Service Mesh v1.
+In the latest released version of the OpenShift Service Mesh operator, mesh wide rewrite of HTTP-based health checks does not longer work when using Service Mesh v1.
 
 The alternatives are:
 
@@ -441,7 +441,7 @@ spec:
   revisionHistoryLimit: 2
   test: false
   selector:
-    app: user4-incident-service
+    app: user1-incident-service
     group: erd-services
   template:
     metadata:
@@ -570,9 +570,40 @@ status:
 * In the sidecar container, the Pilot agent is listening on port 15020. This is the process that bootstraps the Envoy proxy.
 * The Pilot agent redirects the call to the application, strips the response body and returns the response code to the kubelet.
 
+====  Configure HTTP-Based Health Checks with Annotation
+
+. Open the DeploymentConfig of the incident service for editing:
++
+----
+oc edit dc $ERDEMO_USER-incident-service -o yaml -n $ERDEMO_NS
+----
+
+. In the `.spec.template.metadata` section, add the `sidecar.istio.io/rewriteAppHTTPProbers` annotation:
++
+----
+[...]
+  template:
+    metadata:
+      annotations:
+        sidecar.istio.io/inject: 'true'
+        sidecar.istio.io/rewriteAppHTTPProbers: 'true'
+      labels:
+[...]
+----
++
+[TIP]
+====
+Alternatively, you can run the following `oc patch` command:
+
+----
+$ oc patch dc $ERDEMO_USER-incident-service --type='json' -p "[{\"op\": \"add\", \"path\": \"/spec/template/metadata\", \"value\": {\"annotations\":{\"sidecar.istio.io/inject\": \"true\", \"sidecar.istio.io/rewriteAppHTTPProbers\": \"true\"}, \"labels\":{\"app\":\"$ERDEMO_USER-incident-service\",\"group\":\"erd-services\"}}}]" -n $ERDEMO_NS
+----
+====
+. Check the liveness and readiness probes of the incident service pod. 
+
 ==== Configure Command-Based Health Checks
 
-In this section, you replace the health checks in the DeploymentConfig to use a command-based health check with `curl` rather than an HTTP-based health check.
+In this section, you replace the health checks in the DeploymentConfig to use a command-based health check with `curl` rather than an HTTP-based health check. You can skip this step if you applied HTTP probe rewriting.
 
 . Open the DeploymentConfig of the incident service for editing:
 +
@@ -834,7 +865,19 @@ image::images/istio-grafana-workload-inbound.png[]
 
 The procedure for enabling mTLS communication for the responder service and other services in the Emergency Response Demo application is very similar to that of the incident service. Only some differences are highlighted in the sections that follow.
 
-. Replace the health checks in the responder service DeploymentConfig to use a command-based health check with `curl` rather than an HTTP-based health check. You can skip this step if you enabled HTTP probe rewriting in the service mesh.
+. Annotate the responder service pods with the `sidecar.istio.io/inject: "true"` annotation:
++
+----
+$ oc patch dc $ERDEMO_USER-responder-service --type='json' -p "[{\"op\": \"add\", \"path\": \"/spec/template/metadata\", \"value\": {\"annotations\":{\"sidecar.istio.io/inject\": \"true\"}, \"labels\":{\"app\":\"$ERDEMO_USER-responder-service\",\"group\":\"erd-services\"}}}]" -n $ERDEMO_NS
+----
+
+. To use HTTP probe rewriting, annotate the responder service pods with the `sidecar.istio.io/rewriteAppHTTPProbers: "true"` annotation:
++
+----
+$ oc patch dc $ERDEMO_USER-responder-service --type='json' -p "[{\"op\": \"add\", \"path\": \"/spec/template/metadata\", \"value\": {\"annotations\":{\"sidecar.istio.io/inject\": \"true\", \"sidecar.istio.io/rewriteAppHTTPProbers\": \"true\"}, \"labels\":{\"app\":\"$ERDEMO_USER-responder-service\",\"group\":\"erd-services\"}}}]" -n $ERDEMO_NS
+----
+
+. As an alternative, replace the health checks in the responder service DeploymentConfig to use a command-based health check with `curl` rather than an HTTP-based health check. You can skip this step if you enabled HTTP probe rewriting in the service mesh.
 .. Open the DeploymentConfig of the responder service for editing:
 +
 ----
@@ -875,11 +918,7 @@ Alternatively, you can run the following `oc patch` command:
 $ oc patch dc $ERDEMO_USER-responder-service --type='json' -p '[{"op": "remove", "path": "/spec/template/spec/containers/0/livenessProbe/httpGet"}, {"op": "add", "path": "/spec/template/spec/containers/0/livenessProbe", "value": { "exec": { "command" : ["curl", "http://127.0.0.1:8080/health/live"]},"initialDelaySeconds": 10, "timeoutSeconds": 3, "periodSeconds": 30, "successThreshold": 1, "failureThreshold": 3}}, {"op": "remove", "path": "/spec/template/spec/containers/0/readinessProbe/httpGet"}, {"op": "add", "path": "/spec/template/spec/containers/0/readinessProbe", "value": { "exec": { "command" : ["curl", "http://127.0.0.1:8080/health/ready"]},"initialDelaySeconds": 3, "timeoutSeconds": 3, "periodSeconds": 30, "successThreshold": 1, "failureThreshold": 3}}]' -n $ERDEMO_NS
 ----
 ====
-. Annotate the responder service pods with the `sidecar.istio.io/inject: "true"` annotation:
-+
-----
-$ oc patch dc $ERDEMO_USER-responder-service --type='json' -p "[{\"op\": \"add\", \"path\": \"/spec/template/metadata\", \"value\": {\"annotations\":{\"sidecar.istio.io/inject\": \"true\"}, \"labels\":{\"app\":\"$ERDEMO_USER-responder-service\",\"group\":\"erd-services\"}}}]" -n $ERDEMO_NS
-----
+
 . Create a `Policy` resource for the responder service:
 +
 ----
@@ -994,7 +1033,19 @@ $ curl -v -k https://responder-service.$ERDEMO_USER.apps.$SUBDOMAIN_BASE/respond
 
 === Configure Disaster Simulator
 
-. Replace the health checks in the disaster simulator DeploymentConfig to use a command-based health check with `curl` rather than an HTTP-based health check. You can skip this step if you enabled HTTP probe rewriting in the service mesh.
+. Annotate the disaster simulator pods with the `sidecar.istio.io/inject: "true"` annotation.
++
+----
+$ oc patch dc $ERDEMO_USER-disaster-simulator --type='json' -p "[{\"op\": \"add\", \"path\": \"/spec/template/metadata\", \"value\": {\"annotations\":{\"sidecar.istio.io/inject\": \"true\"}, \"labels\":{\"app\":\"$ERDEMO_USER-disaster-simulator\",\"group\":\"erd-services\"}}}]" -n $ERDEMO_NS
+----
+
+. To use HTTP probe rewriting, annotate the disaster simulator pods with the `sidecar.istio.io/rewriteAppHTTPProbers: "true"` annotation:
++
+----
+$ oc patch dc $ERDEMO_USER-disaster-simulator --type='json' -p "[{\"op\": \"add\", \"path\": \"/spec/template/metadata\", \"value\": {\"annotations\":{\"sidecar.istio.io/inject\": \"true\", \"sidecar.istio.io/rewriteAppHTTPProbers\": \"true\"}, \"labels\":{\"app\":\"$ERDEMO_USER-disaster-simulator\",\"group\":\"erd-services\"}}}]" -n $ERDEMO_NS
+----
+
+. As an  alternative, replace the health checks in the disaster simulator DeploymentConfig to use a command-based health check with `curl` rather than an HTTP-based health check. You can skip this step if you enabled HTTP probe rewriting in the service mesh.
 .. Open the DeploymentConfig of the disaster simulator for editing:
 +
 ----
@@ -1035,11 +1086,7 @@ Alternatively, run the following `oc patch` command:
 $ oc patch dc $ERDEMO_USER-disaster-simulator --type='json' -p '[{"op": "remove", "path": "/spec/template/spec/containers/0/livenessProbe/httpGet"}, {"op": "add", "path": "/spec/template/spec/containers/0/livenessProbe", "value": { "exec": { "command" : ["curl", "http://127.0.0.1:8080"]}, "initialDelaySeconds": 10, "timeoutSeconds": 1, "periodSeconds": 10, "successThreshold": 1, "failureThreshold": 3}}, {"op": "remove", "path": "/spec/template/spec/containers/0/readinessProbe/httpGet"}, {"op": "add", "path": "/spec/template/spec/containers/0/readinessProbe", "value": { "exec": { "command" : ["curl", "http://127.0.0.1:8080"]},"initialDelaySeconds": 10, "timeoutSeconds": 1, "periodSeconds": 10, "successThreshold": 1, "failureThreshold": 3}}]' -n $ERDEMO_NS
 ----
 ====
-. Annotate the disaster simulator pods with the `sidecar.istio.io/inject: "true"` annotation.
-+
-----
-$ oc patch dc $ERDEMO_USER-disaster-simulator --type='json' -p "[{\"op\": \"add\", \"path\": \"/spec/template/metadata\", \"value\": {\"annotations\":{\"sidecar.istio.io/inject\": \"true\"}, \"labels\":{\"app\":\"$ERDEMO_USER-disaster-simulator\",\"group\":\"erd-services\"}}}]" -n $ERDEMO_NS
-----
+
 . Create a `Policy` resource for the disaster simulator service:
 +
 ----
@@ -1154,7 +1201,19 @@ $ curl -v -k https://disaster-simulator.$ERDEMO_USER.apps.$SUBDOMAIN_BASE
 
 === Configure Incident Priority Service
 
-. Replace the health checks in the incident priority service DeploymentConfig to use a command-based health check with `curl` rather than an HTTP-based health check. You can skip this step if you enabled HTTP probe rewriting in the service mesh.
+. Annotate the incident priority service pods with the `sidecar.istio.io/inject: "true"` annotation:
++
+----
+$ oc patch dc $ERDEMO_USER-incident-priority-service --type='json' -p "[{\"op\": \"add\", \"path\": \"/spec/template/metadata\", \"value\": {\"annotations\":{\"sidecar.istio.io/inject\": \"true\"}, \"labels\":{\"app\":\"$ERDEMO_USER-incident-priority-service\",\"group\":\"erd-services\"}}}]" -n $ERDEMO_NS
+----
+
+. To use HTTP probe rewriting, annotate the incident priority service pods with the `sidecar.istio.io/rewriteAppHTTPProbers: "true"` annotation:
++
+----
+$ oc patch dc $ERDEMO_USER-incident-priority-service  --type='json' -p "[{\"op\": \"add\", \"path\": \"/spec/template/metadata\", \"value\": {\"annotations\":{\"sidecar.istio.io/inject\": \"true\", \"sidecar.istio.io/rewriteAppHTTPProbers\": \"true\"}, \"labels\":{\"app\":\"$ERDEMO_USER-incident-priority-service \",\"group\":\"erd-services\"}}}]" -n $ERDEMO_NS
+----
+
+. As an alternative, replace the health checks in the incident priority service DeploymentConfig to use a command-based health check with `curl` rather than an HTTP-based health check. You can skip this step if you enabled HTTP probe rewriting in the service mesh.
 .. Open the DeploymentConfig of the incident priority service for editing:
 +
 ----
@@ -1195,11 +1254,7 @@ Alternatively, run the following `oc patch` command:
 $ oc patch dc $ERDEMO_USER-incident-priority-service --type='json' -p '[{"op": "remove", "path": "/spec/template/spec/containers/0/livenessProbe/httpGet"}, {"op": "add", "path": "/spec/template/spec/containers/0/livenessProbe", "value": { "exec": { "command" : ["curl", "http://127.0.0.1:8080/health"]}, "initialDelaySeconds": 30, "timeoutSeconds": 3, "periodSeconds": 30, "successThreshold": 1, "failureThreshold": 3}}, {"op": "remove", "path": "/spec/template/spec/containers/0/readinessProbe/httpGet"}, {"op": "add", "path": "/spec/template/spec/containers/0/readinessProbe", "value": { "exec": { "command" : ["curl", "http://127.0.0.1:8080/health"]},"initialDelaySeconds": 10, "timeoutSeconds": 3, "periodSeconds": 30, "successThreshold": 1, "failureThreshold": 3}}]' -n $ERDEMO_NS
 ----
 ====
-. Annotate the incident priority service pods with the `sidecar.istio.io/inject: "true"` annotation:
-+
-----
-$ oc patch dc $ERDEMO_USER-incident-priority-service --type='json' -p "[{\"op\": \"add\", \"path\": \"/spec/template/metadata\", \"value\": {\"annotations\":{\"sidecar.istio.io/inject\": \"true\"}, \"labels\":{\"app\":\"$ERDEMO_USER-incident-priority-service\",\"group\":\"erd-services\"}}}]" -n $ERDEMO_NS
-----
+
 . Create a `Policy` resource for the incident priority service:
 +
 ----
@@ -1317,7 +1372,19 @@ $ curl -v -k https://incident-priority-service.$ERDEMO_USER.apps.$SUBDOMAIN_BASE
 
 The process service is not exposed outside of the cluster, so there is no need for a `VirtualService` resource or a route.
 
-. Replace the health checks in the process service DeploymentConfig to use a command-based health check with `curl` rather than an HTTP-based health check. You can skip this step if you enabled HTTP probe rewriting in the service mesh.
+. Annotate the process service pods with the `sidecar.istio.io/inject: "true"` annotation:
++
+----
+$ oc patch dc $ERDEMO_USER-process-service --type='json' -p "[{\"op\": \"add\", \"path\": \"/spec/template/metadata\", \"value\": {\"annotations\":{\"sidecar.istio.io/inject\": \"true\"}, \"labels\":{\"app\":\"$ERDEMO_USER-process-service\",\"group\":\"erd-services\"}}}]" -n $ERDEMO_NS
+----
+
+. To use HTTP probe rewriting, annotate the process service pods with the `sidecar.istio.io/rewriteAppHTTPProbers: "true"` annotation:
++
+----
+$ oc patch dc $ERDEMO_USER-process-service --type='json' -p "[{\"op\": \"add\", \"path\": \"/spec/template/metadata\", \"value\": {\"annotations\":{\"sidecar.istio.io/inject\": \"true\", \"sidecar.istio.io/rewriteAppHTTPProbers\": \"true\"}, \"labels\":{\"app\":\"$ERDEMO_USER-process-service\",\"group\":\"erd-services\"}}}]" -n $ERDEMO_NS
+----
+
+. As an alternative, replace the health checks in the process service DeploymentConfig to use a command-based health check with `curl` rather than an HTTP-based health check. You can skip this step if you enabled HTTP probe rewriting in the service mesh.
 .. Open the DeploymentConfig of the process service for editing:
 +
 ----
@@ -1359,11 +1426,6 @@ $ oc patch dc $ERDEMO_USER-process-service --type='json' -p '[{"op": "remove", "
 ----
 ====
 
-. Annotate the process service pods with the `sidecar.istio.io/inject: "true"` annotation:
-+
-----
-$ oc patch dc $ERDEMO_USER-process-service --type='json' -p "[{\"op\": \"add\", \"path\": \"/spec/template/metadata\", \"value\": {\"annotations\":{\"sidecar.istio.io/inject\": \"true\"}, \"labels\":{\"app\":\"$ERDEMO_USER-process-service\",\"group\":\"erd-services\"}}}]" -n $ERDEMO_NS
-----
 . Create a `Policy` resource for the process service:
 +
 ----
@@ -1409,7 +1471,19 @@ $ oc create -f process-service-mtls-destinationrule.yml -n $ERDEMO_NS
 
 The mission service is not exposed outside of the cluster, so there is no need for a `VirtualService` resource or a route.
 
-. Replace the health checks in the mission service DeploymentConfig to use a command-based health check with `curl` rather than an HTTP-based health check. You can skip this step if you enabled HTTP probe rewriting in the service mesh.
+. Annotate the mission service pods with the `sidecar.istio.io/inject: "true"` annotation:
++
+----
+$ oc patch dc $ERDEMO_USER-mission-service --type='json' -p "[{\"op\": \"add\", \"path\": \"/spec/template/metadata\", \"value\": {\"annotations\":{\"sidecar.istio.io/inject\": \"true\"}, \"labels\":{\"app\":\"$ERDEMO_USER-mission-service\",\"group\":\"erd-services\"}}}]" -n $ERDEMO_NS
+----
+
+. To use HTTP probe rewriting, annotate the mission service pods with the `sidecar.istio.io/rewriteAppHTTPProbers: "true"` annotation:
++
+----
+$ oc patch dc $ERDEMO_USER-mission-service --type='json' -p "[{\"op\": \"add\", \"path\": \"/spec/template/metadata\", \"value\": {\"annotations\":{\"sidecar.istio.io/inject\": \"true\", \"sidecar.istio.io/rewriteAppHTTPProbers\": \"true\"}, \"labels\":{\"app\":\"$ERDEMO_USER-mission-service\",\"group\":\"erd-services\"}}}]" -n $ERDEMO_NS
+----
+
+. As an alternative, replace the health checks in the mission service DeploymentConfig to use a command-based health check with `curl` rather than an HTTP-based health check. You can skip this step if you enabled HTTP probe rewriting in the service mesh.
 .. Open the DeploymentConfig of the mission service for editing:
 +
 ----
@@ -1450,11 +1524,7 @@ Alternatively, run the following `oc patch` command:
 $ oc patch dc $ERDEMO_USER-mission-service --type='json' -p '[{"op": "remove", "path": "/spec/template/spec/containers/0/livenessProbe/httpGet"}, {"op": "add", "path": "/spec/template/spec/containers/0/livenessProbe", "value": { "exec": { "command" : ["curl", "http://127.0.0.1:8080/health/live"]},"initialDelaySeconds": 10, "timeoutSeconds": 1, "periodSeconds": 10, "successThreshold": 1, "failureThreshold": 3}}, {"op": "remove", "path": "/spec/template/spec/containers/0/readinessProbe/httpGet"}, {"op": "add", "path": "/spec/template/spec/containers/0/readinessProbe", "value": { "exec": { "command" : ["curl", "http://127.0.0.1:8080/health/ready"]},"initialDelaySeconds": 3, "timeoutSeconds": 1, "periodSeconds": 10, "successThreshold": 1, "failureThreshold": 3}}]' -n $ERDEMO_NS
 ----
 ====
-. Annotate the mission service pods with the `sidecar.istio.io/inject: "true"` annotation:
-+
-----
-$ oc patch dc $ERDEMO_USER-mission-service --type='json' -p "[{\"op\": \"add\", \"path\": \"/spec/template/metadata\", \"value\": {\"annotations\":{\"sidecar.istio.io/inject\": \"true\"}, \"labels\":{\"app\":\"$ERDEMO_USER-mission-service\",\"group\":\"erd-services\"}}}]" -n $ERDEMO_NS
-----
+
 . Create a `Policy` resource for the mission service:
 +
 ----
@@ -1500,7 +1570,19 @@ $ oc create -f mission-service-mtls-destinationrule.yml -n $ERDEMO_NS
 
 The responder simulator service is not exposed outside of the cluster, so there is no need for a `VirtualService` resource or a route.
 
-. Replace the health checks in the responder simulator DeploymentConfig to use a command-based health check with `curl` rather than an HTTP-based health check. You can skip this step if you enabled HTTP probe rewriting in the service mesh.
+. Annotate the responder simulator pods with the `sidecar.istio.io/inject: "true"` annotation:
++
+----
+$ oc patch dc $ERDEMO_USER-responder-simulator --type='json' -p "[{\"op\": \"add\", \"path\": \"/spec/template/metadata\", \"value\": {\"annotations\":{\"sidecar.istio.io/inject\": \"true\"}, \"labels\":{\"app\":\"$ERDEMO_USER-responder-simulator\",\"group\":\"erd-services\"}}}]" -n $ERDEMO_NS
+----
+
+. To use HTTP probe rewriting, annotate the responder simulator pods with the `sidecar.istio.io/rewriteAppHTTPProbers: "true"` annotation:
++
+----
+$ oc patch dc $ERDEMO_USER-responder-simulator --type='json' -p "[{\"op\": \"add\", \"path\": \"/spec/template/metadata\", \"value\": {\"annotations\":{\"sidecar.istio.io/inject\": \"true\", \"sidecar.istio.io/rewriteAppHTTPProbers\": \"true\"}, \"labels\":{\"app\":\"$ERDEMO_USER-responder-simulator\",\"group\":\"erd-services\"}}}]" -n $ERDEMO_NS
+----
+
+. As an alternative, replace the health checks in the responder simulator DeploymentConfig to use a command-based health check with `curl` rather than an HTTP-based health check. You can skip this step if you enabled HTTP probe rewriting in the service mesh.
 .. Open the DeploymentConfig of the responder simulator for editing:
 +
 ----
@@ -1541,12 +1623,6 @@ Alternatively, run the following `oc patch` command:
 $ oc patch dc $ERDEMO_USER-responder-simulator --type='json' -p '[{"op": "remove", "path": "/spec/template/spec/containers/0/livenessProbe/httpGet"}, {"op": "add", "path": "/spec/template/spec/containers/0/livenessProbe", "value": { "exec": { "command" : ["curl", "http://127.0.0.1:8080/health"]},"initialDelaySeconds": 10, "timeoutSeconds": 1, "periodSeconds": 10, "successThreshold": 1, "failureThreshold": 3}}, {"op": "remove", "path": "/spec/template/spec/containers/0/readinessProbe/httpGet"}, {"op": "add", "path": "/spec/template/spec/containers/0/readinessProbe", "value": { "exec": { "command" : ["curl", "http://127.0.0.1:8080/health"]},"initialDelaySeconds": 3, "timeoutSeconds": 1, "periodSeconds": 10, "successThreshold": 1, "failureThreshold": 3}}]' -n $ERDEMO_NS
 ----
 ====
-
-. Annotate the responder simulator pods with the `sidecar.istio.io/inject: "true"` annotation:
-+
-----
-$ oc patch dc $ERDEMO_USER-responder-simulator --type='json' -p "[{\"op\": \"add\", \"path\": \"/spec/template/metadata\", \"value\": {\"annotations\":{\"sidecar.istio.io/inject\": \"true\"}, \"labels\":{\"app\":\"$ERDEMO_USER-responder-simulator\",\"group\":\"erd-services\"}}}]" -n $ERDEMO_NS
-----
 
 . Create a `Policy` resource for the responder simulator service:
 +
@@ -1593,7 +1669,19 @@ $ oc create -f responder-simulator-mtls-destinationrule.yml -n $ERDEMO_NS
 
 The process viewer service is not exposed outside of the cluster, so there is no need for a `VirtualService` resource or a route.
 
-. Replace the health checks in the process viewer DeploymentConfig to use a command-based health check with `curl` rather than an HTTP-based health check. You can skip this step if you enabled HTTP probe rewriting in the service mesh.
+. Annotate the process viewer pods with the `sidecar.istio.io/inject: "true"` annotation:
++
+----
+$ oc patch dc $ERDEMO_USER-process-viewer --type='json' -p "[{\"op\": \"add\", \"path\": \"/spec/template/metadata\", \"value\": {\"annotations\":{\"sidecar.istio.io/inject\": \"true\"}, \"labels\":{\"app\":\"$ERDEMO_USER-process-viewer\"}}}]" -n $ERDEMO_NS
+----
+
+. To use HTTP probe rewriting, annotate the process viewer pods with the `sidecar.istio.io/rewriteAppHTTPProbers: "true"` annotation:
++
+----
+$ oc patch dc $ERDEMO_USER-process-viewer --type='json' -p "[{\"op\": \"add\", \"path\": \"/spec/template/metadata\", \"value\": {\"annotations\":{\"sidecar.istio.io/inject\": \"true\", \"sidecar.istio.io/rewriteAppHTTPProbers\": \"true\"}, \"labels\":{\"app\":\"$ERDEMO_USER-process-viewer\"}}}]" -n $ERDEMO_NS
+----
+
+. As an altenative, replace the health checks in the process viewer DeploymentConfig to use a command-based health check with `curl` rather than an HTTP-based health check. You can skip this step if you enabled HTTP probe rewriting in the service mesh.
 .. Open the DeploymentConfig of the process viewer for editing:
 +
 ----
@@ -1634,12 +1722,6 @@ Alternatively, run the following `oc patch` command:
 $ oc patch dc $ERDEMO_USER-process-viewer --type='json' -p '[{"op": "remove", "path": "/spec/template/spec/containers/0/livenessProbe/httpGet"}, {"op": "add", "path": "/spec/template/spec/containers/0/livenessProbe", "value": { "exec": { "command" : ["curl", "http://127.0.0.1:8080/health"]},"initialDelaySeconds": 15, "timeoutSeconds": 3, "periodSeconds": 30, "successThreshold": 1, "failureThreshold": 3}}, {"op": "remove", "path": "/spec/template/spec/containers/0/readinessProbe/httpGet"}, {"op": "add", "path": "/spec/template/spec/containers/0/readinessProbe", "value": { "exec": { "command" : ["curl", "http://127.0.0.1:8080/health"]},"initialDelaySeconds": 5, "timeoutSeconds": 3, "periodSeconds": 30, "successThreshold": 1, "failureThreshold": 3}}]' -n $ERDEMO_NS
 ----
 ====
-
-. Annotate the process viewer pods with the `sidecar.istio.io/inject: "true"` annotation:
-+
-----
-$ oc patch dc $ERDEMO_USER-process-viewer --type='json' -p "[{\"op\": \"add\", \"path\": \"/spec/template/metadata\", \"value\": {\"annotations\":{\"sidecar.istio.io/inject\": \"true\"}, \"labels\":{\"app\":\"$ERDEMO_USER-process-viewer\"}}}]" -n $ERDEMO_NS
-----
 
 . Create a `Policy` resource for the process viewer service:
 +
@@ -1684,7 +1766,19 @@ $ oc create -f process-viewer-mtls-destinationrule.yml -n $ERDEMO_NS
 
 === Configure Emergency Console
 
-. Replace the health checks in the emergency console DeploymentConfig to use a command-based health check with `curl` rather than an HTTP-based health check. You can skip this step if you enabled HTTP probe rewriting in the service mesh.
+. Annotate the emergency console pods with the `sidecar.istio.io/inject: "true"` annotation:
++
+----
+$ oc patch dc $ERDEMO_USER-emergency-console --type='json' -p "[{\"op\": \"add\", \"path\": \"/spec/template/metadata\", \"value\": {\"annotations\":{\"sidecar.istio.io/inject\": \"true\"}, \"labels\":{\"app\":\"$ERDEMO_USER-emergency-console\"}}}]" -n $ERDEMO_NS
+----
+
+. To use HTTP probe rewriting, annotate the emergency console pods with the `sidecar.istio.io/rewriteAppHTTPProbers: "true"` annotation:
++
+----
+$ oc patch dc $ERDEMO_USER-emergency-console --type='json' -p "[{\"op\": \"add\", \"path\": \"/spec/template/metadata\", \"value\": {\"annotations\":{\"sidecar.istio.io/inject\": \"true\", \"sidecar.istio.io/rewriteAppHTTPProbers\": \"true\"}, \"labels\":{\"app\":\"$ERDEMO_USER-emergency-console\"}}}]" -n $ERDEMO_NS
+----
+
+. As an alternative, replace the health checks in the emergency console DeploymentConfig to use a command-based health check with `curl` rather than an HTTP-based health check. You can skip this step if you enabled HTTP probe rewriting in the service mesh.
 .. Open the DeploymentConfig of the emergency console for editing:
 +
 ----
@@ -1725,12 +1819,6 @@ Alternatively, run the following `oc patch` command:
 $ oc patch dc $ERDEMO_USER-emergency-console --type='json' -p '[{"op": "remove", "path": "/spec/template/spec/containers/0/livenessProbe/httpGet"}, {"op": "add", "path": "/spec/template/spec/containers/0/livenessProbe", "value": { "exec": { "command" : ["curl", "http://127.0.0.1:8080"]}, "initialDelaySeconds": 30, "timeoutSeconds": 3, "periodSeconds": 30, "successThreshold": 1, "failureThreshold": 3}}, {"op": "remove", "path": "/spec/template/spec/containers/0/readinessProbe/httpGet"}, {"op": "add", "path": "/spec/template/spec/containers/0/readinessProbe", "value": { "exec": { "command" : ["curl", "http://127.0.0.1:8080"]},"initialDelaySeconds": 30, "timeoutSeconds": 3, "periodSeconds": 30, "successThreshold": 1, "failureThreshold": 3}}]' -n $ERDEMO_NS
 ----
 ====
-
-. Annotate the emergency console pods with the `sidecar.istio.io/inject: "true"` annotation:
-+
-----
-$ oc patch dc $ERDEMO_USER-emergency-console --type='json' -p "[{\"op\": \"add\", \"path\": \"/spec/template/metadata\", \"value\": {\"annotations\":{\"sidecar.istio.io/inject\": \"true\"}, \"labels\":{\"app\":\"$ERDEMO_USER-emergency-console\"}}}]" -n $ERDEMO_NS
-----
 
 . Create a `Policy` resource for the emergency console service:
 +
