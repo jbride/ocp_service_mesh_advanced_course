@@ -621,7 +621,7 @@ $ oc edit dc $ERDEMO_USER-incident-service -o yaml -n $ERDEMO_NS
             command:
               - curl
               - 'http://127.0.0.1:8080/health/live'
-          initialDelaySeconds: 10
+          initialDelaySeconds: 20
           periodSeconds: 30
           timeoutSeconds: 3
 [...]
@@ -642,7 +642,7 @@ $ oc edit dc $ERDEMO_USER-incident-service -o yaml -n $ERDEMO_NS
 Alternatively you can use the following `oc patch` command to patch the DeploymentConfig:
 
 ----
-$ oc patch dc $ERDEMO_USER-incident-service --type='json' -p '[{"op": "remove", "path": "/spec/template/spec/containers/0/livenessProbe/httpGet"}, {"op": "add", "path": "/spec/template/spec/containers/0/livenessProbe", "value": { "exec": { "command" : ["curl", "http://127.0.0.1:8080/health/ready"]}, "initialDelaySeconds": 10, "timeoutSeconds": 3, "periodSeconds": 30, "successThreshold": 1, "failureThreshold": 3}}, {"op": "remove", "path": "/spec/template/spec/containers/0/readinessProbe/httpGet"}, {"op": "add", "path": "/spec/template/spec/containers/0/readinessProbe", "value": { "exec": { "command" : ["curl", "http://127.0.0.1:8080/health/ready"]}, "initialDelaySeconds": 10, "timeoutSeconds": 3, "periodSeconds": 30, "successThreshold": 1, "failureThreshold": 3}}]' -n $ERDEMO_NS
+$ oc patch dc $ERDEMO_USER-incident-service --type='json' -p '[{"op": "remove", "path": "/spec/template/spec/containers/0/livenessProbe/httpGet"}, {"op": "add", "path": "/spec/template/spec/containers/0/livenessProbe", "value": { "exec": { "command" : ["curl", "http://127.0.0.1:8080/health/ready"]}, "initialDelaySeconds": 20, "timeoutSeconds": 3, "periodSeconds": 30, "successThreshold": 1, "failureThreshold": 3}}, {"op": "remove", "path": "/spec/template/spec/containers/0/readinessProbe/httpGet"}, {"op": "add", "path": "/spec/template/spec/containers/0/readinessProbe", "value": { "exec": { "command" : ["curl", "http://127.0.0.1:8080/health/ready"]}, "initialDelaySeconds": 10, "timeoutSeconds": 3, "periodSeconds": 30, "successThreshold": 1, "failureThreshold": 3}}]' -n $ERDEMO_NS
 ----
 ====
 
@@ -894,7 +894,7 @@ $ oc edit dc $ERDEMO_USER-responder-service -o yaml -n $ERDEMO_NS
             command:
               - curl
               - 'http://127.0.0.1:8080/health/live'
-          initialDelaySeconds: 10
+          initialDelaySeconds: 20
           periodSeconds: 30
           timeoutSeconds: 3
 [...]
@@ -915,7 +915,7 @@ $ oc edit dc $ERDEMO_USER-responder-service -o yaml -n $ERDEMO_NS
 Alternatively, you can run the following `oc patch` command:
 
 ----
-$ oc patch dc $ERDEMO_USER-responder-service --type='json' -p '[{"op": "remove", "path": "/spec/template/spec/containers/0/livenessProbe/httpGet"}, {"op": "add", "path": "/spec/template/spec/containers/0/livenessProbe", "value": { "exec": { "command" : ["curl", "http://127.0.0.1:8080/health/live"]},"initialDelaySeconds": 10, "timeoutSeconds": 3, "periodSeconds": 30, "successThreshold": 1, "failureThreshold": 3}}, {"op": "remove", "path": "/spec/template/spec/containers/0/readinessProbe/httpGet"}, {"op": "add", "path": "/spec/template/spec/containers/0/readinessProbe", "value": { "exec": { "command" : ["curl", "http://127.0.0.1:8080/health/ready"]},"initialDelaySeconds": 3, "timeoutSeconds": 3, "periodSeconds": 30, "successThreshold": 1, "failureThreshold": 3}}]' -n $ERDEMO_NS
+$ oc patch dc $ERDEMO_USER-responder-service --type='json' -p '[{"op": "remove", "path": "/spec/template/spec/containers/0/livenessProbe/httpGet"}, {"op": "add", "path": "/spec/template/spec/containers/0/livenessProbe", "value": { "exec": { "command" : ["curl", "http://127.0.0.1:8080/health/live"]},"initialDelaySeconds": 20, "timeoutSeconds": 3, "periodSeconds": 30, "successThreshold": 1, "failureThreshold": 3}}, {"op": "remove", "path": "/spec/template/spec/containers/0/readinessProbe/httpGet"}, {"op": "add", "path": "/spec/template/spec/containers/0/readinessProbe", "value": { "exec": { "command" : ["curl", "http://127.0.0.1:8080/health/ready"]},"initialDelaySeconds": 3, "timeoutSeconds": 3, "periodSeconds": 30, "successThreshold": 1, "failureThreshold": 3}}]' -n $ERDEMO_NS
 ----
 ====
 
@@ -1500,7 +1500,7 @@ $ oc edit dc $ERDEMO_USER-mission-service -o yaml -n $ERDEMO_NS
             command:
               - curl
               - 'http://127.0.0.1:8080/health/live'
-          initialDelaySeconds: 10
+          initialDelaySeconds: 20
           periodSeconds: 10
           timeoutSeconds: 1
 [...]
@@ -1521,7 +1521,7 @@ $ oc edit dc $ERDEMO_USER-mission-service -o yaml -n $ERDEMO_NS
 Alternatively, run the following `oc patch` command:
 
 ----
-$ oc patch dc $ERDEMO_USER-mission-service --type='json' -p '[{"op": "remove", "path": "/spec/template/spec/containers/0/livenessProbe/httpGet"}, {"op": "add", "path": "/spec/template/spec/containers/0/livenessProbe", "value": { "exec": { "command" : ["curl", "http://127.0.0.1:8080/health/live"]},"initialDelaySeconds": 10, "timeoutSeconds": 1, "periodSeconds": 10, "successThreshold": 1, "failureThreshold": 3}}, {"op": "remove", "path": "/spec/template/spec/containers/0/readinessProbe/httpGet"}, {"op": "add", "path": "/spec/template/spec/containers/0/readinessProbe", "value": { "exec": { "command" : ["curl", "http://127.0.0.1:8080/health/ready"]},"initialDelaySeconds": 3, "timeoutSeconds": 1, "periodSeconds": 10, "successThreshold": 1, "failureThreshold": 3}}]' -n $ERDEMO_NS
+$ oc patch dc $ERDEMO_USER-mission-service --type='json' -p '[{"op": "remove", "path": "/spec/template/spec/containers/0/livenessProbe/httpGet"}, {"op": "add", "path": "/spec/template/spec/containers/0/livenessProbe", "value": { "exec": { "command" : ["curl", "http://127.0.0.1:8080/health/live"]},"initialDelaySeconds": 20, "timeoutSeconds": 1, "periodSeconds": 10, "successThreshold": 1, "failureThreshold": 3}}, {"op": "remove", "path": "/spec/template/spec/containers/0/readinessProbe/httpGet"}, {"op": "add", "path": "/spec/template/spec/containers/0/readinessProbe", "value": { "exec": { "command" : ["curl", "http://127.0.0.1:8080/health/ready"]},"initialDelaySeconds": 3, "timeoutSeconds": 1, "periodSeconds": 10, "successThreshold": 1, "failureThreshold": 3}}]' -n $ERDEMO_NS
 ----
 ====
 
@@ -1599,7 +1599,7 @@ $ oc edit dc $ERDEMO_USER-responder-simulator -o yaml -n $ERDEMO_NS
             command:
               - curl
               - 'http://127.0.0.1:8080/health'
-          initialDelaySeconds: 10
+          initialDelaySeconds: 20
           periodSeconds: 10
           timeoutSeconds: 1
 [...]
@@ -1620,7 +1620,7 @@ $ oc edit dc $ERDEMO_USER-responder-simulator -o yaml -n $ERDEMO_NS
 Alternatively, run the following `oc patch` command:
 
 ----
-$ oc patch dc $ERDEMO_USER-responder-simulator --type='json' -p '[{"op": "remove", "path": "/spec/template/spec/containers/0/livenessProbe/httpGet"}, {"op": "add", "path": "/spec/template/spec/containers/0/livenessProbe", "value": { "exec": { "command" : ["curl", "http://127.0.0.1:8080/health"]},"initialDelaySeconds": 10, "timeoutSeconds": 1, "periodSeconds": 10, "successThreshold": 1, "failureThreshold": 3}}, {"op": "remove", "path": "/spec/template/spec/containers/0/readinessProbe/httpGet"}, {"op": "add", "path": "/spec/template/spec/containers/0/readinessProbe", "value": { "exec": { "command" : ["curl", "http://127.0.0.1:8080/health"]},"initialDelaySeconds": 3, "timeoutSeconds": 1, "periodSeconds": 10, "successThreshold": 1, "failureThreshold": 3}}]' -n $ERDEMO_NS
+$ oc patch dc $ERDEMO_USER-responder-simulator --type='json' -p '[{"op": "remove", "path": "/spec/template/spec/containers/0/livenessProbe/httpGet"}, {"op": "add", "path": "/spec/template/spec/containers/0/livenessProbe", "value": { "exec": { "command" : ["curl", "http://127.0.0.1:8080/health"]},"initialDelaySeconds": 20, "timeoutSeconds": 1, "periodSeconds": 10, "successThreshold": 1, "failureThreshold": 3}}, {"op": "remove", "path": "/spec/template/spec/containers/0/readinessProbe/httpGet"}, {"op": "add", "path": "/spec/template/spec/containers/0/readinessProbe", "value": { "exec": { "command" : ["curl", "http://127.0.0.1:8080/health"]},"initialDelaySeconds": 3, "timeoutSeconds": 1, "periodSeconds": 10, "successThreshold": 1, "failureThreshold": 3}}]' -n $ERDEMO_NS
 ----
 ====
 
