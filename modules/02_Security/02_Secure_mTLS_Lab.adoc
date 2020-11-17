@@ -2239,11 +2239,11 @@ image::images/sso-client-settings.png[]
 $ export RHSSO_URL=https://sso-user-sso.apps.$SUBDOMAIN_BASE
 $ export REALM=$ERDEMO_USER-emergency-realm
 $ TKN=$(curl -X POST "$RHSSO_URL/auth/realms/$REALM/protocol/openid-connect/token" \
- -H "Content-Type: application/x-www-form-urlencoded" \
- -d "username=incident_commander" \
- -d "password=r3dh4t1!" \
- -d "grant_type=password" \
- -d "client_id=curl" \
+ -H 'Content-Type: application/x-www-form-urlencoded' \
+ -d 'username=incident_commander' \
+ -d 'password=r3dh4t1!' \
+ -d 'grant_type=password' \
+ -d 'client_id=curl' \
   --insecure \
  | sed 's/.*access_token":"//g' | sed 's/".*//g')
 $ echo $TKN
