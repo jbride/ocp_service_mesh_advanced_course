@@ -136,4 +136,71 @@ image::images/kiali-runtimes-metrics.png[]
 image::images/kiali-runtimes-metrics-2.png[]
 * Note the application metric dashboards here as well.
 
+. Kiali allows to define and integrate custom dashboards with the `MonitoringDashboard` custom resource. We can use this feature to fix the Quarkus dashboard.
+* Create a custom Kiali dashboard:
++
+----
+$ echo "
+apiVersion: monitoring.kiali.io/v1alpha1
+kind: MonitoringDashboard
+metadata:
+  name: quarkus-fixed
+spec:
+  discoverOn: base_thread_count
+  items:
+  - chart:
+      dataType: raw
+      metricName: base_thread_count
+      name: Thread count
+      spans: 4
+  - chart:
+      dataType: raw
+      metricName: base_memory_usedHeap_bytes
+      name: Used heap
+      spans: 4
+      unit: bytes
+  - chart:
+      dataType: raw
+      metricName: vendor_memory_usedNonHeap_bytes
+      name: Used non-heap
+      spans: 4
+      unit: bytes
+  - chart:
+      dataType: raw
+      metricName: 'base_gc_time_total_seconds'
+      name: Total GC time
+      spans: 3
+      unit: seconds
+  - chart:
+      dataType: raw
+      metricName: 'base_gc_total'
+      name: Total GC count
+      spans: 3
+  runtime: Quarkus
+  title: Quarkus Metrics Fixed
+" > kiali-custom-dashboard.yml
+----
++
+----
+$ oc create -f kiali-custom-dashboard.yml -n $SM_CP_NS
+----
+* Annotate the application pods by adding the `kiali.io/dashboards: quarkus-fixed` annotation to the DeploymentConfig resources of the incident service (`$ERDEMO_USER-incident-service` and `$ERDEMO_USER-incident-service-v2`):
++
+----
+      annotations:
+        kiali.io/runtimes: quarkus
+        kiali.io/dashboards: quarkus-fixed
+        prometheus.io/path: /metrics
+        prometheus.io/port: '8080'
+        prometheus.io/scheme: https
+        prometheus.io/scrape: 'true'
+        sidecar.istio.io/inject: 'true'
+        sidecar.istio.io/rewriteAppHTTPProbers: 'true'
+----
+* In the Kiali console, click *Applications* and open the page for the `$ERDEMO_USER-incident-service` application:
++
+image::images/kiali-custom-dashboard.png[]
+* Note that the page shows an extra tabs: *Quarkus Metrics Fixed*.
+
+
 This concludes the lab. You learned about the features of the Kiali console in OpenShift Service Mesh.
