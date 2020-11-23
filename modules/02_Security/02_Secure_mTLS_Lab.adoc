@@ -47,7 +47,7 @@ $ oc get servicemeshcontrolplane full-install -o yaml -n $SM_CP_NS
 ----
 +
 ----
-apiVersion: maistra.io/v1
+apiVersion: maistra.io/v2
 kind: ServiceMeshControlPlane
 metadata:
   annotations:
@@ -129,7 +129,7 @@ metadata:
   name: default
   namespace: istio-system
   ownerReferences:
-    - apiVersion: maistra.io/v1
+    - apiVersion: maistra.io/v2
       blockOwnerDeletion: true
       controller: true
       kind: ServiceMeshControlPlane
@@ -137,16 +137,17 @@ metadata:
       uid: 37f6be7f-f5d8-11e9-a89b-06c64aecfabc
   labels:
     app: security
-    app.kubernetes.io/part-of: istio
-    app.kubernetes.io/instance: istio-system
-    release: istio
-    app.kubernetes.io/version: 1.0.1-8.el8-1
     app.kubernetes.io/component: security
+    app.kubernetes.io/instance: admin27-istio-system
     app.kubernetes.io/managed-by: maistra-istio-operator
-    maistra.io/owner: istio-system
     app.kubernetes.io/name: security
+    app.kubernetes.io/part-of: istio
+    app.kubernetes.io/version: 2.0.0-11.el8-1
     chart: security
     heritage: Tiller
+    maistra-version: 1.1.10
+    maistra.io/owner: admin27-istio-system
+    release: istio
 spec:
   peers:
     - mtls:
@@ -384,30 +385,21 @@ image::images/incident-service-pod-sidecar.png[]
 
 In this section, you configure the HTTP-based health checks to be rewritten and handled by the Pilot agent in the sidecar container.
 
-. Open the `ServiceMeshControlPlane` resource in the service mesh control plane for editing:
+. Open the `Deployment Config` resource for editing:
 +
 ----
-$ oc edit servicemeshcontrolplane full-install -o yaml -n $SM_CP_NS
+$ oc edit dc/$ERDEMO_USER-incident-service -n $ERDEMO_NS
 ----
 . Add the configuration to allow rewriting of HTTP probes:
 +
 ----
-apiVersion: maistra.io/v1
-kind: ServiceMeshControlPlane
-metadata:
-  [...]
-  name: full-install
-  [...]
 spec:
-  istio:
     [...]
-    tracing:
-      enabled: true
-    sidecarInjectorWebhook:
-      rewriteAppHTTPProbe: true
+    annotations:
+      sidecar.istio.io/rewriteAppHTTPProbers: "true"
   [...]
 ----
-. Save the `ServiceMeshControlPlane` resource.
+. Save the `DeploymentConfig` resource.
 . Redeploy the incident service:
 +
 ----
@@ -746,7 +738,7 @@ image::images/dashboard-manage.png[]
 .. Locate the *Istio Workload Dashboard*.
 .. Select the `emergency-response-demo` namespace and the `Incident Service` workload.
 +
-image::images/select-workload-and-workspace.png[]
+image::images/select-namespace-and-workload.png[]
 
 .. Scroll down to the *Inbound Workloads* section and use `curl` to send some requests to the incident service.
 .. Observe the graphs and expect to see a spike in the incoming requests from the ingress gateway.
@@ -2165,7 +2157,6 @@ $ oc create -f incident-service-internal.yml -n $ERDEMO_NS
 Oct 30, 2019 3:02:31 PM com.redhat.cajun.navy.datagenerate.RestClientVerticle lambda$resetIncidents$4
 INFO: Reset incidents: HTTP response status 200
 ----
-** `curl` requests to the `/incidents` endpoint of the incident service still error out with an HTTP 403 return code.
 
 . Create an `AuthorizationPolicy` resource for external access to the incident service. This service role grants only HTTP GET access to the incident service REST APIs for all traffic handled by the ingress gateway.
 .. On the local file system, create a file called `incident-service-external.yml`:
@@ -2614,7 +2605,7 @@ $ oc create secret generic cacerts -n $SM_CP_NS --from-file=ca-cert.pem=$SM_CP_A
 . Configure Citadel to use the CA certificates rather than self-signed certificates by setting the `.spec.istio.security.selfSigned` element in the `ServiceMeshControlPlane` CR to `false`:
 +
 ----
-$ oc edit servicemeshcontrolplane full-install -n $SM_CP_NS
+$ oc edit servicemeshcontrolplane.v1.maistra.io full-install -n $SM_CP_NS
 ----
 
 .. Add the `.spec.istio.security.selfSigned` element to the CR:

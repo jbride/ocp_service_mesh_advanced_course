@@ -51,7 +51,7 @@ In the lab for module 2, you created a wildcard gateway as well as a VirtualServ
 OpenShift Service Mesh provides a Mixer adapter called the _3scale Istio adapter_.
 In this section of the lab, you review the various components of the adapter and then configure it so that it applies API management policies to inbound requests.
 
-General information about Istio's plug-in architecture for applying policies and capturing telemetry can be found link:https://istio.io/docs/concepts/policies-and-telemetry/[here].
+General information about Istio's plug-in architecture for applying policies and capturing telemetry can be found link:https://istio.io/v1.4/docs/concepts/observability/[here].
 
 image::images/mixer_architecture.png[]
 
@@ -67,21 +67,6 @@ In order for API management policies to be applied to service mesh traffic, poli
 $ oc login $LAB_MASTER_API -u $SM_CP_ADMIN -p $OCP_PASSWD
 ----
 
-. Use the `oc` client to edit the `ServiceMeshControlPlane` resource in the control plane namespace:
-+
-----
-$ oc edit servicemeshcontrolplane full-install -n $SM_CP_NS
-----
-
-. In the `global` section, set the value of `disablePolicyChecks` to `false`:
-+
-----
-    global:
-      disablePolicyChecks: false
-----
-
-. Save the modified resource.
-
 === Explore 3scale Istio Adapter Components
 
 Your service mesh control plane was initially installed without the 3scale Istio adapter.
@@ -90,7 +75,7 @@ In this section of the lab, you enable it.
 . Update the `ServiceMeshControlPlane` resource with the `threeScale` component:
 +
 -----
-$ oc patch smcp/full-install -n $SM_CP_NS --type=json -p \
+$ oc patch smcp.v1.maistra.io full-install -n $SM_CP_NS --type=json -p \
 '[
     {
         "op": "replace",

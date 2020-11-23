@@ -252,7 +252,7 @@ $ oc get crd --as=system:admin | grep 'maistra\|istio'
 [NOTE]
 You need to impersonate an OpenShift cluster admin to do this because a service mesh control plane administrator does not have access to this in a production environment.
 
-* Expect to see about 55 CRDs.
+* Expect to see about 26 CRDs.
 
 . Review some of the more prominent service mesh-related CRD extensions to the OpenShift master API including those in the following table:
 +
@@ -358,9 +358,9 @@ $ istioctl version --remote=true -i $SM_CP_ADMIN-istio-system
 +
 .Sample Output
 -----
-client version: 1.4.6
-control plane version: OSSM_1.1.1
-data plane version: maistra-1.1.1 (2 proxies)
+client version: 1.4.10
+control plane version: OSSM_1.1.10
+data plane version: 1.4.10 (2 proxies)
 -----
 
 . Examine the service mesh control plane deployments:
@@ -394,15 +394,15 @@ $ oc get ServiceMeshControlPlane -n $SM_CP_NS
 +
 .Sample Output
 -----
-NAME           READY   STATUS              TEMPLATE   VERSION   AGE
-full-install   9/9     InstallSuccessful   default    v1.1      4h6m
+NAME           READY   STATUS            PROFILES    VERSION   AGE
+full-install   11/11   ComponentsReady   [default]   1.1.10    40m
 -----
 
 * During the installation of your lab environment, the `$SM_CP_NS` namespace was created and this link:https://github.com/gpe-mw-training/ocp_service_mesh_advanced/blob/master/ansible/roles/maistra_control_plane/tasks/main.yml#L3-L5[`ServiceMeshControlPlane` custom resource] was applied to it.
 The OpenShift Service Mesh operator detected the presence of this new custom resource and subsequently provisioned the service mesh control plane.
 +
 [NOTE]
-If the status in the `READY` column is not `9/9`, this means that the service mesh control plane did not install correctly. If this occurs, examine the status of the `ServiceMeshControlPlane` custom resource to determine the issue.
+If the status in the `READY` column is not `11/11`, this means that the service mesh control plane did not install correctly. If this occurs, examine the status of the `ServiceMeshControlPlane` custom resource to determine the issue.
 
 . Note the existence of a _ServiceMeshPolicy_:
 +

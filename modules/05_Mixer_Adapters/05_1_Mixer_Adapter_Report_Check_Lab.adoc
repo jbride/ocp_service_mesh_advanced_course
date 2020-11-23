@@ -181,7 +181,7 @@ In this exercise, you introduce a rate limit for calls to the incident service c
 . By default, policy checks are disabled in the service mesh. Use the `oc` client to edit the `servicemeshcontrolplane` resource in the control plane namespace to enable policy checks:
 +
 ----
-$ oc edit servicemeshcontrolplane full-install -n $SM_CP_NS
+$ oc edit servicemeshcontrolplane.v1.maistra.io -n $SM_CP_NS
 ----
 
 . In the `global` section, change the value of `disablePolicyChecks` to `false`, and then save your changes:

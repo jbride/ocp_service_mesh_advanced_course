@@ -50,6 +50,7 @@ $ echo -en "\n\n$(oc get project $ERDEMO_NS -o template --template='{{.metadata.
 -----
 map[kiali.io/member-of:admin50-istio-system maistra.io/member-of:admin50-istio-system]
 -----
+// map[maistra.io/member-of:admin27-istio-system]
 
 . Verify that your `$ERDEMO_NS` namespace now includes namespace-scoped `RoleBinding` resources associated with the Istio-related service accounts from your specific service mesh control plane:
 +
@@ -214,9 +215,9 @@ Downstream to upstream is how traffic always flows through Envoy.
 image::images/envoy_architecture.png[]
 
 
-=== Configure Service Proxy Container
+=== Review Service Proxy Container
 
-. Delete any `deploy` pods that are in a `completed` status and have not yet been deleted:
+. Delete any `deploy` pods that are in a `completed` status and have not yet been deleted (this is just a cleanup):
 +
 -----
 $ curl https://raw.githubusercontent.com/gpe-mw-training/ocp_service_mesh_advanced/master/utils/delete_pod_deploys.sh \
@@ -262,96 +263,96 @@ ifdef::showscript[]
 
 endif::showscript[]
 
-=== Demonstrate Modified iptables
+// === Demonstrate Modified iptables
 
-When an Envoy service proxy is injected into an application pod, the `istio-cni` resource modifies iptables on the node that the pod lands on.
-Recall from a previous lab that the `istio-cni` resource is deployed as a DaemonSet and subsequently runs one pod for all of the nodes in an OpenShift cluster.
+// When an Envoy service proxy is injected into an application pod, the `istio-cni` resource modifies iptables on the node that the pod lands on.
+// Recall from a previous lab that the `istio-cni` resource is deployed as a DaemonSet and subsequently runs one pod for all of the nodes in an OpenShift cluster.
 
-In particular, the `istio-cni` resource creates iptable rules so that all ingress to and egress from the application container is redirected to port 15001 of the pod.
-The Envoy service proxy has its listener bound to port 15001.
-
-
-Have your instructor demonstrate these modified iptable rules in a manner similar to the following:
-
-. Identify the OpenShift Container Platform worker node that one of the Emergency Response Demo application pods is running on:
-+
------
-$ oc get pod user50-responder-service-6-5xr86 -o json | jq .spec.nodeName
------
-+
-.Sample Output
------
-[...]
-ip-10-0-136-113.eu-central-1.compute.internal
------
+// In particular, the `istio-cni` resource creates iptable rules so that all ingress to and egress from the application container is redirected to port 15001 of the pod.
+// The Envoy service proxy has its listener bound to port 15001.
 
 
-. Identify the ID of either container (application container or `envoy-proxy`) in that pod:
-+
------
-$ oc describe pod user50-responder-service-6-5xr86 | grep cri-o
------
-+
-.Sample Output
------
-[...]
-Container ID:  cri-o://397fea50eb8ecd03db9fe8c9a7657c7980f23c8462e9cf2554e9a4493308e651
-Container ID:  cri-o://90260d3d7ece810bb4c44a8aee3e23ebe50fd6b1225d48e6e103da070194c53a
------
+// Have your instructor demonstrate these modified iptable rules in a manner similar to the following:
+
+// . Identify the OpenShift Container Platform worker node that one of the Emergency Response Demo application pods is running on:
+// +
+// -----
+// $ oc get pod user50-responder-service-6-5xr86 -o json | jq .spec.nodeName
+// -----
+// +
+// .Sample Output
+// -----
+// [...]
+// ip-10-0-136-113.eu-central-1.compute.internal
+// -----
 
 
-. Set up a debug session into the node where the target Emergency Response pod runs:
-+
------
-$ oc debug node/ip-10-0-136-113.eu-central-1.compute.internal
------
+// . Identify the ID of either container (application container or `envoy-proxy`) in that pod:
+// +
+// -----
+// $ oc describe pod user50-responder-service-6-5xr86 | grep cri-o
+// -----
+// +
+// .Sample Output
+// -----
+// [...]
+// Container ID:  cri-o://397fea50eb8ecd03db9fe8c9a7657c7980f23c8462e9cf2554e9a4493308e651
+// Container ID:  cri-o://90260d3d7ece810bb4c44a8aee3e23ebe50fd6b1225d48e6e103da070194c53a
+// -----
 
-. On that OpenShift node, switch to the host operating system shell that runs host operating system binaries:
-+
------
-sh-4.4# chroot /host
------
 
-. Using the previously determined container ID, determine the operating system process ID of the container on the OpenShift node:
-+
------
-sh-4.4# crictl inspect --output json  90260d3d7ece810bb4c44a8aee3e23ebe50fd6b1225d48e6e103da070194c53a | grep pid
------
-+
-.Sample Output
------
-45315
------
+// . Set up a debug session into the node where the target Emergency Response pod runs:
+// +
+// -----
+// $ oc debug node/ip-10-0-136-113.eu-central-1.compute.internal
+// -----
 
-. Using the process ID of the container, view the iptable rules on that host machine:
-+
------
-sh-4.4# nsenter -t 45315 -n iptables -t nat -S
------
-+
-.Sample Output
------
--P PREROUTING ACCEPT
--P INPUT ACCEPT
--P POSTROUTING ACCEPT
--P OUTPUT ACCEPT
--N ISTIO_REDIRECT
--N ISTIO_IN_REDIRECT
--N ISTIO_INBOUND
--N ISTIO_OUTPUT
--A PREROUTING -p tcp -j ISTIO_INBOUND
--A OUTPUT -p tcp -j ISTIO_OUTPUT
--A ISTIO_REDIRECT -p tcp -j REDIRECT --to-ports 15001
--A ISTIO_IN_REDIRECT -p tcp -j REDIRECT --to-ports 15001
--A ISTIO_INBOUND -p tcp -m tcp --dport 8080 -j ISTIO_IN_REDIRECT
--A ISTIO_OUTPUT ! -d 127.0.0.1/32 -o lo -j ISTIO_REDIRECT
--A ISTIO_OUTPUT -m owner --uid-owner 1000710001 -j RETURN
--A ISTIO_OUTPUT -m owner --gid-owner 1000710001 -j RETURN
--A ISTIO_OUTPUT -d 127.0.0.1/32 -j RETURN
--A ISTIO_OUTPUT -j ISTIO_REDIRECT
------
-* Note that all of the incoming traffic for this operating system process to port 8080--the port on which the Emergency Response `response-service` is listening--is being redirected to port 15001--the port on which the `istio-proxy` is listening.
-The same holds true for the outgoing traffic.
+// . On that OpenShift node, switch to the host operating system shell that runs host operating system binaries:
+// +
+// -----
+// sh-4.4# chroot /host
+// -----
+
+// . Using the previously determined container ID, determine the operating system process ID of the container on the OpenShift node:
+// +
+// -----
+// sh-4.4# crictl inspect --output json  90260d3d7ece810bb4c44a8aee3e23ebe50fd6b1225d48e6e103da070194c53a | grep pid
+// -----
+// +
+// .Sample Output
+// -----
+// 45315
+// -----
+
+// . Using the process ID of the container, view the iptable rules on that host machine:
+// +
+// -----
+// sh-4.4# nsenter -t 45315 -n iptables -t nat -S
+// -----
+// +
+// .Sample Output
+// -----
+// -P PREROUTING ACCEPT
+// -P INPUT ACCEPT
+// -P POSTROUTING ACCEPT
+// -P OUTPUT ACCEPT
+// -N ISTIO_REDIRECT
+// -N ISTIO_IN_REDIRECT
+// -N ISTIO_INBOUND
+// -N ISTIO_OUTPUT
+// -A PREROUTING -p tcp -j ISTIO_INBOUND
+// -A OUTPUT -p tcp -j ISTIO_OUTPUT
+// -A ISTIO_REDIRECT -p tcp -j REDIRECT --to-ports 15001
+// -A ISTIO_IN_REDIRECT -p tcp -j REDIRECT --to-ports 15001
+// -A ISTIO_INBOUND -p tcp -m tcp --dport 8080 -j ISTIO_IN_REDIRECT
+// -A ISTIO_OUTPUT ! -d 127.0.0.1/32 -o lo -j ISTIO_REDIRECT
+// -A ISTIO_OUTPUT -m owner --uid-owner 1000710001 -j RETURN
+// -A ISTIO_OUTPUT -m owner --gid-owner 1000710001 -j RETURN
+// -A ISTIO_OUTPUT -d 127.0.0.1/32 -j RETURN
+// -A ISTIO_OUTPUT -j ISTIO_REDIRECT
+// -----
+// * Note that all of the incoming traffic for this operating system process to port 8080--the port on which the Emergency Response `response-service` is listening--is being redirected to port 15001--the port on which the `istio-proxy` is listening.
+// The same holds true for the outgoing traffic.
 
 
 === Explore Administration API
@@ -520,19 +521,20 @@ $ curl http://$ERDEMO_USER-incident-service.apps.$SUBDOMAIN_BASE/incidents
 * Based on this test, is this service mesh network isolated? Can you explain?
 ****
 
-. Add the `maistra.io/expose-route: 'true'` label to the template section of the DeploymentConfig of the incident service:
+. Add the `maistra.io/expose-route: 'true'` label to the template section of the DeploymentConfig of the `$ERDEMO_USER-incident-service`:
 +
 ----
 kind: DeploymentConfig
 apiVersion: apps.openshift.io/v1
 metadata:
- [...]
+  name: user27-incident-service
+  namespace: user27-er-demo
 spec:
   [...]
   template:
     metadata:
       labels:
-        app: user1-incident-service
+        app: user27-incident-service
         group: erd-services
         maistra.io/expose-route: 'true'
       annotations:
@@ -549,7 +551,7 @@ spec:
 * What do you observe?
 ****
 
-. To preserve functionality of the Emergency Response Demo console, repeat the same process for that `DeploymentConfig`.
+. To preserve functionality of the Emergency Response Demo console, repeat the same process for the `$ERDEMO_USER-emergency-console`.
 If you do not do this, you will not be able to access the console until you have fully configured the application in the next module.
 +
 [TIP]
