@@ -28,7 +28,7 @@ The labs assume that you are using the proper versions of these tools, all of wh
 . On the left, select *OpenShift 4 Student VM*.
 . On the right, click *Order*.
 . On the *Lab Information* Tab make the following selections:
-.. *4.5* for *OpenShift Release*
+.. *4.6* for *OpenShift Release*
 .. The region closest to you for *Region* (North America, EMEA, APAC or LATAM)
 . On the bottom right, click *Submit*.
 +
