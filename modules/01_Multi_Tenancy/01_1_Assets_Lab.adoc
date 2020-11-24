@@ -258,7 +258,7 @@ $ oc get crd --as=system:admin | grep 'maistra\|istio'
 [NOTE]
 You need to impersonate an OpenShift cluster admin to do this because a service mesh control plane administrator does not have access to this in a production environment.
 
-* Expect to see about 26 CRDs.
+* Expect to see about 30 CRDs.
 
 . Review some of the more prominent service mesh-related CRD extensions to the OpenShift master API including those in the following table:
 +
@@ -305,13 +305,13 @@ $ oc get mutatingwebhookconfiguration --as=system:admin | grep $SM_CP_NS
 -----
 [...]
 
-istio-sidecar-injector-admin50-istio-system        1          19h
+istiod-full-install-admin50-istio-system        1          19h
 -----
 
 . Extract the details of `mutatingwebhookconfiguration` specific to your OpenShift Service Mesh installation:
 +
 -----
-$ oc get mutatingwebhookconfiguration istio-sidecar-injector-$SM_CP_NS \
+$ oc get mutatingwebhookconfiguration istiod-full-install-$SM_CP_NS \
        -o yaml \
        --as=system:admin \
        > $HOME/lab/$SM_CP_NS-mutatingwebhookconfiguration.yaml
@@ -319,13 +319,14 @@ $ oc get mutatingwebhookconfiguration istio-sidecar-injector-$SM_CP_NS \
 
 . Study the content of the `$HOME/lab/$SM_CP_NS-mutatingwebhookconfiguration.yaml` output file and note the following:
 
-* The `/inject` endpoint of the `istio-sidecar-injector` service from your service mesh control plane is invoked when auto-injecting the Envoy service proxy into an application pod:
+* The `/inject` endpoint of the `istiod` service from your service mesh control plane is invoked when auto-injecting the Envoy service proxy into an application pod:
 +
 -----
     service:
-      name: istio-sidecar-injector
+      name: istiod-full-install
       namespace: admin25-istio-system
       path: /inject
+      port: 443
 -----
 
 * The scope of your mutating webhook are the namespaces of your service mesh data plane. Namespaces belonging to a service mesh instance have a label `maistra.io/member-of` with value equal to the namespace of the service mesh control plane.
@@ -336,8 +337,14 @@ $ oc get mutatingwebhookconfiguration istio-sidecar-injector-$SM_CP_NS \
     - key: maistra.io/member-of
       operator: In
       values:
-      - admin25-istio-system
+      - admin1-istio-system
     - key: maistra.io/ignore-namespace
+      operator: DoesNotExist
+    - key: istio-injection
+      operator: NotIn
+      values:
+      - disabled
+    - key: istio-env
       operator: DoesNotExist
 -----
 
@@ -382,19 +389,14 @@ $ oc get deployments -n $SM_CP_NS
 +
 .Sample Output
 -----
-NAME                     READY   UP-TO-DATE   AVAILABLE   AGE
-grafana                  1/1     1            1           24h
-istio-citadel            1/1     1            1           24h
-istio-egressgateway      1/1     1            1           24h
-istio-galley             1/1     1            1           24h
-istio-ingressgateway     1/1     1            1           24h
-istio-pilot              1/1     1            1           24h
-istio-policy             1/1     1            1           24h
-istio-sidecar-injector   1/1     1            1           24h
-istio-telemetry          1/1     1            1           24h
-jaeger                   1/1     1            1           24h
-kiali                    1/1     1            1           24h
-prometheus               1/1     1            1           24h
+NAME                   READY   UP-TO-DATE   AVAILABLE   AGE
+grafana                1/1     1            1           163m
+istio-egressgateway    1/1     1            1           163m
+istio-ingressgateway   1/1     1            1           163m
+istiod-full-install    1/1     1            1           167m
+jaeger                 1/1     1            1           163m
+kiali                  1/1     1            1           162m
+prometheus             1/1     1            1           163m
 -----
 
 . Examine the `ServiceMeshControlPlane` custom resource:
@@ -406,28 +408,37 @@ $ oc get ServiceMeshControlPlane -n $SM_CP_NS
 .Sample Output
 -----
 NAME           READY   STATUS            PROFILES    VERSION   AGE
-full-install   11/11   ComponentsReady   [default]   1.1.10    40m
+full-install   9/9     ComponentsReady   ["default"]   2.0.0.2   168m
 -----
 
-* During the installation of your lab environment, the `$SM_CP_NS` namespace was created and this link:https://github.com/gpe-mw-training/ocp_service_mesh_advanced/blob/master/ansible/roles/maistra_control_plane/tasks/main.yml#L3-L5[`ServiceMeshControlPlane` custom resource] was applied to it.
+* During the installation of your lab environment, the `$SM_CP_NS` namespace was created and this link:https://github.com/gpe-mw-training/ocp_service_mesh_advanced/blob/master/ansible/roles/maistra_control_plane/tasks/main.yml#L62-L64[`ServiceMeshControlPlane` custom resource] was applied to it.
 The OpenShift Service Mesh operator detected the presence of this new custom resource and subsequently provisioned the service mesh control plane.
 +
 [NOTE]
-If the status in the `READY` column is not `11/11`, this means that the service mesh control plane did not install correctly. If this occurs, examine the status of the `ServiceMeshControlPlane` custom resource to determine the issue.
+If the status in the `READY` column is not `9/9`, this means that the service mesh control plane did not install correctly. If this occurs, examine the status of the `ServiceMeshControlPlane` custom resource to determine the issue.
 
-. Note the existence of a _ServiceMeshPolicy_:
+. Note the existence of a _PeerAuthentication_ resource called `default` in the service mesh control plane. This resource manages mesh-wide MUTUAL TLS mode, which is set to `PERMISSIVE`:
 +
 -----
-$ oc get ServiceMeshPolicies -n $SM_CP_NS
+$ oc get PeerAuthentication -n $SM_CP_NS
 -----
 +
 .Sample Output
 -----
-NAME      AGE
-default   24h
+NAME                            AGE
+default                         169m
+disable-mtls-jaeger-collector   168m
+grafana-ports-mtls-disabled     168m
 -----
 +
-NOTE: This OpenShift Service Mesh-specific resource replaces the upstream Istio community `MeshPolicy` resource, which is cluster-scoped and not compatible with multi-tenancy. In a later lab of this course, this resource is used to configure mutual Transport Layer Security (mTLS) within a single service mesh.
+----
+$ oc get Peerauthentication default --template '{{.spec.mtls.mode }}{{"\n"}}' -n $SM_CP_NS
+----
++
+.Sample Output
+----
+PERMISSIVE
+----
 
 . Examine the various namespace-scoped `RoleBinding` resources in the service mesh control plane:
 +
@@ -437,20 +448,16 @@ $ oc get RoleBinding -n $SM_CP_NS
 +
 .Sample Output
 -----
-admin                                                           4h8m
-istio-citadel-admin50-istio-system                              4h8m
-istio-galley-admin-role-binding-admin50-istio-system            4h8m
-istio-ingressgateway-sds                                        4h7m
-istio-mixer-admin-role-binding-admin50-istio-system             4h7m
-istio-pilot-admin50-istio-system                                4h7m
-istio-sidecar-injector-admin-role-binding-admin50-istio-system  4h7m
-kiali                                                           4h6m
-mesh-users                                                      4h8m
-prometheus-admin50-istio-system                                 4h8m
-system:deployers                                                4h8m
-system:image-builders                                           4h8m
-system:image-pullers                                            4h8m
-view                                                            3h33m
+admin                            ClusterRole/admin                                     3h5m
+istio-ingressgateway-sds         Role/istio-ingressgateway-sds                         3h
+istiod-pilot-full-install        ClusterRole/istiod-full-install-admin1-istio-system   3h5m
+kiali                            Role/kiali                                            179m
+mesh-users                       Role/mesh-user                                        3h5m
+prometheus-admin1-istio-system   ClusterRole/prometheus-admin1-istio-system            3h1m
+system:deployers                 ClusterRole/system:deployer                           3h5m
+system:image-builders            ClusterRole/system:image-builder                      3h5m
+system:image-pullers             ClusterRole/system:image-puller                       3h5m
+view                             ClusterRole/view                                      173m
 -----
 +
 NOTE: The use of a project-scoped `RoleBinding` resource rather than a cluster-scoped `ClusterRoleBinding` resource is a key enabler of the multi-tenant capabilities of the OpenShift Service Mesh component.
