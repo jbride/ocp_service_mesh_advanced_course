@@ -128,7 +128,7 @@ admin50-istio-system  admin50 Service Mesh Control Plane  Active
 istio-operator        istio-operator                      Active
 kafka-operator-erd                                        Active
 tools-erd                                                 Active
-user-sso                                                  Active
+erd-sso                                                   Active
 user50-er-demo                                            Active
 user50-gw                                                 Active
 -----
@@ -525,7 +525,8 @@ $ oc get deploy -n $ERDEMO_NS
 .Sample Output
 -----
 NAME                            READY   UP-TO-DATE   AVAILABLE   AGE
-kafka-cluster-entity-operator   1/1     1            1           3d5h
+infinispan-operator             1/1     1            1           4h15m
+kafka-cluster-entity-operator   1/1     1            1           58m
 -----
 +
 -----
@@ -541,12 +542,13 @@ kafka-cluster-zookeeper   3/3     3d5h
 . Also, observe that the Emergency Response Demo application makes use of Red Hat Data Grid:
 +
 -----
-$ oc get statefulset -l application=datagrid-service -n $ERDEMO_NS
+$ oc get statefulset -l template=infinispan-ephemeral -n $ERDEMO_NS
 -----
 +
 .Sample Output
 -----
-datagrid-service   3/3     3d5h
+NAME               READY   AGE
+datagrid-service   3/3     4h17m
 -----
 
 === Get Started
