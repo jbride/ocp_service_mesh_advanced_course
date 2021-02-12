@@ -1,0 +1,167 @@
+---
+DATASHEET:
+  status: In continuous Development
+  approver: Dev
+  date: 2020-11-06
+
+FIELDS:
+- name: COURSE NAME
+  description: Full, approved course name.
+  responsible: dev, pre-kickoff
+  value: Advanced Application Management Using Red Hat Service Mesh
+
+- name: PROJECT NAME
+  description: For internal use only (This should match the github repo name)
+  responsible: dev, pre-kickoff
+  value: ocp_service_mesh_advanced
+
+- name: NEW/UPDATE
+  description: |
+    New for net new course, update for a major update to an existing course.
+    For internal use only.
+  responsible: dev, pre-kickoff
+  value: New
+
+- name: DEVELOPER/PRODUCER
+  description: Developer name here. For internal use only.
+  responsible: dev, pre-kickoff
+  value: Jeff Bride/Bernard Tison
+
+- name: DURATION
+  description: Total hours, including any assessments.
+  responsible: dev, post-kickoff
+  value: 24 hours
+
+- name: MODALITY
+  description: |
+    ELT (e-learning)
+    ELAB (e-learning + labs)
+    ILT (instructor-led training)
+    Video (video e-learning)
+    RP (readiness package)
+    Training Clip (short video e-learning), etc.
+  responsible: dev, pre-kickoff
+  value: ILT
+
+- name: PROFICIENCY LEVEL
+  description: Foundational, Experienced, Advanced, or Expert
+  responsible: dev, pre-kickoff
+  value: Advanced
+
+- name: PRODUCT & VERSION
+  description: |
+    Full product name with full release number
+    (e.g., Red Hat JBoss Fuse 6.2.1)
+  responsible: dev, pre-kickoff
+  value: |
+    Red Hat Service Mesh
+
+- name: COURSE DESCRIPTION
+  description: |
+    The course description has a 4000 character limit
+
+    To provide enough information for a sufficiently detailed description, be sure that your description answers the following questions:
+    What is the specific product/solution that the course focuses on?
+    What topics relating to that product/solution are covered?
+    What are the main tasks that the student will perform during the course?
+    What is the end result of taking the course? What skills and knowledge will the student gain? What will the student be able to do?
+  responsible: dev, post-kickoff
+  value: |
+    **Only enrolled attendees will be allowed to attend the course. If you arrive at a course for which you are not actively enrolled you will be asked to leave immediately and will receive no credit for the course.** 
+
+    In Advanced Application Management Using Red Hat OpenShift Service Mesh, students build upon foundational knowledge of Red Hat OpenShift Service Mesh. All of the learning objectives in this course are achieved by applying service mesh functionality to a real-world, microservice-architected application. 
+
+    This course introduces students to the use of securing inter-service communication via the mutual TLS functionality of OpenShift Service Mesh. In addition, students utilize the multi-tenancy capabilities of OpenShift Service Mesh deployed on a single OpenShift cluster. Performance testing on the service mesh tenants is conducted and results are analyzed. Finally, students plug in a 3scale by Red Hat adapter to the control plane of OpenShift Service Mesh to apply API policies to both inbound traffic and traffic between services in the mesh. As part of this exercise, students observe analytics and tracing of traffic in and throughout the service mesh.
+
+    By completing this course, students will be able to:
+    * Use a phased approach toward management of a microservice-architected application
+    * Use an API gateway to apply policies to north/south traffic into an application
+    * Understand service mesh multi-tenancy, `ServiceMeshMemberRoll`, and the Envoy data plane
+    * Enable mTLS transport security and set authorization policies for inter-service communication
+    * Configure service mesh origin authentication and configure Citadel to use certificates issued by an external CA
+    * Understand Istio resiliency features, retries, timeouts, circuit breakers, and outlier detection
+    * Explore the integration of OpenShift Service Mesh with Jaeger distributed tracing
+    * Use instrumented application code to correlate traces
+    * Understand metrics and monitoring in OpenShift Service Mesh and create and collect custom metrics
+    * Define alerts in Prometheus
+    * Understand the Kiali console in OpenShift Service Mesh
+    * Understand service mesh Mixer adapters and create and deploy custom resources to configure built-in Mixer adapters
+    * Review 3scale Istio adapter components and apply API policies to network traffic within microservices applications using the 3scale Istio adapter
+
+
+- name: SHORT DESCRIPTION
+  description: |
+    The short description has a 2000 character limit.
+    The short description should consist of one to three sentences
+    summarizing the main points from the course description.
+    This short description is used for marketing & comms GTM
+    activities as well as in the training system, attached to the
+    course in all search and catalog views.
+  responsible: dev, post-kickoff
+  value: |
+    In Advanced Application Management Using Red Hat OpenShift Service Mesh, students build upon foundational knowledge of Red Hat OpenShift Service Mesh by applying service mesh functionality to a real-world, microservice-architected application.
+
+- name: RECOMMENDED SKILLS
+  description: |
+    What kind of skills/technical experience will someone need to
+    take this course?
+    Soft prerequisites.
+  responsible: dev, post-kickoff
+  value: |
+    Good understanding of Red Hat OpenShift Container Platform
+
+
+- name: RECOMMENDED TRAINING
+  description: |
+    Training courses from any environment that a user should
+    complete before registering for this course. Hard prerequisites.
+    Use actual course titles (e.g., Red Hat JBoss Fuse Foundations)
+  responsible: dev, post-kickoff
+  value: |
+    * Red Hat OpenShift Service Mesh Foundations
+    * Application Development with Red Hat OpenShift Container Platform
+
+
+- name: COURSE OUTLINE
+  description: |
+    An outline for the course contents
+  responsible: dev, post-kickoff
+  value: |
+    *Introduction*
+    * Describe a service mesh.
+    * Understand the complexity of distributed applications and how to address this.
+    * Review the evolution of microservices and the service mesh landscape.
+    * Discuss the data plane and control plane, including Istio control plane components.
+    * Get an overview of OpenShift Service Mesh, including API management.
+
+    *Security*
+    * Review various methods of access control.
+    * Learn about security, identity, PKI, and mTLS in Istio.
+    * Discuss authentication policy, origin authentication, and authorization.
+
+    *Resiliency*
+    * Understand resiliency and resiliency patterns.
+    * Discuss cascading failures.
+    * Describe the timeout, circuit breaker, and bounded queue patterns.
+    * Look at resiliency in OpenShift Service Mesh.
+
+    *Observability*
+    * Get an overview of observability.
+    * Learn about logging and distributed tracing.
+    * Review tracking methods including source code implementation, OpenTracing, and Jaeger.
+    * Described distributed tracing in OpenShift Service Mesh.
+    * Discuss monitoring, including Prometheus and monitoring in OpenShift Service Mesh.
+    * Understand visualization methods.
+
+    *Mixer*
+    * Learn about Mixer, including its topology and adapters.
+    * Discuss attributes.
+    * Review the Mixer configuration model.
+    * Get an overview of the 3scale by Red Hat Mixer adapter.
+
+    *Differences with Upstream Istio*
+    * Review the OpenShift Service Mesh upstream project.
+    * Describe OpenShift Service Mesh Installation.
+    * Understand elevated privileges.
+    * Review differences between upstream Istio and the Maistra project.
+    * Look at Maistra in detail.

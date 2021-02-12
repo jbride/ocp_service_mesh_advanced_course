@@ -1793,284 +1793,259 @@ html:not([data-mode="arrange"]) .reveal .future.in-3d-appear {
 		<div class="reveal">
 			<div class="slides">
 				<section data-background-color="rgb(144,12,18)" data-background-image="bxms_dm_foundational_m03/40cf27dd491393a1b2042f99486971a6.png" data-id="bedc0457df23e02319c4a5f2fb1e220f"><div class="sl-block" data-block-type="text" style="height: auto; width: 1065px; left: 160px; top: 288px;" data-block-id="22dfbc502d30872f61f60fafe62f4e42"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10; text-align: left;" data-has-custom-html="" dir="ui">
-<h1>Advanced Service Mesh</h1>
-
-<h2>Resilience</h2>
+<h1>Advanced Application Management Using Red Hat OpenShift Service Mesh</h1>
+<h2>Resiliency</h2>
 </div></div>
 
 
 <div class="sl-block" data-block-type="image" style="width: 360px; height: 122.4px; left: 0px; top: 0px; min-width: 1px; min-height: 1px;" data-block-id="c5ce7b97245def08c76fac2f2d539e9a"><div class="sl-block-content" style="z-index: 13;" data-inline-svg="true">
 <img data-natural-width="500" data-natural-height="170" data-lazy-loaded="" style="" data-src="service_mesh_advanced_03_resilience/bfa11a84cdd2fc0f50cb6fb54942bd62.svg"><svg xmlns="http://www.w3.org/2000/svg" viewbox="0 0 613 145" height="170" width="500" class="redhat-logo"><path class="logohat" style="fill:#fff;" d="M127.47,83.49c12.51,0,30.61-2.58,30.61-17.46a14,14,0,0,0-.31-3.42l-7.45-32.36c-1.72-7.12-3.23-10.35-15.73-16.6C124.89,8.69,103.76.5,97.51.5,91.69.5,90,8,83.06,8c-6.68,0-11.64-5.6-17.89-5.6-6,0-9.91,4.09-12.93,12.5,0,0-8.41,23.72-9.49,27.16A6.43,6.43,0,0,0,42.53,44c0,9.22,36.3,39.45,84.94,39.45M160,72.07c1.73,8.19,1.73,9.05,1.73,10.13,0,14-15.74,21.77-36.43,21.77C78.54,104,37.58,76.6,37.58,58.49a18.45,18.45,0,0,1,1.51-7.33C22.27,52,.5,55,.5,74.22c0,31.48,74.59,70.28,133.65,70.28,45.28,0,56.7-20.48,56.7-36.65,0-12.72-11-27.16-30.83-35.78"></path><path class="logotext" style="fill:#fff;" d="M579.74,92.8c0,11.89,7.15,17.67,20.19,17.67a52.11,52.11,0,0,0,11.89-1.68V95a24.84,24.84,0,0,1-7.68,1.16c-5.37,0-7.36-1.68-7.36-6.73V68.3h15.56V54.1H596.78v-18l-17,3.68V54.1H568.49V68.3h11.25Zm-53,.32c0-3.68,3.69-5.47,9.26-5.47a43.12,43.12,0,0,1,10.1,1.26v7.15a21.51,21.51,0,0,1-10.63,2.63c-5.46,0-8.73-2.1-8.73-5.57m5.2,17.56c6,0,10.84-1.26,15.36-4.31v3.37h16.82V74.08c0-13.56-9.14-21-24.39-21-8.52,0-16.94,2-26,6.1l6.1,12.52c6.52-2.74,12-4.42,16.83-4.42,7,0,10.62,2.73,10.62,8.31v2.73a49.53,49.53,0,0,0-12.62-1.58c-14.31,0-22.93,6-22.93,16.73,0,9.78,7.78,17.24,20.19,17.24m-92.44-.94h18.09V80.92h30.29v28.82H506V36.12H487.93V64.41H457.64V36.12H439.55ZM370.62,81.87c0-8,6.31-14.1,14.62-14.1A17.22,17.22,0,0,1,397,72.09V91.54A16.36,16.36,0,0,1,385.24,96c-8.2,0-14.62-6.1-14.62-14.09m26.61,27.87h16.83V32.44l-17,3.68V57.05a28.3,28.3,0,0,0-14.2-3.68c-16.19,0-28.92,12.51-28.92,28.5a28.25,28.25,0,0,0,28.4,28.6,25.12,25.12,0,0,0,14.93-4.83ZM320,67c5.36,0,9.88,3.47,11.67,8.83H308.47C310.15,70.3,314.36,67,320,67M291.33,82c0,16.2,13.25,28.82,30.28,28.82,9.36,0,16.2-2.53,23.25-8.42l-11.26-10c-2.63,2.74-6.52,4.21-11.14,4.21a14.39,14.39,0,0,1-13.68-8.83h39.65V83.55c0-17.67-11.88-30.39-28.08-30.39a28.57,28.57,0,0,0-29,28.81M262,51.58c6,0,9.36,3.78,9.36,8.31S268,68.2,262,68.2H244.11V51.58Zm-36,58.16h18.09V82.92h13.77l13.89,26.82H292l-16.2-29.45a22.27,22.27,0,0,0,13.88-20.72c0-13.25-10.41-23.45-26-23.45H226Z"></path></svg>
-</div></div></section><section data-id="c94edad64a41b18e4e276e9914ca9f6f"><div class="sl-block" data-block-type="text" style="height: auto; min-width: 30px; min-height: 30px; width: 1280px; left: 0px; top: 0px;" data-block-id="ff81d8deec2506adcd7ee99bd117cb3f"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 11; padding: 15px;">
+</div></div></section><section data-id="c94edad64a41b18e4e276e9914ca9f6f"><div class="sl-block" data-block-type="text" style="height: auto; min-width: 30px; min-height: 30px; width: 1280px; left: 0px; top: 0px;" data-block-id="ff81d8deec2506adcd7ee99bd117cb3f"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 11;" dir="ui">
 <h2>Module Topics</h2>
-
 <ul>
-	<li>
-	<p><span style="font-size:1.2em">Resiliency</span></p>
-	</li>
-	<li>
-	<p><span style="font-size:1.2em">Resiliency Patterns</span></p>
-	</li>
-	<li>
-	<p><span style="font-size:1.2em">Cascading Failures</span></p>
-	</li>
-	<li>
-	<p><span style="font-size:1.2em">Timeout, Circuit Breaker, Bounded Queues</span></p>
-	</li>
-	<li>
-	<p><span style="font-size:1.2em">Service Mesh and Resiliency</span></p>
-	</li>
+<li><p><span style="font-size:1.0em">Resiliency</span></p></li>
+<li><p><span style="font-size:1.0em">Resiliency Patterns</span></p></li>
+<li><p><span style="font-size:1.0em">Cascading Failures</span></p></li>
+<li><p><span style="font-size:1.0em">Timeout, Circuit Breaker, Bounded Queue</span></p></li>
+<li><p><span style="font-size:1.0em">Red Hat</span><span><span>®</span></span><span style="font-size:1.0em"> OpenShift</span><span><span>®</span></span><span style="font-size:1.0em"> Service Mesh and Resiliency</span></p></li>
 </ul>
-</div></div></section><section data-id="14aee4ce6e77efac398800a568d4b75b"><div class="sl-block" data-block-type="text" style="height: auto; width: 1280px; left: 0px; top: 0px;" data-block-id="c6044dfb82e3dd38b10ae5790e6053ca"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10; padding: 15px;">
+</div></div></section><section data-id="14aee4ce6e77efac398800a568d4b75b"><div class="sl-block" data-block-type="text" style="height: auto; width: 1280px; left: 0px; top: 0px;" data-block-id="c6044dfb82e3dd38b10ae5790e6053ca"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10;" data-has-custom-html="">
 <h2>Resiliency</h2>
 
 <ul>
 	<li>
-	<p><span style="font-size:1.4em">Ability of a system to gracefully handle and recover from failure</span></p>
+	<p><span style="font-size:1.0em">Ability of system to gracefully handle and recover from failure</span></p>
+	<ul>
+	<li>
+	<p><span style="font-size:1.0em">Best case: Without user knowing it</span></p>
 	</li>
 	<li>
-	<p><span style="font-size:1.4em">Without the user knowing it - best case</span></p>
+	<p><span style="font-size:1.0em">Worst case: With graceful degradation of service</span></p>
+	</li>
+      </ul>
+  </li>
+	<li>
+	<p><span style="font-size:1.0em">Distributed applications have increased probability of something going wrong</span></p>
 	</li>
 	<li>
-	<p><span style="font-size:1.4em">With graceful degradation of service - worst case</span></p>
+	<p><span style="font-size:1.0em">Best approach: Embrace failures!</span></p>
 	</li>
 	<li>
-	<p><span style="font-size:1.4em">Distributed applications have an increased probability of something going wrong</span></p>
-	</li>
-	<li>
-	<p><span style="font-size:1.4em">Embrace Failures!</span></p>
-	</li>
-	<li>
-	<p><span style="font-size:1.4em">Favor MTTR to MTTF</span></p>
+	<p><span style="font-size:1.0em">Favor MTTR over MTTF</span></p>
 
 	<ul>
 		<li>
-		<p><span style="font-size:1.0em">MTTF: Mean Time to Failure</span></p>
+		<p><span style="font-size:1.0em">MTTR: Mean time to recovery</span></p>
 		</li>
 		<li>
-		<p><span style="font-size:1.0em">​MTTR: Mean Time To Recovery</span></p>
+		<p><span style="font-size:1.0em">MTTF: Mean time to failure</span></p>
 		</li>
 	</ul>
 	</li>
 </ul>
 </div></div>
-</section><section data-id="5d8474f149c2e676cd72111bac3a72ee"><div class="sl-block" data-block-type="text" style="height: auto; width: 1280px; left: 0px; top: 0px;" data-block-id="9da51fdb5a4c1eac3e86451e309fdb57"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10; padding: 15px;">
-<h2>Resiliency Patterns</h2>
-
-<ul>
-	<li>
-	<p><span style="font-size:1.2em">Isolation</span></p>
-
-	<ul>
-		<li>
-		<p><span style="font-size:1.2em">Bulkhead</span></p>
-		</li>
-		<li>
-		<p><span style="font-size:1.2em">Parameter checking</span></p>
-		</li>
-		<li>
-		<p><span style="font-size:1.2em">Health endpoint monitoring</span></p>
-		</li>
-	</ul>
-	</li>
-	<li>
-	<p><span style="font-size:1.2em">Loose coupling</span></p>
-
-	<ul>
-		<li>
-		<p><span style="font-size:1.2em">Stateless</span></p>
-		</li>
-		<li>
-		<p><span style="font-size:1.2em">Idempotency</span></p>
-		</li>
-		<li>
-		<p><span style="font-size:1.2em">Asynchronous communication</span></p>
-		</li>
-	</ul>
-	</li>
-	<li>
-	<p><span style="font-size:1.2em">Latency control</span></p>
-
-	<ul>
-		<li>
-		<p><span style="font-size:1.2em">Time-outs</span></p>
-		</li>
-		<li>
-		<p><span style="font-size:1.2em">Circuit breaker</span></p>
-		</li>
-		<li>
-		<p><span style="font-size:1.2em">Fail fast</span></p>
-		</li>
-		<li>
-		<p><span style="font-size:1.2em">Bounded queues</span></p>
-		</li>
-	</ul>
-	</li>
-</ul>
-</div></div>
-</section><section data-id="9585040b025e27613160d3edf48920c3"><div class="sl-block" data-block-type="text" style="height: auto; width: 1280px; left: 0px; top: 0px;" data-block-id="1040ca69ef1185a892ded362bb2f6734"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10; padding: 15px;">
+</section><section data-id="5d8474f149c2e676cd72111bac3a72ee"><div class="sl-block" data-block-type="text" style="height: auto; width: 1280px; left: 0px; top: 0px;" data-block-id="9da51fdb5a4c1eac3e86451e309fdb57"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10;" data-has-custom-html=""><h2>Resiliency Patterns</h2></div></div>
+<div class="sl-block" data-block-type="table" data-name="table-a1560d" data-block-id="6c25ae9d2a468d18c83f7b76476ff163" style="height: auto; min-width: 120px; width: 520.162px; left: 160px; top: 144px;"><div class="sl-block-content" style="z-index: 11;" data-table-cols="2" data-table-rows="4"><table><tbody>
+<tr>
+<th style="width: 198px;">Type</th>
+<th>Patterns</th>
+</tr>
+<tr>
+<td style="width: 198px;">Isolation</td>
+<td>• Bulkhead<br>
+• Parameter checking<br>
+• Health endpoint monitoring</td>
+</tr>
+<tr>
+<td style="width: 198px;">Loose coupling</td>
+<td>• Statelessness<br>
+• Idempotency<br>
+• Asynchronous communication</td>
+</tr>
+<tr>
+<td style="width: 198px;">Latency control</td>
+<td>• Timeout<br>
+• Circuit breaker<br>
+• Fail fast<br>
+• Bounded queue</td>
+</tr>
+</tbody></table></div></div></section><section data-id="9585040b025e27613160d3edf48920c3"><div class="sl-block" data-block-type="text" style="height: auto; width: 1280px; left: 0px; top: 0px;" data-block-id="1040ca69ef1185a892ded362bb2f6734"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10;">
 <h2>Cascading Failures</h2>
 
 <ul>
 	<li>
-	<p><span style="font-size:1.4em">Complete system fails as the result of a failing component</span></p>
+	<p><span style="font-size:1.0em">Complete system fails as result of failing component</span></p>
 	</li>
 	<li>
-	<p><span style="font-size:1.4em">Example of cascading failure:</span></p>
+	<p><span style="font-size:1.0em">Example:</span></p>
 	</li>
 </ul>
 </div></div>
-<div class="sl-block" data-block-type="text" style="height: auto; min-width: 30px; min-height: 30px; width: 1143.24px; left: 80px; top: 203.06px;" data-block-id="fd7f39efabf4c3fcd1131c09bd1aee1e"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 11;">
+<div class="sl-block" data-block-type="text" style="height: auto; min-width: 30px; min-height: 30px; width: 1143.24px; left: 28.1781px; top: 168px;" data-block-id="fd7f39efabf4c3fcd1131c09bd1aee1e"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 11;">
 <ol style="color:rgb(53, 64, 69); font-size:21.3333px">
 	<li>
-	<p><span style="font-size:1.4em">Application running in app container with dependencies to N subsystems</span></p>
+	<p><span style="font-size:1.0em">Application running in app container with dependencies to <em>N</em> subsystems</span></p>
 	</li>
 	<li>
-	<p><span style="font-size:1.4em">Single dependency shows increased latency under high volume</span></p>
+	<p><span style="font-size:1.0em">Single dependency shows increased latency under high volume</span></p>
 	</li>
 	<li>
-	<p><span style="font-size:1.4em">User requests threads become saturated</span></p>
+	<p><span style="font-size:1.0em">User-request threads become saturated</span></p>
 	</li>
 	<li>
-	<p><span style="font-size:1.4em">Entire application becomes unresponsive</span></p>
+	<p><span style="font-size:1.0em">Entire application becomes unresponsive</span></p>
 	</li>
 </ol>
-</div></div></section><section data-id="d84d0ae8a9b702cbd6a4dd7c5e0a32a4"><div class="sl-block" data-block-type="text" style="height: auto; width: 1280px; left: 0px; top: 0px;" data-block-id="31db2f8bca3b2ddf3675e015f93ea963"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10; padding: 15px;">
-<h2>Cascading Failure</h2>
+</div></div></section><section data-id="d84d0ae8a9b702cbd6a4dd7c5e0a32a4"><div class="sl-block" data-block-type="text" style="height: auto; width: 1280px; left: 0px; top: 0px;" data-block-id="31db2f8bca3b2ddf3675e015f93ea963"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10;">
+<h2>Cascading Failures</h2>
+
+<h3>Example 1</h3>
 </div></div>
-<div class="sl-block" data-block-type="image" style="min-width: 1px; min-height: 1px; width: 879.658px; height: 627px; left: 80px; top: 93px;" data-block-id="d4e22e2401dc6fc470e48515194319e5"><div class="sl-block-content" style="z-index: 11;"><img style="" data-natural-width="1894" data-natural-height="1350" data-lazy-loaded="" data-src="service_mesh_advanced_03_resilience/a286f00dc3f02c5451a97d8854ef7430.png"></div></div></section><section data-id="d09f2d1c734e27bd88955f2e239f5cd5"><div class="sl-block" data-block-type="text" style="height: auto; width: 1280px; left: 0px; top: 0px;" data-block-id="362baf43da5de7eb1337d328f7c8ddab"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 11; padding: 15px;">
-<h2>Cascading Failure</h2>
+<div class="sl-block" data-block-type="image" style="min-width: 1px; min-height: 1px; width: 801.501px; height: 571.291px; left: 240px; top: 146.355px;" data-block-id="d4e22e2401dc6fc470e48515194319e5"><div class="sl-block-content" style="z-index: 11;"><img style="" data-natural-width="1894" data-natural-height="1350" data-lazy-loaded="" data-src="service_mesh_advanced_03_resilience/a286f00dc3f02c5451a97d8854ef7430.png"></div></div></section><section data-id="d09f2d1c734e27bd88955f2e239f5cd5"><div class="sl-block" data-block-type="text" style="height: auto; width: 1280px; left: 0px; top: 0px;" data-block-id="362baf43da5de7eb1337d328f7c8ddab"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 11;">
+<h2>Cascading Failures</h2>
+
+<h3>Example 2</h3>
 </div></div>
-<div class="sl-block" data-block-type="image" style="min-width: 1px; min-height: 1px; width: 879.658px; height: 627px; left: 80px; top: 93px;" data-block-id="a89992b610bf9ff8710a4761d2753770"><div class="sl-block-style" style="z-index: 10; transform: rotate(360deg);"><div class="sl-block-content" style="z-index: 10;"><img style="" data-natural-width="1894" data-natural-height="1350" data-lazy-loaded="" data-src="service_mesh_advanced_03_resilience/72281ab7a02dae41eba32d251016b0d7.png"></div></div></div></section><section data-id="332e5be1d29a812a11d7f0719e669023"><div class="sl-block" data-block-type="text" style="height: auto; width: 1280px; left: 0px; top: 0px;" data-block-id="b75b08de2ac5ffcacd8dec3918303bdd"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10; padding: 15px;">
-<h2>Timeout Pattern</h2>
+<div class="sl-block" data-block-type="image" style="min-width: 1px; min-height: 1px; width: 808.107px; height: 576px; left: 155.947px; top: 144px;" data-block-id="a89992b610bf9ff8710a4761d2753770"><div class="sl-block-style" style="z-index: 10; transform: rotate(360deg);"><div class="sl-block-content" style="z-index: 10;"><img style="" data-natural-width="1894" data-natural-height="1350" data-lazy-loaded="" data-src="service_mesh_advanced_03_resilience/72281ab7a02dae41eba32d251016b0d7.png"></div></div></div></section><section data-id="332e5be1d29a812a11d7f0719e669023"><div class="sl-block" data-block-type="text" style="height: auto; width: 1280px; left: 0px; top: 0px;" data-block-id="b75b08de2ac5ffcacd8dec3918303bdd"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10;" data-has-custom-html="">
+<h2>Timeout, Circuit Breaker, Bounded Queue</h2>
+
+<h3>Timeout Pattern</h3>
 
 <ul>
 	<li>
-	<p><span style="font-size:1.4em">Preserve responsiveness independent of upstream latency</span></p>
+	<p><span style="font-size:1.0em">Preserve responsiveness independent of upstream latency</span></p>
 	</li>
 	<li>
-	<p><span style="font-size:1.4em">Measure response time of upstream service</span></p>
+	<p><span style="font-size:1.0em">Measure response time of upstream service</span></p>
 	</li>
 	<li>
-	<p><span style="font-size:1.4em">Stop waiting after a pre-determined time</span></p>
+	<p><span style="font-size:1.0em">Stop waiting after predetermined time</span></p>
 	</li>
 	<li>
-	<p><span style="font-size:1.4em">Take alternate action if timeout has been reached</span></p>
+	<p><span style="font-size:1.0em">Take alternative action if timeout is reached</span></p>
 	</li>
 </ul>
 </div></div>
-</section><section data-id="5280d0c6a8fecd63f035020b4d37077d"><div class="sl-block" data-block-type="text" style="height: auto; width: 1280px; left: 0px; top: 0px;" data-block-id="3e988122b9d55af24aca8c2f80b47ade"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10; padding: 15px;">
-<h2>Circuit Breaker</h2>
+</section><section data-id="5280d0c6a8fecd63f035020b4d37077d"><div class="sl-block" data-block-type="text" style="height: auto; width: 1280px; left: 0px; top: 0px;" data-block-id="3e988122b9d55af24aca8c2f80b47ade"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10;">
+<h2 style="color:rgb(53, 64, 69)">Timeout, Circuit Breaker, Bounded Queue</h2>
+
+<h3>Circuit Breaker Pattern</h3>
 
 <ul>
 	<li>
-	<p><span style="font-size:1.4em">Extension of the Timeout pattern</span></p>
+	<p><span style="font-size:1.0em">Extension of timeout pattern</span></p>
 	</li>
 	<li>
-	<p><span style="font-size:1.4em">Circuit breaker: wraps calls to dependent service(s)</span></p>
+	<p><span style="font-size:1.0em">Circuit breaker wraps calls to dependent services</span></p>
 	</li>
 	<li>
-	<p><span style="font-size:1.4em">Original state: closed</span></p>
+	<p><span style="font-size:1.0em">Original state: Closed</span></p>
 
 	<ul>
 		<li>
-		<p><span style="font-size:1.4em">Circuit breaker implementation monitors calls to dependent service</span></p>
+		<p><span style="font-size:1.0em">Circuit breaker implementation monitors calls to dependent service</span></p>
 		</li>
 		<li>
-		<p><span style="font-size:1.4em">When failures (timeout, exception) hit  preconfigured threshold, circuit breaker trips open</span></p>
+		<p><span style="font-size:1.0em">When failures (timeout, exception) hit preconfigured threshold, circuit breaker trips open</span></p>
 		</li>
 	</ul>
 	</li>
 	<li>
-	<p><span style="font-size:1.4em">When open, calls to dependent service are no longer made, but fallback response returned</span></p>
+	<p><span style="font-size:1.0em">When open, calls to dependent service no longer made, fallback response returned</span></p>
 	</li>
 	<li>
-	<p><span style="font-size:1.4em">Circuit breaker moves to half-open state after configurable time</span></p>
+	<p><span style="font-size:1.0em">Circuit breaker moves to half-open state after configurable time</span></p>
 
 	<ul>
 		<li>
-		<p><span style="font-size:1.4em">In half-open state, circuit breaker executes remote calls periodically to monitor dependent service's health</span></p>
+		<p><span style="font-size:1.0em">In half-open state, circuit breaker executes remote calls periodically to monitor dependent service's health</span></p>
 		</li>
 		<li>
-		<p><span style="font-size:1.4em">When service becomes healthy again, state switches back to closed</span></p>
-		</li>
-	</ul>
-	</li>
-</ul>
-</div></div>
-</section><section data-id="e9b68cf72feb2e2a696e3cbd64c1a6f3"><div class="sl-block" data-block-type="text" style="height: auto; width: 1280px; left: 0px; top: 0px;" data-block-id="09eb6902677b9c2ec9f68dafdc749276"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10; padding: 15px;">
-<h2><span style="font-size:1.0em">Circuit Breaker</span></h2>
-</div></div>
-<div class="sl-block" data-block-type="image" style="min-width: 1px; min-height: 1px; width: 640px; height: 552.84px; left: 240px; top: 117.494px;" data-block-id="aaef2584349e6a8182f6d1e30f241d3e"><div class="sl-block-content" style="z-index: 11;"><img style="" data-natural-width="771" data-natural-height="666" data-lazy-loaded="" data-src="service_mesh_advanced_03_resilience/bf498959ba401055ef9d83b316bbad4e.png"></div></div></section><section data-id="705caef52a0b61cd2052c844a2bb8e2b"><div class="sl-block" data-block-type="text" style="height: auto; width: 1280px; left: 0px; top: 0px;" data-block-id="16ebec5718b37a14604cd4e38dd433be"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10; padding: 15px;">
-<h2><span style="font-size:1.0em">Bounded Queues</span></h2>
-
-<ul>
-	<li>
-	<p><span style="font-size:1.4em">Limit request queue sizes in front of highly utilized resources.</span></p>
-	</li>
-	<li>
-	<p><span style="font-size:1.4em">Avoids latency due to overloaded resources</span></p>
-	</li>
-	<li>
-	<p><span style="font-size:1.4em">Introduces pushback on the client - back pressure</span></p>
-	</li>
-	<li>
-	<p><span style="font-size:1.4em">Variant of the Fail fast pattern</span></p>
-	</li>
-</ul>
-</div></div>
-</section><section data-id="ac1f42c05e13c7393876967c7efdc3a7"><div class="sl-block" data-block-type="text" style="height: auto; width: 1280px; left: 0px; top: 0px;" data-block-id="d5f4f99c75f5315b55c06bdb7f52ca27"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10; padding: 15px;">
-<h2><span style="font-size:1.0em">Service Mesh and Resiliency</span></h2>
-
-<ul>
-	<li>
-	<p><span style="font-size:1.4em">Client-side load-balancing</span></p>
-	</li>
-	<li>
-	<p><span style="font-size:1.4em">Circuit Breaker - outlier detection</span></p>
-	</li>
-	<li>
-	<p><span style="font-size:1.4em">Automatic retry</span></p>
-	</li>
-	<li>
-	<p><span style="font-size:1.4em">Request timeout handling</span></p>
-	</li>
-	<li>
-	<p><span style="font-size:1.4em">Fault injection</span></p>
-	</li>
-</ul>
-</div></div>
-</section><section data-id="81b7251d203bed85c8aac93c725b73e2"><div class="sl-block" data-block-type="text" style="height: auto; width: 1280px; left: 0px; top: 0px;" data-block-id="92ddceefa584ccae325181a76ab65fe3"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10; padding: 15px;">
-<h2><span style="font-size:1.0em">Load-Balancing</span></h2>
-
-<ul>
-	<li>
-	<p><span style="font-size:1.4em">Configured through <em>Destination Rule</em></span></p>
-	</li>
-	<li>
-	<p><span style="font-size:1.4em">Round-robin by default</span></p>
-	</li>
-	<li>
-	<p><span style="font-size:1.4em">Also supports:</span></p>
-
-	<ul>
-		<li>
-		<p><span style="font-size:1.4em">​Random</span></p>
-		</li>
-		<li>
-		<p><span style="font-size:1.4em">Weighted</span></p>
-		</li>
-		<li>
-		<p><span style="font-size:1.4em">Least requests</span></p>
-		</li>
-		<li>
-		<p><span style="font-size:1.4em">Consistent Hash - based on header, cookie, source IP</span></p>
+		<p><span style="font-size:1.0em">When service becomes healthy again, state switches back to closed</span></p>
 		</li>
 	</ul>
 	</li>
 </ul>
 </div></div>
-<div class="sl-block" data-block-type="text" data-block-id="644ab62f2d2a9702fa512ec5e5916a80" style="height: auto; width: 600px; left: 80px; top: 468px;"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 11;">
+</section><section data-id="e9b68cf72feb2e2a696e3cbd64c1a6f3"><div class="sl-block" data-block-type="text" style="height: auto; width: 1280px; left: 0px; top: 0px;" data-block-id="09eb6902677b9c2ec9f68dafdc749276"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10;">
+<h2 style="color:rgb(53, 64, 69)">Timeout, Circuit Breaker, Bounded Queue</h2>
+
+<h3><span style="font-size:1.0em">Circuit Breaker Example</span></h3>
+</div></div>
+<div class="sl-block" data-block-type="image" style="min-width: 1px; min-height: 1px; width: 640px; height: 552.84px; left: 320px; top: 155.58px;" data-block-id="aaef2584349e6a8182f6d1e30f241d3e"><div class="sl-block-content" style="z-index: 11;"><img style="" data-natural-width="771" data-natural-height="666" data-lazy-loaded="" data-src="service_mesh_advanced_03_resilience/bf498959ba401055ef9d83b316bbad4e.png"></div></div></section><section data-id="705caef52a0b61cd2052c844a2bb8e2b"><div class="sl-block" data-block-type="text" style="height: auto; width: 1280px; left: 0px; top: 0px;" data-block-id="16ebec5718b37a14604cd4e38dd433be"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10;">
+<h2>Timeout, Circuit Breaker, Bounded Queue</h2>
+
+<h3><span style="font-size:1.0em">Bounded Queue Pattern</span></h3>
+
+<ul>
+	<li>
+	<p><span style="font-size:1.0em">Limit request queue sizes in front of highly utilized resources</span></p>
+	</li>
+	<li>
+	<p><span style="font-size:1.0em">Avoids latency due to overloaded resources</span></p>
+	</li>
+	<li>
+	<p><span style="font-size:1.0em">Introduces pushback on client (back pressure)</span></p>
+	</li>
+	<li>
+	<p><span style="font-size:1.0em">Variant of fail fast pattern</span></p>
+	</li>
+</ul>
+</div></div>
+</section><section data-id="ac1f42c05e13c7393876967c7efdc3a7"><div class="sl-block" data-block-type="text" style="height: auto; width: 1280px; left: 0px; top: 0px;" data-block-id="d5f4f99c75f5315b55c06bdb7f52ca27"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10;">
+<h2><span style="font-size:1.0em">Red Hat OpenShift Service Mesh and Resiliency</span></h2>
+
+<ul>
+	<li>
+	<p><span style="font-size:1.0em">Client-side load balancing</span></p>
+	</li>
+	<li>
+	<p><span style="font-size:1.0em">Circuit breaker: Outlier detection</span></p>
+	</li>
+	<li>
+	<p><span style="font-size:1.0em">Automatic retry</span></p>
+	</li>
+	<li>
+	<p><span style="font-size:1.0em">Request timeout handling</span></p>
+	</li>
+	<li>
+	<p><span style="font-size:1.0em">Fault injection</span></p>
+	</li>
+</ul>
+</div></div>
+</section><section data-id="81b7251d203bed85c8aac93c725b73e2"><div class="sl-block" data-block-type="text" style="height: auto; width: 1280px; left: 0px; top: 0px;" data-block-id="92ddceefa584ccae325181a76ab65fe3"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10;" data-has-custom-html="">
+<h2 style="color:rgb(53, 64, 69)"><span>Red Hat OpenShift Service Mesh and Resiliency</span></h2>
+
+<h3><span style="font-size:1.0em">Load Balancing</span></h3>
+
+<ul>
+	<li>
+	<p><span style="font-size:1.0em">Configured through <span class="mono">DestinationRule</span></span></p>
+	</li>
+	<li>
+	<p><span style="font-size:1.0em">Round-robin by default</span></p>
+	</li>
+	<li>
+	<p><span style="font-size:1.0em">Also supports:</span></p>
+
+	<ul>
+		<li>
+		<p><span style="font-size:1.0em">​Random</span></p>
+		</li>
+		<li>
+		<p><span style="font-size:1.0em">Weighted</span></p>
+		</li>
+		<li>
+		<p><span style="font-size:1.0em">Fewest requests</span></p>
+		</li>
+		<li>
+		<p><span style="font-size:1.0em">Consistent hash: Based on header, cookie, source IP</span></p>
+		</li>
+	</ul>
+	</li>
+</ul>
+</div></div>
+<div class="sl-block" data-block-type="text" data-block-id="644ab62f2d2a9702fa512ec5e5916a80" style="height: auto; width: 600px; left: 59.2713px; top: 432px;"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 11;">
 <pre><span style="font-size:1.2em">apiVersion:networking.istio.io/v1alpha3
 kind:DestinationRule
 metadata:
@@ -2080,19 +2055,21 @@ spec:
   trafficPolicy:
     loadBalancer:
       simple:LEAST_CONN</span></pre>
-</div></div></section><section data-id="fa2749c7d390d1d075936c0d5fbfb9dd"><div class="sl-block" data-block-type="text" style="height: auto; width: 1280px; left: 0px; top: 0px;" data-block-id="bd4f7e4e18f463861e5471a6512cf5c1"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10; padding: 15px;">
-<h2><span style="font-size:1.0em">Outlier Detection</span></h2>
+</div></div></section><section data-id="fa2749c7d390d1d075936c0d5fbfb9dd"><div class="sl-block" data-block-type="text" style="height: auto; width: 1280px; left: 0px; top: 0px;" data-block-id="bd4f7e4e18f463861e5471a6512cf5c1"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10;">
+<h2>Red Hat OpenShift Service Mesh and Resiliency</h2>
+
+<h3><span style="font-size:1.0em">Outlier Detection</span></h3>
 
 <ul>
 	<li>
-	<p><span style="font-size:1.4em">Istio implementation of circuit breaker</span></p>
+	<p><span style="font-size:1.0em">Istio implementation of circuit breaker</span></p>
 	</li>
 	<li>
-	<p><span style="font-size:1.4em">Outliers are excluded from the active load-balancing pool </span></p>
+	<p><span style="font-size:1.0em">Outliers excluded from active load-balancing pool </span></p>
 	</li>
 </ul>
 </div></div>
-<div class="sl-block" data-block-type="text" style="height: auto; width: 600px; left: 80px; top: 213px;" data-block-id="1c21f9df25c2fd7b47bfafbb24e4cc68"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 11;">
+<div class="sl-block" data-block-type="text" style="height: auto; width: 600px; left: 32.0648px; top: 227px;" data-block-id="1c21f9df25c2fd7b47bfafbb24e4cc68"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 11;">
 <pre>apiVersion:networking.istio.io/v1alpha3
 kind:DestinationRule
 metadata:
@@ -2104,22 +2081,24 @@ spec:
        </span><span style="font-size:18.75px">consecutiveErrors</span><span style="font-size:18.75px">:</span><span style="font-size:18.75px">5
        </span><span style="font-size:18.75px">interval</span><span style="font-size:18.75px">:</span><span style="font-size:18.75px">1m
        </span><span style="font-size:18.75px">baseEjectionTime</span><span style="font-size:18.75px">:</span><span style="font-size:18.75px">3m</span></pre>
-</div></div></section><section data-id="80ba8adec42b86d196bc1682925b30c7"><div class="sl-block" data-block-type="text" style="height: auto; width: 1280px; left: 0px; top: 0px;" data-block-id="592ec5c48b4353609f4cc8e790eb6225"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10; padding: 15px;">
-<h2><span style="font-size:1.0em">Retries and Timeouts</span></h2>
+</div></div></section><section data-id="80ba8adec42b86d196bc1682925b30c7"><div class="sl-block" data-block-type="text" style="height: auto; width: 1280px; left: 0px; top: 0px;" data-block-id="592ec5c48b4353609f4cc8e790eb6225"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10;" data-has-custom-html="">
+<h2 style="color:rgb(53, 64, 69)">Red Hat OpenShift Service Mesh and Resiliency</h2>
+
+<h3><span style="font-size:1.0em">Retries and Timeouts</span></h3>
 
 <ul>
 	<li>
-	<p><span style="font-size:1.4em">Default timeout in Envoy proxy = 15s</span></p>
+	<p><span style="font-size:1.0em">Default timeout in Envoy proxy: <span class="mono">15s</span></span></p>
 	</li>
 	<li>
-	<p><span style="font-size:1.4em">Automatic retry when error code 503 is returned</span></p>
+	<p><span style="font-size:1.0em">Automatic retry when error code 503 returned</span></p>
 	</li>
 	<li>
-	<p><span style="color:rgb(53, 64, 69); font-size:29.8667px">Defined on a per-service basis using <em>Virtual Service</em></span></p>
+	<p><span style="font-size:1.0em"><span style="color:rgb(53, 64, 69)">Defined on per-service basis using <span class="mono">VirtualService</span></span></span></p>
 	</li>
 </ul>
 </div></div>
-<div class="sl-block" data-block-type="text" style="height: auto; width: 600px; left: 80px; top: 261px;" data-block-id="b85466bee28b8fe3d910ff200ba751ce"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 11;">
+<div class="sl-block" data-block-type="text" style="height: auto; width: 600px; left: 33.3603px; top: 279.344px;" data-block-id="b85466bee28b8fe3d910ff200ba751ce"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 11;">
 <pre>apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
 metadata:
@@ -2136,25 +2115,27 @@ spec:
     retries:
       attempts: 3
       perTryTimeout: 2s</pre>
-</div></div></section><section data-id="14d45cf07186c99ae82ac83ac738184b"><div class="sl-block" data-block-type="text" style="height: auto; width: 1280px; left: 0px; top: 0px;" data-block-id="4379fcfb5b17b0515172e1e8d31fd60e"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10; padding: 15px;">
-<h2><span style="font-size:1.0em">Fault Injection</span></h2>
+</div></div></section><section data-id="14d45cf07186c99ae82ac83ac738184b"><div class="sl-block" data-block-type="text" style="height: auto; width: 1280px; left: 0px; top: 0px;" data-block-id="4379fcfb5b17b0515172e1e8d31fd60e"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10;" data-has-custom-html="">
+<h2 style="color:rgb(53, 64, 69)">Red Hat OpenShift Service Mesh and Resiliency</h2>
+
+<h3><span style="font-size:1.0em">Fault Injection</span></h3>
 
 <ul>
 	<li>
-	<p><span style="font-size:1.4em">Chaos engineering</span></p>
+	<p><span style="font-size:1.0em">Chaos engineering</span></p>
 	</li>
 	<li>
-	<p><span style="font-size:29.8667px">Test distributed applications by deliberately injecting faults into running (production) systems</span></p>
+	<p><span style="font-size:1.0em">Test distributed applications by deliberately injecting faults into running (production) systems</span></p>
 	</li>
 	<li>
-	<p><span style="font-size:29.8667px">Service Mesh allows to inject delays and HTTP response error codes at the application layer</span></p>
+	<p><span style="font-size:1.0em">OpenShift Service Mesh allows injecting delays and HTTP response error codes at application layer</span></p>
 	</li>
 	<li>
-	<p><span style="font-size:29.8667px">Defined on a per-service basis using </span><em>Virtual Service</em></p>
+	<p><span style="font-size:1.0em">Defined on per-service basis using <span class="mono">VirtualService</span></span></p>
 	</li>
 </ul>
 </div></div>
-<div class="sl-block" data-block-type="text" style="height: auto; width: 600px; left: 80px; top: 348px;" data-block-id="fa38d40f46056ea7a7737fa67a393818"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 11;">
+<div class="sl-block" data-block-type="text" style="height: auto; width: 600px; left: 30.7692px; top: 316.907px;" data-block-id="fa38d40f46056ea7a7737fa67a393818"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 11;">
 <pre>apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
 metadata:
@@ -2169,12 +2150,32 @@ spec:
           value: 
         fixedDelay: 5s
 </pre>
+</div></div></section><section data-id="5d953d4135362d1c6762efa81c1133d1"><div class="sl-block" data-block-type="text" style="height: auto; width: 1280px; left: 0px; top: 0px;" data-block-id="915b8e7b72bb322d18eb5a46af1097f4"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10;">
+<h2>Module Summary</h2>
+
+<ul>
+	<li>
+	<p><span style="font-size:1.0em">Resiliency</span></p>
+	</li>
+	<li>
+	<p><span style="font-size:1.0em">Resiliency Patterns</span></p>
+	</li>
+	<li>
+	<p><span style="font-size:1.0em">Cascading Failures</span></p>
+	</li>
+	<li>
+	<p><span style="font-size:1.0em">Timeout, Circuit Breaker, Bounded Queue</span></p>
+	</li>
+	<li>
+	<p><span style="font-size:1.0em">Red Hat OpenShift Service Mesh and Resiliency</span></p>
+	</li>
+</ul>
 </div></div></section>
 			</div>
 		</div>
 
 		<script>
-			var SLConfig = {"deck": {"id":1706624,"slug":"service_mesh_advanced_03_resilience","title":"Service_Mesh_Advanced_03_Resilience","description":"","width":1280,"height":720,"margin":0.05,"visibility":"self","published_at":null,"sanitize_messages":null,"thumbnail_url":"https://s3.amazonaws.com/media-p.slid.es/thumbnails/5756f051c6447420298a800ca9f49403/thumb.jpg?1580623350","view_count":0,"user":{"id":349930,"username":"btison","name":"Bernard Tison","description":null,"thumbnail_url":"https://www.gravatar.com/avatar/e2e3cdd3ce9e08ca385892a22816db22?s=140\u0026d=https%3A%2F%2Fstatic.slid.es%2Fimages%2Fdefault-profile-picture.png","paid":true,"pro":true,"lite":false,"team_id":32,"settings":{"id":183077,"present_controls":true,"present_upsizing":true,"present_pointer":false,"present_notes":true,"default_deck_tag_id":null},"enterprise":true,"membership":{"role":"member","manager":false,"activated":true}},"background_transition":"none","transition":"none","theme_id":176,"theme_font":"overpass2","theme_color":"no-color","auto_slide_interval":0,"comments_enabled":true,"forking_enabled":false,"rolling_links":false,"center":false,"shuffle":false,"should_loop":false,"share_notes":false,"slide_number":true,"slide_count":16,"rtl":false,"version":2,"collaborative":false,"deck_user_editor_limit":null,"data_updated_at":1580629412916,"font_typekit":null,"font_google":null,"time_limit":null,"upsizing_enabled":true,"notes":{"bedc0457df23e02319c4a5f2fb1e220f":"","14aee4ce6e77efac398800a568d4b75b":"","00c8743aad41872b1490fa1b34350a1b":"","57eadeb0bee99829e929666d4957b001":"","a0a8f62b4e04f627b163a856dfb59a4f":"","2ffc9af43b0e6f78c72fde3a1e0165f3":"","0d01f8dbe2b1c338949e507a3e9bb5ec":"","48dfbc8c76713fecc916f6ab82c26831":"","620d650e6e3ab7ea1fae9af7fc848890":"","4adbb56d9ccb48b44aac2c7cfa67cd26":"","a0567e5825addcdbc8496f3779b14e51":"","ffdb9b6bcf5f9b3b1412d9a6bd31eac5":"","407ed17b3f536db0b8d6f0fec7dc1da1":"","05baa377921dfc24bc2f976dfdeba3ac":"","4cd9c824a4d86a7211f8100e5794b5c4":"","503b95ca3245a464ab20828c58f29060":"","0c7a65c2ec6743d876e0f8a52019d607":"","883ab49bf404a9dcb67d33a2fb0299a1":"","0ea0feca0cfde165ad868afc2c554e79":"","00896e2961203a8b4eca7fafc7f957ee":"","d43265aed24508d5c80c5863b4a869e8":"","acdb0f554bba724e4bea7b4c88c6ae8d":"","e56c3cd4bd06f102c94d95a6b9f22cae":"","c94edad64a41b18e4e276e9914ca9f6f":""}}};
+			var SLConfig = {"deck": {"id":1706624,"slug":"service_mesh_advanced_03_resilience","title":"Service_Mesh_Advanced_03_Resilience","description":"","width":1280,"height":720,"margin":0.05,"visibility":"self","published_at":null,"sanitize_messages":null,"thumbnail_url":"https://s3.amazonaws.com/media-p.slid.es/thumbnails/5756f051c6447420298a800ca9f49403/thumb.jpg?1585669942","view_count":0,"user":{"id":349930,"username":"btison","name":"Bernard Tison","description":null,"thumbnail_url":"https://www.gravatar.com/avatar/e2e3cdd3ce9e08ca385892a22816db22?s=140\u0026d=https%3A%2F%2Fstatic.slid.es%2Fimages%2Fdefault-profile-picture.png","paid":true,"pro":true,"lite":false,"team_id":32,"settings":{"id":183077,"present_controls":true,"present_upsizing":true,"present_pointer":false,"present_notes":true,"default_deck_tag_id":null},"enterprise":true,"membership":{"role":"member","manager":false,"activated":true}},"background_transition":"none","transition":"none","theme_id":176,"theme_font":"overpass2","theme_color":"no-color","auto_slide_interval":0,"comments_enabled":true,"forking_enabled":false,"rolling_links":false,"center":false,"shuffle":false,"should_loop":false,"share_notes":false,"slide_number":true,"slide_count":17,"rtl":false,"version":2,"collaborative":true,"deck_user_editor_limit":null,"data_updated_at":1585760570361,"font_typekit":null,"font_google":null,"time_limit":null,"upsizing_enabled":true,"notes":{"bedc0457df23e02319c4a5f2fb1e220f":"","14aee4ce6e77efac398800a568d4b75b":"","00c8743aad41872b1490fa1b34350a1b":"","57eadeb0bee99829e929666d4957b001":"","a0a8f62b4e04f627b163a856dfb59a4f":"","2ffc9af43b0e6f78c72fde3a1e0165f3":"","0d01f8dbe2b1c338949e507a3e9bb5ec":"","48dfbc8c76713fecc916f6ab82c26831":"","620d650e6e3ab7ea1fae9af7fc848890":"","4adbb56d9ccb48b44aac2c7cfa67cd26":"","a0567e5825addcdbc8496f3779b14e51":"","ffdb9b6bcf5f9b3b1412d9a6bd31eac5":"","407ed17b3f536db0b8d6f0fec7dc1da1":"","05baa377921dfc24bc2f976dfdeba3ac":"","4cd9c824a4d86a7211f8100e5794b5c4":"","503b95ca3245a464ab20828c58f29060":"","0c7a65c2ec6743d876e0f8a52019d607":"","883ab49bf404a9dcb67d33a2fb0299a1":"","0ea0feca0cfde165ad868afc2c554e79":"","00896e2961203a8b4eca7fafc7f957ee":"","d43265aed24508d5c80c5863b4a869e8":"","acdb0f554bba724e4bea7b4c88c6ae8d":"","e56c3cd4bd06f102c94d95a6b9f22cae":"","c94edad64a41b18e4e276e9914ca9f6f":""}}};
 
 				SLConfig.theme = {"id":176,"created_at":"2014-05-27T12:38:16.183Z","updated_at":"2019-10-17T00:32:59.630Z","name":"Red Hat Corporate (Archived)","thumbnail_url":"https://s3.amazonaws.com/media-p.slid.es/thumbnails/66755080be2b0c8c0146bfa70069ef16/thumb.jpg?1571272377","sanitize_messages":null,"slide_template_ids":[28642,36442,26765,26762,56704,16857,16856,16853,16855,16854,16852,16863,16862,16861,16860,16859,16858,56721,185268,185425],"font_typekit":"","font_google":"","width":960,"height":700};
 
@@ -2202,6 +2203,8 @@ spec:
 
 				autoSlide: 0,
 				autoSlideStoppable: true,
+
+				autoAnimateMatcher: SL.deck.AutoAnimate.matcher,
 
 				center: false,
 				shuffle: false,

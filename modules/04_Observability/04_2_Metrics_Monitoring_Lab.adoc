@@ -4,30 +4,29 @@
 :linkattrs:
 :data-uri:
 
-== Observability Lab: Metrics and Monitoring
+== Observability: Metrics and Monitoring Lab
 
 .Goals
-* Understand Metrics and Monitoring in Red Hat Service Mesh.
-* Create and collect custom metrics.
-* Define alerts in Prometheus.
+* Understand metrics and monitoring in Red Hat^(R)^ OpenShift^(R)^ Service Mesh
+* Create and collect custom metrics
+* Define alerts in Prometheus
 
 :numbered:
 
-== Red Hat Service Mesh Metrics and Monitoring
+== Explore OpenShift Service Mesh Metrics and Monitoring
 
-One of the core features of the Red Hat Service Mesh is the observability of network traffic. Because all service-to-service communication is going through Envoy proxies, and the Service Mesh control plane is able to gather logs and metrics from these proxies, the Service Mesh can give deep insights about mesh network.
+One of the core features of OpenShift Service Mesh is the observability of network traffic. Because all service-to-service communication goes through Envoy proxies, and the service mesh control plane is able to gather logs and metrics from these proxies, the service mesh can give deep insights about the mesh network.
 
-The Mixer component of the Control Plane is responsible for telemetry collection (In fact, Mixer is two different deployments in Openshift. One is called _istio-policy_, the other is called _istio-telemetry_. The _istio-policy_ component is responsible for providing policy controls, _istio-telemetry_ handles metric collection).
+The Mixer component of the control plane is responsible for telemetry collection. In fact, Mixer is two different deployments in OpenShift Container Platform: `istio-policy` and `istio-telemetry`. `istio-policy` is responsible for providing policy controls and `istio-telemetry` handles metrics collection.
 
-The Envoy sidecars from the application pods call _istio-policy_ before each request to perform precondition policy checks, and after each request they call _istio-telemetry_ to report telemetry. Note that the sidecar has local caching such that a large percentage of precondition checks can be performed from cache. Additionally, the sidecar buffers outgoing telemetry such that it only calls Mixer infrequently.
+The Envoy sidecars from the application pods call `istio-policy` before each request to perform precondition policy checks and `istio-telemetry` after each request to report telemetry. Note that the sidecar has local caching so that a large percentage of precondition checks can be performed from the cache. Additionally, the sidecar buffers outgoing telemetry to reduce the frequency of Mixer calls.
 
-Mixer comes standard with a mixer adapter for Prometheus, allowing a Prometheus instance to scrape metrics from Mixer.
+=== Explore Prometheus
+Mixer comes standard with a Mixer adapter for Prometheus, allowing a Prometheus instance to scrape metrics from Mixer.
 
-The Service Mesh instance of Prometheus is configured with a number of scraping targets. As such the Prometheus instance will collect metrics not only from Mixer, but also from the other control plane components and from each sidecar.
+The service mesh instance of Prometheus is configured with a number of scraping targets, which means it collects metrics not only from Mixer, but also from the other control plane components and from each sidecar. All of these metrics are aggregated and visualized in a Grafana dashboard.
 
-All these metric are aggregated an visualized in a Grafana Dashboard.
-
-. Ensure you're logged into OpenShift as the control plane admin user.
+. Make sure you are logged in to OpenShift Container Platform as the control plane admin user:
 +
 ----
 $ oc login $LAB_MASTER_API -u $SM_CP_ADMIN -p $OCP_PASSWD
@@ -37,114 +36,120 @@ $ oc login $LAB_MASTER_API -u $SM_CP_ADMIN -p $OCP_PASSWD
 ----
 $ echo -en "\n\nhttps://$(oc get route prometheus -o template --template={{.spec.host}} -n $SM_CP_NS)\n\n"
 ----
-. In a browser window, navigate to the Prometheus UI. Navigate to  the _Status -> Targets_ page. This page shows al the scraping targets discovered by the Prometheus server:
+. In a browser window, navigate to the Prometheus UI.
+. Navigate to *Status -> Targets* to view all of the scraping targets discovered by the Prometheus server:
 +
 image::images/prometheus-targets.png[]
-+
-These targets include:
-+
-* `envoy-stats`: the different envoy proxies.
-* `istio-mesh`: scraping target for service mesh metrics through the Mixer Prometheus adapter
-* `citadel`, `pilot`, `galley`, `istio-telemetry`, `istio-policy`: metrics exposed by the control plane components about themselves.
-* `kubernetes-service-endpoints`: service endpoints which do not necessarily belong to the mesh. They are discovered automatically because the Service resource has Prometheus annotations. This is the case for the ZooKeeper and Kafka pods in the Emergency Response Demo namespace.
 
-. Navigate to the _Graph_ of the Prometheus UI. Click on the _insert metric at cursor_ dropdown to see which metrics are scraped by this Prometheus instance:
+* These targets include:
+
+** `envoy-stats`: The different envoy proxies.
+** `istio-mesh`: The scraping target for service mesh metrics through Mixer's Prometheus adapter.
+** `citadel`, `pilot`, `galley`, `istio-telemetry`, `istio-policy`: The metrics exposed by the control plane components about themselves.
+** `kubernetes-service-endpoints`: Service endpoints that do not necessarily belong to the mesh. They are discovered automatically because the service resources--for example, the ZooKeeper and Kafka pods in the Emergency Response Demo namespace--have Prometheus annotations.
+
+. Click *Graph* and then click the *insert metric at cursor* list to see which metrics are scraped by this Prometheus instance:
 +
 image::images/prometheus-metrics.png[]
-+
-The metrics are prefixed according to their source:
-+
-* `envoy_`: metrics exposed by the Envoy proxy.
-* `istio_`: metrics exposed through the Prometheus Mixer adapter. These metrics include:
-** `istio_requests_total` is a counter that aggregates request totals. Can be used to calculate for example the number of requests per second, grouped by source, destination, protocol and response code.
-** `istio_request_duration_seconds` is a histogram that collects latency for requests between workloads.
-** `istio_request_bytes` and `istio_response_bytes`: histograms that collect the ingoing and outgoing bytes per request and response.
 
-. Internally, the metrics exposed through Mixer are configured with a combination of _metric_, _handler_ and _rule_ resources.
-** The `metric` resources will be translated into Prometheus metrics. To see the list of default metrics:
+* The metrics are prefixed according to their source:
+
+** `envoy_`: The metrics exposed by the Envoy proxy.
+** `istio_`: The metrics exposed through the Mixer's Prometheus adapter, including the following:
+*** `istio_requests_total`: A counter that aggregates request totals. For example, it can be used to calculate the number of requests per second grouped by source, destination, protocol, and response code.
+*** `istio_request_duration_seconds`: A histogram that collects latency for requests between workloads.
+*** `istio_request_bytes` and `istio_response_bytes`: Histograms that collect the ingoing and outgoing bytes per request and response.
+
+. Internally, the metrics exposed through Mixer are configured with a combination of `instance`, `handler`, and `rule` resources.
+.. Get a list of the default metrics:
 +
 ----
-$ oc get metric -n $SM_CP_NS
+$ oc get instance -n $SM_CP_NS
 ----
 +
-.Output
+.Sample Output
 ----
 NAME                   AGE
-requestcount           9d
-requestduration        9d
-requestsize            9d
-responsesize           9d
-tcpbytereceived        9d
-tcpbytesent            9d
-tcpconnectionsclosed   9d
-tcpconnectionsopened   9d
+attributes             2d4h
+requestcount           2d4h
+requestduration        2d4h
+requestsize            2d4h
+responsesize           2d4h
+tcpbytereceived        2d4h
+tcpbytesent            2d4h
+tcpconnectionsclosed   2d4h
+tcpconnectionsopened   2d4h
 ----
+* The `instance` resources are translated into Prometheus metrics.
+.. View details of an `instance` resource:
 +
 ----
-$ oc get metric requestcount -o yaml -n $SM_CP_NS
+$ oc get instance requestcount -o yaml -n $SM_CP_NS
 ----
 +
-.Output (truncated)
+.Sample Output (truncated)
 ----
 apiVersion: config.istio.io/v1alpha2
-kind: metric
+kind: instance
 metadata:
   [...]
 spec:
-spec:
-  dimensions:
-    connection_security_policy: conditional((context.reporter.kind | "inbound") ==
-      "outbound", "unknown", conditional(connection.mtls | false, "mutual_tls", "none"))
-    destination_app: destination.labels["app"] | "unknown"
-    destination_principal: destination.principal | "unknown"
-    destination_service: destination.service.host | "unknown"
-    destination_service_name: destination.service.name | "unknown"
-    destination_service_namespace: destination.service.namespace | "unknown"
-    destination_version: destination.labels["version"] | "unknown"
-    destination_workload: destination.workload.name | "unknown"
-    destination_workload_namespace: destination.workload.namespace | "unknown"
-    permissive_response_code: rbac.permissive.response_code | "none"
-    permissive_response_policyid: rbac.permissive.effective_policy_id | "none"
-    reporter: conditional((context.reporter.kind | "inbound") == "outbound", "source",
-      "destination")
-    request_protocol: api.protocol | context.protocol | "unknown"
-    response_code: response.code | 200
-    response_flags: context.proxy_error_code | "-"
-    source_app: source.labels["app"] | "unknown"
-    source_principal: source.principal | "unknown"
-    source_version: source.labels["version"] | "unknown"
-    source_workload: source.workload.name | "unknown"
-    source_workload_namespace: source.workload.namespace | "unknown"
-  monitored_resource_type: '"UNSPECIFIED"'
-  value: "1"    
+  compiledTemplate: metric
+  params:
+    dimensions:
+      connection_security_policy: conditional((context.reporter.kind | "inbound")
+        == "outbound", "unknown", conditional(connection.mtls | false, "mutual_tls",
+        "none"))
+      destination_app: destination.labels["app"] | "unknown"
+      destination_principal: destination.principal | "unknown"
+      destination_service: destination.service.host | conditional((destination.service.name
+        | "unknown") == "unknown", "unknown", request.host)
+      destination_service_name: destination.service.name | "unknown"
+      destination_service_namespace: destination.service.namespace | "unknown"
+      destination_version: destination.labels["version"] | "unknown"
+      destination_workload: destination.workload.name | "unknown"
+      destination_workload_namespace: destination.workload.namespace | "unknown"
+      grpc_response_status: response.grpc_status | ""
+      reporter: conditional((context.reporter.kind | "inbound") == "outbound", "source",
+        "destination")
+      request_protocol: api.protocol | context.protocol | "unknown"
+      response_code: response.code | 200
+      response_flags: context.proxy_error_code | "-"
+      source_app: source.labels["app"] | "unknown"
+      source_principal: source.principal | "unknown"
+      source_version: source.labels["version"] | "unknown"
+      source_workload: source.workload.name | "unknown"
+      source_workload_namespace: source.workload.namespace | "unknown"
+    monitored_resource_type: '"UNSPECIFIED"'
+    value: "1"
 ----
-** The `prometheus` handler describes the Prometheus metrics and references the metric custom resources in the instance_name fields. It also defines the name that can be used in Prometheus queries later (with the `istio` prefix), like `requests_total`, and the labels used to group the metrics:
+.. View a `handler` resource:
 +
 ----
 $ oc get handler prometheus -o yaml -n $SM_CP_NS
 ----
 +
-.Output (truncated)
+.Sample Output (Truncated)
 ----
 apiVersion: config.istio.io/v1alpha2
 kind: handler
 metadata:
   [...]
-spec:
-  compiledAdapter: prometheus
-  params:
-    metrics:
-    - instance_name: requestcount.metric.admin50-istio-system
-      kind: COUNTER
-      label_names:
-      - reporter
-      - source_app
-      - source_principal
-      - source_workload
-      - source_workload_namespace
-      - source_version
-      - destination_app
-      - destination_principal
+spec:                                                                                                                
+  compiledAdapter: prometheus                                                                                        
+  params:                                                                                                            
+    metrics:                                                                                                         
+    - instance_name: requestcount.instance.admin50-istio-system                                                       
+      kind: COUNTER                                                                                                  
+      label_names:                                                                                                   
+      - reporter                                                                                                     
+      - source_app                                                                                                   
+      - source_principal                                                                                             
+      - source_workload                                                                                              
+      - source_workload_namespace                                                                                    
+      - source_version                                                                                               
+      - destination_app                                                                                              
+      - destination_principal 
       - destination_workload
       - destination_workload_namespace
       - destination_version
@@ -153,20 +158,21 @@ spec:
       - destination_service_namespace
       - request_protocol
       - response_code
+      - grpc_response_status
       - response_flags
-      - permissive_response_code
-      - permissive_response_policyid
       - connection_security_policy
       name: requests_total
     [...]
 ----
-** Finally, the _Rule_ resources bind the metrics to the handlers.
+** The `prometheus` handler describes the Prometheus metrics and references the metric custom resources in the `instance_name` fields. It also defines the name that can be used in Prometheus queries later (with the `istio` prefix)--such as `requests_total`&#8212;and the labels used to group the metrics.
+
+.. View the `rule` resources, which bind the metrics to the handlers:
 +
 ----
 $ oc get rule -n $SM_CP_NS
 ----
 +
-.Output
+.Sample Output
 ----
 NAME                      AGE
 kubeattrgenrulerule       9d
@@ -176,12 +182,13 @@ promtcpconnectionclosed   9d
 promtcpconnectionopen     9d
 tcpkubeattrgenrulerule    9d
 ----
+.. View the details of a `rule` resource:
 +
 ----
 $ oc get rule promhttp -o yaml -n $SM_CP_NS
 ----
 +
-.Output (truncated)
+.Sample Output (Truncated)
 ----
 apiVersion: config.istio.io/v1alpha2
 kind: rule
@@ -197,41 +204,44 @@ spec:
     - responsesize.metric
   match: (context.protocol == "http" || context.protocol == "grpc") && (match((request.useragent
     | "-"), "kube-probe*") == false) && (match((request.useragent | "-"), "Prometheus*")
-    == false)  
+    == false)
 ----
 
-. Prometheus is essentially a time-series database, and as such has very limited functionality for displaying metric data in graphs and dashboards. That's why Prometheus is often deployed together which Grafana. Grafana can use the Prometheus time-series as data source for graphics and dashboards. The default installation of Service mesh includes Grafana, and pre-built dashboards for the different metric groups obtained from Prometheus.
-.. Obtain the URL for the Grafana instance:
+=== Explore Grafana
+Prometheus is essentially a time-series database, and as such has limited functionality for displaying metric data in graphs and dashboards. That is why Prometheus is often deployed together with Grafana. Grafana uses the Prometheus time-series as a data source for graphics and dashboards. The default installation of service mesh includes Grafana and prebuilt dashboards for the different metric groups obtained from Prometheus.
+
+. Obtain the URL for the Grafana instance:
 +
 ----
 $ echo -en "\n\nhttps://$(oc get route grafana -o template --template={{.spec.host}} -n $SM_CP_NS)\n\n"
 ----
-.. In a browser window, navigate to the Grafana home page. Log in with the control plane admin username and password.
+. In a browser window, navigate to the Grafana home page and log in with the control plane admin username and password:
 +
 image::images/grafana-homepage.png[]
-.. Click on the _Home_ drop-down, and on the _Istio_ folder to see the different default dasboards:
+. Click *Home* and select the *Istio* folder to see the different default dashboards:
 +
 image::images/grafana-dashboards.png[]
-.. The _Istio Workload Dashboard_ groups the dashboards for the different metric groups obtained through the Prometheus Mixer Adapter. In the selection bar at the top, you can select the namespace and workload you want to see, and further filter on inbound workload namespace, inbound workload and destination service.
+. Select *Istio Workload Dashboard*:
 +
 image::images/grafana-workload-dashboard.png[]
+* This dashboard groups the dashboards for the different metric groups obtained through the Mixer's Prometheus adapter.
+* In the selection bar at the top, you can select the namespace and workload you want to see, then filter further on inbound workload namespace, inbound workload, and destination service.
 
 == Create and Collect Custom Metrics
 
-The default metrics generated by the Service Mesh will often be sufficient. But in some cases, one can imagine a need for specific metrics which are not readily generated by the Service Mesh.
+The default metrics generated by the service mesh are usually sufficient. But in some cases, you can imagine a need for specific metrics that are not readily generated by the service mesh.
 
-The Service Mesh allows to define additional metrics through a combination of _Instance_, _Handler_ and _Rule_ resources. These metrics will be made available by Mixer for scraping by Prometheus.
+The service mesh allows you to define additional metrics through a combination of `instance`, `handler`, and `rule` resources. These metrics are made available by Mixer for scraping by Prometheus.
 
-In this section of the lab, you will create a custom metric which will count the number of requests per version of the Incident Service. You will first deploy a new version of the Incident Service, and distribute traffic beween these two versions. The new metric will reflect the distribution of the requests between the two versions.
+In this section of the lab, you create a custom metric that counts the number of requests per version of the incident service. First, you deploy a second version of the incident service and distribute traffic between the two versions.
 
-. Label the deployed version of the Incident Service as `v1`:
+. Label the deployed version of the incident service as `v1`:
 +
 ----
 $ oc patch dc $ERDEMO_USER-incident-service -p '{"spec":{"template":{"metadata":{"labels":{"version":"v1"}}}}}' -n $ERDEMO_NS
 ----
-+
-This will force a redeployment of the Incident Service pods.
-. Deploy version `v2` of the Incident Service:
+* This forces a redeployment of the incident service pods.
+. Deploy version `v2` of the incident service:
 +
 ----
 $ echo "---
@@ -339,11 +349,11 @@ spec:
         name: $ERDEMO_USER-incident-service:1.0.0-jaeger
         namespace: $ERDEMO_NS
     type: ImageChange
-" | oc create -f - -n $ERDEMO_NS 
+" | oc create -f - -n $ERDEMO_NS
 ----
-+
-* Note that for the sake of simplicity we are deploying the same image of the Incident Service. Only the value of the _version_ label marks the difference between the two versions.
-* Note that both deployments are bound to the same service. The _Selector_ of the service matches the labels `app=$ERDEMO_USER-incident-service` and `group=erd-services`:
+
+* Note that for the sake of simplicity, you are deploying the same image of the incident service. Only the value of the `version` label marks the difference between the two.
+. Observe that both deployments are bound to the same service:
 +
 ----
 $ oc get service $ERDEMO_USER-incident-service -o custom-columns=NAME:.metadata.name,SELECTOR:.spec.selector -n $ERDEMO_NS
@@ -352,23 +362,23 @@ $ oc get service $ERDEMO_USER-incident-service -o custom-columns=NAME:.metadata.
 .Sample Output
 ----
 NAME                      SELECTOR
-user50-incident-service   map[app:user50-incident-service group:erd-services] 
+user50-incident-service   map[app:user50-incident-service group:erd-services]
 ----
-
-. Verify that the Incident Service service has two endpoints:
+* The `Selector` of the service matches the labels `app=$ERDEMO_USER-incident-service` and `group=erd-services`.
+. Verify that the incident service has two endpoints:
 +
 ----
 $ oc describe service $ERDEMO_USER-incident-service -n $ERDEMO_NS | grep Endpoints
 ----
 +
-.Sample output
+.Sample Output
 ----
 Endpoints:         10.128.3.245:8080,10.128.3.247:8080
 ----
 
-. The traffic directed to the Incident Service will be more or less equally distributed beteen the two versions. To make things a bit more interesting, you can give a weight to the different services. +
-This can be achived by defining subsets of the service in the Incident Service _DestinationRule_ and configuring routing weights in the Incident Service _VirtualService_ resource.
-.. Define the Incident Service subsets in the DestinationRule:
+* The traffic directed to the incident service will be more or less equally distributed between the two versions.
+. To make things a bit more interesting, give a weight to each service by defining subsets of the service in the incident service DestinationRule and configuring routing weights in the incident service VirtualService:
+.. Define the incident service subsets in the DestinationRule:
 +
 ----
 $ echo "---
@@ -390,7 +400,7 @@ spec:
       version: v2
 " | oc apply -f - -n $ERDEMO_NS
 ----
-.. Add routing instructions to the VirtualService.
+.. Add routing instructions to the VirtualService:
 +
 ----
 $ echo "---
@@ -422,22 +432,21 @@ spec:
           weight: 80
 " | oc apply -f - -n $ERDEMO_NS
 ----
-* In the example above, roughly 80% of the requests will be routed to version v2 of the Incident Service.
-.. Create some traffic to the Incident Service:
+* In the example above, roughly 80% of the requests are to be routed to version `v2` of the incident service.
+. Create some traffic to the incident service:
 +
 ----
 $ while :; do curl -k https://incident-service.$ERDEMO_USER.apps.$SUBDOMAIN_BASE/incidents; sleep 1; done
 ----
-.. In the _Istio Workload Dashboard_ in Grafana, select the application namespace and the Incident Service workload to verify that some traffic reaches the `v1` version of the Incident Service:
+. In the *Istio Workload Dashboard* in Grafana, select the application namespace and the incident service workload to verify that some traffic reaches the original version (`v1`) of the incident service:
 +
 image::images/grafana-workload-1.png[]
-+
-Verify that the `v2` version of the service gets a lot more traffic:
+
+. Verify that the `v2` version of the service gets a lot more traffic:
 +
 image::images/grafana-workload-2.png[]
 
-. The requirement for the custom metric is to count the number of invocations that hit each version of the service. +
-First you create the _Instance_ resource, which defines an instance of the metric to be sent from the Envoy proxy to the Mixer:
+. The requirement for the custom metric is to count the number of invocations that hit each version of the service, so first create the `instance` resource, which defines an instance of the metric to be sent from the Envoy proxy to the Mixer:
 +
 ----
 $ echo "---
@@ -456,12 +465,12 @@ spec:
     monitored_resource_type: '\"UNSPECIFIED\"'
 "  | oc create -f - -n $ERDEMO_NS
 ----
-* For each instance of `version-count`, the configuration directs Mixer to supply a value of 1 for the instance. Because Envoy generates an instance for each request, this means that this metric records the total number of requests received.
+* For each instance of `version-count`, the configuration directs Mixer to supply a value of `1` for the instance. Because Envoy generates an instance for each request, this means that this metric records the total number of requests received.
 * A set of dimensions are specified for each `version-count` instance. Dimensions provide a way to slice, aggregate, and analyze metric data according to different needs and directions of inquiry. For instance, it may be desirable to only consider requests for a certain destination service when troubleshooting application behavior.
-* One of the dimensions used for the new metric is the value of the version label on the destination pod - `destination.labels["version"]`
-* The configuration instructs Mixer to populate values for these dimensions based on attribute values and literal values. For instance, for the source dimension, the new configuration requests that the value be taken from the `source.workload.name` attribute. If that attribute value is not populated, the rule instructs Mixer to use a default value of "unknown".
+* One of the dimensions used for the new metric is the value of the version label on the destination pod: `destination.labels["version"]`.
+* The configuration instructs Mixer to populate values for these dimensions based on attribute values and literal values. For instance, for the source dimension, the new configuration requests that the value be taken from the `source.workload.name` attribute. If that attribute value is not populated, the rule instructs Mixer to use a default value of `"unknown"`.
 
-. Create the _Handler_, which specifies how the Prometheus adapter code translates received metric instances into Prometheus-formatted values that can be processed by a Prometheus backend.
+. Create the `handler` resource, which specifies how the Prometheus adapter code translates received metric instances into Prometheus-formatted values that can be processed by a Prometheus back end:
 +
 ----
 $ echo "---
@@ -482,12 +491,12 @@ spec:
       - destination
 " | oc create -f - -n $ERDEMO_NS
 ----
-+
-* This configuration specifies a new Prometheus metric named `version_count`. 
-* The Prometheus adapter prepends the `istio_` namespace to all metric names, therefore this metric will show up in Prometheus as `istio_version_count`. 
+
+* This configuration specifies a new Prometheus metric named `version_count`.
+* The Prometheus adapter prepends the `istio_` namespace to all metric names, therefore this metric appears in Prometheus as `istio_version_count`.
 * The metric has three labels matching the dimensions configured for `version-count` instances.
-* The kind of metric is a _Counter_, which is a monotonically increasing value.
-. Create a _Rule_ resource to bind the Instance to the Handler:
+* The kind of metric is a _counter_, which is a monotonically increasing value.
+. Create a `rule` resource to bind the instance to the handler:
 +
 ----
 $ echo "---
@@ -503,43 +512,43 @@ spec:
     - version-count
 " | oc create -f - -n $ERDEMO_NS
 ----
-* _Match_ is an attribute based predicate. When Mixer receives a request it evaluates the match expression and executes all the associated actions if the match evaluates to true.
-* In this example, the `version-count` metric will only be generated when the request is a HTTP request and the destination service is the Incident Service.
+* `match` is an attribute-based predicate. When Mixer receives a request, it evaluates the match expression and executes all of the associated actions if the match evaluates to true.
+* In this example, the `version-count` metric is only generated when the request is an HTTP request and the destination service is the incident service.
 
-. Generate some traffic to the Incident Service:
+. Generate some traffic to the incident service:
 +
 ----
 $ while :; do curl -k https://incident-service.$ERDEMO_USER.apps.$SUBDOMAIN_BASE/incidents; sleep 1; done
 ----
-. In a browser window, navigate to the Prometheus home page. In the metric drop-down box, locate the `istio-version-count` metric. If the metric does not show up, try refreshing the page. +
-Select the `istio-version-count` metric, and click on _Execute_. Select the _Graph_ tab to display a graph of the metric. +
-Expect to see a counter of the requests to the Incident Service, sliced according to the version:
+. In a browser window, navigate to the Prometheus home page and locate the `istio-version-count` metric in the *Metric* list. If the metric does not show up, try refreshing the page.
+. Select the `istio-version-count` metric and click *Execute*.
+. Select the *Graph* tab to display a graph of the metric:
 +
 image::images/prometheus-custom-metric.png[]
+* Expect to see a counter of the requests to the incident service, sliced according to the version.
 
+== Define Alerts in Prometheus
 
-== Alerting in Prometheus
+Prometheus allows you to define alerts on metrics. The Prometheus server alert functionality is limited to generating the alerts, so in order to do something useful with them, you need an additional component of the Prometheus ecosystem--the _Alertmanager_.
+The Alertmanager handles alerts sent by client applications such as the Prometheus server. It takes care of deduplicating, grouping, and routing them to the correct receiver integration such as email, PagerDuty, or OpsGenie. It also takes care of silencing and inhibiting alerts.
 
-Prometheus allows you to define alerts on metrics. The Prometheus server alert functionality is limited to generating the alerts, so in order to do something useful with them you need an additional component of the Prometheus ecosystem, the _Alertmanager_. +
-The Alertmanager handles alerts sent by client applications such as the Prometheus server. It takes care of deduplicating, grouping, and routing them to the correct receiver integration such as email, PagerDuty, or OpsGenie. It also takes care of silencing and inhibition of alerts.
+NOTE: The default installation of OpenShift Service Mesh includes the Prometheus server, but not the Alertmanager component.
 
-NOTE: The default installation of Red Hat Service Mesh does include the Prometheus server, but not the AlertManager component. 
-
-In this section of the lab, you will define a _Recording Rule_, and define alerts based on the rule.
-
-Recording rules allow you to precompute frequently needed or computationally expensive expressions and save their result as a new set of time series.
+In this section of the lab, you define a _recording rule_ and alerts based on the rule.
+Recording rules allow you to precompute frequently needed or computationally expensive expressions and save their results as a new time series set.
 
 Recording and alerting rules exist in a rule group. Rules within a group are run sequentially at a regular interval. Recording and alerting rules are configured in their own files, which are referenced from the general Prometheus configuration file.
 
-. The Service Mesh Prometheus main configuration file is managed by the `prometheus` ConfigMap in the control plane namespace. The ConfigMap is mounted into the `/etc/prometheus` directory of the Prometheus pod. +
+The main configuration file for the service mesh Prometheus adapter is managed by the `prometheus` ConfigMap in the control plane namespace. The ConfigMap is mounted into the `/etc/prometheus` directory of the Prometheus pod.
 The recording and alerting rules need to be added to the ConfigMap.
-.. Extract the current Prometheus configuration from the ConfigMap to your local system:
+
+. Extract the current Prometheus configuration from the ConfigMap to your local system:
 +
 ----
 $ oc extract cm/prometheus -n $SM_CP_NS --to=. --keys=prometheus.yml
 ----
-.. Open the `prometheus.yml` file with your favourite text editor and make the following changes:
-... In the `global` section, add the evaluation interval for recording and alerting rules:
+. Open the `prometheus.yml` file with your favorite text editor and make the following changes:
+.. In the `global` section, add the evaluation interval for recording and alerting rules:
 +
 ----
 global:
@@ -548,7 +557,7 @@ global:
 
 [...]
 ----
-... Under the `global` section, add the configuration for the rules file location:
+.. Under the `global` section, add the configuration for the rules file location:
 +
 ----
 global:
@@ -561,8 +570,8 @@ rule_files:
 [...]
 ----
 +
-Save the file.
-.. Create a new file `ingress.rules` for the recording rule. In this example you create a recording rule for the 0.5, 0.9 and 0.99 quantiles of the request duration for all request which have the Istio Ingress Gateway as source workload:
+. Save the file.
+. Create a new `ingress.rules` file for the recording rule. In this example, you create a recording rule for the `0.5`, `0.9`, and `0.99` quantiles of the request duration for all requests that have the Istio ingress gateway as the source workload:
 +
 ----
 $ echo "
@@ -583,15 +592,15 @@ groups:
           quantile: \"0.99\"
 " > ingress.rules
 ----
-.. Create another file `ingress-alert.rules` to define an alert based on the histogram calculated by the recording rule. +
-As an example, let's say you want to fire an alert whenever 90% of the requests to the Incident Service have a response time higher than 1 second, for more than 30 seconds.
+. Create an `ingress-alert.rules` file to define an alert based on the histogram calculated by the recording rule.
+In this example, assume you want to fire an alert whenever 90% of the requests to the incident service have a response time higher than one second, for more than 30 seconds:
 +
 ----
 $ echo "
 groups:
   - name: ingress_gateway_alerts
     rules:
-      - alert: IncidentServiceHighResponseTime 
+      - alert: IncidentServiceHighResponseTime
         expr:  ingress:request_duration_seconds:histogram_quantile{quantile=\"0.9\",destination_workload=~\"^$ERDEMO_USER-incident-service.*\"} > 1
         for: 30s
         labels:
@@ -600,39 +609,39 @@ groups:
           message: The Incident Service has a 90th percentile response time of {{ \$value }} seconds for destination {{ \$labels.destination_workload }}.
 " > ingress-alert.rules
 ----
-.. Delete the `prometheus` ConfigMap in the control plane namespace and create a new one from the configuration and rule files.
+. Delete the `prometheus` ConfigMap in the control plane namespace and create a new one from the configuration and rule files:
 +
 ----
 $ oc delete configmap prometheus -n $SM_CP_NS
 $ oc create configmap prometheus -n $SM_CP_NS --from-file=prometheus.yml --from-file=ingress.rules --from-file=ingress-alert.rules --save-config=true
-$ oc label configmap prometheus -n $SM_CP_NS app=prometheus app.kubernetes.io/component=prometheus app.kubernetes.io/instance=$SM_CP_NS app.kubernetes.io/managed-by=maistra-istio-operator app.kubernetes.io/name=prometheus app.kubernetes.io/part-of=istio app.kubernetes.io/version=1.0.1-8.el8-1 chart=prometheus heritage=Tiller maistra.io/owner=$SM_CP_NS release=istio
+$ oc label configmap prometheus -n $SM_CP_NS app=prometheus app.kubernetes.io/part-of=istio app.kubernetes.io/instance=$SM_CP_NS release=istio app.kubernetes.io/version=1.1.1-5.el8-1 app.kubernetes.io/component=prometheus maistra-version=1.1.1 app.kubernetes.io/managed-by=maistra-istio-operator maistra.io/owner=$SM_CP_NS app.kubernetes.io/name=prometheus chart=prometheus heritage=Tiller
 ----
 . Restart the Prometheus pod in the control plane namespace:
 +
 ----
 $ oc patch deployment prometheus -p '{"spec":{"template":{"metadata":{"annotations":{"kubectl.kubernetes.io/restartedAt": "'`date -Iseconds`'"}}}}}' -n $SM_CP_NS
 ----
-. In the Prometheus UI, navigate to the _Status->Rules_ page, and verify that the recording and alerting rules are present.
+. In the Prometheus UI, navigate to *Status -> Rules* and verify that the recording and alerting rules are present:
 +
-image::images/prometheus-rules.png[] 
-. Generate traffic to the Incident Service:
+image::images/prometheus-rules.png[]
+. Generate traffic to the incident service:
 +
 ----
 $ while :; do curl -k https://incident-service.$ERDEMO_USER.apps.$SUBDOMAIN_BASE/incidents; sleep 1; done
 ----
-. In the Prometheus UI, navigate to the _Graph_ page. +
-Paste the following expression in the _Expression_ box: `ingress:request_duration_seconds:histogram_quantile{destination_workload=~"^$ERDEMO_USER-incident-service.*"}`. Click _Execute_. +
-Expect to see values for the histogram quantiles of the response times of ingress traffic to the Incident Service:
+. In the Prometheus UI, navigate to the *Graph* page and paste the following expression in the *Expression* box: `ingress:request_duration_seconds:histogram_quantile{destination_workload=~"^$ERDEMO_USER-incident-service.*"}`.
+. Click *Execute*.
+* Expect to see values for the histogram quantiles of the response times of ingress traffic to the incident service:
 +
 image::images/prometheus-quantiles.png[]
 +
 image::images/prometheus-quantiles-graph.png[]
-. In the Prometheus UI, navigate to the Alerts_ page. Note that the `IncidentServiceHighResponseTime` is present, and has zero activations.
+. In the Prometheus UI, navigate to the *Alerts* page and observe that the `IncidentServiceHighResponseTime` is present and has zero activations:
 +
 image::images/prometheus-alert.png[]
 
-. To trigger the alert, you can use the fault injection mechanism from Service Mesh. This functionality allows to inject HTTP delays or HTTP error codes into requests to services. This is often used to test the resiliency of an application. Fault injection rules are defined in _VirtualService_ resources. +
-Add the fault injection definition to the Incident Service VirtualService: 
+. Use the fault injection mechanism from OpenShift Service Mesh to trigger the alert. This functionality allows to inject HTTP delays or HTTP error codes into requests to services. This is often used to test the resiliency of an application. Fault injection rules are defined in `VirtualService` resources.
+.. Add the fault injection definition to the incident service VirtualService:
 +
 ----
 $ echo "---
@@ -666,18 +675,21 @@ spec:
         delay:
           fixedDelay: 2s
           percentage:
-            value: 30 
+            value: 30
 " | oc apply -f - -n $ERDEMO_NS
 ----
-+
-* In this case a delay of 2 seconds will be injected in 30% of the requests to the Incident Service.
-. Generate traffic to the Incident Service:
+
+** In this case, a delay of two seconds will be injected in 30% of the requests to the incident service.
+. Generate traffic to the incident service:
 +
 ----
 $ while :; do curl -k https://incident-service.$ERDEMO_USER.apps.$SUBDOMAIN_BASE/incidents; sleep 1; done
 ----
-. In the Prometheus UI, navigate to the _Alerts_ page. Refresh the page regularly, until you see one or two alerts activated. Click on the alert bar to see the details of the alert:
+. From the *Alerts* page, refresh regularly until you see one or two alerts activated.
+. Click the alert bar to see the details of the alert:
 +
 image::images/prometheus-alert-fired.png[]
-+
-Once the condition in the alert expression evaluates to true, the alert will be put in _pending_ state. If the alert continues to be active for each evaluation during the period specified in the optional _for_ clause of the alert definition, the alert will be _fired_. Once fired, the alert is cleared.
+
+* Once the condition in the alert expression evaluates to true, the alert is put in a `PENDING` state. If the alert continues to be active for each evaluation during the period specified in the optional `for` clause of the alert definition, the alert is _fired_. Once fired, the alert is cleared.
+
+This concludes the lab. You learned about metrics and monitoring in OpenShift Service Mesh, created and collected custom metrics, and defined alerts in Prometheus.
