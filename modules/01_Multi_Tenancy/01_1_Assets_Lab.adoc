@@ -503,17 +503,17 @@ $ oc get dc -n $ERDEMO_NS
 .Sample Output
 -----
 NAME                              REVISION   DESIRED   CURRENT   TRIGGERED BY
-postgresql                        1          1         1         config,image(postgresql:9.6)
-process-service-postgresql        1          1         1         config,image(postgresql:9.6)
-user50-disaster-simulator         1          1         1         config,image(user50-disaster-simulator:c6818a7a8)
-user50-emergency-console          1          1         1         config,image(user50-emergency-console:1fa91c80b)
-user50-incident-priority-service  1          1         1         config,image(user50-incident-priority-service:1f5b136f5)
-user50-incident-service           1          1         1         config,image(user50-incident-service:ba3e9bca3)
-user50-mission-service            1          1         1         config,image(user50-mission-service:803e6420f)
-user50-process-service            1          1         1         config,image(user50-process-service:cbfad8cf2)
-user50-process-viewer             1          1         1         config,image(user50-process-viewer:8eac584e7)
-user50-responder-service          1          1         1         config,image(user50-responder-service:4ca7b4bab)
-user50-responder-simulator        1          1         1         config,image(user50-responder-simulator:66105af21)
+postgresql                        1          1         1         config,image(postgresql:12-el8)
+process-service-postgresql        1          1         1         config,image(postgresql:12-el8)
+user1-disaster-simulator          1          1         1         config,image(user1-disaster-simulator:2679bab)
+user1-emergency-console           1          1         1         config,image(user1-emergency-console:875345f)
+user1-incident-priority-service   1          1         1         config,image(user1-incident-priority-service:1f5b136f5)
+user1-incident-service            1          1         1         config,image(user1-incident-service:50149de)
+user1-mission-service             1          1         1         config,image(user1-mission-service:63f80b7)
+user1-process-service             1          1         1         config,image(user1-process-service:253a805)
+user1-process-viewer              1          1         1         config,image(user1-process-viewer:8eac584e7)
+user1-responder-service           1          1         1         config,image(user1-responder-service:90d9467)
+user1-responder-simulator         1          1         1         config,image(user1-responder-simulator:79fdf95)
 -----
 
 . Observe that the Emergency Response Demo application also makes use of Red Hat AMQ streams for event-driven, streams-based communication between many of its services:
@@ -559,7 +559,7 @@ The Emergency Response Demo application includes a web console where you can vie
 . Access the web console at the following URL:
 +
 -----
-echo -en "\n\nhttps://$(oc get route $ERDEMO_USER-emergency-console -o template --template={{.spec.host}} -n $ERDEMO_NS)\n\n"
+$ echo -en "\n\nhttps://$(oc get route $ERDEMO_USER-emergency-console -o template --template={{.spec.host}} -n $ERDEMO_NS)\n\n"
 -----
 
 . On the login page, login with username `incident_commander` and password `r3dh4t1!`.
