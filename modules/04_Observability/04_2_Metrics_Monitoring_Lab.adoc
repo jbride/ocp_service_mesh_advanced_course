@@ -15,16 +15,19 @@
 
 == Explore OpenShift Service Mesh Metrics and Monitoring
 
-One of the core features of OpenShift Service Mesh is the observability of network traffic. Because all service-to-service communication goes through Envoy proxies, and the service mesh control plane is able to gather logs and metrics from these proxies, the service mesh can give deep insights about the mesh network.
+One of the core features of OpenShift Service Mesh is the observability of network traffic. Because all service-to-service communication is routed through Envoy proxies, and the service mesh control plane is able to gather logs and metrics from these proxies, the service mesh can give deep insights about the mesh network. This provides operators with unique ways of troubleshooting, managing, and optimizing their services, without imposing any additional burdens on application developers.
 
-The Mixer component of the control plane is responsible for telemetry collection. In fact, Mixer is two different deployments in OpenShift Container Platform: `istio-policy` and `istio-telemetry`. `istio-policy` is responsible for providing policy controls and `istio-telemetry` handles metrics collection.
+Service Mesh 2.0 uses Telemetry v2, which is a radical change compared to earlier versions, which relied on the Mixer control plane component for telemetry collection. Mixer is deprecated in Service Mesh 2.0, and will disappear completely in a future version.
 
-The Envoy sidecars from the application pods call `istio-policy` before each request to perform precondition policy checks and `istio-telemetry` after each request to report telemetry. Note that the sidecar has local caching so that a large percentage of precondition checks can be performed from the cache. Additionally, the sidecar buffers outgoing telemetry to reduce the frequency of Mixer calls.
+With Telemetry V2, Envoy exposes metric data (including metadata necessary to provide rich metrics) directly for scraping by Prometheus. By moving away from a central component substantial gains in latency and cpu consumption are achieved.
+
+The metrics exposed by Envoy fall in two categories: _proxy-level_ metrics and _service-level_ metrics. +
+Proxy-level metrics are standard metrics provided by the Envoy proxy itself about all pass-through traffic, as well as detailed statistics about the administrative functions of the proxy, including configuration and health information.
+Server-level metrics provide service-oriented metrics for monitoring service communications. These metrics cover the four basic service monitoring needs: latency, traffic, errors, and saturation. 
 
 === Explore Prometheus
-Mixer comes standard with a Mixer adapter for Prometheus, allowing a Prometheus instance to scrape metrics from Mixer.
 
-The service mesh instance of Prometheus is configured with a number of scraping targets, which means it collects metrics not only from Mixer, but also from the other control plane components and from each sidecar. All of these metrics are aggregated and visualized in a Grafana dashboard.
+The service mesh instance of Prometheus is configured with a number of scraping targets, which means it collects metrics from the components and from each sidecar. All of these metrics are aggregated and visualized in a Grafana dashboard.
 
 . Make sure you are logged in to OpenShift Container Platform as the control plane admin user:
 +
@@ -44,9 +47,11 @@ image::images/prometheus-targets.png[]
 * These targets include:
 
 ** `envoy-stats`: The different envoy proxies.
-** `istio-mesh`: The scraping target for service mesh metrics through Mixer's Prometheus adapter.
-** `citadel`, `pilot`, `galley`, `istio-telemetry`, `istio-policy`: The metrics exposed by the control plane components about themselves.
-** `kubernetes-service-endpoints`: Service endpoints that do not necessarily belong to the mesh. They are discovered automatically because the service resources--for example, the ZooKeeper and Kafka pods in the Emergency Response Demo namespace--have Prometheus annotations.
+** `istio-mesh`: The scraping target for service mesh metrics through Mixer's Prometheus adapter. +
+As Mixer is not used for telemetry in Service mesh 2.0, there are no discovered instances for this target.
+** `citadel`, `pilot`, `galley`, `istio-telemetry`, `istio-policy`: The metrics exposed by the control plane components about themselves. +
+Note that only `pilot` has a discovered target, which corresponds to the `istiod` pod. The other targets belong to obsolete control plane components, and as such are not discovered.
+** `kubernetes-service-endpoints`: Service endpoints that do not necessarily belong to the mesh. They are discovered automatically because the service resources have Prometheus annotations.
 
 . Click *Graph* and then click the *insert metric at cursor* list to see which metrics are scraped by this Prometheus instance:
 +
@@ -54,158 +59,28 @@ image::images/prometheus-metrics.png[]
 
 * The metrics are prefixed according to their source:
 
-** `envoy_`: The metrics exposed by the Envoy proxy.
-** `istio_`: The metrics exposed through the Mixer's Prometheus adapter, including the following:
+** `envoy_`: The proxy-level metrics exposed by the Envoy proxy.
+** `istio_`: The service-level metrics exposed by the Envoy proxy, including the following:
 *** `istio_requests_total`: A counter that aggregates request totals. For example, it can be used to calculate the number of requests per second grouped by source, destination, protocol, and response code.
-*** `istio_request_duration_seconds`: A histogram that collects latency for requests between workloads.
+*** `istio_request_duration_milliseconds`: A histogram which measures the duration of requests.
 *** `istio_request_bytes` and `istio_response_bytes`: Histograms that collect the ingoing and outgoing bytes per request and response.
+*** metrics prefixed with `istio_tcp`: metrics generated for TCP traffic, including bytes sent and received, and connections opened and closed. 
 
-. Internally, the metrics exposed through Mixer are configured with a combination of `instance`, `handler`, and `rule` resources.
-.. Get a list of the default metrics:
+. Execute a query against the metrics collected by Prometheus by inserting a metric in the *Expressions* text box. +
+For example, from the *insert metrics at cursor* drop-down, select `istio_requests_total`, and click *Execute*.
++
+image::images/prometheus-graph.png[]
++
+Expect to see a large number of metrics, categorized according to a number of _labels_, such as `source_app`, `source_workload_namespace`, `response_code`, `destination_app` etc...
++
+The labels can be used to further drill down into the metrics. For example, to filter for traffic between the _emergency console_ and the _responder service_, modify the metric to:
 +
 ----
-$ oc get instance -n $SM_CP_NS
+istio_requests_total{source_app="user1-emergency-console", destination_app="user1-responder-service"}
 ----
 +
-.Sample Output
-----
-NAME                   AGE
-attributes             2d4h
-requestcount           2d4h
-requestduration        2d4h
-requestsize            2d4h
-responsesize           2d4h
-tcpbytereceived        2d4h
-tcpbytesent            2d4h
-tcpconnectionsclosed   2d4h
-tcpconnectionsopened   2d4h
-----
-* The `instance` resources are translated into Prometheus metrics.
-.. View details of an `instance` resource:
-+
-----
-$ oc get instance requestcount -o yaml -n $SM_CP_NS
-----
-+
-.Sample Output (truncated)
-----
-apiVersion: config.istio.io/v1alpha2
-kind: instance
-metadata:
-  [...]
-spec:
-  compiledTemplate: metric
-  params:
-    dimensions:
-      connection_security_policy: conditional((context.reporter.kind | "inbound")
-        == "outbound", "unknown", conditional(connection.mtls | false, "mutual_tls",
-        "none"))
-      destination_app: destination.labels["app"] | "unknown"
-      destination_principal: destination.principal | "unknown"
-      destination_service: destination.service.host | conditional((destination.service.name
-        | "unknown") == "unknown", "unknown", request.host)
-      destination_service_name: destination.service.name | "unknown"
-      destination_service_namespace: destination.service.namespace | "unknown"
-      destination_version: destination.labels["version"] | "unknown"
-      destination_workload: destination.workload.name | "unknown"
-      destination_workload_namespace: destination.workload.namespace | "unknown"
-      grpc_response_status: response.grpc_status | ""
-      reporter: conditional((context.reporter.kind | "inbound") == "outbound", "source",
-        "destination")
-      request_protocol: api.protocol | context.protocol | "unknown"
-      response_code: response.code | 200
-      response_flags: context.proxy_error_code | "-"
-      source_app: source.labels["app"] | "unknown"
-      source_principal: source.principal | "unknown"
-      source_version: source.labels["version"] | "unknown"
-      source_workload: source.workload.name | "unknown"
-      source_workload_namespace: source.workload.namespace | "unknown"
-    monitored_resource_type: '"UNSPECIFIED"'
-    value: "1"
-----
-.. View a `handler` resource:
-+
-----
-$ oc get handler prometheus -o yaml -n $SM_CP_NS
-----
-+
-.Sample Output (Truncated)
-----
-apiVersion: config.istio.io/v1alpha2
-kind: handler
-metadata:
-  [...]
-spec:                                                                                                                
-  compiledAdapter: prometheus                                                                                        
-  params:                                                                                                            
-    metrics:                                                                                                         
-    - instance_name: requestcount.instance.admin50-istio-system                                                       
-      kind: COUNTER                                                                                                  
-      label_names:                                                                                                   
-      - reporter                                                                                                     
-      - source_app                                                                                                   
-      - source_principal                                                                                             
-      - source_workload                                                                                              
-      - source_workload_namespace                                                                                    
-      - source_version                                                                                               
-      - destination_app                                                                                              
-      - destination_principal 
-      - destination_workload
-      - destination_workload_namespace
-      - destination_version
-      - destination_service
-      - destination_service_name
-      - destination_service_namespace
-      - request_protocol
-      - response_code
-      - grpc_response_status
-      - response_flags
-      - connection_security_policy
-      name: requests_total
-    [...]
-----
-** The `prometheus` handler describes the Prometheus metrics and references the metric custom resources in the `instance_name` fields. It also defines the name that can be used in Prometheus queries later (with the `istio` prefix)--such as `requests_total`&#8212;and the labels used to group the metrics.
+image::images/prometheus-graph-2.png[]
 
-.. View the `rule` resources, which bind the metrics to the handlers:
-+
-----
-$ oc get rule -n $SM_CP_NS
-----
-+
-.Sample Output
-----
-NAME                      AGE
-kubeattrgenrulerule       9d
-promhttp                  9d
-promtcp                   9d
-promtcpconnectionclosed   9d
-promtcpconnectionopen     9d
-tcpkubeattrgenrulerule    9d
-----
-.. View the details of a `rule` resource:
-+
-----
-$ oc get rule promhttp -o yaml -n $SM_CP_NS
-----
-+
-.Sample Output (Truncated)
-----
-apiVersion: config.istio.io/v1alpha2
-kind: rule
-metadata:
-  [...]
-spec:
-  actions:
-  - handler: prometheus
-    instances:
-    - requestcount.metric
-    - requestduration.metric
-    - requestsize.metric
-    - responsesize.metric
-  match: (context.protocol == "http" || context.protocol == "grpc") && (match((request.useragent
-    | "-"), "kube-probe*") == false) && (match((request.useragent | "-"), "Prometheus*")
-    == false)
-----
 
 === Explore Grafana
 Prometheus is essentially a time-series database, and as such has limited functionality for displaying metric data in graphs and dashboards. That is why Prometheus is often deployed together with Grafana. Grafana uses the Prometheus time-series as a data source for graphics and dashboards. The default installation of service mesh includes Grafana and prebuilt dashboards for the different metric groups obtained from Prometheus.
@@ -227,13 +102,22 @@ image::images/grafana-workload-dashboard.png[]
 * This dashboard groups the dashboards for the different metric groups obtained through the Mixer's Prometheus adapter.
 * In the selection bar at the top, you can select the namespace and workload you want to see, then filter further on inbound workload namespace, inbound workload, and destination service.
 
-== Create and Collect Custom Metrics
+== Monitor Istio A/B deployments and Canary deployments
 
-The default metrics generated by the service mesh are usually sufficient. But in some cases, you can imagine a need for specific metrics that are not readily generated by the service mesh.
+One of the major features of Service Mesh is the ability to establish intelligent routing based on e.g. the service version.
 
-The service mesh allows you to define additional metrics through a combination of `instance`, `handler`, and `rule` resources. These metrics are made available by Mixer for scraping by Prometheus.
+This ability can be used for 
 
-In this section of the lab, you create a custom metric that counts the number of requests per version of the incident service. First, you deploy a second version of the incident service and distribute traffic between the two versions.
+* Content-based routing: For example, if the user-agent is a mobile phone, you can change the specific service that formats the final HTML template.
+* A/B deployments: Two similar versions of the service that you want to compare in production.
+* Canary deployment: Experimental service version that will only be triggered by certain conditions (like some specific test users).
+* Traffic Shifting: Progressive migration to the new service version maintaining the old version fully functional.
+
+Using the metrics produced by the Service Mesh, these service migrations can be closely monitored and as such help drive operational decisions.
+
+In this section of the lab, you deploy a second version of the incident service and distribute traffic between the two versions. Then you define queries over the metrics produced by the Service mesh to compare both versions.
+
+One of the labels that are added to metrics by Envoy is `destination_version`, which corresponds to the value of the `version` label on the pods of the destination service. This allows you to filter and roup metrics by the value of the `version` label.
 
 . Label the deployed version of the incident service as `v1`:
 +
@@ -250,6 +134,7 @@ kind: DeploymentConfig
 metadata:
   labels:
     app: $ERDEMO_USER-incident-service
+    app.kubernetes.io/part-of: bizservices
   name: $ERDEMO_USER-incident-service-v2
 spec:
   replicas: 1
@@ -287,7 +172,7 @@ spec:
             path: /health/live
             port: 8080
             scheme: HTTP
-          initialDelaySeconds: 10
+          initialDelaySeconds: 20
           timeoutSeconds: 3
           periodSeconds: 30
           successThreshold: 1
@@ -303,20 +188,18 @@ spec:
             port: 8080
             scheme: HTTP
           initialDelaySeconds: 3
-          timeoutSeconds: 3
           periodSeconds: 10
           successThreshold: 1
           failureThreshold: 3
         resources:
           limits:
-            cpu: 500m
+            cpu: 250m
             memory: 500Mi
           requests:
             cpu: 100m
             memory: 200Mi
         securityContext:
           privileged: false
-          procMount: Default
         terminationMessagePath: /dev/termination-log
         terminationMessagePolicy: File
         volumeMounts:
@@ -374,12 +257,12 @@ Endpoints:         10.128.3.245:8080,10.128.3.247:8080
 ----
 
 * The traffic directed to the incident service will be more or less equally distributed between the two versions.
-. To make things a bit more interesting, give a weight to each service by defining subsets of the service in the incident service DestinationRule and configuring routing weights in the incident service VirtualService:
+. You can give a weight to each service by defining subsets of the service in the incident service DestinationRule and configuring routing weights in the incident service VirtualService:
 .. Define the incident service subsets in the DestinationRule:
 +
 ----
 $ echo "---
-apiVersion: networking.istio.io/v1alpha3
+apiVersion: networking.istio.io/v1beta1
 kind: DestinationRule
 metadata:
   name: incident-service-client-mtls
@@ -401,7 +284,7 @@ spec:
 +
 ----
 $ echo "---
-apiVersion: networking.istio.io/v1alpha3
+apiVersion: networking.istio.io/v1beta1
 kind: VirtualService
 metadata:
   name: incident-service-virtualservice
@@ -409,7 +292,7 @@ spec:
   hosts:
   - incident-service.$ERDEMO_USER.apps.$SUBDOMAIN_BASE
   gateways:
-  - erd-wildcard-gateway.$SM_CP_NS.svc.cluster.local
+  - incident-service-gateway.$SM_CP_NS.svc.cluster.local
   http:
     - match:
         - uri:
@@ -420,109 +303,73 @@ spec:
             port:
               number: 8080
             subset: v1
-          weight: 20
+          weight: 80
         - destination:
             host: $ERDEMO_USER-incident-service.$ERDEMO_NS.svc.cluster.local
             port:
               number: 8080
             subset: v2
-          weight: 80
+          weight: 20
 " | oc apply -f - -n $ERDEMO_NS
 ----
-* In the example above, roughly 80% of the requests are to be routed to version `v2` of the incident service.
+* In the example above, roughly 20% of the requests are to be routed to version `v2` of the incident service.
 . Create some traffic to the incident service:
 +
 ----
 $ while :; do curl -k https://incident-service.$ERDEMO_USER.apps.$SUBDOMAIN_BASE/incidents; sleep 1; done
 ----
++
+Leave this command running during the remainder of this lab.
+
 . In the *Istio Workload Dashboard* in Grafana, select the application namespace and the incident service workload to verify that some traffic reaches the original version (`v1`) of the incident service:
 +
 image::images/grafana-workload-1.png[]
 
-. Verify that the `v2` version of the service gets a lot more traffic:
+. Verify that the `v2` version of the service gets a lot less traffic:
 +
 image::images/grafana-workload-2.png[]
 
-. The requirement for the custom metric is to count the number of invocations that hit each version of the service, so first create the `instance` resource, which defines an instance of the metric to be sent from the Envoy proxy to the Mixer:
+. A first metric that you might be interested in is the distribution of requests between the two versions. +
+On the *Graph* page of the Prometheus UI, paste the following query in the *Expression* test box.
 +
 ----
-$ echo "---
-apiVersion: config.istio.io/v1alpha2
-kind: instance
-metadata:
-  name: version-count
-spec:
-  compiledTemplate: metric
-  params:
-    value: \"1\"
-    dimensions:
-      source: source.workload.name | \"unknown\"
-      version: destination.labels[\"version\"] | \"unknown\"
-      destination: destination.service.name | \"unknown\"
-    monitored_resource_type: '\"UNSPECIFIED\"'
-"  | oc create -f - -n $ERDEMO_NS
+sum by (destination_version) (irate(istio_requests_total{destination_app="user1-incident-service", source_app="istio-ingressgateway", reporter="destination"}[5m]))
 ----
-* For each instance of `version-count`, the configuration directs Mixer to supply a value of `1` for the instance. Because Envoy generates an instance for each request, this means that this metric records the total number of requests received.
-* A set of dimensions are specified for each `version-count` instance. Dimensions provide a way to slice, aggregate, and analyze metric data according to different needs and directions of inquiry. For instance, it may be desirable to only consider requests for a certain destination service when troubleshooting application behavior.
-* One of the dimensions used for the new metric is the value of the version label on the destination pod: `destination.labels["version"]`.
-* The configuration instructs Mixer to populate values for these dimensions based on attribute values and literal values. For instance, for the source dimension, the new configuration requests that the value be taken from the `source.workload.name` attribute. If that attribute value is not populated, the rule instructs Mixer to use a default value of `"unknown"`.
++
+Click *Execute* to execute the query, and click the *Graph* to see a graph of the data:
++
+image::images/prometheus-graph-version-1.png[]
++
+* The query calculates the per-second instant rate of requests as measured over the last 5 minutes, filtered for the traffic from the ingress-gateway to the incident service. As each version might have more than 1 pod, the sum of the request rate is taken and grouped by the version. +
+For more details on the semantics of `irate` and other Prometheus query functions, refer to https://prometheus.io/docs/prometheus/latest/querying/functions.
+* Expect roughly a 4:1 distribution in requests between the two versions.
 
-. Create the `handler` resource, which specifies how the Prometheus adapter code translates received metric instances into Prometheus-formatted values that can be processed by a Prometheus back end:
+. When deploying a new version of a service, it is essential to monitor the performance compared to the previous version. In the case of a REST based service, you can use the latency or duration of HTTP requests as a performance comparison point.
++
+Paste the following query in the Prometheus UI:
 +
 ----
-$ echo "---
-apiVersion: config.istio.io/v1alpha2
-kind: handler
-metadata:
-  name: version-count-handler
-spec:
-  compiledAdapter: prometheus
-  params:
-    metrics:
-    - name: version_count
-      instance_name: version-count.instance.$ERDEMO_NS
-      kind: COUNTER
-      label_names:
-      - source
-      - version
-      - destination
-" | oc create -f - -n $ERDEMO_NS
+avg by (destination_version) (rate(istio_request_duration_milliseconds_sum{destination_app="user1-incident-service", source_app="istio-ingressgateway", reporter="destination"}[5m]) / rate(istio_request_duration_milliseconds_count{destination_app="user1-incident-service", source_app="istio-ingressgateway", reporter="destination"}[5m]))
 ----
++
+Click *Execute* to execute the query, and click the *Graph* to see a graph of the data:
++
+image::images/prometheus-graph-version-2.png[]
++
+* The query divides the total request duration (in milliseconds) by the total number of requests, and takes the average grouped per destination. 
 
-* This configuration specifies a new Prometheus metric named `version_count`.
-* The Prometheus adapter prepends the `istio_` namespace to all metric names, therefore this metric appears in Prometheus as `istio_version_count`.
-* The metric has three labels matching the dimensions configured for `version-count` instances.
-* The kind of metric is a _counter_, which is a monotonically increasing value.
-. Create a `rule` resource to bind the instance to the handler:
+. Another interesting metric is the relative number of HTTP errors. As an example, you can divide the number of requests returning a HTTP code loer than by the total number of requests to get the success rate. +
+Paste the following query in the Prometheus UI:
 +
 ----
-$ echo "---
-apiVersion: \"config.istio.io/v1alpha2\"
-kind: rule
-metadata:
-  name: version-count-prometheus
-spec:
-  match: (context.protocol == \"http\") && (destination.service.host == \"$ERDEMO_USER-incident-service.$ERDEMO_NS.svc.cluster.local\")
-  actions:
-  - handler: version-count-handler
-    instances:
-    - version-count
-" | oc create -f - -n $ERDEMO_NS
+(avg by (destination_version) (istio_requests_total{destination_app="user1-incident-service", source_app="istio-ingressgateway", reporter="destination", response_code!~"5.*"} / istio_requests_total{destination_app="user1-incident-service", source_app="istio-ingressgateway", reporter="destination"})) * 100
 ----
-* `match` is an attribute-based predicate. When Mixer receives a request, it evaluates the match expression and executes all of the associated actions if the match evaluates to true.
-* In this example, the `version-count` metric is only generated when the request is an HTTP request and the destination service is the incident service.
++
+Click *Execute* to execute the query, and click the *Graph* to see a graph of the data:
++
+image::images/prometheus-graph-version-3.png[]
 
-. Generate some traffic to the incident service:
-+
-----
-$ while :; do curl -k https://incident-service.$ERDEMO_USER.apps.$SUBDOMAIN_BASE/incidents; sleep 1; done
-----
-. In a browser window, navigate to the Prometheus home page and locate the `istio-version-count` metric in the *Metric* list. If the metric does not show up, try refreshing the page.
-. Select the `istio-version-count` metric and click *Execute*.
-. Select the *Graph* tab to display a graph of the metric:
-+
-image::images/prometheus-custom-metric.png[]
-* Expect to see a counter of the requests to the incident service, sliced according to the version.
+At this point you can stop the curl loop command.
 
 == Define Alerts in Prometheus
 
@@ -575,16 +422,16 @@ $ echo "
 groups:
   - name: ingress_gateway
     rules:
-      - record: ingress:request_duration_seconds:histogram_quantile
-        expr: histogram_quantile(0.5 ,sum(irate(istio_request_duration_seconds_bucket{source_workload=\"istio-ingressgateway\"} [1m])) by (destination_workload, le))
+      - record: ingress:request_duration_milliseconds:histogram_quantile
+        expr: histogram_quantile(0.5 ,sum(irate(istio_request_duration_milliseconds_bucket{source_workload=\"istio-ingressgateway\"} [1m])) by (destination_workload, le))
         labels:
           quantile: \"0.5\"
-      - record: ingress:request_duration_seconds:histogram_quantile
-        expr: histogram_quantile(0.9, sum(irate(istio_request_duration_seconds_bucket{source_workload=\"istio-ingressgateway\"} [1m])) by (destination_workload, le))
+      - record: ingress:request_duration_milliseconds:histogram_quantile
+        expr: histogram_quantile(0.9, sum(irate(istio_request_duration_milliseconds_bucket{source_workload=\"istio-ingressgateway\"} [1m])) by (destination_workload, le))
         labels:
           quantile: \"0.9\"
-      - record: ingress:request_duration_seconds:histogram_quantile
-        expr: histogram_quantile(0.99,sum(irate(istio_request_duration_seconds_bucket{source_workload=\"istio-ingressgateway\"} [1m])) by (destination_workload, le))
+      - record: ingress:request_duration_milliseconds:histogram_quantile
+        expr: histogram_quantile(0.99,sum(irate(istio_request_duration_milliseconds_bucket{source_workload=\"istio-ingressgateway\"} [1m])) by (destination_workload, le))
         labels:
           quantile: \"0.99\"
 " > ingress.rules
@@ -598,7 +445,7 @@ groups:
   - name: ingress_gateway_alerts
     rules:
       - alert: IncidentServiceHighResponseTime
-        expr:  ingress:request_duration_seconds:histogram_quantile{quantile=\"0.9\",destination_workload=~\"^$ERDEMO_USER-incident-service.*\"} > 1
+        expr:  ingress:request_duration_milliseconds:histogram_quantile{quantile=\"0.9\",destination_workload=~\"^$ERDEMO_USER-incident-service.*\"} > 1000
         for: 30s
         labels:
           severity: high
@@ -611,7 +458,7 @@ groups:
 ----
 $ oc delete configmap prometheus -n $SM_CP_NS
 $ oc create configmap prometheus -n $SM_CP_NS --from-file=prometheus.yml --from-file=ingress.rules --from-file=ingress-alert.rules --save-config=true
-$ oc label configmap prometheus -n $SM_CP_NS app=prometheus app.kubernetes.io/part-of=istio app.kubernetes.io/instance=$SM_CP_NS release=istio app.kubernetes.io/version=1.1.1-5.el8-1 app.kubernetes.io/component=prometheus maistra-version=1.1.1 app.kubernetes.io/managed-by=maistra-istio-operator maistra.io/owner=$SM_CP_NS app.kubernetes.io/name=prometheus chart=prometheus heritage=Tiller
+$ oc label configmap prometheus -n $SM_CP_NS app=prometheus app.kubernetes.io/part-of=istio app.kubernetes.io/instance=$SM_CP_NS release=istio app.kubernetes.io/version=2.0.2-3.el8-1 app.kubernetes.io/component=prometheus maistra-version=2.0.2 app.kubernetes.io/managed-by=maistra-istio-operator maistra.io/owner=$SM_CP_NS app.kubernetes.io/name=prometheus
 ----
 . Restart the Prometheus pod in the control plane namespace:
 +
@@ -626,7 +473,11 @@ image::images/prometheus-rules.png[]
 ----
 $ while :; do curl -k https://incident-service.$ERDEMO_USER.apps.$SUBDOMAIN_BASE/incidents; sleep 1; done
 ----
-. In the Prometheus UI, navigate to the *Graph* page and paste the following expression in the *Expression* box: `ingress:request_duration_seconds:histogram_quantile{destination_workload=~"^$ERDEMO_USER-incident-service.*"}`.
+. In the Prometheus UI, navigate to the *Graph* page and paste the following expression in the *Expression* box:
++
+----
+ingress:request_duration_milliseconds:histogram_quantile{destination_workload=~"^$ERDEMO_USER-incident-service.*"}
+----
 . Click *Execute*.
 * Expect to see values for the histogram quantiles of the response times of ingress traffic to the incident service:
 +
@@ -642,7 +493,7 @@ image::images/prometheus-alert.png[]
 +
 ----
 $ echo "---
-apiVersion: networking.istio.io/v1alpha3
+apiVersion: networking.istio.io/v1beta1
 kind: VirtualService
 metadata:
   name: incident-service-virtualservice
@@ -661,13 +512,13 @@ spec:
             port:
               number: 8080
             subset: v1
-          weight: 20
+          weight: 80
         - destination:
             host: $ERDEMO_USER-incident-service.$ERDEMO_NS.svc.cluster.local
             port:
               number: 8080
             subset: v2
-          weight: 80
+          weight: 20
       fault:
         delay:
           fixedDelay: 2s
