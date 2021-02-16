@@ -408,7 +408,7 @@ $ oc get ServiceMeshControlPlane -n $SM_CP_NS
 .Sample Output
 -----
 NAME           READY   STATUS            PROFILES    VERSION   AGE
-full-install   9/9     ComponentsReady   ["default"]   2.0.0.2   168m
+full-install   9/9     ComponentsReady   ["default"]   2.0.2   168m
 -----
 
 * During the installation of your lab environment, the `$SM_CP_NS` namespace was created and this link:https://github.com/gpe-mw-training/ocp_service_mesh_advanced/blob/master/ansible/roles/maistra_control_plane/tasks/main.yml#L62-L64[`ServiceMeshControlPlane` custom resource] was applied to it.
