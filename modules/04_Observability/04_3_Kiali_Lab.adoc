@@ -53,7 +53,7 @@ $ while :; do curl -k https://incident-service.$ERDEMO_USER.apps.$SUBDOMAIN_BASE
 .. REST calls to the responder service:
 +
 ----
-$ while :; do curl -k https://incident-service.$ERDEMO_USER.apps.$SUBDOMAIN_BASE/responders/available; sleep 1; done
+$ while :; do curl -k https://responder-service.$ERDEMO_USER.apps.$SUBDOMAIN_BASE/responders/available; sleep 1; done
 ----
 .. Emergency Response Demo application runs.
 . Observe how the graph changes when traffic hits the services of the application:
@@ -77,13 +77,11 @@ $ oc edit kiali kiali -n $SM_CP_NS
 Add the following at the end of the `spec` section, under the `version` setting:
 
 ----
-  version: v1.12
+  version: v1.24
   kubernetes_config:
     excluded_workloads:
       - CronJob
       - Job
-      - ReplicationController
-      - StatefulSet
 ----
 
 Save the Custom Resource. This will cause a redeployment of the Kiali pod.
@@ -112,12 +110,13 @@ spec:
   template:
     metadata:
       annotations:
-        kiali.io/runtimes: 'springboot-jvm,springboot-jvm-pool'
-        prometheus.io/path: /actuator/prometheus
+        kiali.io/runtimes: 'quarkus'
+        prometheus.io/path: /metrics
         prometheus.io/port: '8080'
         prometheus.io/scheme: https
         prometheus.io/scrape: 'true'
         sidecar.istio.io/inject: 'true'
+        sidecar.istio.io/rewriteAppHTTPProbers: 'true'
 ----
 
 * The `prometheus.io` annotations are for discovery by Prometheus.
@@ -130,11 +129,11 @@ $ while :; do curl -k https://incident-service.$ERDEMO_USER.apps.$SUBDOMAIN_BASE
 . In the Kiali console, click *Applications* and open the page for the `$ERDEMO_USER-incident-service` application:
 +
 image::images/kiali-runtimes-metrics.png[]
-* Note that the page shows two extra tabs: *JVM Metrics* and *JVM Pool Metrics*.
+* Note that the page shows an extra tab: *Quarkus Metrics*.
 . Click *Workloads* and select either the `$ERDEMO_USER-incident-service` or the `$ERDEMO_USER-incident-service-v2` workload:
 +
 image::images/kiali-runtimes-metrics-2.png[]
-* Note the application metric dashboards here as well.
+* Note the application metric dashboard here as well.
 
 . Kiali allows to define and integrate custom dashboards with the `MonitoringDashboard` custom resource. We can use this feature to fix the Quarkus dashboard.
 * Create a custom Kiali dashboard:
@@ -178,7 +177,7 @@ spec:
       spans: 3
   runtime: Quarkus
   title: Quarkus Metrics Fixed
-" > kiali-custom-dashboard.yml
+" | tee kiali-custom-dashboard.yml
 ----
 +
 ----
