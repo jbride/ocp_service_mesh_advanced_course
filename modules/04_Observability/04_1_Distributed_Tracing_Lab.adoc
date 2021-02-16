@@ -42,7 +42,7 @@ $ oc login $LAB_MASTER_API -u $SM_CP_ADMIN -p $OCP_PASSWD
 . Review the `Tracing` section of the `ServiceMeshControlPlane` custom resource:
 +
 ----
-$ oc describe servicemeshcontrolplane.v1.maistra.io full-install -n $SM_CP_NS
+$ oc describe servicemeshcontrolplane full-install -n $SM_CP_NS
 ----
 +
 .Sample Output (Truncated)
@@ -50,16 +50,22 @@ $ oc describe servicemeshcontrolplane.v1.maistra.io full-install -n $SM_CP_NS
 Name:         full-install
 Namespace:    admin50-istio-system
 Labels:       <none>
-[...]]
+[...]
 Spec:
-  Istio:
-    [...]
-    Tracing:
-      Enabled:   true
-      Provider:  jaeger
+  [...]
+  Tracing:
+    Sampling:  10000
+    Type:      Jaeger
+[...]    
 Status:
   [...]
-  Last Applied Configuration:
+  Applied Spec:
+    [...]
+    Tracing:
+      Sampling:  10000
+      Type:      Jaeger
+    [...]
+  Applied Values:
     Istio:
       [...]
       Tracing:
@@ -67,16 +73,39 @@ Status:
         Ingress:
           Enabled:  true
         Jaeger:
-          Template:  all-in-one
-        Provider:    jaeger
+          Install:        true
+          Resource Name:  jaeger
+          Template:       all-in-one
+        Provider:         jaeger
 [...]
 ----
-* Distributed tracing is enabled by setting `Tracing.Enabled` to `True`.
+* Distributed tracing is enabled by the `Tracing.Type` element. If this is set to `None` tracing is disabled.
 * The tracing implementation used by OpenShift Service Mesh is Jaeger. Upstream Istio also supports Zipkin.
 * The default template for Jaeger is `all-in-one`. This is a minimal installation that uses in-memory storage. As such, it is recommended only for development and testing purposes, and should not be used in a production environment.
-* For production environments, the value of `Jaeger.Template` needs to be set to `production-elasticsearch`. This template uses Elasticsearch for Jaeger’s storage needs.
-* The Jaeger architecture consists of several components: agent, collector, ingester, query, UI, and storage. For the `all-in-one` strategy, all of these components are bundled in the same image.
+* For production environments, the Jaeger configuration can be specified in the `Addons.Jaeger` element of the ServiceMeshControlPlane CR. +
+For example:
++
+----
+spec:
+  addons:
+    jaeger:
+      name: jaeger
+      install:
+        ingress:
+          enabled: true
+        storage:
+          type: Elasticsearch
+          elasticsearch:
+            storage:
+              storageClassName: "standard"
+              size: "5G"
+            nodeCount: 1
+            redundancyPolicy: ZeroRedundancy
 
+----
+* The Jaeger architecture consists of several components: agent, collector, ingester, query, UI, and storage. For the `all-in-one` strategy, all of these components are bundled in the same image.
+* The value of `Tracing.Sampling` determines the sampling rate a a percentage of the total requests, up to a precision of 0.01%. The value is scaled as 0 to 10000, where 10000 is 100%, and 100 is 1%.
+ 
 . Obtain the URL to the Jaeger UI:
 +
 ----
@@ -153,7 +182,7 @@ image::images/jaeger-ui-incident-service-trace-tags.png[]
 * `guid:x-request-id`: The generated unique ID of the trace. This value is propagated to sibling and child spans. It is also added to the request as an `x-request-id` HTTP header. This allows the application to use the value as an identifier--for example, in logging.
 * `http.url`, `http.method`, `user_agent`, `http.protocol`, `http.status_code`, and `response_size`: Information pertaining to the HTTP request.
 * `downstream_cluster`, `upstream_cluster`: Information about the incoming (downstream) and outgoing (upstream) requests as recorded by the Envoy proxy.
-* `internal_span_format`: The value here is `zipkin` because Envoy uses a Zipkin-compatible format.
+* `internal.span.format`: The value here is `zipkin` because Envoy uses a Zipkin-compatible format.
 
 . Obtain the URL to the Emergency Response Demo Console:
 +
