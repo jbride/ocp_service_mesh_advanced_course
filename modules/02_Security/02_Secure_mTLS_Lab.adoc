@@ -252,7 +252,7 @@ $ oc rsh -n $ERDEMO_NS -c $ERDEMO_USER-incident-service $INCIDENT_SERVICE_POD cu
 . Copy the value of the `dynamic_active_secrets[0].secret.tls_certificate.certificate_chain.inline_bytes` element. In a terminal, base64 decode the value:
 +
 ----
-$ echo "<base64 encoded cetificate chain>" | base64 -d
+$ echo "<base64 encoded certificate chain>" | base64 -d
 ----
 +
 .Sample output
@@ -382,7 +382,7 @@ In a service mesh, a better approach is to use a gateway for incoming traffic. T
 
 The service mesh installs an _Istio ingress gateway service_, which is an Envoy proxy container running on its own. All incoming traffic into the service mesh should be routed through the Istio ingress gateway to ensure that mesh policies and routing rules are applied to incoming traffic.
 
-To route the traffic from the ingress gateway to the target services, `Gateway` and `VirtualService` resources are defined. One way to do this is to create `Gateway` and `VirtualService` resources for each service exposed outside of the cluster. An alternative is to use a single `Gateway` resource along with a `VirtualService` resource for each service. A third possibility consists of using a wildcard Gateway resource with a `VirtualService` resoource for each service.
+To route the traffic from the ingress gateway to the target services, `Gateway` and `VirtualService` resources are defined. One way to do this is to create `Gateway` and `VirtualService` resources for each service exposed outside of the cluster. An alternative is to use a single `Gateway` resource along with a `VirtualService` resource for each service. A third possibility consists of using a wildcard Gateway resource with a `VirtualService` resource for each service.
 
 Which topology to choose will depend on an number of criteria, one of them being how to handle TLS certificates. If a wildcard certificate is acceptable for all services exposed outside of the mesh, a wildcard `Gateway` resource with a wildcard certificate can be used. If wildcard certificates are not desired, you can choose between a multi-host `Gateway` resource (which defines several hosts) or several single-host `Gateway` resources. The latter is the approach taken in this lab. When not using a single wildcard Gateway, a public certificate must be provided for every service exposed outside of the mesh.
 
@@ -818,7 +818,7 @@ spec:
   hosts:
   - incident-service.$ERDEMO_USER.apps.$SUBDOMAIN_BASE
   gateways:
-  - incident-service-gateway.$SM_CP_NS.svc.cluster.local
+  - $SM_CP_NS/incident-service-gateway
   http:
   - match:
     - uri:
@@ -1187,7 +1187,7 @@ spec:
   hosts:
   - \"responder-service.$ERDEMO_USER.apps.$SUBDOMAIN_BASE\"
   gateways:
-  - responder-service-gateway.$SM_CP_NS.svc.cluster.local
+  - $SM_CP_NS/responder-service-gateway
   http:
   - match:
     - uri:
@@ -1397,7 +1397,7 @@ spec:
   hosts:
   - disaster-simulator.$ERDEMO_USER.apps.$SUBDOMAIN_BASE
   gateways:
-  - disaster-simulator-gateway.$SM_CP_NS.svc.cluster.local
+  - $SM_CP_NS/disaster-simulator-gateway
   http:
   - match:
     - uri:
@@ -1606,7 +1606,7 @@ spec:
   hosts:
   - incident-priority-service.$ERDEMO_USER.apps.$SUBDOMAIN_BASE
   gateways:
-  - incident-priority-service-gateway.$SM_CP_NS.svc.cluster.local
+  - $SM_CP_NS/incident-priority-service-gateway
   http:
   - match:
     - uri:
@@ -2128,7 +2128,7 @@ spec:
   hosts:
   - emergency-console.$ERDEMO_USER.apps.$SUBDOMAIN_BASE
   gateways:
-  - emergency-console-gateway.$SM_CP_NS.svc.cluster.local
+  - $SM_CP_NS/emergency-console-gateway
   http:
   - match:
     - uri:
