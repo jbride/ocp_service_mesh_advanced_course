@@ -40,7 +40,7 @@ image::images/mixer_architecture.png[]
 
 === Enable Mixer
 
-In Service Mesh 2.0, Mixer is deprecated and not installed by default. The functionality previously provided by Mixer - policy checks, telemetry reporting - is now provided by the Envoy proxy itself. The Envoy proxy functionality can be extended through filters or WebAssembly modules (WASM). However, the 3scale WebAssembly module is still work in progress, and is expected to be released with Service mesh 2.1.
+In Service Mesh 2.0, Mixer is deprecated and not installed by default. The functionality previously provided by Mixer - policy checks, telemetry reporting - is now provided by the Envoy proxy itself. The Envoy proxy functionality can be extended through filters or WebAssembly modules (WASM). However, the 3scale WebAssembly module is still work in progress, and is expected to be released with Service Mesh 2.1.
 
 This means that the in the current version of Service Mesh, integration with 3scale is still through the 3scale Mixer adapter. In order to use the adapter the Service Mesh Mixer component has to be enabled.
 
