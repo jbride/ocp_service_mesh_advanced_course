@@ -1,20 +1,11 @@
 apiVersion: maistra.io/v1
 kind: ServiceMeshControlPlane
 metadata:
-  name: user1-istio-system
-
-  # Documentation: https://servicemesh--ocpdocs.netlify.com/openshift-enterprise/latest/service_mesh/service_mesh_install/installing-ossm.html#ossm-cr-parameters_installing-ossm
-
+  name: full-install
 spec:
   istio:
-
-    # enables the Container Network Interface (CNI).
-    # Because this field is set to true, manual sidecar injection will work
-    # However, pods will not be able to communicate with the control plane unless they are a part of the ServiceMeshMemberRoll resource.
-    istio_cni:
-      enabled: true
-
     global:
+      disablePolicyChecks: false
       proxy:
         resources:
           requests:
@@ -23,30 +14,17 @@ spec:
           limits:
             cpu: 500m
             memory: 128Mi
-      mtls:
-        enabled: false
-
-      # In order for the 3scale Istio Adapter to work, disablePolicyChecks must be false.
-      disablePolicyChecks: false
-
-      #  indicates whether traffic is allowed to pass through to the Envoy sidecar when the Mixer policy service cannot be reached
-      policyCheckFailOpen: true
-
-      multitenant: true
 
     gateways:
       istio-egressgateway:
         autoscaleEnabled: false
       istio-ingressgateway:
         autoscaleEnabled: false
-
-        # Automatic route creation does not currently work with multi-tenancy. Set ior_enabled to false for multi-tenant installations.
         ior_enabled: false
 
     mixer:
       policy:
         autoscaleEnabled: false
-
       telemetry:
         autoscaleEnabled: false
         resources:
@@ -60,33 +38,27 @@ spec:
     pilot:
       autoscaleEnabled: false
       traceSampling: 100.0
-      resources:
-        requests:
-          memory: 1Gi
-        limits:
-          memory: 2Gi
 
     kiali:
-     dashboard:
-        user: admin
-        passphrase: admin
-
-    tracing:
-      # The Jaeger agent runs as a DaemonSet, therefore tracing may only be enabled for a single ServiceMeshControlPlane instance. 
-      enabled: false
-
-    threeScale:
       enabled: true
-      PARAM_THREESCALE_LISTEN_ADDR: 3333
-      PARAM_THREESCALE_LOG_LEVEL: info
-      PARAM_THREESCALE_LOG_JSON: true
-      PARAM_THREESCALE_LOG_GRPC: false
-      PARAM_THREESCALE_REPORT_METRICS: true
-      PARAM_THREESCALE_METRICS_PORT: 8080
-      PARAM_THREESCALE_CACHE_TTL_SECONDS: 300
-      PARAM_THREESCALE_CACHE_REFRESH_SECONDS: 180
-      PARAM_THREESCALE_CACHE_ENTRIES_MAX: 1000
-      PARAM_THREESCALE_CACHE_REFRESH_RETRIES: 1
-      PARAM_THREESCALE_ALLOW_INSECURE_CONN: false
-      PARAM_THREESCALE_CLIENT_TIMEOUT_SECONDS: 10
-      PARAM_THREESCALE_GRPC_CONN_MAX_SECONDS: 60
+      dashboard:
+        user: admin
+        passphrase: redhat
+    tracing:
+      enabled: true
+  threeScale:
+    PARAM_THREESCALE_ALLOW_INSECURE_CONN: false
+    PARAM_THREESCALE_CACHE_ENTRIES_MAX: 1000
+    PARAM_THREESCALE_CACHE_REFRESH_RETRIES: 1
+    PARAM_THREESCALE_CACHE_REFRESH_SECONDS: 180
+    PARAM_THREESCALE_CACHE_TTL_SECONDS: 300
+    PARAM_THREESCALE_CLIENT_TIMEOUT_SECONDS: 10
+    PARAM_THREESCALE_GRPC_CONN_MAX_SECONDS: 60
+    PARAM_THREESCALE_LISTEN_ADDR: 3333
+    PARAM_THREESCALE_LOG_GRPC: false
+    PARAM_THREESCALE_LOG_JSON: true
+    PARAM_THREESCALE_LOG_LEVEL: debug
+    PARAM_THREESCALE_METRICS_PORT: 8080
+    PARAM_THREESCALE_REPORT_METRICS: true
+    enabled: true
+    
