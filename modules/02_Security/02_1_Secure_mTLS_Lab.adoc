@@ -1271,7 +1271,7 @@ $ oc edit dc $ERDEMO_USER-disaster-simulator -o yaml -n $ERDEMO_NS
 .. Replace the existing liveness and readiness probes with command-based probes:
 +
 ----
-[...]
+...
         livenessProbe:
           failureThreshold: 3
           exec:
@@ -1281,7 +1281,7 @@ $ oc edit dc $ERDEMO_USER-disaster-simulator -o yaml -n $ERDEMO_NS
           initialDelaySeconds: 30
           periodSeconds: 30
           timeoutSeconds: 3
-[...]
+...
         readinessProbe:
           failureThreshold: 3
           exec:
@@ -1291,7 +1291,7 @@ $ oc edit dc $ERDEMO_USER-disaster-simulator -o yaml -n $ERDEMO_NS
           initialDelaySeconds: 30
           periodSeconds: 30
           timeoutSeconds: 3
-[...]
+...
 ----
 +
 [TIP]
@@ -1480,7 +1480,7 @@ $ oc edit dc $ERDEMO_USER-incident-priority-service -o yaml -n $ERDEMO_NS
 .. Replace the existing liveness and readiness probes with command-based probes:
 +
 ----
-[...]
+...
         livenessProbe:
           failureThreshold: 3
           exec:
@@ -1490,7 +1490,7 @@ $ oc edit dc $ERDEMO_USER-incident-priority-service -o yaml -n $ERDEMO_NS
           initialDelaySeconds: 30
           periodSeconds: 30
           timeoutSeconds: 3
-[...]
+...
         readinessProbe:
           failureThreshold: 3
           exec:
@@ -1500,7 +1500,7 @@ $ oc edit dc $ERDEMO_USER-incident-priority-service -o yaml -n $ERDEMO_NS
           initialDelaySeconds: 10
           periodSeconds: 30
           timeoutSeconds: 3
-[...]
+...
 ----
 +
 [TIP]
@@ -1693,7 +1693,7 @@ $ oc edit dc $ERDEMO_USER-process-service -o yaml -n $ERDEMO_NS
 .. Replace the existing liveness and readiness probes with command-based probes:
 +
 ----
-[...]
+...
         livenessProbe:
           failureThreshold: 3
           exec:
@@ -1703,7 +1703,7 @@ $ oc edit dc $ERDEMO_USER-process-service -o yaml -n $ERDEMO_NS
           initialDelaySeconds: 60
           periodSeconds: 30
           timeoutSeconds: 3
-[...]
+...
         readinessProbe:
           failureThreshold: 3
           exec:
@@ -1713,7 +1713,7 @@ $ oc edit dc $ERDEMO_USER-process-service -o yaml -n $ERDEMO_NS
           initialDelaySeconds: 45
           periodSeconds: 30
           timeoutSeconds: 3
-[...]
+...
 ----
 +
 [TIP]
@@ -1771,7 +1771,7 @@ $ oc edit dc $ERDEMO_USER-mission-service -o yaml -n $ERDEMO_NS
 .. Replace the existing liveness and readiness probes with command-based probes:
 +
 ----
-[...]
+...
         livenessProbe:
           failureThreshold: 3
           exec:
@@ -1781,7 +1781,7 @@ $ oc edit dc $ERDEMO_USER-mission-service -o yaml -n $ERDEMO_NS
           initialDelaySeconds: 20
           periodSeconds: 10
           timeoutSeconds: 1
-[...]
+...
         readinessProbe:
           failureThreshold: 3
           exec:
@@ -1791,7 +1791,7 @@ $ oc edit dc $ERDEMO_USER-mission-service -o yaml -n $ERDEMO_NS
           initialDelaySeconds: 3
           periodSeconds: 10
           timeoutSeconds: 1
-[...]
+...
 ----
 +
 [TIP]
@@ -1849,7 +1849,7 @@ $ oc edit dc $ERDEMO_USER-responder-simulator -o yaml -n $ERDEMO_NS
 .. Replace the existing liveness and readiness probes with command-based probes:
 +
 ----
-[...]
+...
         livenessProbe:
           failureThreshold: 3
           exec:
@@ -1859,7 +1859,7 @@ $ oc edit dc $ERDEMO_USER-responder-simulator -o yaml -n $ERDEMO_NS
           initialDelaySeconds: 20
           periodSeconds: 10
           timeoutSeconds: 1
-[...]
+...
         readinessProbe:
           failureThreshold: 3
           exec:
@@ -1869,7 +1869,7 @@ $ oc edit dc $ERDEMO_USER-responder-simulator -o yaml -n $ERDEMO_NS
           initialDelaySeconds: 3
           periodSeconds: 10
           timeoutSeconds: 1
-[...]
+...
 ----
 +
 [TIP]
@@ -1927,7 +1927,7 @@ $ oc edit dc $ERDEMO_USER-process-viewer -o yaml -n $ERDEMO_NS
 .. Replace the existing liveness and readiness probes with command-based probes:
 +
 ----
-[...]
+...
         livenessProbe:
           failureThreshold: 3
           exec:
@@ -1937,7 +1937,7 @@ $ oc edit dc $ERDEMO_USER-process-viewer -o yaml -n $ERDEMO_NS
           initialDelaySeconds: 15
           periodSeconds: 30
           timeoutSeconds: 3
-[...]
+...
         readinessProbe:
           failureThreshold: 3
           exec:
@@ -1947,7 +1947,7 @@ $ oc edit dc $ERDEMO_USER-process-viewer -o yaml -n $ERDEMO_NS
           initialDelaySeconds: 5
           periodSeconds: 30
           timeoutSeconds: 3
-[...]
+...
 ----
 +
 [TIP]
@@ -2003,7 +2003,7 @@ $ oc edit dc $ERDEMO_USER-emergency-console -o yaml -n $ERDEMO_NS
 .. Replace the existing liveness and readiness probes with command-based probes:
 +
 ----
-[...]
+...
         livenessProbe:
           failureThreshold: 3
           exec:
@@ -2013,7 +2013,7 @@ $ oc edit dc $ERDEMO_USER-emergency-console -o yaml -n $ERDEMO_NS
           initialDelaySeconds: 30
           periodSeconds: 30
           timeoutSeconds: 3
-[...]
+...
         readinessProbe:
           failureThreshold: 3
           exec:
@@ -2023,7 +2023,7 @@ $ oc edit dc $ERDEMO_USER-emergency-console -o yaml -n $ERDEMO_NS
           initialDelaySeconds: 30
           periodSeconds: 30
           timeoutSeconds: 3
-[...]
+...
 ----
 +
 [TIP]
