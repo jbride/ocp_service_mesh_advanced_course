@@ -1009,7 +1009,7 @@ $ istioctl -n $ERDEMO_NS -i $SM_CP_NS x describe pod ${INCIDENT_SERVICE_POD}
 Pod: user1-incident-service-3-prkhd
    Pod Ports: 8080 (user1-incident-service), 15090 (istio-proxy)
 Suggestion: add 'version' label to pod for Istio telemetry.
---------------------
+
 Service: user1-incident-service
    Port: http 8080/HTTP targets pod port 8080
 DestinationRule: incident-service-client-mtls for "user1-incident-service.user1-er-demo.svc.cluster.local"
