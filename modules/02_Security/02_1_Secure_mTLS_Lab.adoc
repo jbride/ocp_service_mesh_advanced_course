@@ -2283,43 +2283,6 @@ $ curl -v -k https://$INCIDENT_SERVICE_URL/incidents
 +
 .Sample Output
 ----
-*   Trying 35.158.48.203:443...
-* TCP_NODELAY set
-* Connected to incident-service.user1.apps.cluster-18ac.18ac.example.opentlc.com (35.158.48.203) port 443 (#0)
-* ALPN, offering h2
-* ALPN, offering http/1.1
-* successfully set certificate verify locations:
-*   CAfile: /etc/pki/tls/certs/ca-bundle.crt
-  CApath: none
-* TLSv1.3 (OUT), TLS handshake, Client hello (1):
-* TLSv1.3 (IN), TLS handshake, Server hello (2):
-* TLSv1.3 (IN), TLS handshake, Encrypted Extensions (8):
-* TLSv1.3 (IN), TLS handshake, Certificate (11):
-* TLSv1.3 (IN), TLS handshake, CERT verify (15):
-* TLSv1.3 (IN), TLS handshake, Finished (20):
-* TLSv1.3 (OUT), TLS change cipher, Change cipher spec (1):
-* TLSv1.3 (OUT), TLS handshake, Finished (20):
-* SSL connection using TLSv1.3 / TLS_AES_256_GCM_SHA384
-* ALPN, server accepted to use h2
-* Server certificate:
-*  subject: CN=user1.apps.cluster-18ac.18ac.example.opentlc.com
-*  start date: May  4 18:51:29 2020 GMT
-*  expire date: May  4 18:51:29 2022 GMT
-*  issuer: CN=user1.apps.cluster-18ac.18ac.example.opentlc.com
-*  SSL certificate verify result: self signed certificate (18), continuing anyway.
-* Using HTTP2, server supports multi-use
-* Connection state changed (HTTP/2 confirmed)
-* Copying HTTP/2 data in stream buffer to connection buffer after upgrade: len=0
-* Using Stream ID: 1 (easy handle 0x55efdc8a4200)
-> GET /incidents HTTP/2
-> Host: incident-service.user1.apps.cluster-18ac.18ac.example.opentlc.com
-> User-Agent: curl/7.66.0
-> Accept: */*
->
-* TLSv1.3 (IN), TLS handshake, Newsession Ticket (4):
-* TLSv1.3 (IN), TLS handshake, Newsession Ticket (4):
-* old SSL session ID is stale, removing
-* Connection state changed (MAX_CONCURRENT_STREAMS == 4294967295)!
 < HTTP/2 403
 < content-length: 19
 < content-type: text/plain
