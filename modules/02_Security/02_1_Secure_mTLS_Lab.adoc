@@ -2578,6 +2578,48 @@ $ curl -v -k -H "Authorization: Bearer $TKN" https://$INCIDENT_SERVICE_URL/incid
 +
 .Sample Output
 ----
+*   Trying 35.156.140.248:443...
+* TCP_NODELAY set
+* Connected to incident-service.erd.apps.cluster-a3c6.a3c6.example.opentlc.com (35.156.140.248) port 443 (#0)
+* ALPN, offering h2
+* ALPN, offering http/1.1
+* successfully set certificate verify locations:
+*   CAfile: /etc/pki/tls/certs/ca-bundle.crt
+  CApath: none
+* TLSv1.3 (OUT), TLS handshake, Client hello (1):
+* TLSv1.3 (IN), TLS handshake, Server hello (2):
+* TLSv1.3 (IN), TLS handshake, Encrypted Extensions (8):
+* TLSv1.3 (IN), TLS handshake, Certificate (11):
+* TLSv1.3 (IN), TLS handshake, CERT verify (15):
+* TLSv1.3 (IN), TLS handshake, Finished (20):
+* TLSv1.3 (OUT), TLS change cipher, Change cipher spec (1):
+* TLSv1.3 (OUT), TLS handshake, Finished (20):
+* SSL connection using TLSv1.3 / TLS_AES_256_GCM_SHA384
+* ALPN, server accepted to use h2
+* Server certificate:
+*  subject: CN=*.erd.apps.cluster-a3c6.a3c6.example.opentlc.com
+*  start date: Oct 25 15:12:23 2019 GMT
+*  expire date: Jan 23 15:12:23 2020 GMT
+*  issuer: C=US; O=Let's Encrypt; CN=Let's Encrypt Authority X3
+*  SSL certificate verify result: unable to get local issuer certificate (20), continuing anyway.
+* Using HTTP2, server supports multi-use
+* Connection state changed (HTTP/2 confirmed)
+* Copying HTTP/2 data in stream buffer to connection buffer after upgrade: len=0
+* Using Stream ID: 1 (easy handle 0x558e40afda40)
+> GET /incidents HTTP/2
+> Host: incident-service.erd.apps.cluster-a3c6.a3c6.example.opentlc.com
+> User-Agent: curl/7.65.3
+> Accept: */*
+> Authorization: Bearer eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJrLVZtbjU2SG9keWZLSjBBLTFab01ZWUxvbDJXQlNsTjNRYVBjTzFzSTNJIn0.eyJqdGkiOiI2Y2IwYjlmMC1jMzFiLTQyOTQtYWJkMi1hZWVlMTEwNWQ2ZDEiLCJleHAiOjE1NzI1NjM0NTQsIm5iZiI6MCwiaWF0IjoxNTcyNTYzMTU0LCJpc3MiOiJodHRwczovL3Nzby11c2
+VyLXNzby5hcHBzLmNsdXN0ZXItYTNjNi5hM2M2LmV4YW1wbGUub3BlbnRsYy5jb20vYXV0aC9yZWFsbXMvZW1lcmdlbmN5LXJlYWxtIiwiYXVkIjoiYWNjb3VudCIsInN1YiI6ImVlNjBkNTBhLTllNGEtNDNjZi1iOWM2LWFlYzQwYjM3OWU4ZCIsInR5cCI6IkJlYXJlciIsImF6cCI6ImN1cmwiLCJhdXRoX3RpbWUiOjAsInNlc3Npb25fc3RhdGUiOiJhY2MxMzQyOC0yOGFi
+LTRiOWItYWEyNi02OWNlY2UxNmFiNWQiLCJhY3IiOiIxIiwicmVhbG1fYWNjZXNzIjp7InJvbGVzIjpbIm9mZmxpbmVfYWNjZXNzIiwidW1hX2F1dGhvcml6YXRpb24iXX0sInJlc291cmNlX2FjY2VzcyI6eyJhY2NvdW50Ijp7InJvbGVzIjpbIm1hbmFnZS1hY2NvdW50IiwibWFuYWdlLWFjY291bnQtbGlua3MiLCJ2aWV3LXByb2ZpbGUiXX19LCJzY29wZSI6ImVtYWlsIH
+Byb2ZpbGUiLCJlbWFpbF92ZXJpZmllZCI6ZmFsc2UsIm5hbWUiOiJCZXJuYXJkIFRpc29uIiwicHJlZmVycmVkX3VzZXJuYW1lIjoiYnRpc29uIiwiZ2l2ZW5fbmFtZSI6IkJlcm5hcmQiLCJmYW1pbHlfbmFtZSI6IlRpc29uIiwiZW1haWwiOiJidGlzb25AcmVkaGF0LmNvbSJ9.NvT75pNsT3PdQMbYFtbsPeNx9_bdZwDYdfBOO4BU5GPvgB6z3RTIBfKJCnGpBZmpZw46PgJ
+8eLljOZ3eDmZzPGStSMSBvgDndNv7AhdscmXVisGGR-WCLzDYtkYrZXjGVLIzhpLP_lTfapFflXlQWNZk1DkPsY_xuJ7dIX-vMQPurn0fyBhFcNtl0F6uHd7s02bCMqsX5EoOa0mV5lkI-RIqNjb94h12lBRVza9Go7aQ7q6NWP5LRr3RkKmdaLtz4E--L3pK4fVGCuhFAJfmQk7LndIQESs4DZvdtYYvQuT6RQEaLvm_0dh77xsKkIuPI7jXCugyAl_8ODeXEqsQcg
+>
+* TLSv1.3 (IN), TLS handshake, Newsession Ticket (4):
+* TLSv1.3 (IN), TLS handshake, Newsession Ticket (4):
+* old SSL session ID is stale, removing
+* Connection state changed (MAX_CONCURRENT_STREAMS == 4294967295)!
 < HTTP/2 200
 < content-type: application/json;charset=UTF-8
 < date: Thu, 31 Oct 2019 23:06:09 GMT
