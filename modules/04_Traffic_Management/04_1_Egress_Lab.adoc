@@ -864,7 +864,7 @@ spec:
         mode: ISTIO_MUTUAL
   selector:
     istio: egressgateway
-" | oc create -n $SM_CP_NS
+" | oc create -f - -n $SM_CP_NS
 ----
 
 . Create a VirtualService to route all traffic for the Echo API through the egress gateway and from the gateway to the external service.
@@ -902,7 +902,7 @@ spec:
             port:
               number: 443
           weight: 100
-" | oc create -n $SM_CP_NS
+" | oc create -f - -n $SM_CP_NS
 ----
 * Notice that traffic in the service mesh (gateway `mesh`) for host `echo-api.3scale.net` is routed to the egress gateway service on port 443 (this was port 80 in the previous example).
 * Traffic to the egress gateway for `echo-api.3scale.net` on port 443 is routed to the external service on port 443 (through the `ServiceEntry` abstraction).
@@ -928,7 +928,7 @@ spec:
             tls:
               mode: ISTIO_MUTUAL
               sni: echo-api.3scale.net
-" | oc create -n $SM_CP_NS
+" | oc create -f - -n $SM_CP_NS
 ----
 
 . Send a HTTP request to Echo API from within the mission service container:
