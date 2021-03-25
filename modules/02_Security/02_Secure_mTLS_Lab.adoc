@@ -1001,7 +1001,7 @@ $ curl -v -k https://incident-service.$ERDEMO_USER.apps.$SUBDOMAIN_BASE/incident
 +
 ----
 $ INCIDENT_SERVICE_POD=$(oc get pod -l app=$ERDEMO_USER-incident-service -o jsonpath={.items[0].metadata.name} -n $ERDEMO_NS)
-$ istioctl -n $ERDEMO_NS -i $SM_CP_NS x describe pod ${INCIDENT_SERVICE_POD}
+$ istioctl -n $ERDEMO_NS -i $SM_CP_NS experimental describe pod ${INCIDENT_SERVICE_POD}
 ----
 +
 .Sample Output
