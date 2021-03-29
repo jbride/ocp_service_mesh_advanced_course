@@ -18,8 +18,7 @@ spec:
       proxy:
         resources:
           requests:
-            cpu: 100m
-            memory: 128Mi
+	@@ -23,30 +14,17 @@ spec:
           limits:
             cpu: 500m
             memory: 128Mi
@@ -50,13 +49,7 @@ spec:
       telemetry:
         autoscaleEnabled: false
         resources:
-          requests:
-            cpu: 100m
-            memory: 1G
-          limits:
-            cpu: 500m
-            memory: 4G
-
+	@@ -60,33 +38,27 @@ spec:
     pilot:
       autoscaleEnabled: false
       traceSampling: 100.0
