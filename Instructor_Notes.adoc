@@ -6,7 +6,7 @@
 
 . link:https://docs.google.com/spreadsheets/d/1vazinjjbOSN-uDY8u_mmg-lXtrRlZtm1l5vJQucdKz8/edit#gid=959461386[Class Assignment Spreadsheet]
 
-== *OCP 4.4 Workshop Deployer*
+== *OCP Cluster Provisioning*
 . Provisioned from https://labs.opentlc.com 
 .. *Services -> Catalogs -> OPENTLC OpenShift 4 Labs -> Adv App Management with Service Mesh*
 
@@ -38,6 +38,13 @@ $ oc scale machineset <MACHINESETNAME> --replicas=<COUNT> -n openshift-machine-a
 $ oc get machinesets -n openshift-machine-api -w
 ----
 
+== Configure Environment to Stay Up
+During the course, you want the environment to stay up, without idling. You can set this in the CloudForms UI.
+
+. Select your service, then select *Admin* drop-down
+. Select *Unidle*
+
+image::images/admin-unidle.png[]
  
 == Prep Provisioning Environment
 
