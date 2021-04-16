@@ -4,12 +4,11 @@
 :linkattrs:
 :data-uri:
 
-== Istio Resiliency Lab
+== Service Mesh Resiliency Lab
 
 .Goals
-* Understand Istio resiliency features
+* Understand Service Mesh resiliency features
 * Understand retries, timeouts, circuit breakers, and outlier detection
-
 
 :numbered:
 == Introduction
@@ -54,12 +53,12 @@ $ oc scale dc $ERDEMO_USER-incident-priority-service --replicas=3 -n $ERDEMO_NS
 . Find the name of one of the incident priority service pods:
 +
 ----
-$ INCIDENT_PRIORITY_SERVICE_POD=$(oc get pods -n $ERDEMO_NS|grep Running|grep $ERDEMO_USER-incident-priority-service.*|awk '{ print $1 }'|head -1)
+$ INCIDENT_PRIORITY_SERVICE_POD=$(oc get pods -n $ERDEMO_NS|grep Running|grep $ERDEMO_USER-incident-priority-service|awk '{ print $1 }'|head -1)
 ----
 . Using `oc exec`, obtain a bash prompt inside the service container:
 +
 ----
-$ oc exec -it $INCIDENT_PRIORITY_SERVICE_POD -n $ERDEMO_NS -c $ERDEMO_USER-incident-priority-service /bin/bash
+$ oc exec -it $INCIDENT_PRIORITY_SERVICE_POD -n $ERDEMO_NS -c $ERDEMO_USER-incident-priority-service -- /bin/bash
 ----
 . In the container, execute the following `curl` command to have the service return an HTTP 503 return code when called over its REST APIs:
 +
@@ -314,12 +313,12 @@ The incident priority service version you deployed in the beginning of the lab a
 . Find the name of one of the incident priority service pods:
 +
 ----
-$ INCIDENT_PRIORITY_SERVICE_POD=$(oc get pods -n $ERDEMO_NS|grep Running|grep $ERDEMO_USER-incident-priority-service.*|awk '{ print $1 }'|head -1)
+$ INCIDENT_PRIORITY_SERVICE_POD=$(oc get pods -n $ERDEMO_NS|grep Running|grep $ERDEMO_USER-incident-priority-service|awk '{ print $1 }'|head -1)
 ----
 . Using `oc exec`, obtain a bash prompt inside the service container:
 +
 ----
-$ oc exec -it $INCIDENT_PRIORITY_SERVICE_POD -n $ERDEMO_NS -c $ERDEMO_USER-incident-priority-service /bin/bash
+$ oc exec -it $INCIDENT_PRIORITY_SERVICE_POD -n $ERDEMO_NS -c $ERDEMO_USER-incident-priority-service -- /bin/bash
 ----
 . In the container, execute the following `curl` command to have the service wait for two seconds before returning a response when called over its REST APIs:
 +
@@ -567,7 +566,7 @@ OpenShift Service Mesh implements circuit breakers using outlier detection. As a
 .. Find the name of one of the incident priority service pods:
 +
 ----
-$ INCIDENT_PRIORITY_SERVICE_POD=$(oc get pods -n $ERDEMO_NS|grep Running|grep $ERDEMO_USER-incident-priority-service.*|awk '{ print $1 }'|head -1)
+$ INCIDENT_PRIORITY_SERVICE_POD=$(oc get pods -n $ERDEMO_NS|grep Running|grep $ERDEMO_USER-incident-priority-service|awk '{ print $1 }'|head -1)
 ----
 .. Using `oc exec`, obtain a bash prompt inside the service container:
 +

@@ -28,7 +28,7 @@ The labs assume that you are using the proper versions of these tools, all of wh
 . On the left, select *OpenShift 4 Student VM*.
 . On the right, click *Order*.
 . On the *Lab Information* Tab make the following selections:
-.. *4.5* for *OpenShift Release*
+.. *4.6* for *OpenShift Release*
 .. The region closest to you for *Region* (North America, EMEA, APAC or LATAM)
 . On the bottom right, click *Submit*.
 +
@@ -93,6 +93,12 @@ user2-gw
 +
 NOTE: If you see empty output, make sure you source your `.bashrc` file using `source $HOME/.bashrc`.
 
+=== Download `istioctl`
+
+Some exercises in this course use the `istioctl` Istio command line tool. +
+Download the upstream Istio distribution from link:https://github.com/istio/istio/releases/tag/1.6.5[]. Make sure to download the _1.6.5_ version, which corresponds with the upstream Istio version that Red Hat Service Mesh is based on. +
+Extract the archive and add the `bin` folder to your path.
+
 == Review OpenShift Container Platform Assets
 
 Your lab is built on a shared OpenShift Container Platform 4 cluster in the cloud.
@@ -122,7 +128,7 @@ admin50-istio-system  admin50 Service Mesh Control Plane  Active
 istio-operator        istio-operator                      Active
 kafka-operator-erd                                        Active
 tools-erd                                                 Active
-user-sso                                                  Active
+erd-sso                                                   Active
 user50-er-demo                                            Active
 user50-gw                                                 Active
 -----
@@ -215,7 +221,7 @@ Subsequently, it is implemented as a DaemonSet in the `istio-operator` namespace
 . View the previously installed `istio-cni` pods implemented as an OpenShift DaemonSet in the `istio-operator` namespace:
 +
 -----
-oc get daemonset istio-node -n istio-operator
+$ oc get daemonset istio-node -n istio-operator
 -----
 +
 .Sample Output
@@ -252,7 +258,7 @@ $ oc get crd --as=system:admin | grep 'maistra\|istio'
 [NOTE]
 You need to impersonate an OpenShift cluster admin to do this because a service mesh control plane administrator does not have access to this in a production environment.
 
-* Expect to see about 26 CRDs.
+* Expect to see about 30 CRDs.
 
 . Review some of the more prominent service mesh-related CRD extensions to the OpenShift master API including those in the following table:
 +
@@ -299,13 +305,13 @@ $ oc get mutatingwebhookconfiguration --as=system:admin | grep $SM_CP_NS
 -----
 [...]
 
-istio-sidecar-injector-admin25-istio-system   2019-11-12T15:15:18Z
+istiod-full-install-admin50-istio-system        1          19h
 -----
 
 . Extract the details of `mutatingwebhookconfiguration` specific to your OpenShift Service Mesh installation:
 +
 -----
-$ oc get mutatingwebhookconfiguration istio-sidecar-injector-$SM_CP_NS \
+$ oc get mutatingwebhookconfiguration istiod-full-install-$SM_CP_NS \
        -o yaml \
        --as=system:admin \
        > $HOME/lab/$SM_CP_NS-mutatingwebhookconfiguration.yaml
@@ -313,16 +319,17 @@ $ oc get mutatingwebhookconfiguration istio-sidecar-injector-$SM_CP_NS \
 
 . Study the content of the `$HOME/lab/$SM_CP_NS-mutatingwebhookconfiguration.yaml` output file and note the following:
 
-* The `/inject` endpoint of the `istio-sidecar-injector` service from your service mesh control plane is invoked when auto-injecting the Envoy service proxy into an application pod:
+* The `/inject` endpoint of the `istiod` service from your service mesh control plane is invoked when auto-injecting the Envoy service proxy into an application pod:
 +
 -----
     service:
-      name: istio-sidecar-injector
+      name: istiod-full-install
       namespace: admin25-istio-system
       path: /inject
+      port: 443
 -----
 
-* The scope of your mutating webhook is the namespace of your service mesh control plane:
+* The scope of your mutating webhook are the namespaces of your service mesh data plane. Namespaces belonging to a service mesh instance have a label `maistra.io/member-of` with value equal to the namespace of the service mesh control plane.
 +
 -----
   namespaceSelector:
@@ -330,8 +337,14 @@ $ oc get mutatingwebhookconfiguration istio-sidecar-injector-$SM_CP_NS \
     - key: maistra.io/member-of
       operator: In
       values:
-      - admin25-istio-system
+      - admin1-istio-system
     - key: maistra.io/ignore-namespace
+      operator: DoesNotExist
+    - key: istio-injection
+      operator: NotIn
+      values:
+      - disabled
+    - key: istio-env
       operator: DoesNotExist
 -----
 
@@ -358,10 +371,15 @@ $ istioctl version --remote=true -i $SM_CP_ADMIN-istio-system
 +
 .Sample Output
 -----
-client version: 1.4.10
-control plane version: OSSM_1.1.10
-data plane version: 1.4.10 (2 proxies)
+client version: 1.6.5
+control plane version: OSSM_2.0.0
+data plane version: 1.6.5 (3 proxies)
 -----
++
+[NOTE]
+====
+The output of the `istioctl` command might be `no running Istio pods in "admin1-istio-system"`. If this is the case, add the label `istio=pilot` to the `istiod` pod in the control plane.
+====
 
 . Examine the service mesh control plane deployments:
 +
@@ -371,19 +389,14 @@ $ oc get deployments -n $SM_CP_NS
 +
 .Sample Output
 -----
-NAME                     READY   UP-TO-DATE   AVAILABLE   AGE
-grafana                  1/1     1            1           24h
-istio-citadel            1/1     1            1           24h
-istio-egressgateway      1/1     1            1           24h
-istio-galley             1/1     1            1           24h
-istio-ingressgateway     1/1     1            1           24h
-istio-pilot              1/1     1            1           24h
-istio-policy             1/1     1            1           24h
-istio-sidecar-injector   1/1     1            1           24h
-istio-telemetry          1/1     1            1           24h
-jaeger                   1/1     1            1           24h
-kiali                    1/1     1            1           24h
-prometheus               1/1     1            1           24h
+NAME                   READY   UP-TO-DATE   AVAILABLE   AGE
+grafana                1/1     1            1           163m
+istio-egressgateway    1/1     1            1           163m
+istio-ingressgateway   1/1     1            1           163m
+istiod-full-install    1/1     1            1           167m
+jaeger                 1/1     1            1           163m
+kiali                  1/1     1            1           162m
+prometheus             1/1     1            1           163m
 -----
 
 . Examine the `ServiceMeshControlPlane` custom resource:
@@ -395,28 +408,37 @@ $ oc get ServiceMeshControlPlane -n $SM_CP_NS
 .Sample Output
 -----
 NAME           READY   STATUS            PROFILES    VERSION   AGE
-full-install   11/11   ComponentsReady   [default]   1.1.10    40m
+full-install   9/9     ComponentsReady   ["default"]   2.0.2   168m
 -----
 
-* During the installation of your lab environment, the `$SM_CP_NS` namespace was created and this link:https://github.com/gpe-mw-training/ocp_service_mesh_advanced/blob/master/ansible/roles/maistra_control_plane/tasks/main.yml#L3-L5[`ServiceMeshControlPlane` custom resource] was applied to it.
+* During the installation of your lab environment, the `$SM_CP_NS` namespace was created and this link:https://github.com/gpe-mw-training/ocp_service_mesh_advanced/blob/master/ansible/roles/maistra_control_plane/tasks/main.yml#L62-L64[`ServiceMeshControlPlane` custom resource] was applied to it.
 The OpenShift Service Mesh operator detected the presence of this new custom resource and subsequently provisioned the service mesh control plane.
 +
 [NOTE]
-If the status in the `READY` column is not `11/11`, this means that the service mesh control plane did not install correctly. If this occurs, examine the status of the `ServiceMeshControlPlane` custom resource to determine the issue.
+If the status in the `READY` column is not `9/9`, this means that the service mesh control plane did not install correctly. If this occurs, examine the status of the `ServiceMeshControlPlane` custom resource to determine the issue.
 
-. Note the existence of a _ServiceMeshPolicy_:
+. Note the existence of a _PeerAuthentication_ resource called `default` in the service mesh control plane. This resource manages mesh-wide MUTUAL TLS mode, which is set to `PERMISSIVE`:
 +
 -----
-$ oc get ServiceMeshPolicies -n $SM_CP_NS
+$ oc get PeerAuthentication -n $SM_CP_NS
 -----
 +
 .Sample Output
 -----
-NAME      AGE
-default   24h
+NAME                            AGE
+default                         169m
+disable-mtls-jaeger-collector   168m
+grafana-ports-mtls-disabled     168m
 -----
 +
-NOTE: This OpenShift Service Mesh-specific resource replaces the upstream Istio community `MeshPolicy` resource, which is cluster-scoped and not compatible with multi-tenancy. In a later lab of this course, this resource is used to configure mutual Transport Layer Security (mTLS) within a single service mesh.
+----
+$ oc get Peerauthentication default --template '{{.spec.mtls.mode }}{{"\n"}}' -n $SM_CP_NS
+----
++
+.Sample Output
+----
+PERMISSIVE
+----
 
 . Examine the various namespace-scoped `RoleBinding` resources in the service mesh control plane:
 +
@@ -426,20 +448,16 @@ $ oc get RoleBinding -n $SM_CP_NS
 +
 .Sample Output
 -----
-admin                                                           4h8m
-istio-citadel-admin50-istio-system                              4h8m
-istio-galley-admin-role-binding-admin50-istio-system            4h8m
-istio-ingressgateway-sds                                        4h7m
-istio-mixer-admin-role-binding-admin50-istio-system             4h7m
-istio-pilot-admin50-istio-system                                4h7m
-istio-sidecar-injector-admin-role-binding-admin50-istio-system  4h7m
-kiali                                                           4h6m
-mesh-users                                                      4h8m
-prometheus-admin50-istio-system                                 4h8m
-system:deployers                                                4h8m
-system:image-builders                                           4h8m
-system:image-pullers                                            4h8m
-view                                                            3h33m
+admin                            ClusterRole/admin                                     3h5m
+istio-ingressgateway-sds         Role/istio-ingressgateway-sds                         3h
+istiod-pilot-full-install        ClusterRole/istiod-full-install-admin1-istio-system   3h5m
+kiali                            Role/kiali                                            179m
+mesh-users                       Role/mesh-user                                        3h5m
+prometheus-admin1-istio-system   ClusterRole/prometheus-admin1-istio-system            3h1m
+system:deployers                 ClusterRole/system:deployer                           3h5m
+system:image-builders            ClusterRole/system:image-builder                      3h5m
+system:image-pullers             ClusterRole/system:image-puller                       3h5m
+view                             ClusterRole/view                                      173m
 -----
 +
 NOTE: The use of a project-scoped `RoleBinding` resource rather than a cluster-scoped `ClusterRoleBinding` resource is a key enabler of the multi-tenant capabilities of the OpenShift Service Mesh component.
@@ -462,7 +480,7 @@ map[]
 
 For the purposes of this course, your service mesh control plane manages your instance of the link:https://www.erdemo.io[Emergency Response Demo application].
 
-The intent of the Emergency Response Demo application is to showcase the breadth of the Red Hat Middleware portfolio running on Red Hat OpenShift.
+The Emergency Response demo is designed as a distributed, cloud-native and mostly event-driven distributed application.
 
 The services of the Emergency Response Demo application use a mix of HTTP-based synchronous communication and AMQ Streams-based asynchronous communication.
 Because of this, the demo is an excellent application to highlight the existing capabilities and limitations of a service mesh.
@@ -485,18 +503,17 @@ $ oc get dc -n $ERDEMO_NS
 .Sample Output
 -----
 NAME                              REVISION   DESIRED   CURRENT   TRIGGERED BY
-postgresql                        1          1         1         config,image(postgresql:9.6)
-process-service-postgresql        1          1         1         config,image(postgresql:9.6)
-user50-disaster-simulator         1          1         1         config,image(user50-disaster-simulator:c6818a7a8)
-user50-emergency-console          1          1         1         config,image(user50-emergency-console:1fa91c80b)
-user50-incident-priority-service  1          1         1         config,image(user50-incident-priority-service:1f5b136f5)
-user50-incident-service           1          1         1         config,image(user50-incident-service:ba3e9bca3)
-user50-mission-service            1          1         1         config,image(user50-mission-service:803e6420f)
-user50-process-service            1          1         1         config,image(user50-process-service:cbfad8cf2)
-user50-process-viewer             1          1         1         config,image(user50-process-viewer:8eac584e7)
-user50-responder-client-app       1          1         1         config,image(user50-responder-client-app:f2394c06c)
-user50-responder-service          1          1         1         config,image(user50-responder-service:4ca7b4bab)
-user50-responder-simulator        1          1         1         config,image(user50-responder-simulator:66105af21)
+postgresql                        1          1         1         config,image(postgresql:12-el8)
+process-service-postgresql        1          1         1         config,image(postgresql:12-el8)
+user1-disaster-simulator          1          1         1         config,image(user1-disaster-simulator:2679bab)
+user1-emergency-console           1          1         1         config,image(user1-emergency-console:875345f)
+user1-incident-priority-service   1          1         1         config,image(user1-incident-priority-service:1f5b136f5)
+user1-incident-service            1          1         1         config,image(user1-incident-service:50149de)
+user1-mission-service             1          1         1         config,image(user1-mission-service:63f80b7)
+user1-process-service             1          1         1         config,image(user1-process-service:253a805)
+user1-process-viewer              1          1         1         config,image(user1-process-viewer:8eac584e7)
+user1-responder-service           1          1         1         config,image(user1-responder-service:90d9467)
+user1-responder-simulator         1          1         1         config,image(user1-responder-simulator:79fdf95)
 -----
 
 . Observe that the Emergency Response Demo application also makes use of Red Hat AMQ streams for event-driven, streams-based communication between many of its services:
@@ -508,7 +525,8 @@ $ oc get deploy -n $ERDEMO_NS
 .Sample Output
 -----
 NAME                            READY   UP-TO-DATE   AVAILABLE   AGE
-kafka-cluster-entity-operator   1/1     1            1           3d5h
+infinispan-operator             1/1     1            1           4h15m
+kafka-cluster-entity-operator   1/1     1            1           58m
 -----
 +
 -----
@@ -524,43 +542,31 @@ kafka-cluster-zookeeper   3/3     3d5h
 . Also, observe that the Emergency Response Demo application makes use of Red Hat Data Grid:
 +
 -----
-$ oc get statefulset -l application=datagrid-service -n $ERDEMO_NS
+$ oc get statefulset -l template=infinispan-ephemeral -n $ERDEMO_NS
 -----
 +
 .Sample Output
 -----
-datagrid-service   3/3     3d5h
+NAME               READY   AGE
+datagrid-service   3/3     4h17m
 -----
 
 === Get Started
 
-The Emergency Response Demo application includes a web console where you can view emergency _incidents_ being accepted by volunteer _responders_.
+The Emergency Response Demo application includes a web console where you can view emergency _incidents_ being accepted and rescued by volunteer _responders_.
 
 ==== Visit ER Demo App
 . Access the web console at the following URL:
 +
 -----
-echo -en "\n\nhttps://$(oc get route $ERDEMO_USER-emergency-console -o template --template={{.spec.host}} -n $ERDEMO_NS)\n\n"
+$ echo -en "\n\nhttps://$(oc get route $ERDEMO_USER-emergency-console -o template --template={{.spec.host}} -n $ERDEMO_NS)\n\n"
 -----
 
-. On the login page, click the *Register Now* button
-+
-image::images/er-demo-register-now-button.png[]
-
-. Register a new test user
-.. *Boat Capacity*: How many rescuees the responder can carry in their boat. Setting a boat-capability of 10-12 is typically sufficient to be assigned an incident
-.. *Medical Support*: Set to true if the responder can provide medical/first-aid support.
-+
-image::images/er-demo-register-now-responder.png[]
-
-.. Once completed, click: *Register*
-
+. On the login page, login with username `incident_commander` and password `r3dh4t1!`.
 
 . Click the *Dashboard* link in the left panel. You will see the main application screen.
 +
-image::images/er-demo-main-screen.png[]
-
-
+image::images/er-demo-main-screen-1.png[]
 
 ===== Incident Status
 The Incident Status section tracks the data for number of incidents requested, assigned, picked up and rescued. These values update in real-time based on application events.
@@ -573,35 +579,9 @@ The map shows the location of the incidents, responders and their associated rou
 
 ==== Mission
 
-When a Responder is assigned an Incident, a Mission is created. The Mission defines where the Responder needs to go to collect the victims of the Incident (the Way Point) and what shelter the victims should be dropped off at (the Target Location). The mission also has details of the responders location history.
+When a Responder is assigned an Incident, a Mission is created. The Mission defines where the Responder needs to go to collect the victims of the Incident and what shelter the victims should be dropped off at.
 
-. Select the link for *Mission*
-
-** This screen shows the view for an individual responder which shows their current mission, including the router to the Incident and onward route to the shelter.
-
-. Add yourself to the map as a responder
-.. Click any location on the map.
-+
-image::images/er-demo-add-as-responder-to-the-map.png[width="80%"]
-
-.. Click your boat icon. It will show the details of your boat profile.
-+
-image::images/er-demo-responder-boat-details.png[width="80%"]
-
-.. Click the *Available* button. 
-
-NOTE: Scroll to the bottom of the screen to see the *Available* button.
-
-image::images/er-demo-mission_click_available_button.png[width="80%"]
-
-NOTE: After you click the *Available* button, the button may continue to spin. You don't have to wait for the button to finish spinning. You can safely proceed to the next section.
-
-==== View the Dashboard
-
-. Click the *Dashboard* link
-** In the *Responder Utilization* section, verify that there are 1 total responders. This is based on your recent action.
-+
-image::images/er-demo-1-total-responders.png[width="80%"]
+The Emergency Response application allows for interaction with demo participants. Participants can register in the application as a responder, and be assigned missions. Individual missions can be followed in the Mission tab of the dashboard.
 
 ==== Incidents
 
@@ -611,95 +591,44 @@ An incident is a request for help from an individual (or group of individuals) t
 
 ** This screen shows a list of incidents. At the moment, this screen is empty, but we will create incidents in the next section.
 +
-image::images/er-demo-incidents-empty.png[width="80%"]
+image::images/er-demo-incidents-empty.png[]
 
-==== Disaster Simulator
-Let's get the web URL for the Disaster Simulator
+==== Running the demo
 
-. In your terminal window, type the following
+There are two ways to run the demo, with the _Simulation_ button on the main dashboard, or with the _Disaster Simulator_ application.
+
+. Click the blue _Start Simulation_ button to start a simulation.
++
+image::images/er-demo-main-screen-1.png[]
+. As part of the simulation, 20 responders are generated, as well as 15 incidents. The incidents are assigned to responders, which start to move towards their assigned incident, and then to the designated shelter. The location of the incidents and the movement of the responders can be followed on the map.
++
+image::images/emergency-response-simulation.png[]
++
+Clicking on one of the incident or responder icons, will show details about the incident or responder, and show the route the responder is following. 
++
+image::images/emergency-response-simulation-details.png[]
++
+The `Process Diagram` link in the incident details popup opens a tab with the RHPAM process instance diagram which manages the lifecycle of the incident.
++
+image::images/er-demo-view-process-diagram.png[]
+
+. When all the incidents are rescued and the evacuees dropped off at a shelter, the simulation is finished.
++
+image::images/emergency-response-simulation-terminated.png[]
++
+Please note that this will take several minutes.
+
+Another way to launch the demo is through the _Disaster Simulation_ application, which allows more control over the number of incidents and responders that are generated. 
+
+. In your terminal window, type the following:
 +
 -----
-echo -en "\n\nhttp://$(oc get route $ERDEMO_USER-disaster-simulator -o template --template={{.spec.host}} -n $ERDEMO_NS)\n\n"
+$ echo -en "\n\nhttp://$(oc get route $ERDEMO_USER-disaster-simulator -o template --template={{.spec.host}} -n $ERDEMO_NS)\n\n"
 -----
 
 . In your web browser, visit the above URL.
 
-===== Create Incidents
-
-. In the section for *Create Incidents*, move to the field for *Number of Incidents* and enter `50`.
-. Click *Submit*
-+
-image::images/er-demo-create-incidents.png[width="60%"]
-
-** At the top of the screen, you will see the result of the command.
-+
-image::images/er-demo-simulator-create-incidents-result.png[]
-
-===== Create Responders
-. In the section for *Create Responders*, move to the field for *Number of Responders* and enter `3`.
-. Click *Submit*
-+
-image::images/er-demo-create-responders.png[width="60%"]
-
-** At the top of the screen, you will see the result of the command.
-+
-image::images/er-demo-simulator-create-responders-result.png[]
-
-. Move back to the *Emergency Response Demo Web Console* window
-
-. Click the *Dashboard* link.
-
-. Confirm that you have incidents and responders. 
-
-** You will see activity as the responders are assigned to missions. The responders will start moving to rescue the stranded victims.
-
-==== View Your Mission
-
-By this time, your boat should have been assigned to a mission.
-
-. Click the *Mission* link.
-
-* You will see your boat moving towards an incident.
-
-* Once your boat makes it to the incident location, click the *Picked up* button. 
-
-NOTE: Scroll to the bottom of the screen to see the *Picked up* button.
-
-image::images/er-demo-mission-picked-up.png[width="80%"]
-
-* This confirms that you have picked up the passengers and your boat will proceed to the shelter.
-
-==== View Incidents
-
-You can view a list of all incidents and check their status.
-
-. Click the *Incidents* link.
-+
-image::images/er-demo-view-all-incidents.png[width="80%"]
-
-==== Process Automation
-
-The Process Service is responsible for managing the overall process flow of the system. The Process Service operates purely on Kafka messages and does not expose any HTTP API - although it does invoke HTTP APIs in the Responder and Incident Priority Services. 
-
-When a new Incident is reported on the topic-incident-event Topic, the process Service kicks off a new BPM process to manage the new Incident. When a Responder is shown as available (via the topic-responder-event Topic), the BPM process is updated to reflect this. As the Mission progresses and additional messages are received on the topic-mission-event Topic, the BPM process is updated to reflect the latest state.
-
-The Process Service sends out multiple types of messages on various Topics in response to the Incident progressing through the Business Process.
-
-Let's view the process diagram for an incident.
-
-. Click the *Dashboard* link.
-
-. Click an Incident on the map.
-** This will show a pop-up for the incident.
-+
-image::images/er-demo-incident-popup.png[width="80%"]
-
-. Click the link for *Process Diagram*
-** This will open new tab to view the Process Diagram for this incident.
-+
-image::images/er-demo-view-process-diagram.png[width="80%"]
-
-. Review the process diagram for this incident.
+. In the disaster simulator screen, you can create incidents, responders, and clear (delete) incidents, responders and missions.
 
 == Appendix
 

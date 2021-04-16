@@ -1,0 +1,1035 @@
+:noaudio:
+:scrollbar:
+:toc2:
+:linkattrs:
+:data-uri:
+
+== Service Mesh Egress Lab
+
+.Goals
+* Understand Service Mesh Egress traffic management
+
+:numbered:
+== Introduction
+
+Within the service mesh, all outbound traffic is routed through the Envoy sidecar proxies. As such, accessibility of URLs outside of the service mesh depends on the configuration of the sidecar proxy. +
+By default, Service Mesh configures the Envoy proxies to passthrough all outbound traffic to external services. Note that external services means all services not managed by the service mesh. This includes external URLs, but also services co-deployed inside the service mesh which have not been injected with the Envoy proxy. In our example application this includes the Kafka broker as well as the DataGrid cluster and the PostgreSQL databases used by the services.
+
+The default approach to access external services has the drawback that you lose Istio monitoring and control for traffic to external services.
+Service Mesh allows to set up controlled access to external services. It can do so in a couple of ways.
+
+A first step consists in defining `ServiceEntry` resources for the external services.
+`ServiceEntry` adds additional entries into Istio’s internal service registry. A service entry describes the properties of a service (DNS name, VIPs, ports, protocols, endpoints). These services could be external to the mesh (e.g., web APIs) or mesh-internal services that are not part of the platform’s service registry.
+
+Requests to external services accessed through a `ServiceEntry` configuration can be managed just as other requests inside the service mesh. Routing rules such as timeout rules, retries and circuit breakers can be defined.
+
+In some cases, even more control is needed or desired. It is a good practice to channel all the incoming traffic into the service mesh through ingress gateways. Likewise, you can configure the mesh to have outgoing traffic routed through _egress_ gateways. Egress gateways define exit points from the service mesh. Having one or more defined exit points for outgoing traffic makes it easier to apply policy enforcement and monitor the traffic flowing out of the service mesh.
+
+== Accessing External Services
+
+=== Accessing External Service with ServiceEntry
+
+The Emergency Response application uses MapBox APIs (https://mapbox.com) to calculate GPS routes. More specifically, the mission service uses the MapBox APIs to calculate the routes for the incident responders to pick up the evacuees and drop them off at a shelter.
+
+In this section of the lab you define a `ServiceEntry` for the MapBox API and verify that outgoing calls to the mapBox API are managed by the service mesh.
+
+. Make sure you are logged in to OpenShift Container Platform as the control plane admin user:
++
+----
+$ oc login $LAB_MASTER_API -u $SM_CP_ADMIN -p $OCP_PASSWD
+----
+
+. Enable access logs for the Envoy proxy. This will give you better visibility in incoming and outgoing traffic.
+* Open the `ServiceMeshControlPlane` resource in the service mesh control plane for editing:
++
+----
+$ oc edit smcp full-install -o yaml -n $SM_CP_NS
+----
+* Add the access log configuration to the `spec.proxy` element:
++
+----
+apiVersion: maistra.io/v2
+kind: ServiceMeshControlPlane
+metadata:
+  [...]
+spec:
+  [...]
+  proxy:
+    accessLogging:
+      file:
+        encoding: TEXT
+        name: /dev/stdout
+    runtime:
+      container:
+        resources:
+          limits:
+            cpu: 500m
+            memory: 128Mi
+          requests:
+            cpu: 100m
+            memory: 128Mi
+[...]
+----
+* Save the `ServiceMeshControlPlane` resource.
+
+. Verify that the Mapbox API can be called from the services of the Emergency Response application.
++
+----
+$ MISSION_SERVICE_POD=$(oc get pod -l app=$ERDEMO_USER-mission-service -o jsonpath={.items[0].metadata.name} -n $ERDEMO_NS)
+$ oc exec $MISSION_SERVICE_POD -c $ERDEMO_USER-mission-service -n $ERDEMO_NS -it -- curl -v https://api.mapbox.com
+----
++
+.Sample output
+----
+* Rebuilt URL to: https://api.mapbox.com/
+*   Trying 13.224.80.155...
+* TCP_NODELAY set
+* Connected to api.mapbox.com (13.224.80.155) port 443 (#0)
+* ALPN, offering h2
+* ALPN, offering http/1.1
+* successfully set certificate verify locations:
+*   CAfile: /etc/pki/tls/certs/ca-bundle.crt
+  CApath: none
+* TLSv1.3 (OUT), TLS handshake, Client hello (1):
+* TLSv1.3 (IN), TLS handshake, Server hello (2):
+* TLSv1.3 (IN), TLS handshake, [no content] (0):
+* TLSv1.3 (IN), TLS handshake, Encrypted Extensions (8):
+* TLSv1.3 (IN), TLS handshake, [no content] (0):
+* TLSv1.3 (IN), TLS handshake, Certificate (11):
+* TLSv1.3 (IN), TLS handshake, [no content] (0):
+* TLSv1.3 (IN), TLS handshake, CERT verify (15):
+* TLSv1.3 (IN), TLS handshake, [no content] (0):
+* TLSv1.3 (IN), TLS handshake, Finished (20):
+* TLSv1.3 (OUT), TLS change cipher, Change cipher spec (1):
+* TLSv1.3 (OUT), TLS handshake, [no content] (0):
+* TLSv1.3 (OUT), TLS handshake, Finished (20):
+* SSL connection using TLSv1.3 / TLS_AES_128_GCM_SHA256
+* ALPN, server did not agree to a protocol
+* Server certificate:
+*  subject: CN=api.mapbox.com
+*  start date: Feb  5 00:00:00 2021 GMT
+*  expire date: Mar  6 23:59:59 2022 GMT
+*  subjectAltName: host "api.mapbox.com" matched cert's "api.mapbox.com"
+*  issuer: C=US; O=Amazon; OU=Server CA 1B; CN=Amazon
+*  SSL certificate verify ok.
+* TLSv1.3 (OUT), TLS app data, [no content] (0):
+> GET / HTTP/1.1
+> Host: api.mapbox.com
+> User-Agent: curl/7.61.1
+> Accept: */*
+>
+* TLSv1.3 (IN), TLS app data, [no content] (0):
+< HTTP/1.1 200 OK
+< Content-Type: application/json; charset=utf-8
+< Content-Length: 16
+< Connection: keep-alive
+< X-Powered-By: Express
+< Date: Tue, 16 Feb 2021 12:14:48 GMT
+< ETag: W/"10-64e0d8b5"
+< Vary: Accept-Encoding
+< X-Cache: Hit from cloudfront
+< Via: 1.1 bcc4ad8f771bded524c65fdce1b7af50.cloudfront.net (CloudFront)
+< X-Amz-Cf-Pop: MAN50-C2
+< X-Amz-Cf-Id: KcTAk55tku45Dwr4qvmC_lUBxVh9Bz8QaGPTjpISji0udABr2L1L7g==
+< Age: 81692
+<
+* Connection #0 to host api.mapbox.com left intact
+{"api":"mapbox"}
+----
+* Expect a HTTP return code `200`.
+. Verify the Envoy proxy access log of the mission service pod.
++
+----
+$ oc logs $MISSION_SERVICE_POD -c istio-proxy -n $ERDEMO_NS
+----
++
+Towards the end of the logs, expect to see an entry like:
++
+----
+[2021-02-17T11:03:10.981Z] "- - -" 0 - "-" "-" 705 6011 43 - "-" "-" "-" "-" "99.86.117.126:443" PassthroughCluster 10.128.2.136:43340 99.86.117.126:443 10.128.2.136:43338 - -
+----
+* The default format of the access log is as follows:
++
+----
+[%START_TIME%] \"%REQ(:METHOD)% %REQ(X-ENVOY-ORIGINAL-PATH?:PATH)% %PROTOCOL%\" %RESPONSE_CODE% %RESPONSE_FLAGS% %RESPONSE_CODE_DETAILS% %CONNECTION_TERMINATION_DETAILS%
+\"%UPSTREAM_TRANSPORT_FAILURE_REASON%\" %BYTES_RECEIVED% %BYTES_SENT% %DURATION% %RESP(X-ENVOY-UPSTREAM-SERVICE-TIME)% \"%REQ(X-FORWARDED-FOR)%\" \"%REQ(USER-AGENT)%\" \"%REQ(X-REQUEST-ID)%\"
+\"%REQ(:AUTHORITY)%\" \"%UPSTREAM_HOST%\" %UPSTREAM_CLUSTER% %UPSTREAM_LOCAL_ADDRESS% %DOWNSTREAM_LOCAL_ADDRESS% %DOWNSTREAM_REMOTE_ADDRESS% %REQUESTED_SERVER_NAME% %ROUTE_NAME%\n
+----
++
+You can find more details about the meaning of the different fields at https://istio.io/latest/docs/tasks/observability/logs/access-log and https://www.envoyproxy.io/docs/envoy/latest/configuration/observability/access_log/usage
+
+* The log entry for `UPSTREAM_CLUSTER` is `PassthroughCluster`. The PassthroughCluster is a virtual cluster created in the Envoy configuration for all traffic to any external service.
+
+. Create a `ServiceEntry` resource for the Mapbox API.
++
+----
+$ echo "---
+apiVersion: networking.istio.io/v1beta1
+kind: ServiceEntry
+metadata:
+  name: mapbox
+spec:
+  hosts:
+  - api.mapbox.com
+  ports:
+  - number: 443
+    name: https
+    protocol: TLS
+  resolution: DNS
+  location: MESH_EXTERNAL
+" | oc create -f - -n $ERDEMO_NS
+----
++
+.Sample output
+----
+serviceentry.networking.istio.io/mapbox created
+----
+
+. Call the MapBox API from within the mission service pod.
++
+----
+$ MISSION_SERVICE_POD=$(oc get pod -l app=$ERDEMO_USER-mission-service -o jsonpath={.items[0].metadata.name} -n $ERDEMO_NS)
+$ oc exec $MISSION_SERVICE_POD -c $ERDEMO_USER-mission-service -n $ERDEMO_NS -it -- curl -v https://api.mapbox.com
+----
++
+* Expect a HTTP response code `200`
+.
+. Verify the Envoy proxy access log of the mission service pod.
++
+----
+$ oc logs $MISSION_SERVICE_POD -c istio-proxy -n $ERDEMO_NS
+----
++
+Towards the end of the logs, expect to see an entry like:
++
+----
+[2021-02-17T11:23:35.162Z] "- - -" 0 - "-" "-" 705 6011 69 - "-" "-" "-" "-" "13.224.80.155:443" outbound|443||api.mapbox.com 10.128.2.136:50614 13.224.80.155:443 10.128.2.136:50608 api.mapbox.com
+----
++
+Note that the access log does not contain a lot of information, except for the source and destination IP address, the upstream cluster definition (`outbound|443||api.mapbox.com`) - which corresponds to the `ServiceEntry` definition - and the bytes sent, bytes received and duration of the request. This is expected, as the traffic is already encrypted when it is intercepted by the Envoy proxy, and as such the proxy has limited introspection possibilities.
+
+. The way Proxy sidecars handle outgoing traffic is configured with the `spec.proxy.networking.trafficControl.outbound.policy` element in the `ServiceMeshControlPlane` custom resource. +
+The default value for this policy is `ALLOW_ANY`, which lets the Envoy proxy pass through calls to unknown services. +
+When this value is set to `REGISTRY_ONLY`, the proxy blocks all calls for hosts without an HTTP service or service entry defined.
+* Open the `ServiceMeshControlPlane` resource in the service mesh control plane for editing:
++
+----
+$ oc edit smcp full-install -o yaml -n $SM_CP_NS
+----
+* Add the outbound policy setting to the `spec.proxy` element:
++
+----
+apiVersion: maistra.io/v2
+kind: ServiceMeshControlPlane
+metadata:
+  [...]
+spec:
+  [...]
+  proxy:
+    accessLogging:
+      file:
+        encoding: TEXT
+        name: /dev/stdout
+    networking:
+      trafficControl:
+        outbound:
+          policy: REGISTRY_ONLY
+    runtime:
+      container:
+        resources:
+          limits:
+            cpu: 500m
+            memory: 128Mi
+          requests:
+            cpu: 100m
+            memory: 128Mi
+[...]
+----
+* Save the `ServiceMeshControlPlane` resource.
+* Call the `httpbin.org` API from within the mission service pod.
++
+----
+$ MISSION_SERVICE_POD=$(oc get pod -l app=$ERDEMO_USER-mission-service -o jsonpath={.items[0].metadata.name} -n $ERDEMO_NS)
+$ oc exec $MISSION_SERVICE_POD -c $ERDEMO_USER-mission-service -n $ERDEMO_NS -it -- curl -v https://httpbin.org/headers
+----
++
+.Sample output
+----
+*   Trying 54.147.165.197...
+* TCP_NODELAY set
+* Connected to httpbin.org (54.147.165.197) port 443 (#0)
+* ALPN, offering h2
+* ALPN, offering http/1.1
+* successfully set certificate verify locations:
+*   CAfile: /etc/pki/tls/certs/ca-bundle.crt
+  CApath: none
+* TLSv1.3 (OUT), TLS handshake, Client hello (1):
+* OpenSSL SSL_connect: SSL_ERROR_SYSCALL in connection to httpbin.org:443
+* Closing connection 0
+curl: (35) OpenSSL SSL_connect: SSL_ERROR_SYSCALL in connection to httpbin.org:443
+command terminated with exit code 35
+----
++
+* Expect the call to be blocked.
+* If you try the same with a call to http://httpbin.org, you will notice that the HTTP call returns with an HTTP code `502`.
+* Reset the policy to `ALLOW_ANY` to avoid breaking the Emergency Response application.
++
+----
+apiVersion: maistra.io/v2
+kind: ServiceMeshControlPlane
+metadata:
+  [...]
+spec:
+  [...]
+  proxy:
+    accessLogging:
+      file:
+        encoding: TEXT
+        name: /dev/stdout
+    networking:
+      trafficControl:
+        outbound:
+          policy: ALLOW_ANY
+    runtime:
+      container:
+        resources:
+          limits:
+            cpu: 500m
+            memory: 128Mi
+          requests:
+            cpu: 100m
+            memory: 128Mi
+[...]
+----
+* Check that calls to `httpbin.org` succeed again.
+
+=== Egress TLS origination
+
+In the previous example, the application called the external service over HTTPS. It is also possible to have TLS originated by the Envoy proxy. In this case, the application calls the API over HTTP, and the connection is upgraded to HTTPS/TLS in the Envoy proxy.
+
+A benefit of sending unencrypted HTTP requests from the source, and letting Istio perform the TLS upgrade, is that Istio can produce better telemetry and provide more routing control for requests that are not encrypted.
+
+For this example you are using the Echo API hosted at 3scale.net.
+
+. Create a ServiceEntry for the Echo API:
++
+----
+$ echo "---
+apiVersion: networking.istio.io/v1beta1
+kind: ServiceEntry
+metadata:
+  name: echo
+spec:
+  hosts:
+  - echo-api.3scale.net
+  ports:
+  - number: 443
+    name: https
+    protocol: TLS
+  resolution: DNS
+  location: MESH_EXTERNAL
+" | oc create -f - -n $ERDEMO_NS
+----
+. Verify that you can call the Echo API from within the service pods of the Emergency Response application:
++
+----
+$ oc exec $MISSION_SERVICE_POD -c $ERDEMO_USER-mission-service -n $ERDEMO_NS -it -- curl -v https://echo-api.3scale.net
+----
++
+.Sample output
+----
+* Rebuilt URL to: https://echo-api.3scale.net/
+*   Trying 3.209.102.99...
+* TCP_NODELAY set
+* Connected to echo-api.3scale.net (3.209.102.99) port 443 (#0)
+* ALPN, offering h2
+* ALPN, offering http/1.1
+* successfully set certificate verify locations:
+*   CAfile: /etc/pki/tls/certs/ca-bundle.crt
+  CApath: none
+* TLSv1.3 (OUT), TLS handshake, Client hello (1):
+* TLSv1.3 (IN), TLS handshake, Server hello (2):
+* TLSv1.2 (IN), TLS handshake, Certificate (11):
+* TLSv1.2 (IN), TLS handshake, Server key exchange (12):
+* TLSv1.2 (IN), TLS handshake, Server finished (14):
+* TLSv1.2 (OUT), TLS handshake, Client key exchange (16):
+* TLSv1.2 (OUT), TLS change cipher, Change cipher spec (1):
+* TLSv1.2 (OUT), TLS handshake, Finished (20):
+* TLSv1.2 (IN), TLS handshake, Finished (20):
+* SSL connection using TLSv1.2 / ECDHE-RSA-AES128-GCM-SHA256
+* ALPN, server did not agree to a protocol
+* Server certificate:
+*  subject: CN=*.3scale.net
+*  start date: Mar 18 00:00:00 2020 GMT
+*  expire date: Apr 18 12:00:00 2021 GMT
+*  subjectAltName: host "echo-api.3scale.net" matched cert's "*.3scale.net"
+*  issuer: C=US; O=Amazon; OU=Server CA 1B; CN=Amazon
+*  SSL certificate verify ok.
+> GET / HTTP/1.1
+> Host: echo-api.3scale.net
+> User-Agent: curl/7.61.1
+> Accept: */*
+>
+< HTTP/1.1 200 OK
+< Cache-control: private
+< Content-Type: application/json
+< Set-Cookie: d8c1dd0e39ac4456ed39ce5889b9a5a5=a2fc12ea6f2b4c73b9df4196c9fb19a7; path=/; HttpOnly
+< Vary: Origin
+< X-3scale-Echo-API: echo-api/1.0.3
+< X-Content-Type-Options: nosniff
+< Content-Length: 535
+< Connection: keep-alive
+<
+{
+  "method": "GET",
+  "path": "/",
+  "args": "",
+  "body": "",
+  "headers": {
+    "HTTP_VERSION": "HTTP/1.1",
+    "HTTP_HOST": "echo-api.3scale.net",
+    "HTTP_ACCEPT": "*/*",
+    "HTTP_USER_AGENT": "curl/7.61.1",
+    "HTTP_X_FORWARDED_FOR": "52.210.207.250, 10.0.103.196",
+    "HTTP_X_FORWARDED_HOST": "echo-api.3scale.net",
+    "HTTP_X_FORWARDED_PORT": "443",
+    "HTTP_X_FORWARDED_PROTO": "https",
+    "HTTP_FORWARDED": "for=10.0.103.196;host=echo-api.3scale.net;proto=https"
+  },
+  "uuid": "2c9d91ce-6e64-43c4-a806-a49836a423af"
+}
+----
+. Verify the Envoy proxy access log of the mission service pod.
++
+----
+$ oc logs $MISSION_SERVICE_POD -c istio-proxy -n $ERDEMO_NS | grep outbound
+----
++
+Towards the end of the logs, expect to see an entry like:
++
+----
+[2021-02-17T17:55:37.862Z] "- - -" 0 - "-" "-" 786 6246 348 - "-" "-" "-" "-" "107.23.61.39:443" outbound|443||echo-api.3scale.net 10.128.2.203:36096 3.209.102.99:443 10.128.2.203:48122 echo-api.3scale.net -
+----
+
+. In order to be able to call the API from within the application container over HTTP, and upgrade to HTTPS in the Envoy proxy, the HTTP port need to be rewritten from 80 to 443. This can be defined in a `VirtualService`:
++
+----
+$ echo "---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: echo-tls
+spec:
+  hosts:
+  - echo-api.3scale.net
+  http:
+  - match:
+    - port: 80
+    route:
+    - destination:
+        host: echo-api.3scale.net
+        subset: tls-origination
+        port:
+          number: 443
+" | oc create -f - -n $ERDEMO_NS
+----
++
+* A call to host `echo-api.3scale.net` port `80` is routed to the same host, but with port `443`.
+. In the Envoy proxy, the TLS origination should be performed. This can be configured in a `Destination Rule`:
++
+----
+$ echo "---
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  name: echo-tls
+spec:
+  host: echo-api.3scale.net
+  subsets:
+  - name: tls-origination
+    trafficPolicy:
+      loadBalancer:
+        simple: ROUND_ROBIN
+      portLevelSettings:
+      - port:
+          number: 443
+        tls:
+          mode: SIMPLE # initiates HTTPS when accessing api.mapbox.com
+" | oc create -f - -n $ERDEMO_NS
+----
+. Now you can call the Echo API from an application container using plain HTTP:
++
+----
+$ oc exec $MISSION_SERVICE_POD -c $ERDEMO_USER-mission-service -n $ERDEMO_NS -it -- curl -v http://echo-api.3scale.net
+----
++
+.Sample Output
+----
+* Rebuilt URL to: http://echo-api.3scale.net/
+*   Trying 3.209.102.99...
+* TCP_NODELAY set
+* Connected to echo-api.3scale.net (3.209.102.99) port 80 (#0)
+> GET / HTTP/1.1
+> Host: echo-api.3scale.net
+> User-Agent: curl/7.61.1
+> Accept: */*
+>
+< HTTP/1.1 200 OK
+< cache-control: private
+< content-type: application/json
+< set-cookie: d8c1dd0e39ac4456ed39ce5889b9a5a5=fd71b3b8302ed17a9039bd73cc13a7cd; path=/; HttpOnly
+< vary: Origin
+< x-3scale-echo-api: echo-api/1.0.3
+< x-content-type-options: nosniff
+< content-length: 1966
+< x-envoy-upstream-service-time: 278
+< date: Wed, 17 Feb 2021 18:08:34 GMT
+< server: envoy
+<
+{
+  "method": "GET",
+  "path": "/",
+  "args": "",
+  "body": "",
+  "headers": {
+    "HTTP_VERSION": "HTTP/1.1",
+    "HTTP_HOST": "echo-api.3scale.net",
+    "HTTP_ACCEPT": "*/*",
+    "HTTP_USER_AGENT": "curl/7.61.1",
+    "HTTP_X_B3_SAMPLED": "1",
+    "HTTP_X_B3_SPANID": "0c34a2204837639c",
+    "HTTP_X_B3_TRACEID": "df87c6edfa4da8370c34a2204837639c",
+    "HTTP_X_ENVOY_ATTEMPT_COUNT": "1",
+    "HTTP_X_ENVOY_DECORATOR_OPERATION": "echo-api.3scale.net:443/*",
+    "HTTP_X_ENVOY_PEER_METADATA": "ChoKCkNMVVNURVJfSUQSDBoKS3ViZXJuZXRlcwo4CgxJTlNUQU5DRV9JUFMSKBomMTAuMTI4LjIuMjAzLGZlODA6OjUwMjY6N2NmZjpmZTQxOjQ3YjAK0AIKBkxBQkVMUxLFAirCAgoeCgNhcHASFxoVdXNlcjItbWlzc2lvbi1zZXJ2aWNlCicKCmRlcGxveW1lbnQSGRoXdXNlcjItbWlzc2lvbi1zZXJ2aWNlLTMKKwoQZGVwbG95bWVudGNvbmZpZxIXGhV1c2VyMi1taXNzaW9uLXNlcnZpY2UKFwoFZ3JvdXASDhoMZXJkLXNlcnZpY2VzCh4KDGlzdGlvLmlvL3JldhIOGgxmdWxsLWluc3RhbGwKJAoZc2VjdXJpdHkuaXN0aW8uaW8vdGxzTW9kZRIHGgVpc3Rpbwo6Ch9zZXJ2aWNlLmlzdGlvLmlvL2Nhbm9uaWNhbC1uYW1lEhcaFXVzZXIyLW1pc3Npb24tc2VydmljZQovCiNzZXJ2aWNlLmlzdGlvLmlvL2Nhbm9uaWNhbC1yZXZpc2lvbhIIGgZsYXRlc3QKGgoHTUVTSF9JRBIPGg1jbHVzdGVyLmxvY2FsCicKBE5BTUUSHxoddXNlcjItbWlzc2lvbi1zZXJ2aWNlLTMtcTZ2d3gKHAoJTkFNRVNQQUNFEg8aDXVzZXIyLWVyLWRlbW8KZwoFT1dORVISXhpca3ViZXJuZXRlczovL2FwaXMvdjEvbmFtZXNwYWNlcy91c2VyMi1lci1kZW1vL3JlcGxpY2F0aW9uY29udHJvbGxlcnMvdXNlcjItbWlzc2lvbi1zZXJ2aWNlLTMKJAoPU0VSVklDRV9BQ0NPVU5UEhEaD21pc3Npb24tc2VydmljZQoqCg1XT1JLTE9BRF9OQU1FEhkaF3VzZXIyLW1pc3Npb24tc2VydmljZS0z",
+    "HTTP_X_ENVOY_PEER_METADATA_ID": "sidecar~10.128.2.203~user2-mission-service-3-q6vwx.user2-er-demo~user2-er-demo.svc.cluster.local",
+    "HTTP_X_REQUEST_ID": "e0b85262-d2d7-9eb1-8464-f1d017b922bd",
+    "HTTP_X_FORWARDED_FOR": "52.210.207.250, 10.0.103.196",
+    "HTTP_X_FORWARDED_HOST": "echo-api.3scale.net",
+    "HTTP_X_FORWARDED_PORT": "443",
+    "HTTP_X_FORWARDED_PROTO": "https",
+    "HTTP_FORWARDED": "for=10.0.103.196;host=echo-api.3scale.net;proto=https"
+  },
+  "uuid": "11b785ac-e288-4bd4-8f9d-1bcd2e4a2144"
+* Connection #0 to host echo-api.3scale.net left intact
+}
+----
+* The Echo API echoes all the headers from the incoming call. Notice the tracing headers (`HTTP_X_B3`) and other headers added by the Envoy proxy. These headers are not present when calling the API directly over HTTPS, because Envoy cannot add headers to encrypted traffic.
+. Verify the Envoy proxy access log of the mission service pod.
++
+----
+$ oc logs $MISSION_SERVICE_POD -c istio-proxy -n $ERDEMO_NS | grep outbound
+----
++
+Towards the end of the logs, expect to see an entry like:
++
+----
+[2021-02-17T18:37:42.586Z] "GET / HTTP/1.1" 200 - "-" "-" 0 1964 275 274 "-" "curl/7.61.1" "b2bca157-fa47-96c6-a340-743019ffc654" "echo-api.3scale.net" "3.209.102.99:443" outbound|443|tls-origination|echo-api.3scale.net 10.128.2.203:38624 107.23.61.39:80 10.128.2.203:58266 - -
+----
++
+* Notice that the access log contains a lot more information than when calling the Echo API over HTTPS.
+* Notice the name of the upstream cluster: `outbound|443|tls-origination|echo-api.3scale.net`, which indicates that the traffic was routed through the `tls-origination` subset defined in the `VirtualService`.
+
+. As the call to the Echo API originates as a HTTP call, service mesh routing rules can be applied. For instance, set a time-out rule on calls to the Echo API. +
+Edit the `echo-tls` `VirtualService`, and add the time-out rule. Use a sufficient low value for the timeout to ensure the rule fires.
++
+----
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: echo-tls
+spec:
+  hosts:
+  - echo-api.3scale.net
+  http:
+  - match:
+    - port: 80
+    timeout: 50ms
+    route:
+    - destination:
+        host: echo-api.3scale.net
+        port:
+          number: 443
+        subset: tls-origination
+----
+. Call the Echo API from the mission service container:
++
+----
+oc exec $MISSION_SERVICE_POD -c $ERDEMO_USER-mission-service -n $ERDEMO_NS -it -- curl -v https://echo-api.3scale.net
+----
++
+Notice the HTTP response code `504 Gateway Timeout`.
++
+Notice the following entries in the proxy container logs:
++
+----
+[2021-02-17T21:10:57.177Z] "GET / HTTP/1.1" 504 UT "-" "-" 0 24 49 - "-" "curl/7.61.1" "cb513d41-6419-9ae2-9ecd-22b17bdd75ef" "echo-api.3scale.net" "107.23.61.39:443" outbound|443|tls-origination|echo-api.3scale.net 10.128.2.203:42872 3.209.102.99:80 10.128.2.203:55984 - -
+----
++
+The `UT` Response flag stands for `Upstream request timeout`.
+
+. Before continuing with the next part of the lab, remove the `ServiceEntry`, `VirtualService` and `DestinationRule` created for the Echo API:
++
+----
+$ oc delete serviceentry mapbox -n $ERDEMO_NS
+$ oc delete virtualservice echo-tls -n $ERDEMO_NS
+$ oc delete destinationrule echo-tls -n $ERDEMO_NS
+----
+
+== Accessing External Services through Egress Gateway
+
+=== Egress gateway for HTTPS traffic
+
+Traffic flowing out of the mesh can be tunneled through egress gateways. The service mesh installs an _egress gateway service_, which is an Envoy proxy container running on its own. Several egress gateways can be installed as part of the service mesh, so you can have a separate egress gateway per external service.
+
+. Create an egress `Gateway` for the Echo API. Bind the Gateway to the `istio-egressgateway` service in the service mesh controlplane:
++
+----
+$ echo "---
+apiVersion: networking.istio.io/v1beta1
+kind: Gateway
+metadata:
+  name: echo-egress
+spec:
+  selector:
+    istio: egressgateway
+  servers:
+  - port:
+      number: 443
+      name: tls
+      protocol: TLS
+    hosts:
+    - echo-api.3scale.net
+    tls:
+      mode: PASSTHROUGH
+" | oc create -f - -n $SM_CP_NS
+----
+. Create a VirtualService to route all traffic for the Echo API through the egress gateway and from the gateway to the external service.
++
+----
+$ echo "---
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: echo-egress
+spec:
+  hosts:
+  - echo-api.3scale.net
+  gateways:
+  - mesh
+  - echo-egress
+  tls:
+  - match:
+    - gateways:
+      - mesh
+      port: 443
+      sniHosts:
+      - echo-api.3scale.net
+    route:
+    - destination:
+        host: istio-egressgateway.$SM_CP_NS.svc.cluster.local
+        subset: echo
+        port:
+          number: 443
+  - match:
+    - gateways:
+      - echo-egress
+      port: 443
+      sniHosts:
+      - echo-api.3scale.net
+    route:
+    - destination:
+        host: echo-api.3scale.net
+        port:
+          number: 443
+      weight: 100
+" | oc create -f - -n $SM_CP_NS
+----
+* The `mesh` gateway is a special predefined gateway which applies to all sidecar proxies in the service mesh.
+* This virtual service defines that all HTTPS/TLS traffic to host `echo-api.3scale.net` is routed to the egress gateway in the control plane on port 443. All traffic to the egress gateway for `echo-api.3scale.net` is routed to the external service on port 443 (through the `ServiceEntry` abstraction).
+. Create a `DestinationRule` defining the `echo` subset of the `VirtualService`:
++
+----
+$ echo "---
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: echo-egress
+spec:
+  host: istio-egressgateway.$SM_CP_NS.svc.cluster.local
+  subsets:
+  - name: echo
+" | oc create -f - -n $SM_CP_NS
+----
+. Send a HTTPS request to Echo API from within the mission service container:
++
+----
+$ oc exec $MISSION_SERVICE_POD -c $ERDEMO_USER-mission-service -n $ERDEMO_NS -it -- curl -v https://echo-api.3scale.net
+----
++
+Expect a HTTP return code `200`
+. Verify the Envoy proxy access log of the mission service pod.
++
+----
+$ oc logs $MISSION_SERVICE_POD -c istio-proxy -n $ERDEMO_NS | grep outbound
+----
++
+Towards the end of the logs, expect to see an entry like:
++
+----
+[2021-02-17T23:16:14.483Z] "- - -" 0 - "-" "-" 786 6273 355 - "-" "-" "-" "-" "10.128.3.40:8443" outbound|443|echo|istio-egressgateway.admin2-istio-system.svc.cluster.local 10.128.2.203:53538 107.23.61.39:443 10.128.2.203:45708 echo-api.3scale.net -
+----
++
+* Notice that the outbound traffic is sent to the egress gateway service in the controlplane.
+. Check the logs of the egress gateway:
++
+----
+$ EGRESS_GATEWAY_POD=$(oc get pod -l app=istio-egressgateway -o jsonpath={.items[0].metadata.name} -n $SM_CP_NS)
+$
+----
++
+Towards the end of the logs, expect to see an entry like:
++
+----
+[2021-02-17T23:16:14.485Z] "- - -" 0 - "-" "-" 786 6273 354 - "-" "-" "-" "-" "3.209.102.99:443" outbound|443||echo-api.3scale.net 10.128.3.40:40928 10.128.3.40:8443 10.128.2.203:53538 echo-api.3scale.net -
+----
+
+. Before continuing with the next part of the lab, remove the `Gateway`, `VirtualService` and `DestinationRule` created for the Echo API:
+----
+$ oc delete gateway echo-egress -n $SM_CP_NS
+$ oc delete virtualservice echo-egress -n $SM_CP_NS
+$ oc delete destinationrule echo-egress -n $SM_CP_NS
+----
+
+=== Egress Gateway with HTTPS Origination
+
+In the previous example, the application called the external service over HTTPS. It is also possible to have TLS originated by the egress gateway. In this case, the application calls the API over HTTP, and TLS is initiated in the egress gateway.
+
+. Create an egress `Gateway` for the Echo API. Bind the Gateway to the `istio-egressgateway` service in the service mesh controlplane. In contrast to the previous example, the gateway is listening to port 80.
++
+----
+$ echo "---
+apiVersion: networking.istio.io/v1beta1
+kind: Gateway
+metadata:
+  name: echo-egress-http
+spec:
+  selector:
+    istio: egressgateway
+  servers:
+  - port:
+      number: 80
+      name: http
+      protocol: HTTP
+    hosts:
+    - echo-api.3scale.net
+" | oc create -f - -n $SM_CP_NS
+----
+
+. Create a VirtualService to route all traffic for the Echo API through the egress gateway and from the gateway to the external service.
++
+----
+$ echo "---
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: echo-egress-http
+spec:
+  hosts:
+  - echo-api.3scale.net
+  gateways:
+  - mesh
+  - echo-egress-http
+  http:
+  - match:
+    - gateways:
+      - mesh
+      port: 80
+    route:
+    - destination:
+        host: istio-egressgateway.$SM_CP_NS.svc.cluster.local
+        subset: echo
+        port:
+          number: 80
+  - match:
+    - gateways:
+      - echo-egress-http
+      port: 80
+    route:
+    - destination:
+        host: echo-api.3scale.net
+        port:
+          number: 443
+      weight: 100
+" | oc create -f - -n $SM_CP_NS
+----
+* This virtual service defines that all HTTP traffic to host `echo-api.3scale.net` is routed to the egress gateway in the control plane on port 80. All traffic to the egress gateway for `echo-api.3scale.net` on port 80 is routed to the external service on port 443 (through the `ServiceEntry` abstraction).
+. Create a `DestinationRule` defining the `echo` subset of the `VirtualService`:
++
+----
+$ echo "---
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: echo-egress-http
+spec:
+  host: istio-egressgateway.$SM_CP_NS.svc.cluster.local
+  subsets:
+  - name: echo
+" | oc create -f - -n $SM_CP_NS
+----
+. Create a second DestinationRule to initiate TLS for traffic targeting `echo-api.3scale.net`:
++
+----
+$ echo "---
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  name: echo-egress-tls
+spec:
+  host: echo-api.3scale.net
+  trafficPolicy:
+    loadBalancer:
+      simple: ROUND_ROBIN
+    portLevelSettings:
+    - port:
+        number: 443
+      tls:
+        mode: SIMPLE # initiates HTTPS for connections to echo-api.3scale.net
+" | oc create -f - -n $SM_CP_NS
+----
+
+. Send a HTTP request to Echo API from within the mission service container:
++
+----
+$ oc exec $MISSION_SERVICE_POD -c $ERDEMO_USER-mission-service -n $ERDEMO_NS -it -- curl -v http://echo-api.3scale.net
+----
++
+Expect a HTTP return code `200`
+. Verify the Envoy proxy access log of the mission service pod.
++
+----
+$ oc logs $MISSION_SERVICE_POD -c istio-proxy -n $ERDEMO_NS | grep outbound
+----
++
+Towards the end of the logs, expect to see an entry like:
++
+----
+[2021-02-18T00:09:00.697Z] "GET / HTTP/1.1" 200 - "-" "-" 0 2110 72 72 "-" "curl/7.61.1" "0e2d5aff-2e19-9829-b192-017c8689435a" "echo-api.3scale.net" "10.128.3.40:8080" outbound|80|echo|istio-egressgateway.admin2-istio-system.svc.cluster.local 10.128.2.203:45868 107.23.61.39:80 10.128.2.203:46412 - -
+----
++
+* Notice that the outbound traffic is sent to the egress gateway service in the controlplane over port 80.
+. Check the logs of the egress gateway:
++
+----
+$ EGRESS_GATEWAY_POD=$(oc get pod -l app=istio-egressgateway -o jsonpath={.items[0].metadata.name} -n $SM_CP_NS)
+$ oc logs $EGRESS_GATEWAY_POD -n $SM_CP_NS
+----
++
+Towards the end of the logs, expect to see an entry like:
++
+----
+[2021-02-18T00:09:02.012Z] "GET / HTTP/2" 200 - "-" "-" 0 2112 71 70 "10.128.2.203" "curl/7.61.1" "aa251118-8bb6-9c62-b0f7-17841c4d9007" "echo-api.3scale.net" "107.23.61.39:443" outbound|443||echo-api.3scale.net 10.128.3.40:58816 10.128.3.40:8080 10.128.2.203:45868 - -
+----
+
+. Before continuing with the next part of the lab, remove the `Gateway`, `VirtualService` and `DestinationRule` created for the Echo API:
++
+----
+$ oc delete gateway echo-egress-http -n $SM_CP_NS
+$ oc delete virtualservice echo-egress-http -n $SM_CP_NS
+$ oc delete destinationrule echo-egress-http -n $SM_CP_NS
+----
+
+=== Egress Gateway with HTTPS Origination and Inter-service mTLS
+
+In our last example, the communication between the application issuing a call to an external service and the egress gateway is plain unencrypted HTTP. The logical next step consists in using the Service Mesh security features to secure that communication using mTLS.
+
+. Create an egress `Gateway` for the Echo API. Bind the Gateway to the `istio-egressgateway` service in the service mesh controlplane. In contrast to the previous example, the gateway is listening to port 443, and use TLS mode `ISTIO_MUTUAL`.
++
+----
+echo "---
+kind: Gateway
+apiVersion: networking.istio.io/v1alpha3
+metadata:
+  name: echo-egress-http-mtls
+spec:
+  servers:
+    - hosts:
+        - echo-api.3scale.net
+      port:
+        name: https
+        number: 443
+        protocol: HTTPS
+      tls:
+        mode: ISTIO_MUTUAL
+  selector:
+    istio: egressgateway
+" | oc create -f - -n $SM_CP_NS
+----
+
+. Create a VirtualService to route all traffic for the Echo API through the egress gateway and from the gateway to the external service.
++
+----
+$ echo "---
+kind: VirtualService
+apiVersion: networking.istio.io/v1alpha3
+metadata:
+  name: echo-egress-http-mtls
+spec:
+  hosts:
+    - echo-api.3scale.net
+  gateways:
+    - mesh
+    - echo-egress-http-mtls
+  http:
+    - match:
+        - gateways:
+            - mesh
+          port: 80
+      route:
+        - destination:
+            host: istio-egressgateway.admin2-istio-system.svc.cluster.local
+            port:
+              number: 443
+            subset: echo
+    - match:
+        - gateways:
+            - echo-egress-http-mtls
+          port: 443
+      route:
+        - destination:
+            host: echo-api.3scale.net
+            port:
+              number: 443
+          weight: 100
+" | oc create -f - -n $SM_CP_NS
+----
+* Notice that traffic in the service mesh (gateway `mesh`) for host `echo-api.3scale.net` is routed to the egress gateway service on port 443 (this was port 80 in the previous example).
+* Traffic to the egress gateway for `echo-api.3scale.net` on port 443 is routed to the external service on port 443 (through the `ServiceEntry` abstraction).
+
+. Create a `DestinationRule` for the `echo` subset of the `VirtualService`. The `DestinationRule` defines a policy that mTLS is to be used for traffic targeting the egress gateway.
++
+----
+$ echo "---
+kind: DestinationRule
+apiVersion: networking.istio.io/v1alpha3
+metadata:
+  name: echo-egress-http-mtls
+spec:
+  host: istio-egressgateway.admin2-istio-system.svc.cluster.local
+  subsets:
+    - name: echo
+      trafficPolicy:
+        loadBalancer:
+          simple: ROUND_ROBIN
+        portLevelSettings:
+          - port:
+              number: 443
+            tls:
+              mode: ISTIO_MUTUAL
+              sni: echo-api.3scale.net
+" | oc create -f - -n $SM_CP_NS
+----
+
+. Send a HTTP request to Echo API from within the mission service container:
++
+----
+$ oc exec $MISSION_SERVICE_POD -c $ERDEMO_USER-mission-service -n $ERDEMO_NS -it -- curl -v http://echo-api.3scale.net
+----
++
+.Sample Output
+----
+* Rebuilt URL to: http://echo-api.3scale.net/
+*   Trying 3.209.102.99...
+* TCP_NODELAY set
+* Connected to echo-api.3scale.net (3.209.102.99) port 80 (#0)
+> GET / HTTP/1.1
+> Host: echo-api.3scale.net
+> User-Agent: curl/7.61.1
+> Accept: */*
+>
+< HTTP/1.1 200 OK
+< cache-control: private
+< content-type: application/json
+< set-cookie: d8c1dd0e39ac4456ed39ce5889b9a5a5=a2fc12ea6f2b4c73b9df4196c9fb19a7; path=/; HttpOnly
+< vary: Origin
+< x-3scale-echo-api: echo-api/1.0.3
+< x-content-type-options: nosniff
+< content-length: 3643
+< x-envoy-upstream-service-time: 71
+< date: Thu, 18 Feb 2021 00:59:45 GMT
+< server: envoy
+<
+{
+  "method": "GET",
+  "path": "/",
+  "args": "",
+  "body": "",
+  "headers": {
+    "HTTP_VERSION": "HTTP/1.1",
+    "HTTP_HOST": "echo-api.3scale.net",
+    "HTTP_ACCEPT": "*/*",
+    "HTTP_USER_AGENT": "curl/7.61.1",
+    "HTTP_X_B3_PARENTSPANID": "b92eac5cc6c0b2fb",
+    "HTTP_X_B3_SAMPLED": "1",
+    "HTTP_X_B3_SPANID": "b77e1f02a5964ce1",
+    "HTTP_X_B3_TRACEID": "ebe978696bdeb9cab92eac5cc6c0b2fb",
+    "HTTP_X_ENVOY_ATTEMPT_COUNT": "1",
+    "HTTP_X_ENVOY_DECORATOR_OPERATION": "echo-api.3scale.net:443/*",
+    "HTTP_X_ENVOY_INTERNAL": "true",
+    "HTTP_X_ENVOY_PEER_METADATA": "ChoKCkNMVVNURVJfSUQSDBoKS3ViZXJuZXRlcwo3CgxJTlNUQU5DRV9JUFMSJxolMTAuMTI4LjMuNDAsZmU4MDo6ZjA2Mzo1NGZmOmZlZmI6NjYwNQrLAg
+oGTEFCRUxTEsACKr0CChwKA2FwcBIVGhNpc3Rpby1lZ3Jlc3NnYXRld2F5ChgKBWlzdGlvEg8aDWVncmVzc2dhdGV3YXkKLgoVbWFpc3RyYS1jb250cm9sLXBsYW5lEhUaE2FkbWluMi1pc3Rpby1zeXN
+0ZW0KPwoSbWFpc3RyYS5pby9nYXRld2F5EikaJ2lzdGlvLWVncmVzc2dhdGV3YXkuYWRtaW4yLWlzdGlvLXN5c3RlbQohChFwb2QtdGVtcGxhdGUtaGFzaBIMGgo3YmY2Y2RiNTZkCjgKH3NlcnZpY2Uu
+aXN0aW8uaW8vY2Fub25pY2FsLW5hbWUSFRoTaXN0aW8tZWdyZXNzZ2F0ZXdheQo1CiNzZXJ2aWNlLmlzdGlvLmlvL2Nhbm9uaWNhbC1yZXZpc2lvbhIOGgxmdWxsLWluc3RhbGwKGgoHTUVTSF9JRBIPG
+g1jbHVzdGVyLmxvY2FsCi4KBE5BTUUSJhokaXN0aW8tZWdyZXNzZ2F0ZXdheS03YmY2Y2RiNTZkLTZ0Zmg5CiIKCU5BTUVTUEFDRRIVGhNhZG1pbjItaXN0aW8tc3lzdGVtCmMKBU9XTkVSEloaWGt1Ym
+VybmV0ZXM6Ly9hcGlzL2FwcHMvdjEvbmFtZXNwYWNlcy9hZG1pbjItaXN0aW8tc3lzdGVtL2RlcGxveW1lbnRzL2lzdGlvLWVncmVzc2dhdGV3YXkKOAoPU0VSVklDRV9BQ0NPVU5UEiUaI2lzdGlvLWV
+ncmVzc2dhdGV3YXktc2VydmljZS1hY2NvdW50CiYKDVdPUktMT0FEX05BTUUSFRoTaXN0aW8tZWdyZXNzZ2F0ZXdheQ==",
+    "HTTP_X_ENVOY_PEER_METADATA_ID": "router~10.128.3.40~istio-egressgateway-7bf6cdb56d-6tfh9.admin2-istio-system~admin2-istio-system.svc.cluster.local",
+    "HTTP_X_FORWARDED_CLIENT_CERT": "By=spiffe://cluster.local/ns/admin2-istio-system/sa/istio-egressgateway-service-account;Hash=a7ecafc7fbf403d9fd2c8fb
+b353f52fe47d257731cdce7ccb2e8f6ce6903ccc3;Cert=\"-----BEGIN%20CERTIFICATE-----%0AMIIDLTCCAhWgAwIBAgIQJCabL6K1IzMATYXhuuI3rzANBgkqhkiG9w0BAQsFADAY%0AMRYwF
+AYDVQQKEw1jbHVzdGVyLmxvY2FsMB4XDTIxMDIxNzE1NTQzMFoXDTIxMDIx%0AODE1NTQzMFowADCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBALVKfaC2%0AySnkQ6JtgEeiYX71weuA2Uwg
+wRjM6NqYtWq%2BNl7LvU9QrSMiWeGfaVQ4D0J6SqAj%0AaEVItHXK1SiaJ7fs6RV%2Fp7%2BU1IbhXJkBg46D95WeRKikeC6qU0oUUKIKv9yOscqw%0Ae%2FbN7XAuPX0RtjjukLMNJw9JTo7z1renk6J
+PZehSf7vOIos7IMPl30VwclkyIsv%2F%0AV5512oLPPb5hAsZvCjxqn2Y1jRObMaaagYQ7osSbHLhB5yFQ7INprOALXcYe32Jl%0AhJED4PXkOH5Dt2XnJIuBiPOnYRi5RDIdBidsopPA59ocN99KkCjm
+0pgNkWcCausz%0AYShBisl7l%2Bfx9N8CAwEAAaOBijCBhzAOBgNVHQ8BAf8EBAMCBaAwHQYDVR0lBBYw%0AFAYIKwYBBQUHAwEGCCsGAQUFBwMCMAwGA1UdEwEB%2FwQCMAAwSAYDVR0RAQH%2FBD4w%
+0APIY6c3BpZmZlOi8vY2x1c3Rlci5sb2NhbC9ucy91c2VyMi1lci1kZW1vL3NhL21p%0Ac3Npb24tc2VydmljZTANBgkqhkiG9w0BAQsFAAOCAQEAJlK5KiUJTFiGmHXENVcn%0AtpB%2BxbWL82b75V5
+BC1NgVB6CzCeWoYExICnGwH6GGcEkozogmdlYjgIMupOvE%2FCg%0AoW06treqNlq8FbNx%2FBj26m2aNfhLvbX8n4hMN6caY9p30PK2EKmz9usxEfEdKkRH%0AvlP6FW7mWw17R%2BraHdZ6sMZjCLu0
+6vOfkVZe%2F%2FOW%2FKGsaGhoEDEV%2Fn1CAO5VnQPZ%0ADnax4xrajthwlLg4ISjEarjQUQLIPBAquQKBXeg5CUO3qiBsU0zthgXi5s7RWW8M%0AUFyxjoZC5buc5cyytSJ1KQNuxn%2Fq3t143jA7k
+n9KIS6pf8AetYiziUfWKdO%2Fa%2FVe%0AyQ%3D%3D%0A-----END%20CERTIFICATE-----%0A\";Subject=\"\";URI=spiffe://cluster.local/ns/user2-er-demo/sa/mission-service
+",
+    "HTTP_X_REQUEST_ID": "759c7f45-2adb-9f8b-ab3a-668d6e9644d1",
+    "HTTP_X_FORWARDED_FOR": "10.128.2.203, 52.210.207.250, 10.0.101.74",
+    "HTTP_X_FORWARDED_HOST": "echo-api.3scale.net",
+    "HTTP_X_FORWARDED_PORT": "443",
+    "HTTP_X_FORWARDED_PROTO": "https",
+    "HTTP_FORWARDED": "for=10.0.101.74;host=echo-api.3scale.net;proto=https"
+  },
+  "uuid": "f7760ee8-b72f-423a-90f7-49559a3c10f0"
+}
+----
++
+* Expect a HTTP return code `200`.
+. Verify the Envoy proxy access log of the mission service pod.
++
+----
+$ oc logs $MISSION_SERVICE_POD -c istio-proxy -n $ERDEMO_NS | grep outbound
+----
++
+Towards the end of the logs, expect to see an entry like:
++
+----
+[2021-02-18T00:59:43.888Z] "GET / HTTP/1.1" 200 - "-" "-" 0 3645 76 76 "-" "curl/7.61.1" "4700cd45-7255-9fbb-bb65-318ff90380ce" "echo-api.3scale.net" "10.128.3.40:8443" outbound|443|echo|istio-egressgateway.admin2-istio-system.svc.cluster.local 10.128.2.203:38632 3.209.102.99:80 10.128.2.203:43804 - -
+----
++
+* Notice that the outbound traffic is sent to the egress gateway service in the controlplane over port 443.
+. Check the logs of the egress gateway:
++
+----
+$ EGRESS_GATEWAY_POD=$(oc get pod -l app=istio-egressgateway -o jsonpath={.items[0].metadata.name} -n $SM_CP_NS)
+$ oc logs $EGRESS_GATEWAY_POD -n $SM_CP_NS
+----
++
+Towards the end of the logs, expect to see an entry like:
++
+----
+[2021-02-18T00:59:43.888Z] "GET / HTTP/1.1" 200 - "-" "-" 0 3645 76 76 "10.128.2.203" "curl/7.61.1" "4700cd45-7255-9fbb-bb65-318ff90380ce" "echo-api.3scale.net" "107.23.61.39:443" outbound|443||echo-api.3scale.net 10.128.3.40:47452 10.128.3.40:8443 10.128.2.203:38632 echo-api.3scale.net -
+----
