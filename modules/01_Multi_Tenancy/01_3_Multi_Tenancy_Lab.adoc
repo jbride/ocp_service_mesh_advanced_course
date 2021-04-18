@@ -244,6 +244,7 @@ Have your instructor demonstrate these modified iptable rules in a manner simila
 . Identify the OpenShift Container Platform worker node that one of the Emergency Response Demo application pods is running on:
 +
 -----
+$ oc project user50-er-demo
 $ oc get pod user50-responder-service-6-5xr86 -o json | jq .spec.nodeName
 -----
 +
@@ -400,6 +401,14 @@ kafka-cluster-network-policy-zookeeper   strimzi.io/name=kafka-cluster-zookeeper
 ----
 ** `kafka-cluster-network-policy-kafka` and `kafka-cluster-network-policy-zookeeper` are created when installing the Kafka cluster, and define ingress rules for the Kafka and Zookeeper pods.
 ** `istio-mesh-full-install` and `istio-expose-route-full-install` are created when adding the namespace to the service mesh.
+.. Delete the network policies:
+- allow-from-all-namespaces
+- allow-from-ingress-namespace
++
+----
+$ oc delete networkpolicy allow-from-all-namespaces -n $ERDEMO_NS
+$ oc delete networkpolicy allow-from-ingress-namespace -n $ERDEMO_NS
+----
 .. Review the `istio-mesh-full-install` network policy:
 +
 ----
@@ -466,12 +475,13 @@ spec:
 .. Obtain a remote shell into the `stage-apicast` pod in the `apicast` namespace:
 +
 ----
+$ echo http://$ERDEMO_USER-incident-service.$ERDEMO_NS.svc:8080/incidents
 $ oc rsh -n $GW_PROJECT stage-apicast-1-xxxxx
 ----
 .. In the remote shell, `curl` the incident service through its service name:
 +
 ----
-sh-4.2$ curl http://$ERDEMO_USER-incident-service.$ERDEMO_NS.svc:8080/incidents
+sh-4.2$ curl <REPLACE_WITH_ECHO_URL>
 ----
 
 .. Exit the remote shell.
