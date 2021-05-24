@@ -439,7 +439,7 @@ Instructor layers 1 Emergency Response Demo per student
 . Checkout the installation code:
 +
 ----
-$ git clone https://github.com/btison/emergency-response-demo-install.git
+$ git clone https://github.com/gpe-mw-training/emergency-response-demo-install
 $ cd emergency-response-demo-install
 $ git checkout service-mesh-advanced-ilt
 ----
