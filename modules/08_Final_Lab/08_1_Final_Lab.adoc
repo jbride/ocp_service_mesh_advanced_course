@@ -46,7 +46,7 @@ oc new-project bookinfo
 . Deploy the `bookinfo` application in the new project:
 +
 -----
-oc apply -f https://raw.githubusercontent.com/istio/istio/1.4.0/samples/bookinfo/platform/kube/bookinfo.yaml -n bookinfo
+oc apply -f https://raw.githubusercontent.com/istio/istio/1.6.0/samples/bookinfo/platform/kube/bookinfo.yaml -n bookinfo
 -----
 
 . Review a description and architectural overview of the `bookinfo` application in the first section of its link:https://istio.io/docs/examples/bookinfo/[documentation].

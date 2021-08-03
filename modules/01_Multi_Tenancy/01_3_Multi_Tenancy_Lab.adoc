@@ -48,9 +48,8 @@ $ echo -en "\n\n$(oc get project $ERDEMO_NS -o template --template='{{.metadata.
 +
 .Sample Output
 -----
-map[kiali.io/member-of:admin50-istio-system maistra.io/member-of:admin50-istio-system]
+map[kiali.io/member-of:admin50-istio-system maistra.io/member-of:admin50-istio-system olm.operatorgroup.uid/054aba76-dd7e-487a-911e-4071a1853e81:]
 -----
-// map[maistra.io/member-of:admin27-istio-system]
 
 . Verify that your `$ERDEMO_NS` namespace now includes namespace-scoped `RoleBinding` resources associated with the Istio-related service accounts from your specific service mesh control plane:
 +
@@ -60,13 +59,10 @@ $ oc get RoleBinding  -n $ERDEMO_NS -l release=istio
 +
 .Sample Output
 -----
-NAME                                                             AGE
-istio-citadel-admin50-istio-system                               24s
-istio-galley-admin-role-binding-admin50-istio-system             24s
-istio-mixer-admin-role-binding-admin50-istio-system              24s
-istio-pilot-admin50-istio-system                                 24s
-istio-sidecar-injector-admin-role-binding-admin50-istio-system   24s
-prometheus-admin50-istio-system                                  24s
+NAME                              ROLE                                                   AGE
+istio-ingressgateway-sds          Role/istio-ingressgateway-sds                          51m
+istiod-pilot-full-install         ClusterRole/istiod-full-install-admin50-istio-system   51m
+prometheus-admin50-istio-system   ClusterRole/prometheus-admin50-istio-system            51m
 -----
 * The use of a project-scoped `RoleBinding` resource, rather than a cluster-scoped `ClusterRoleBinding` resource, is a key enabler of the _multi-tenant_ capabilities of Red Hat^(R)^ OpenShift^(R)^ Service Mesh.
 
@@ -75,44 +71,15 @@ prometheus-admin50-istio-system                                  24s
 . Verify that your `$ERDEMO_NS` namespace now also includes a `NetworkPolicy` resource called `istio-mesh`:
 +
 -----
-$ oc get NetworkPolicy istio-mesh -n $ERDEMO_NS
+$ oc get NetworkPolicy istio-mesh-full-install -n $ERDEMO_NS
 -----
 +
 .Sample Output
 -----
-NAME         POD-SELECTOR   AGE
-istio-mesh   <none>         26m
+NAME                      POD-SELECTOR   AGE
+istio-mesh-full-install   <none>         59m
 -----
 * This `NetworkPolicy` resource allows ingress to all pods specific to this namespace from all other registered members of the same OpenShift Service Mesh control plane.
-
-. Verify that your `$ERDEMO_NS` namespace now includes `istio` related secrets:
-+
------
-$ oc get secrets -n $ERDEMO_NS | grep istio
------
-+
-.Sample Output
------
-[...]
-istio.builder                                   istio.io/key-and-cert                 3      9m58s
-istio.default                                   istio.io/key-and-cert                 3      9m55s
-istio.deployer                                  istio.io/key-and-cert                 3      9m57s
-istio.disaster-simulator-service                istio.io/key-and-cert                 3      9m58s
-istio.emergency-console                         istio.io/key-and-cert                 3      9m54s
-istio.incident-priority-service                 istio.io/key-and-cert                 3      9m57s
-istio.incident-service                          istio.io/key-and-cert                 3      9m54s
-istio.kafka-cluster-entity-operator             istio.io/key-and-cert                 3      9m54s
-istio.kafka-cluster-kafka                       istio.io/key-and-cert                 3      9m55s
-istio.kafka-cluster-zookeeper                   istio.io/key-and-cert                 3      9m55s
-istio.mission-service                           istio.io/key-and-cert                 3      9m56s
-istio.postgresql                                istio.io/key-and-cert                 3      9m56s
-istio.process-service                           istio.io/key-and-cert                 3      9m57s
-istio.process-viewer                            istio.io/key-and-cert                 3      9m54s
-istio.responder-service                         istio.io/key-and-cert                 3      9m54s
-istio.responder-simulator-service               istio.io/key-and-cert                 3      9m53s
------
-* These secrets support mutual TLS functionality provided by OpenShift Service Mesh.
-You learn more about these secrets in the next module, which pertains to mTLS.
 
 == Opt In Auto-Injection Annotations
 
@@ -215,7 +182,7 @@ Downstream to upstream is how traffic always flows through Envoy.
 image::images/envoy_architecture.png[]
 
 
-=== Review Service Proxy Container
+=== Explore Service Proxy Container
 
 . Delete any `deploy` pods that are in a `completed` status and have not yet been deleted (this is just a cleanup):
 +
@@ -263,96 +230,96 @@ ifdef::showscript[]
 
 endif::showscript[]
 
-// === Demonstrate Modified iptables
+=== Demonstrate Modified iptables
 
-// When an Envoy service proxy is injected into an application pod, the `istio-cni` resource modifies iptables on the node that the pod lands on.
-// Recall from a previous lab that the `istio-cni` resource is deployed as a DaemonSet and subsequently runs one pod for all of the nodes in an OpenShift cluster.
+When an Envoy service proxy is injected into an application pod, the `istio-cni` resource modifies iptables on the node that the pod lands on.
+Recall from a previous lab that the `istio-cni` resource is deployed as a DaemonSet and subsequently runs one pod for all of the nodes in an OpenShift cluster.
 
-// In particular, the `istio-cni` resource creates iptable rules so that all ingress to and egress from the application container is redirected to port 15001 of the pod.
-// The Envoy service proxy has its listener bound to port 15001.
-
-
-// Have your instructor demonstrate these modified iptable rules in a manner similar to the following:
-
-// . Identify the OpenShift Container Platform worker node that one of the Emergency Response Demo application pods is running on:
-// +
-// -----
-// $ oc get pod user50-responder-service-6-5xr86 -o json | jq .spec.nodeName
-// -----
-// +
-// .Sample Output
-// -----
-// [...]
-// ip-10-0-136-113.eu-central-1.compute.internal
-// -----
+In particular, the `istio-cni` resource creates iptable rules so that all ingress to and egress from the application container is redirected to port 15001 of the pod.
+The Envoy service proxy has its listener bound to port 15001.
 
 
-// . Identify the ID of either container (application container or `envoy-proxy`) in that pod:
-// +
-// -----
-// $ oc describe pod user50-responder-service-6-5xr86 | grep cri-o
-// -----
-// +
-// .Sample Output
-// -----
-// [...]
-// Container ID:  cri-o://397fea50eb8ecd03db9fe8c9a7657c7980f23c8462e9cf2554e9a4493308e651
-// Container ID:  cri-o://90260d3d7ece810bb4c44a8aee3e23ebe50fd6b1225d48e6e103da070194c53a
-// -----
+Have your instructor demonstrate these modified iptable rules in a manner similar to the following:
+
+. Identify the OpenShift Container Platform worker node that one of the Emergency Response Demo application pods is running on:
++
+-----
+$ oc project user50-er-demo
+$ oc get pod user50-responder-service-6-5xr86 -o json | jq .spec.nodeName
+-----
++
+.Sample Output
+-----
+[...]
+ip-10-0-136-113.eu-central-1.compute.internal
+-----
+
+. Identify the ID of either container (application container or `envoy-proxy`) in that pod:
++
+-----
+$ oc describe pod user50-responder-service-6-5xr86 | grep cri-o
+-----
++
+.Sample Output
+-----
+[...]
+Container ID:  cri-o://397fea50eb8ecd03db9fe8c9a7657c7980f23c8462e9cf2554e9a4493308e651
+Container ID:  cri-o://90260d3d7ece810bb4c44a8aee3e23ebe50fd6b1225d48e6e103da070194c53a
+-----
 
 
-// . Set up a debug session into the node where the target Emergency Response pod runs:
-// +
-// -----
-// $ oc debug node/ip-10-0-136-113.eu-central-1.compute.internal
-// -----
+. Set up a debug session into the node where the target Emergency Response pod runs:
++
+-----
+$ oc debug node/ip-10-0-136-113.eu-central-1.compute.internal
+-----
 
-// . On that OpenShift node, switch to the host operating system shell that runs host operating system binaries:
-// +
-// -----
-// sh-4.4# chroot /host
-// -----
+. On that OpenShift node, switch to the host operating system shell that runs host operating system binaries:
++
+-----
+sh-4.4# chroot /host
+-----
 
-// . Using the previously determined container ID, determine the operating system process ID of the container on the OpenShift node:
-// +
-// -----
-// sh-4.4# crictl inspect --output json  90260d3d7ece810bb4c44a8aee3e23ebe50fd6b1225d48e6e103da070194c53a | grep pid
-// -----
-// +
-// .Sample Output
-// -----
-// 45315
-// -----
+. Using the previously determined container ID, determine the operating system process ID of the container on the OpenShift node:
++
+-----
+sh-4.4# crictl inspect --output json  90260d3d7ece810bb4c44a8aee3e23ebe50fd6b1225d48e6e103da070194c53a | grep pid
+-----
++
+.Sample Output
+-----
+45315
+-----
 
-// . Using the process ID of the container, view the iptable rules on that host machine:
-// +
-// -----
-// sh-4.4# nsenter -t 45315 -n iptables -t nat -S
-// -----
-// +
-// .Sample Output
-// -----
-// -P PREROUTING ACCEPT
-// -P INPUT ACCEPT
-// -P POSTROUTING ACCEPT
-// -P OUTPUT ACCEPT
-// -N ISTIO_REDIRECT
-// -N ISTIO_IN_REDIRECT
-// -N ISTIO_INBOUND
-// -N ISTIO_OUTPUT
-// -A PREROUTING -p tcp -j ISTIO_INBOUND
-// -A OUTPUT -p tcp -j ISTIO_OUTPUT
-// -A ISTIO_REDIRECT -p tcp -j REDIRECT --to-ports 15001
-// -A ISTIO_IN_REDIRECT -p tcp -j REDIRECT --to-ports 15001
-// -A ISTIO_INBOUND -p tcp -m tcp --dport 8080 -j ISTIO_IN_REDIRECT
-// -A ISTIO_OUTPUT ! -d 127.0.0.1/32 -o lo -j ISTIO_REDIRECT
-// -A ISTIO_OUTPUT -m owner --uid-owner 1000710001 -j RETURN
-// -A ISTIO_OUTPUT -m owner --gid-owner 1000710001 -j RETURN
-// -A ISTIO_OUTPUT -d 127.0.0.1/32 -j RETURN
-// -A ISTIO_OUTPUT -j ISTIO_REDIRECT
-// -----
-// * Note that all of the incoming traffic for this operating system process to port 8080--the port on which the Emergency Response `response-service` is listening--is being redirected to port 15001--the port on which the `istio-proxy` is listening.
-// The same holds true for the outgoing traffic.
+. Using the process ID of the container, view the iptable rules on that host machine:
++
+-----
+sh-4.4# nsenter -t 45315 -n iptables -t nat -S
+-----
++
+.Sample Output
+-----
+-P PREROUTING ACCEPT
+-P INPUT ACCEPT
+-P POSTROUTING ACCEPT
+-P OUTPUT ACCEPT
+-N ISTIO_REDIRECT
+-N ISTIO_IN_REDIRECT
+-N ISTIO_INBOUND
+-N ISTIO_OUTPUT
+-A PREROUTING -p tcp -j ISTIO_INBOUND
+-A OUTPUT -p tcp -j ISTIO_OUTPUT
+-A ISTIO_REDIRECT -p tcp -j REDIRECT --to-ports 15001
+-A ISTIO_IN_REDIRECT -p tcp -j REDIRECT --to-ports 15001
+-A ISTIO_INBOUND -p tcp -m tcp --dport 8080 -j ISTIO_IN_REDIRECT
+-A ISTIO_OUTPUT ! -d 127.0.0.1/32 -o lo -j ISTIO_REDIRECT
+-A ISTIO_OUTPUT -m owner --uid-owner 1000710001 -j RETURN
+-A ISTIO_OUTPUT -m owner --gid-owner 1000710001 -j RETURN
+-A ISTIO_OUTPUT -d 127.0.0.1/32 -j RETURN
+-A ISTIO_OUTPUT -j ISTIO_REDIRECT
+-----
+* Note that all of the incoming traffic for this operating system process to port 8080--the port on which the Emergency Response `response-service` is listening--is being redirected to port 15001--the port on which the `istio-proxy` is listening.
+The same holds true for the outgoing traffic.
 
 
 === Explore Administration API
@@ -391,7 +358,7 @@ $ oc -n $ERDEMO_NS rsh -c $ERDEMO_USER-responder-service \
 +
 IMPORTANT: Under no circumstances do any of your Envoy proxies have visibility to services that you do not own. This is critical from performance, scalability, and security perspectives.
 
-. Inspect the configuration sent by Pilot to your pod's sidecar using `istioctl`:
+. Inspect the configuration sent by Istiod to your pod's sidecar using `istioctl`:
 +
 -----
 $ istioctl proxy-config cluster -n $ERDEMO_NS \
@@ -426,17 +393,26 @@ $ oc get networkpolicy -n $ERDEMO_NS
 +
 .Sample Output
 ----
-istio-expose-route                       maistra.io/expose-route=true              19h
-istio-mesh                               <none>                                    19h
-kafka-cluster-network-policy-kafka       strimzi.io/name=kafka-cluster-kafka       32h
-kafka-cluster-network-policy-zookeeper   strimzi.io/name=kafka-cluster-zookeeper   32h
+NAME                                     POD-SELECTOR                              AGE
+istio-expose-route-full-install          maistra.io/expose-route=true              3h58m
+istio-mesh-full-install                  <none>                                    3h58m
+kafka-cluster-network-policy-kafka       strimzi.io/name=kafka-cluster-kafka       8h
+kafka-cluster-network-policy-zookeeper   strimzi.io/name=kafka-cluster-zookeeper   8h
 ----
 ** `kafka-cluster-network-policy-kafka` and `kafka-cluster-network-policy-zookeeper` are created when installing the Kafka cluster, and define ingress rules for the Kafka and Zookeeper pods.
-** `istio-mesh` and `istio-expose-route` are created when adding the namespace to the service mesh.
-.. Review the `istio-mesh` network policy:
+** `istio-mesh-full-install` and `istio-expose-route-full-install` are created when adding the namespace to the service mesh.
+.. Delete the network policies:
+- allow-from-all-namespaces
+- allow-from-ingress-namespace
 +
 ----
-$ oc get networkpolicy istio-mesh -n $ERDEMO_NS -o yaml
+$ oc delete networkpolicy allow-from-all-namespaces -n $ERDEMO_NS
+$ oc delete networkpolicy allow-from-ingress-namespace -n $ERDEMO_NS
+----
+.. Review the `istio-mesh-full-install` network policy:
++
+----
+$ oc get networkpolicy istio-mesh-full-install -n $ERDEMO_NS -o yaml
 ----
 +
 .Sample Output
@@ -452,21 +428,21 @@ metadata:
   labels:
     [...]
 spec:
-  podSelector: {}
   ingress:
-    - from:
-        - namespaceSelector:
-            matchLabels:
-              maistra.io/member-of: admin1-istio-system
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          maistra.io/member-of: admin1-istio-system
+  podSelector: {}
   policyTypes:
-    - Ingress
+  - Ingress
 ----
 ** This policy allows all ingress traffic between namespaces that are labeled with `maistra.io/member-of: $SM_CP_ADMIN-istio-system`. This includes the service mesh data plane namespace as well as the mesh member namespaces as defined in `ServiceMeshMemberRoll`.
 
 .. Review the `istio-expose-route` network policy:
 +
 ----
-$ oc get networkpolicy istio-expose-route -n $ERDEMO_NS -o yaml
+$ oc get networkpolicy istio-expose-route-full-install -n $ERDEMO_NS -o yaml
 ----
 +
 .Sample Output
@@ -482,16 +458,16 @@ metadata:
   labels:
     [...]
 spec:
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          network.openshift.io/policy-group: ingress
   podSelector:
     matchLabels:
-      maistra.io/expose-route: 'true'
-  ingress:
-    - from:
-        - namespaceSelector:
-            matchLabels:
-              network.openshift.io/policy-group: ingress
+      maistra.io/expose-route: "true"
   policyTypes:
-    - Ingress
+  - Ingress
 ----
 ** This policy allows ingress traffic between namespaces that are labeled with `network.openshift.io/policy-group: ingress` and pods with the `maistra.io/expose-route: 'true'` label. The `openshift-ingress` namespace--in which the OpenShift router pods run--has the `network.openshift.io/policy-group: ingress` label so annotated pods can be reached through a route.
 
@@ -499,12 +475,13 @@ spec:
 .. Obtain a remote shell into the `stage-apicast` pod in the `apicast` namespace:
 +
 ----
+$ echo http://$ERDEMO_USER-incident-service.$ERDEMO_NS.svc:8080/incidents
 $ oc rsh -n $GW_PROJECT stage-apicast-1-xxxxx
 ----
 .. In the remote shell, `curl` the incident service through its service name:
 +
 ----
-sh-4.2$ curl http://$ERDEMO_USER-incident-service.$ERDEMO_NS.svc:8080/incidents
+sh-4.2$ curl <REPLACE_WITH_ECHO_URL>
 ----
 
 .. Exit the remote shell.

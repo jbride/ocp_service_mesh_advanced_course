@@ -25,23 +25,6 @@ image::images/3scale_mixer_adapter.png[]
 In this diagram, note that the API gateway has been replaced with the 3scale Istio adapter.
 
 
-== Disable Existing API Production Gateway
-
-Your 3scale API gateways (utilized briefly in the first module of this course) are no longer needed.
-Instead, inbound traffic to your Emergency Response Demo application flows directly through the _Istio ingress gateway_. Subsequently, your API production gateway can be disabled.
-
-. Switch to the owner of your existing API gateways:
-+
------
-$ oc login -u $ERDEMO_USER -p $OCP_PASSWD
------
-
-. Scale down the existing API production gateway:
-+
------
-$ oc scale dc/prod-apicast --replicas=0 -n $GW_PROJECT
------
-
 == Set Up VirtualService
 
 In the lab for module 2, you created a wildcard gateway as well as a VirtualService to route inbound traffic to the incident service through the service mesh _ingress gateway_. If you have not yet done so, complete the lab exercises in module 2 before continuing with this lab.
@@ -55,11 +38,11 @@ General information about Istio's plug-in architecture for applying policies and
 
 image::images/mixer_architecture.png[]
 
-=== Enable Policy Checks
+=== Enable Mixer
 
-OpenShift Service Mesh allows for enabling or disabling policy evaluation through the `mixer` component of your service mesh control plane.
+In Service Mesh 2.0, Mixer is deprecated and not installed by default. The functionality previously provided by Mixer - policy checks, telemetry reporting - is now provided by the Envoy proxy itself. The Envoy proxy functionality can be extended through filters or WebAssembly modules (WASM). However, the 3scale WebAssembly module is still work in progress, and is expected to be released with Service Mesh 2.1.
 
-In order for API management policies to be applied to service mesh traffic, policy evaluation in `mixer` needs to be enabled. By default, policy checks are disabled in the service mesh.
+This means that the in the current version of Service Mesh, integration with 3scale is still through the 3scale Mixer adapter. In order to use the adapter the Service Mesh Mixer component has to be enabled.
 
 . Log in to the OpenShift Container Platform as the control plane admin user:
 +
@@ -67,126 +50,125 @@ In order for API management policies to be applied to service mesh traffic, poli
 $ oc login $LAB_MASTER_API -u $SM_CP_ADMIN -p $OCP_PASSWD
 ----
 
+. Use the `oc` client to edit the `ServiceMeshControlPlane` resource in the control plane namespace:
++
+----
+oc edit smcp full-install -n $SM_CP_NS
+----
+
+. In the `spec` section, change the configuration of the `policy` element to type `Mixer`, enable policy checks for mixer , and add a `telemetry` element also with type `Mixer`.
++
+----
+apiVersion: maistra.io/v2
+kind: ServiceMeshControlPlane
+metadata:
+  name: full-install
+[...]
+spec:
+  [...]
+  policy:
+    mixer:
+      enableChecks: true
+    type: Mixer
+  telemetry:
+    type: Mixer
+[...]
+----
+. Save the modified resource.
+
+. Verify the pods in the control plane namespace. Notice 2 new pods, `istio-policy` and `istio-telemetry`. These are the pods of the Service Mesh Mixer component.
++
+----
+$ oc get pods -n $SM_CP_NS
+----
++
+.Sample Output
+----
+grafana-575c6d664b-n4rkk                2/2     Running   0          2d5h
+istio-egressgateway-fc49857b6-rf7ww     1/1     Running   0          44h
+istio-ingressgateway-858c48f5cb-j5crs   1/1     Running   0          44h
+istio-policy-6b694d666b-qlmvn           2/2     Running   2          2m52s
+istio-telemetry-59cd475444-snxqd        2/2     Running   2          2m52s
+istiod-full-install-56f7fff968-gjg44    1/1     Running   0          44h
+jaeger-6fd54886d5-vcxfk                 2/2     Running   0          2d5h
+kiali-558779b6db-qsq76                  1/1     Running   0          97m
+prometheus-86c884b8b5-4tn5k             3/3     Running   0          23h
+----
+
 === Explore 3scale Istio Adapter Components
 
-Your service mesh control plane was initially installed without the 3scale Istio adapter.
+The service mesh control plane was initially installed without the 3scale Istio adapter.
 In this section of the lab, you enable it.
 
-. Update the `ServiceMeshControlPlane` resource with the `threeScale` component:
+. Use the `oc` client to edit the `ServiceMeshControlPlane` resource in the control plane namespace:
 +
------
-$ oc patch smcp.v1.maistra.io full-install -n $SM_CP_NS --type=json -p \
-'[
-    {
-        "op": "replace",
-        "path": "/spec/threeScale/enabled",
-        "value": true
-    },
-    {
-        "op": "add",
-        "path": "/spec/threeScale/image",
-        "value": "3scale-istio-adapter-rhel8"
-    },
-    {
-        "op": "add",
-        "path": "/spec/threeScale/tag",
-        "value": "1.0.0"
-    },
-    {
-        "op": "add",
-        "path": "/spec/threeScale/PARAM_THREESCALE_LISTEN_ADDR",
-        "value": 3333
-    },
-    {
-        "op": "add",
-        "path": "/spec/threeScale/PARAM_THREESCALE_LOG_LEVEL",
-        "value": "debug"
-    },
-    {
-        "op": "add",
-        "path": "/spec/threeScale/PARAM_THREESCALE_LOG_JSON",
-        "value": true
-    },
-    {
-        "op": "add",
-        "path": "/spec/threeScale/PARAM_THREESCALE_LOG_GRPC",
-        "value": false
-    },
-    {
-        "op": "add",
-        "path": "/spec/threeScale/PARAM_THREESCALE_REPORT_METRICS",
-        "value": true
-    },
-    {
-        "op": "add",
-        "path": "/spec/threeScale/PARAM_THREESCALE_METRICS_PORT",
-        "value": 8080
-    },
-    {
-        "op": "add",
-        "path": "/spec/threeScale/PARAM_THREESCALE_CACHE_TTL_SECONDS",
-        "value": 300
-    },
-    {
-        "op": "add",
-        "path": "/spec/threeScale/PARAM_THREESCALE_CACHE_REFRESH_SECONDS",
-        "value": 180
-    },
-    {
-        "op": "add",
-        "path": "/spec/threeScale/PARAM_THREESCALE_CACHE_ENTRIES_MAX",
-        "value": 1000
-    },
-    {
-        "op": "add",
-        "path": "/spec/threeScale/PARAM_THREESCALE_CACHE_REFRESH_RETRIES",
-        "value": 1
-    },
-    {
-        "op": "add",
-        "path": "/spec/threeScale/PARAM_THREESCALE_ALLOW_INSECURE_CONN",
-        "value": false
-    },
-    {
-        "op": "add",
-        "path": "/spec/threeScale/PARAM_THREESCALE_CLIENT_TIMEOUT_SECONDS",
-        "value": 10
-    },
-    {
-        "op": "add",
-        "path": "/spec/threeScale/PARAM_THREESCALE_GRPC_CONN_MAX_SECONDS",
-        "value": 60
-    }
-]'
------
-* Note that the above configuration enables the `threeScale` Mixer plug-in and also specifies the exact tag of the `3scale-istio-adapter` link:https://access.redhat.com/containers/?tab=tags#/registry.access.redhat.com/openshift-service-mesh/3scale-istio-adapter-rhel8[image to pull] from registry.redhat.io.
+----
+$ oc edit smcp full-install -n $SM_CP_NS
+----
 
-* Because a change was made to `ServiceMeshControlPlane`, expect the OpenShift Service Mesh operator to detect this change.
-Eventually, it automatically starts a `3scale-istio-adapter` deployment.
-. Monitor the pods of your service mesh control plane to view the new `3scale-istio-adapter` pod.
-
-. Review the 3scale Istio adapter components in your service mesh control plane namespace:
+. In the `spec.addons.3scale` section, add the configuration for the 3scale adapter, and set the adapter to enabled. In the `spec.runtime.components` section add a section `3scale` with the name and tag of the 3scale adapter container image:
 +
------
+----
+apiVersion: maistra.io/v2
+kind: ServiceMeshControlPlane
+metadata:
+  name: full-install
+[...]
+spec:
+  addons:
+    3scale:
+      enabled: true
+      listen_addr: 3333
+      log_level: debug
+      log_grpc: false
+      log_json: true
+      client:
+        allow_insecure_connections: false
+        timeout: 10
+      grpc:
+        max_conn_timeout: 1
+      metrics:
+        port: 8080
+        report: true
+      system:
+        cache_max_size: 1000
+        cache_refresh_interval: 180
+        cache_refresh_retries: 1
+        cache_ttl: 300
+[...]
+  runtime:
+    components:
+      3scale:
+        container:
+          imageName: 3scale-istio-adapter-rhel8
+          imageTag: 2.0.0
+[...]
+----
+. Save the modified resource.
+
+. As a result of the change to the ServiceMeshControlPlane Custom Resource, the service mesh operator deploys the 3scale adapter pod. +
+Verify that the pod is deployed correctly:
++
+----
 $ oc get all -l app=3scale-istio-adapter -n $SM_CP_NS
------
+----
++
+.Sample Output
+----
+NAME                                        READY   STATUS    RESTARTS   AGE
+pod/3scale-istio-adapter-66bb856788-npjw5   1/1     Running   0          17m
 
-* Expect the response to list the `3scale-istio-adapter` deployment, ReplicaSet, and pod.
+NAME                               TYPE        CLUSTER-IP   EXTERNAL-IP   PORT(S)             AGE
+service/threescale-istio-adapter   ClusterIP   None         <none>        3333/TCP,8080/TCP   17m
 
-* Per the diagram above, the `3scale-istio-adapter` Linux^(R)^ container includes the following two components:
-** `3scale-istio-adapter`: Accepts gRPC invocations from the Istio ingress gateway and routes them to the other sidecar in the pod, `3scale-istio-httpclient`.
+NAME                                   READY   UP-TO-DATE   AVAILABLE   AGE
+deployment.apps/3scale-istio-adapter   1/1     1            1           17m
 
-** `3scale-istio-httpclient`: Accepts invocations from `3scale-istio-adapter` and invokes the `system-provider` and `backend-listener` endpoints of the remote Red Hat 3scale API Management system.
+NAME                                              DESIRED   CURRENT   READY   AGE
+replicaset.apps/3scale-istio-adapter-66bb856788   1         1         1       17m
+----
 
 . View listings of configurations that support the 3scale Istio adapter:
-+
-[NOTE]
-====
-Embedded in the following YAML files is the 3scale `handler` resource that is injected into the Istio Mixer.
-This `handler` resource is written in Golang by the 3scale engineering team per the link:https://github.com/istio/istio/wiki/Mixer-Out-Of-Process-Adapter-Dev-Guide[Mixer Out of Process Adapter Dev Guide].
-Many of these files consist of the adapter's configuration link:https://developers.google.com/protocol-buffers/docs/proto3[proto].
-====
-
 .. View adapters:
 +
 -----
@@ -223,73 +205,67 @@ This is needed so that the Istio Mixer can pull API proxy details from the 3scal
 .. `SYSTEM_PROVIDER_URL`
 .. `API_ADMIN_ACCESS_TOKEN`
 
-. Clone the source code of the 3scale Istio adapter configurations:
+. Create the _Handler_, _Instance_ and _Rule_ custom resource definitions for the 3scale istio adapter:
++ 
+----
+$ echo "---
+apiVersion: config.istio.io/v1alpha2
+kind: handler
+metadata:
+  name: threescale
+spec:
+  adapter: threescale
+  connection:
+    address: dns:///threescale-istio-adapter:3333
+  params:
+    access_token: $API_ADMIN_ACCESS_TOKEN
+    service_id: '$INCIDENT_SERVICE_ID'
+    system_url: https://$SYSTEM_PROVIDER_URL
+---
+apiVersion: config.istio.io/v1alpha2
+kind: instance
+metadata:
+  name: threescale-authorization
+spec:
+  params:
+    action:
+      method: request.method | \"get\"
+      path: request.url_path
+    subject:
+      user: request.query_params[\"user_key\"] | request.headers[\"user_key\"] | \"\"
+  template: threescale-authorization
+---
+apiVersion: config.istio.io/v1alpha2
+kind: rule
+metadata:
+  name: threescale
+spec:
+  actions:
+  - handler: threescale.handler
+    instances:
+    - threescale-authorization.instance
+  match: |-
+    context.reporter.kind == \"inbound\" &&
+    destination.service.name == \"$ERDEMO_USER-incident-service\"
+" | tee 3scale-adapter-resources.yml
+----
 +
------
-$ git clone \
-      --branch v1.0.0 \
-      https://github.com/3scale/istio-integration \
-      $HOME/lab/istio-integration
------
-
-. Review the `threescale-adapter-config.yaml` file :
-+
------
-$ less $HOME/lab/istio-integration/istio/threescale-adapter-config.yaml | more
------
-
-. Modify the `threescale-adapter-config.yaml` file with the ID of your incident API service:
-+
------
-$ sed -i "s/service_id: .*/service_id: \"$INCIDENT_SERVICE_ID\"/" \
-      $HOME/lab/istio-integration/istio/threescale-adapter-config.yaml
------
-
-. Modify the `threescale-adapter-config.yaml` file with the URL to your 3scale API Management tenant:
-+
------
-$ sed -i "s/system_url: .*/system_url: \"https:\/\/$SYSTEM_PROVIDER_URL\"/" \
-      $HOME/lab/istio-integration/istio/threescale-adapter-config.yaml
------
-
-. Modify the `threescale-adapter-config.yaml` file with the administrative access token of your 3scale API Management administration account:
-+
------
-$ sed -i "s/access_token: .*/access_token: \"$API_ADMIN_ACCESS_TOKEN\"/" \
-      $HOME/lab/istio-integration/istio/threescale-adapter-config.yaml
------
-
-. Review the `rule` in `threescale-adapter-config.yaml` that defines the conditions for applying API management policies to a request.
-
-* The existing default rule is as follows:
-+
------
-match: destination.labels["service-mesh.3scale.net"] == "true"
------
-
-* This rule specifies that API management policies are applied to the request when the target deployment includes the `service-mesh.3scale.net` label.
-
-. Update the `threescale-adapter-config.yaml` file with a modified rule specifying that API management policies are to be applied when the target is the incident service:
-+
------
-$ sed -i "s/match: .*/match: destination.service.name == \"$ERDEMO_USER-incident-service\"/" \
-      $HOME/lab/istio-integration/istio/threescale-adapter-config.yaml
------
+* Pay special attention to the _Rule_ resource, which defines when the API management policies need to be applied. In this case, the rule defines that the policies need to be defined when the target service (`destination.service.name`) is the incident service.
 +
 [NOTE]
-You can find more information about Istio's Policy Attribute Vocabulary (used in the creation of rules) link:https://istio.io/docs/reference/config/policy-and-telemetry/attribute-vocabulary/[here].
+You can find more information about Istio's Policy Attribute Vocabulary (used in the creation of rules) link:https://istio.io/v1.6/docs/reference/config/policy-and-telemetry/attribute-vocabulary/[here].
 
-. Load the 3scale Istio adapter configurations:
+. Create the 3scale Istio adapter configuration resources:
 +
 ----
-$ oc create -f $HOME/lab/istio-integration/istio/threescale-adapter-config.yaml -n $SM_CP_NS
+$ oc create -f 3scale-adapter-resources.yml -n $SM_CP_NS
 ----
 +
 .Sample Output
 ----
 handler.config.istio.io/threescale created
-instance.config.istio.io "threescale-authorization" created
-rule.config.istio.io "threescale" created
+instance.config.istio.io/threescale-authorization created
+rule.config.istio.io/threescale created
 ----
 +
 [NOTE]
@@ -303,7 +279,7 @@ $ oc delete handler.config.istio.io threescale -n $SM_CP_NS
 -----
 ====
 
-. Verify that the 3scale Istio adapter `handler` configurations were created in the service mesh control plane namespace:
+. Verify that the 3scale Istio adapter _handler_ configurations were created in the service mesh control plane namespace:
 +
 -----
 $ oc get handler threescale -n $SM_CP_NS -o yaml
@@ -325,7 +301,7 @@ items:
     params:
       access_token: secret-token
       service_id: "15"
-      system_url: https://user50-3scale-mt-admin.apps.4a64.openshift.opentlc.com
+      system_url: https://user50-3scale-admin.apps.4a64.openshift.opentlc.com
 
 -----
 
@@ -350,7 +326,7 @@ image::images/edit_apicast_1.png[]
 . Change the value of *Production Public Base URL* to the value of the following:
 +
 -----
-$ echo -en "\nhttps://`oc get route incident-service-gateway -n $SM_CP_NS -o template --template {{.spec.host}}:443`\n\n"
+$ echo -en "\nhttps://`oc get route incident-service-route -n $SM_CP_NS -o template --template {{.spec.host}}:443`\n\n"
 -----
 +
 image::images/istioingress_public_url.png[]
@@ -370,28 +346,26 @@ image::images/promote_to_staging.png[]
 image::images/promote_to_production.png[]
 
 
-
 == Smoke Test 3scale Istio Adapter
 
 . From the terminal, execute the following `curl` command to invoke your incident service directly via the Istio ingress gateway:
 +
 -----
 $ curl -v -k \
-       `echo "https://"$(oc get route incident-service-gateway -n $SM_CP_NS -o template --template {{.spec.host}})"/incidents"`
+       `echo "https://"$(oc get route incident-service-route -n $SM_CP_NS -o template --template {{.spec.host}})"/incidents"`
 -----
 +
 .Sample Output
 -----
 [...]
 
-< HTTP/1.1 403 Forbidden
+< HTTP/2 401
 [...]
 
-* Connection #0 to host istio-ingressgateway-istio-system.apps.clientvm.b902.rhte.opentlc.com left intact
-
-PERMISSION_DENIED:threescalehandler.handler.istio-system:no auth credentials provided or provided in invalid location
+* Connection #0 to host incident-service.user1.apps.cluster-0476.0476.sandbox114.opentlc.com left intact
+UNAUTHENTICATED:threescale.handler.admin1-istio-system:no auth credentials provided or provided in invalid location
 -----
-* Expect to see a 403 error response with a "PERMISSION_DENIED:threescalehandler.handler.istio-system:..." message.
+* Expect to see a 401 error response with a "UNAUTHENTICATED:threescale.handler.admin1-istio-system:..." message.
 
 * Inbound requests through the Istio ingress gateway are now correctly flowing through the Mixer to the 3scale Istio adapter.
 
@@ -400,17 +374,14 @@ PERMISSION_DENIED:threescalehandler.handler.istio-system:no auth credentials pro
 . View the log file of the 3scale Istio adapter:
 +
 -----
-$ oc logs -f `oc get pod -n $SM_CP_NS | grep "3scale-istio-adapter" | awk '{print $1}'` \
-          -n $SM_CP_NS \
-          -c 3scale-istio-adapter
+$ oc logs -f `oc get pod -n $SM_CP_NS | grep "3scale-istio-adapter" | awk '{print $1}'` -n $SM_CP_NS
 -----
 +
 .Sample Output
 -----
-
-"Got instance &InstanceMsg{Subject:&SubjectMsg{User:,Groups:,Properties:map[string]*istio_policy_v1beta11.Value{app_id: &Value{Value:&Value_StringValue{StringValue:,},},app_key: &Value{Value:&Value_StringValue{StringValue:,},},},},Action:&ActionMsg{Namespace:,Service:,Method:GET,Path:/products,Properties:map[string]*istio_policy_v1beta11.Value{},},Name:threescale-authorization.instance.istio-system,}"
-
-"proxy config for service id 4 is being fetching from 3scale"
+[...]
+"{"level":"debug","time":"2021-02-14T22:14:53.642382Z","msg":"Got instance &InstanceMsg{Subject:&SubjectMsg{User:,Groups:,Properties:map[string]*istio_policy_v1beta11.Value{},},Action:&ActionMsg{Namespace:,Service:,Method:GET,Path:/incidents,Properties:map[string]*istio_policy_v1beta11.Value{},},Name:threescale-authorization.instance.admin1-istio-system,}"}"
+[...]
 -----
 
 . Invoke your incident service again, this time using the incident service `user_key` value:
@@ -419,14 +390,6 @@ $ oc logs -f `oc get pod -n $SM_CP_NS | grep "3scale-istio-adapter" | awk '{prin
 $ curl -v -k \
        `echo "https://"$(oc get route incident-service-gateway -n $SM_CP_NS -o template --template {{.spec.host}})"/incidents?user_key=$INCIDENT_SERVICE_API_KEY"`
 -----
-+
-[TIP]
-====
-If you see the message `PERMISSION_DENIED:deny-curl-handler.admin21-istio-system:not allowed`, remove the _deny-curl_ `rule` you created in the previous lab.
-----
-$ oc delete rule incident-service-deny-curl -n $SM_CP_NS
-----
-====
 
 * Expect to see that the incident service is again being managed and secured by Red Hat 3scale API Management.
 This time however, the 3scale Istio adapter is being utilized rather than the API gateway.
@@ -491,38 +454,9 @@ When all of the conditions are met, the inbound traffic is routed to the 3scale 
 . Review the conditions of the rule:
 
 * The destination service needs to be the incident service.
-* The inbound request needs to originate from outside `$ERDEMO_NS` (that is, from the `istio-ingress` of the `$SM_CP_NS` namespace).
+* The inbound request needs to originate from outside `$ERDEMO_NS` (that is, from the `istio-ingressgateway` of the `$SM_CP_NS` namespace).
 * The HTTP verb is of type `POST`.
 * The target is the `/incidents/` endpoint.
-
-
-. View the `istio-policy` pod's log file:
-+
------
-$ oc logs -f `oc get pod -n $SM_CP_NS | grep "istio-policy" | awk '{print $1}'` -c mixer -n $SM_CP_NS
------
-+
-.Sample Output
------
-[...]
-
-IntrospectionOptions: ctrlz.Options{Port:0x2694, Address:"127.0.0.1"}
-warn    Neither --kubeconfig nor --master was specified.  Using the inClusterConfig.  This might not work.
-info    Built new config.Snapshot: id='0'
-info    Cleaning up handler table, with config ID:-1
-info    Built new config.Snapshot: id='1'
-info    adapters        getting kubeconfig from: ""     {"adapter": "handler.kubernetesenv.istio-system"}
-warn    Neither --kubeconfig nor --master was specified.  Using the inClusterConfig.  This might not work.
-info    adapters        Waiting for kubernetes cache sync...    {"adapter": "handler.kubernetesenv.istio-system"}
-info    adapters        Cache sync successful.  {"adapter": "handler.kubernetesenv.istio-system"}
-info    Cleaning up handler table, with config ID:0
-info    adapters        serving prometheus metrics on 42422     {"adapter": "handler.prometheus.istio-system"}
- Mixer: root@71a9470ea93c-docker.io/istio-1.0.0-3a136c90ec5e308f236e0d7ebb5c4c5e405217f4-Clean
-Starting gRPC server on port 9091
-info    ControlZ available at 172.17.0.10:9876
------
-* In particular, note that the new policies were put into effect with no error messages logged.
-
 
 === Test
 . Invoke your incident service again, this time _without_ the incident service `user_key` value:

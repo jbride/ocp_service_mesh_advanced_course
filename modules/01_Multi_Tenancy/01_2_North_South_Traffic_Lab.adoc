@@ -86,7 +86,7 @@ https://95d1c0a311ba965cd23562164db2126516344b6ff5985b49a4282662181e68ae@user50-
 image::images/3scale_navigate_app_1.png[]
 
 . In the *Apps* column, click the number of existing applications (most likely `0`) associated with the *Developer* account.
-. In the top right corner, click *Create Application*.
+. Still in the developer account panel, at the top, click on Applications, click on *Create Application*.
 . Populate the form with the following:
 .. *Application plan*: `incident-service_app_plan`
 .. *Service plan*: `Default`
@@ -105,7 +105,7 @@ $ echo "export INCIDENT_SERVICE_API_KEY=<change me>" >> $HOME/.bashrc
 -----
 
 . Set an `INCIDENT_SERVICE_ID` environment variable to use later:
-.. From the top panel, navigate to *API: incident-service -> Configuration, Methods and Settings*.
+.. From the top panel, navigate to *Product: incident-service -> Configuration, Methods and Settings*.
 .. Locate the value of your `ID for API calls` similar to the following:
 +
 image::images/incident_service_id_1.png[]

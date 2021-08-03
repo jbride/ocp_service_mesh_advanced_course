@@ -6,9 +6,9 @@
 
 . link:https://docs.google.com/spreadsheets/d/1vazinjjbOSN-uDY8u_mmg-lXtrRlZtm1l5vJQucdKz8/edit#gid=959461386[Class Assignment Spreadsheet]
 
-== *OCP 4.4 Workshop Deployer*
+== *OCP Cluster Provisioning*
 . Provisioned from https://labs.opentlc.com 
-.. *Services -> Catalogs -> OPENTLC OpenShift 4 Labs -> OpenShift Workshop Deployer - 4.4*
+.. *Services -> Catalogs -> OPENTLC OpenShift 4 Labs -> Adv App Management with Service Mesh*
 
 . Instructor uses _MachineSet API_ to scale to appropriately sized cluster
 .. Emergency Response (16GB RAM) + Istio Control Plane (6GB RAM) = 22GB RAM per student
@@ -38,13 +38,14 @@ $ oc scale machineset <MACHINESETNAME> --replicas=<COUNT> -n openshift-machine-a
 $ oc get machinesets -n openshift-machine-api -w
 ----
 
-. Configure Environment to Stay Up
-.. During the course, you want the environment to stay up, without idling. You can set this in the CloudForms UI.
-.. Select your service, then select *Admin* drop-down
-.. Select *Unidle*
+== Configure Environment to Stay Up
+During the course, you want the environment to stay up, without idling. You can set this in the CloudForms UI.
+
+. Select your service, then select *Admin* drop-down
+. Select *Unidle*
 
 image::images/admin-unidle.png[]
-
+ 
 == Prep Provisioning Environment
 
 You will need an environment to run the Ansible provisioning playbooks. 
@@ -80,7 +81,7 @@ $ sudo pip3 install lxml
 . Install OpenShift python module
 +
 ----
-$ sudo pip3 install openshift
+$ sudo pip3 install openshift==0.11.2
 ----
 
 === Install Ansible Tooling
@@ -194,7 +195,10 @@ $ rht_service_token_password=<changeme> # RHT Registry Service Account passwd as
 . Install the GPTE 3scale Ansible role.
 +
 -----
-$ ansible-galaxy install gpe_mw_ansible.3scale_multitenant --force -p $HOME/.ansible/roles
+ansible-galaxy install gpe_mw_ansible.3scale_multitenant --force -p $HOME/.ansible/roles
+cd $HOME/.ansible/roles
+rm -rf gpe_mw_ansible.3scale_multitenant/
+git clone https://github.com/gpe-mw-ansible-org/3scale_multitenant.git gpe_mw_ansible.3scale_multitenant
 -----
  
 === Ansible Project Layout
@@ -390,7 +394,7 @@ $ less ~/provisioning_output/cluster-*/tenants_3scale-mt-api0/tenant_info*.txt
 
 Each tenant is provisioned with a user that has admin privleges to that tenant.
 
-The useId and password are generated using the following ansible variables found in file: ``.ansible/roles/gpe_mw_ansible.3scale_multitenant/defaults/main.yml`:
+The userId and password are generated using the following ansible variables found in file: `.ansible/roles/gpe_mw_ansible.3scale_multitenant/defaults/main.yml`:
 
 . *Tenant admin userId:*  {{ tenant_admin_user_name_base }}  (ie:  api1, api2, ...)
 . *Tenant admin password:* admin
@@ -435,7 +439,7 @@ Instructor layers 1 Emergency Response Demo per student
 . Checkout the installation code:
 +
 ----
-$ git clone https://github.com/btison/emergency-response-demo-install.git
+$ git clone https://github.com/gpe-mw-training/emergency-response-demo-install
 $ cd emergency-response-demo-install
 $ git checkout service-mesh-advanced-ilt
 ----

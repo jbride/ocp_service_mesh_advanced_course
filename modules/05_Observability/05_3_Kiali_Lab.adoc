@@ -24,7 +24,7 @@ $ echo -en "\n\nhttps://$(oc get route kiali -o template --template={{.spec.host
 +
 image::images/kiali-homepage.png[]
 
-* Expect to see the Kaili home page, which shows an overview of the namespaces that form the service mesh. From here you can navigate to the different pages in the application by clicking items in the left menu, or by clicking the icons in the namespace overview box.
+* Expect to see the Kiali home page, which shows an overview of the namespaces that form the service mesh. From here you can navigate to the different pages in the application by clicking items in the left menu, or by clicking the icons in the namespace overview box.
 +
 [NOTE]
 ====
@@ -53,7 +53,7 @@ $ while :; do curl -k https://incident-service.$ERDEMO_USER.apps.$SUBDOMAIN_BASE
 .. REST calls to the responder service:
 +
 ----
-$ while :; do curl -k https://incident-service.$ERDEMO_USER.apps.$SUBDOMAIN_BASE/responders/available; sleep 1; done
+$ while :; do curl -k https://responder-service.$ERDEMO_USER.apps.$SUBDOMAIN_BASE/responders/available; sleep 1; done
 ----
 .. Emergency Response Demo application runs.
 . Observe how the graph changes when traffic hits the services of the application:
@@ -68,18 +68,23 @@ $ while :; do curl -k https://incident-service.$ERDEMO_USER.apps.$SUBDOMAIN_BASE
 +
 [NOTE]
 ====
-In order to see all of the `DeploymentConfigs` in the _Workloads_ list, you must modify the *Kiali* `ConfigMap` in the `$SM_CP_NS` namespace.
-Make sure you remove the `DeploymentConfig` entry so they are not excluded.
+In order to see all of the `DeploymentConfigs` in the _Workloads_ list, you must modify the *Kiali* Custom Resource in the `$SM_CP_NS` namespace.
+
 ----
-kubernetes_config:
-      [...]
-      excluded_workloads:
+$ oc edit kiali kiali -n $SM_CP_NS
+----
+
+Add the following at the end of the `spec` section, under the `version` setting:
+
+----
+  version: v1.24
+  kubernetes_config:
+    excluded_workloads:
       - CronJob
-      - DeploymentConfig
       - Job
-      - ReplicationController
-      - StatefulSet
 ----
+
+Save the Custom Resource. This will cause a redeployment of the Kiali pod.
 ====
 
 . Explore *Istio Config* to see the different service mesh configuration resources such as gateways, VirtualServices, and DestinationRules. Kiali provides inline editions of the YAML representation of these resources, as well as powerful semantic validation.
@@ -105,12 +110,13 @@ spec:
   template:
     metadata:
       annotations:
-        kiali.io/runtimes: 'springboot-jvm,springboot-jvm-pool'
-        prometheus.io/path: /actuator/prometheus
+        kiali.io/runtimes: 'quarkus'
+        prometheus.io/path: /metrics
         prometheus.io/port: '8080'
         prometheus.io/scheme: https
         prometheus.io/scrape: 'true'
         sidecar.istio.io/inject: 'true'
+        sidecar.istio.io/rewriteAppHTTPProbers: 'true'
 ----
 
 * The `prometheus.io` annotations are for discovery by Prometheus.
@@ -123,10 +129,77 @@ $ while :; do curl -k https://incident-service.$ERDEMO_USER.apps.$SUBDOMAIN_BASE
 . In the Kiali console, click *Applications* and open the page for the `$ERDEMO_USER-incident-service` application:
 +
 image::images/kiali-runtimes-metrics.png[]
-* Note that the page shows two extra tabs: *JVM Metrics* and *JVM Pool Metrics*.
+* Note that the page shows an extra tab: *Quarkus Metrics*.
 . Click *Workloads* and select either the `$ERDEMO_USER-incident-service` or the `$ERDEMO_USER-incident-service-v2` workload:
 +
 image::images/kiali-runtimes-metrics-2.png[]
-* Note the application metric dashboards here as well.
+* Note the application metric dashboard here as well.
+
+. Kiali allows to define and integrate custom dashboards with the `MonitoringDashboard` custom resource. We can use this feature to fix the Quarkus dashboard.
+* Create a custom Kiali dashboard:
++
+----
+$ echo "
+apiVersion: monitoring.kiali.io/v1alpha1
+kind: MonitoringDashboard
+metadata:
+  name: quarkus-fixed
+spec:
+  discoverOn: base_thread_count
+  items:
+  - chart:
+      dataType: raw
+      metricName: base_thread_count
+      name: Thread count
+      spans: 4
+  - chart:
+      dataType: raw
+      metricName: base_memory_usedHeap_bytes
+      name: Used heap
+      spans: 4
+      unit: bytes
+  - chart:
+      dataType: raw
+      metricName: vendor_memory_usedNonHeap_bytes
+      name: Used non-heap
+      spans: 4
+      unit: bytes
+  - chart:
+      dataType: raw
+      metricName: 'base_gc_time_total_seconds'
+      name: Total GC time
+      spans: 3
+      unit: seconds
+  - chart:
+      dataType: raw
+      metricName: 'base_gc_total'
+      name: Total GC count
+      spans: 3
+  runtime: Quarkus
+  title: Quarkus Metrics Fixed
+" | tee kiali-custom-dashboard.yml
+----
++
+----
+$ oc create -f kiali-custom-dashboard.yml -n $SM_CP_NS
+----
+* Annotate the application pods by adding the `kiali.io/dashboards: quarkus-fixed` annotation to the DeploymentConfig resources of the incident service (`$ERDEMO_USER-incident-service` and `$ERDEMO_USER-incident-service-v2`):
++
+----
+      annotations:
+        kiali.io/runtimes: quarkus
+        kiali.io/dashboards: quarkus-fixed
+        prometheus.io/path: /metrics
+        prometheus.io/port: '8080'
+        prometheus.io/scheme: https
+        prometheus.io/scrape: 'true'
+        sidecar.istio.io/inject: 'true'
+        sidecar.istio.io/rewriteAppHTTPProbers: 'true'
+----
+* In the Kiali console, click *Applications* and open the page for the `$ERDEMO_USER-incident-service` application:
++
+image::images/kiali-custom-dashboard.png[]
+* Note that the page shows an extra tabs: *Quarkus Metrics Fixed*.
+
 
 This concludes the lab. You learned about the features of the Kiali console in OpenShift Service Mesh.
