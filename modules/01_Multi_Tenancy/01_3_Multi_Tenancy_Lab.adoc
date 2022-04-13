@@ -59,10 +59,15 @@ $ oc get RoleBinding  -n $ERDEMO_NS -l release=istio
 +
 .Sample Output
 -----
-NAME                              ROLE                                                   AGE
-istio-ingressgateway-sds          Role/istio-ingressgateway-sds                          51m
-istiod-pilot-full-install         ClusterRole/istiod-full-install-admin50-istio-system   51m
-prometheus-admin50-istio-system   ClusterRole/prometheus-admin50-istio-system            51m
+NAME                                       ROLE                                                       AGE
+
+istio-egressgateway-sds                    Role/istio-egressgateway-sds                               16s
+istio-ingressgateway-sds                   Role/istio-ingressgateway-sds                              16s
+istiod-full-install-admin1-istio-system    ClusterRole/istiod-full-install-admin1-istio-system        16s
+istiod-internal-full-install               Role/istiod-internal-full-install                          16s
+prometheus-admin1-istio-system             ClusterRole/prometheus-admin1-istio-system                 16s
+wasm-cacher-full-install                   ClusterRole/wasm-cacher-full-install-admin1-istio-system   16s
+wasm-cacher-registry-viewer-full-install   ClusterRole/registry-viewer                                16s
 -----
 * The use of a project-scoped `RoleBinding` resource, rather than a cluster-scoped `ClusterRoleBinding` resource, is a key enabler of the _multi-tenant_ capabilities of Red Hat^(R)^ OpenShift^(R)^ Service Mesh.
 

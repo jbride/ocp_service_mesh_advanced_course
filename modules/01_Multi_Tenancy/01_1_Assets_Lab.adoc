@@ -96,7 +96,7 @@ NOTE: If you see empty output, make sure you source your `.bashrc` file using `s
 === Download `istioctl`
 
 Some exercises in this course use the `istioctl` Istio command line tool. +
-Download the upstream Istio distribution from link:https://github.com/istio/istio/releases/tag/1.6.5[]. Make sure to download the _1.6.5_ version, which corresponds with the upstream Istio version that Red Hat Service Mesh is based on. +
+Download the upstream Istio distribution from link:https://github.com/istio/istio/releases/tag/1.9.9[]. Make sure to download the _1.9.9_ version, which corresponds with the upstream Istio version that Red Hat Service Mesh is based on. +
 Extract the archive and add the `bin` folder to your path.
 
 == Review OpenShift Container Platform Assets
@@ -371,9 +371,9 @@ $ istioctl version --remote=true -i $SM_CP_ADMIN-istio-system
 +
 .Sample Output
 -----
-client version: 1.6.5
-control plane version: OSSM_2.0.0
-data plane version: 1.6.14 (3 proxies)
+client version: 1.9.9
+control plane version: OSSM_2.1.2-4.el8
+data plane version: 1.9.9 (2 proxies)
 -----
 +
 [NOTE]
@@ -389,14 +389,15 @@ $ oc get deployments -n $SM_CP_NS
 +
 .Sample Output
 -----
-NAME                   READY   UP-TO-DATE   AVAILABLE   AGE
-grafana                1/1     1            1           163m
-istio-egressgateway    1/1     1            1           163m
-istio-ingressgateway   1/1     1            1           163m
-istiod-full-install    1/1     1            1           167m
-jaeger                 1/1     1            1           163m
-kiali                  1/1     1            1           162m
-prometheus             1/1     1            1           163m
+NAME                        READY   UP-TO-DATE   AVAILABLE   AGE
+grafana                     1/1     1            1           163m
+istio-egressgateway         1/1     1            1           163m
+istio-ingressgateway        1/1     1            1           163m
+istiod-full-install         1/1     1            1           167m
+jaeger                      1/1     1            1           163m
+kiali                       1/1     1            1           162m
+prometheus                  1/1     1            1           163m
+wasm-cacher-full-install    1/1     1            1           163m
 -----
 
 . Examine the `ServiceMeshControlPlane` custom resource:
@@ -407,8 +408,8 @@ $ oc get ServiceMeshControlPlane -n $SM_CP_NS
 +
 .Sample Output
 -----
-NAME           READY   STATUS            PROFILES    VERSION   AGE
-full-install   9/9     ComponentsReady   ["default"]   2.0.2   168m
+NAME           READY     STATUS            PROFILES    VERSION   AGE
+full-install   10/10     ComponentsReady   ["default"] 2.1.2   168m
 -----
 
 * During the installation of your lab environment, the `$SM_CP_NS` namespace was created and this link:https://github.com/gpe-mw-training/ocp_service_mesh_advanced/blob/master/ansible/roles/maistra_control_plane/tasks/main.yml#L62-L64[`ServiceMeshControlPlane` custom resource] was applied to it.
@@ -425,10 +426,10 @@ $ oc get PeerAuthentication -n $SM_CP_NS
 +
 .Sample Output
 -----
-NAME                            AGE
-default                         169m
-disable-mtls-jaeger-collector   168m
-grafana-ports-mtls-disabled     168m
+NAME                            MODE         AGE
+default                         PERMISSIVE   35m
+disable-mtls-jaeger-collector   DISABLE      34m
+grafana-ports-mtls-disabled     PERMISSIVE   34m
 -----
 +
 ----
