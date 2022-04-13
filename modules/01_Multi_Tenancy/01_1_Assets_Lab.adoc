@@ -125,7 +125,7 @@ $ oc get projects
 NAME                  DISPLAY NAME                        STATUS
 3scale-mt-api0        3scale-mt-api0                      Active
 admin50-istio-system  admin50 Service Mesh Control Plane  Active
-istio-operator        istio-operator                      Active
+openshift-operators   openshift-operators                 Active
 kafka-operator-erd                                        Active
 tools-erd                                                 Active
 erd-sso                                                   Active
@@ -157,7 +157,7 @@ $ oc get projects
 NAME                  DISPLAY NAME                        STATUS
 3scale-mt-api0        3scale-mt-api0                      Active
 admin50-istio-system  admin50 Service Mesh Control Plane  Active
-istio-operator        istio-operator                      Active
+openshift-operators   openshift-operators                 Active
 user50-er-demo                                            Active
 -----
 
@@ -180,16 +180,16 @@ In this section of the lab, you review the OpenShift Service Mesh resources owne
 
 === Explore Operator
 
-. Switch to the administrator of your Service Mesh control plane (who also has view access to the `istio-operator` namespace):
+. Switch to the administrator of your Service Mesh control plane (who also has view access to the `openshift-operators` namespace):
 +
 -----
 $ oc login -u $SM_CP_ADMIN -p $OCP_PASSWD
 -----
 
-. View the previously installed Service Mesh operator found in the `istio-operator` namespace:
+. View the previously installed Service Mesh operator found in the `openshift-operators` namespace:
 +
 -----
-$ oc get deploy istio-operator -n istio-operator
+$ oc get deploy istio-operator -n openshift-operators
 -----
 +
 .Sample Output
@@ -199,7 +199,7 @@ istio-operator   1/1     1            1           15h
 -----
 
 * This operator is global in scope to the OpenShift cluster.
-* The administrator of the `istio-operator` namespace is the OpenShift user with `cluster-admin` rights.
+* The administrator of the `openshift-operators` namespace is the OpenShift user with `cluster-admin` rights.
 
 
 === Explore Istio CNI Plug-in
@@ -215,13 +215,13 @@ This plug-in is an implementation of the link:https://github.com/containernetwor
 It is responsible for manipulating iptables routing rules on a pod injected with the Envoy sidecar container.
 
 The `istio-cni` plug-in still runs with elevated privileges.
-Subsequently, it is implemented as a DaemonSet in the `istio-operator` namespace, which is typically owned by the OpenShift user with `cluster-admin` privileges.
+Subsequently, it is implemented as a DaemonSet in the `openshift-operators` namespace, which is typically owned by the OpenShift user with `cluster-admin` privileges.
 
 
-. View the previously installed `istio-cni` pods implemented as an OpenShift DaemonSet in the `istio-operator` namespace:
+. View the previously installed `istio-cni` pods implemented as an OpenShift DaemonSet in the `openshift-operators` namespace:
 +
 -----
-$ oc get daemonset istio-node -n istio-operator
+$ oc get daemonset istio-node -n openshift-operators
 -----
 +
 .Sample Output
@@ -236,7 +236,7 @@ istio-node   12        12        12      12           12          beta.kubernete
 . Examine the use of the Red Hat-supported `istio-cni` Linux container image:
 +
 -----
-$ oc describe daemonset istio-node -n istio-operator | grep Image
+$ oc describe daemonset istio-node -n openshift-operators | grep Image
 -----
 +
 .Sample Output
